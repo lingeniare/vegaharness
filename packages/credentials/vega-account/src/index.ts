@@ -183,7 +183,7 @@ export class VegaAccount extends DeepSeekAccount {
     const lifetime = this.detailsLifetime
     const stored = await this.readCurrentGrant(lifetime)
     if (stored === null || lifetime.signal.aborted) return null
-    const result = await this.getDetail('profile', this.detailHeaders(client), { lifetime, stored })
+    const result = await this.getDetail('profile', client, { lifetime, stored })
     if (this.detailsLifetime !== lifetime) return null
     if (result !== null) this.cacheProfile(stored.token, result)
     if (result?.status !== 'failed') return result
@@ -193,7 +193,7 @@ export class VegaAccount extends DeepSeekAccount {
   }
 
   override getBalance(client: AccountClientMetadata): Promise<AccountDetails['balance'] | null> {
-    return this.getDetail('balance', this.detailHeaders(client))
+    return this.getDetail('balance', client)
   }
 
   /** VEGA exposes no bonus program; the outcome is an empty projection. */
@@ -206,14 +206,15 @@ export class VegaAccount extends DeepSeekAccount {
     return Promise.resolve(false)
   }
 
-  private async getDetail<K extends keyof AccountDetails>(field: K, headers: Record<string, string>,
+  private async getDetail<K extends keyof AccountDetails>(field: K, client: AccountClientMetadata,
     captured?: { lifetime: AbortController; stored: z.infer<typeof grant> }): Promise<AccountDetails[K] | null> {
     const lifetime = captured?.lifetime ?? this.detailsLifetime
     const stored = captured?.stored ?? await this.readCurrentGrant(lifetime)
     if (stored === null || lifetime.signal.aborted) return null
     try {
       const details = await readAccountDetail(field, this.origin, stored.token,
-        AbortSignal.any([lifetime.signal, AbortSignal.timeout(field === 'balance' ? this.balanceTimeout : this.requestTimeout)]), headers)
+        AbortSignal.any([lifetime.signal, AbortSignal.timeout(field === 'balance' ? this.balanceTimeout : this.requestTimeout)]),
+        this.detailHeaders(client), client.locale)
       return this.detailsLifetime !== lifetime ? null : details
     } catch (_unauthorized) {
       // readAccountDetail exposes only authenticated credential rejection failures.
@@ -322,7 +323,6 @@ export class VegaAccount extends DeepSeekAccount {
     if (previous !== undefined) {
       await previous.done
       // Disposal can close the provider while the previous attempt settles.
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (this.closed) throw new VegaAuthError('protocol')
       if (this.attempt !== previous) return this.getState()
     }

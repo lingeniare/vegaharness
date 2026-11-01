@@ -9,6 +9,7 @@ const account = z.object({
   email: z.string().nullish(),
   name: z.string().nullish(),
   balance: z.union([z.number(), z.string()]).nullish(),
+  balanceRub: z.union([z.number(), z.string()]).nullish(),
 })
 const credits = z.object({
   data: z.object({ total_credits: z.number(), total_usage: z.number() }),
@@ -47,11 +48,13 @@ function accountPayload<T>(schema: z.ZodType<T>, value: unknown, field: 'profile
  * @param token - stored managed API key.
  * @param signal - request and credential lifetime.
  * @param headers - validated deployment headers for the configured origin.
+ * @param locale - active UI language; selects the wallet currency.
  * @returns sanitized query outcome; failure never becomes a zero balance.
  * @throws AccountUnauthorizedError when VEGA rejects the stored key.
  */
 const queries: { [K in keyof AccountDetails]: {
-  read: (origin: string, token: string, signal: AbortSignal, headers: Record<string, string>) => Promise<AccountDetails[K]>
+  read: (origin: string, token: string, signal: AbortSignal, headers: Record<string, string>,
+    locale: string) => Promise<AccountDetails[K]>
 } } = {
   profile: {
     read: async (origin, token, signal, headers) => ({
@@ -60,18 +63,20 @@ const queries: { [K in keyof AccountDetails]: {
     }),
   },
   balance: {
-    read: async (origin, token, signal, headers) => {
+    read: async (origin, token, signal, headers, locale) => {
+      // VEGA reports the deposit in USD plus its ruble conversion at the current
+      // rate; Russian UI reads rubles, every other locale reads the dollar figure.
       // Balance rides the account payload when the server supplies it; otherwise
-      // the OpenRouter-compatible credits endpoint reports remaining credit.
+      // the OpenRouter-compatible credits endpoint reports remaining credit in USD.
       const value = await requestAccount(origin, '/api/v1/account', token, signal, headers)
       const parsed = accountPayload(account, value, 'balance')
-      let balance: string | undefined
-      if (parsed.balance !== undefined && parsed.balance !== null) balance = String(parsed.balance)
-      else {
-        const rows = accountPayload(credits, await requestAccount(origin, '/api/v1/credits', token, signal, headers), 'balance')
-        balance = String(rows.data.total_credits - rows.data.total_usage)
+      const ruble = locale.toLowerCase().split(/[-_]/)[0] === 'ru' && parsed.balanceRub != null
+      if (parsed.balance !== undefined && parsed.balance !== null) {
+        const balance = ruble ? String(parsed.balanceRub) : String(parsed.balance)
+        return { status: 'ready', value: [{ currency: ruble ? 'RUB' : 'USD', balance }], bonusWallets: [] }
       }
-      return { status: 'ready', value: [{ currency: 'RUB', balance }], bonusWallets: [] }
+      const rows = accountPayload(credits, await requestAccount(origin, '/api/v1/credits', token, signal, headers), 'balance')
+      return { status: 'ready', value: [{ currency: 'USD', balance: String(rows.data.total_credits - rows.data.total_usage) }], bonusWallets: [] }
     },
   },
 }
@@ -83,12 +88,13 @@ const queries: { [K in keyof AccountDetails]: {
  * @param token - stored managed API key.
  * @param signal - request and credential lifetime.
  * @param headers - validated deployment headers for the configured origin.
+ * @param locale - active UI language; selects the wallet currency.
  * @returns sanitized query outcome; failure never becomes a zero balance.
  * @throws AccountUnauthorizedError when VEGA rejects the stored key.
  */
 export async function readAccountDetail<K extends keyof AccountDetails>(field: K, origin: string, token: string,
-  signal: AbortSignal, headers: Record<string, string>): Promise<AccountDetails[K]> {
-  try { return await queries[field].read(origin, token, signal, headers) }
+  signal: AbortSignal, headers: Record<string, string>, locale: string): Promise<AccountDetails[K]> {
+  try { return await queries[field].read(origin, token, signal, headers, locale) }
   catch (error) {
     if (error instanceof AccountUnauthorizedError) throw error
     return { status: 'failed' } as AccountDetails[K]

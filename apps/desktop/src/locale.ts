@@ -258,7 +258,7 @@ export const ru = {
   welcomeTaglineBefore: 'Добро пожаловать в ',
   welcomeTaglineBrand: 'VEGA Harness',
   welcomeTaglineAfter: '',
-  welcomeDescription: 'Развивайте потенциал. Исследуйте интеллект.',
+  welcomeDescription: 'Развивайте свой потенциал\nвместе с ИИ',
   welcomeAuthStarting: 'Открытие входа в систему…',
   welcomeAuthWaiting: 'Браузер не открылся автоматически?',
   welcomeAuthWaitingDescription: 'Скопируйте ссылку для входа и откройте ее в браузере, чтобы войти.',

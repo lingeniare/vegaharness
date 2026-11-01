@@ -237,7 +237,8 @@ RFC 8628 через better-auth `deviceAuthorization`. Срок кода 10 ми
    стереть ключ локально.
 
 Полезные эндпоинты с этим ключом: `GET /api/v1/key` (инфо ключа),
-`GET /api/v1/account` (email, баланс, имя ключа).
+`GET /api/v1/account` (email, `balance` в USD, `balanceRub` — тот же депозит
+в рублях по текущему курсу, имя ключа).
 Щит ПДн включается заголовком `X-Vega-Anonymize: true` на каждом запросе
 (разделы 7–8).
 

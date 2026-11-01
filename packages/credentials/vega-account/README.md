@@ -1,5 +1,5 @@
 ---
-description: "The VEGA account service behind the deepseekAccount seam: device-flow sign-in against api.vega.chat, managed key mint/revoke, profile and RUB balance, device identity migration."
+description: "The VEGA account service behind the deepseekAccount seam: device-flow sign-in against api.vega.chat, managed key mint/revoke, profile and locale-selected wallet balance, device identity migration."
 kind: "package-reference"
 ---
 
@@ -7,7 +7,7 @@ kind: "package-reference"
 
 ## Summary
 
-With `dsh-vega-account`, the harness signs the user in to VEGA (`api.vega.chat`) through the device authorization flow and exposes the result through the existing `ctx.deepseekAccount` service seam. Sign-in surfaces a `userCode` plus a VEGA device URL, polls the token endpoint, mints a `sk-apivega-...` managed key into the credential store; sign-out revokes the grant server-side. Profile, contact, and RUB wallet data come from the VEGA account endpoints. `AccountView.embeddedPages` is `false`, so usage and top-up actions open in the external browser at configured `usageUrl`/`topUpUrl`. The legacy DeepSeek device identity migrates into the VEGA record so analytics identity survives the switch.
+With `dsh-vega-account`, the harness signs the user in to VEGA (`api.vega.chat`) through the device authorization flow behind the existing `ctx.deepseekAccount` seam. Sign-in surfaces a `userCode` plus a VEGA device URL, polls the token endpoint, and mints a `sk-apivega-...` managed key into the credential store; sign-out revokes the grant server-side. Profile and balance come from the VEGA account endpoints; the USD deposit renders as RUB through `balanceRub` on a Russian UI. `AccountView.embeddedPages` is `false`, so usage and top-up open externally at configured `usageUrl`/`topUpUrl`. The legacy device identity migrates into the VEGA record, preserving analytics identity.
 
 ## Table of Contents
 

@@ -115,6 +115,7 @@ body {
 .tagline p {
   margin: 0;
   font: inherit;
+  white-space: pre-line;
 }
 
 .tagline em {

@@ -63,7 +63,7 @@ it('relabels the menu in the current locale and ignores relabel after disposal',
   const f = setup()
   f.setLocale('ru')
   f.tray.relabel()
-  expect(labels(native.menus[1]!)).toEqual(['Открыть DeepSeek Harness', 'separator', 'Выйти из VEGA Harness'])
+  expect(labels(native.menus[1]!)).toEqual(['Открыть VEGA Harness', 'separator', 'Выйти из VEGA Harness'])
   f.tray.dispose()
   f.tray.dispose()
   expect(f.native.destroy).toHaveBeenCalledOnce()
