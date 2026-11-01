@@ -52,9 +52,9 @@ describe('installer preparation preserves application dependencies', () => {
       })
       const appInfo = new AppInfo(metadataPackager, undefined)
       expect(appInfo.companyName).toBe('Hangzhou DeepSeek Artificial Intelligence Co., Ltd.')
-      expect(appInfo.copyright).toBe(`Copyright © ${new Date().getFullYear()} DeepSeek Harness`)
+      expect(appInfo.copyright).toBe(`Copyright © ${new Date().getFullYear()} VEGA Harness`)
       if (platform === 'win32') {
-        expect(expandMacro(config.nsis.uninstallDisplayName, null, appInfo, {}, false)).toBe('DeepSeek Harness')
+        expect(expandMacro(config.nsis.uninstallDisplayName, null, appInfo, {}, false)).toBe('VEGA Harness')
         expect(config.nsis.installerLanguages).toEqual(readInstallerLocales().map(locale => locale.id))
       }
       const aboutIcon = config.extraResources.find(resource => resource.to === 'icon.png')
@@ -81,7 +81,7 @@ describe('installer preparation preserves application dependencies', () => {
       expect(write).toHaveBeenCalledTimes(platform === 'win32' ? 1 : 0)
       if (platform === 'win32') {
         expect(write).toHaveBeenCalledWith(expect.stringMatching(/installer-ui[\\/]strings\.nsh$/u),
-          expect.stringContaining('LangString INSTALLER_INSTALL ${LANG_JAPANESE}'), 'utf8')
+          expect.stringContaining('LangString INSTALLER_INSTALL ${LANG_RUSSIAN}'), 'utf8')
       }
     } finally {
       vi.unstubAllEnvs()
@@ -99,7 +99,7 @@ describe('installer preparation preserves application dependencies', () => {
       DSH_DESKTOP_TARGET_ARCH: 'x64',
       DSH_DESKTOP_UNSIGNED: '1',
     }, 'win32', 'x64')
-    expect(config.artifactName).toBe('deepseek-harness-${version}-${os}-${arch}-unsigned.${ext}')
+    expect(config.artifactName).toBe('vega-harness-${version}-${os}-${arch}-unsigned.${ext}')
   })
 
   it('packages every preload entry point the shell loads', async () => {

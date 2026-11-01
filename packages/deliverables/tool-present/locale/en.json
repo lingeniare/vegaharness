@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "tool-present"
+    "title": "tool-present",
+    "description": "Explicit workspace file delivery declarations for the VEGA Harness."
   }
 }

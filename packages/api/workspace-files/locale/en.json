@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "api-workspace-files"
+    "title": "api-workspace-files",
+    "description": "Workspace file service and Client resource provider: bounded reads, directory listing, and live metadata over the workspaceFiles Remote namespace."
   }
 }

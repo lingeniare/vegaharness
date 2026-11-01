@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-settings-account"
+    "title": "ui-settings-account",
+    "description": "Manage DeepSeek login and open Platform billing pages."
   }
 }

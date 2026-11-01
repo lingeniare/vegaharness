@@ -282,6 +282,18 @@ export interface LlmConfigurableProvider {
   nativeAuth?: LlmNativeAuth
   /** Configuration diagnostic for repair; unaffected models may remain serviceable. */
   error?: string
+  /**
+   * Whether an account sign-in owns this route's credential. Account-managed
+   * routes have no user-editable profile, so configuration surfaces must not
+   * offer Edit/Delete; the route appears and disappears with the account grant.
+   */
+  accountManaged?: boolean
+  /**
+   * Whether the route passes model inputs through provider-side PII
+   * de-identification before the model sees them. Informational for
+   * configuration surfaces that badge shielded routes.
+   */
+  piiShielded?: boolean
 }
 
 /** Authentication a provider route performs without a credential reference in its profile. */

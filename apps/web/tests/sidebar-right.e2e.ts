@@ -26,7 +26,7 @@ import { afterAll, beforeAll, describe, expect, it, onTestFailed } from 'vitest'
 import { createMessage, createUserMessage } from '@deepseek-ai/dsh-llm'
 import { acknowledgeReloadConnectionLoss, launchWebScaffold, watchConsole, type WebScaffold } from './scaffold.ts'
 import {
-  connectFreshWorkspace, newEnglishPage, saveFailureShot, ZH_BROWSER_LOCALE,
+  connectFreshWorkspace, newEnglishPage, saveFailureShot, RU_BROWSER_LOCALE,
 } from './support.ts'
 
 /** The produced file the seeded turn writes, and what the preview should show. */
@@ -1382,23 +1382,23 @@ describe('web e2e: shipped right Sidebar', () => {
     // this block because a settled session is its precondition too — a case that
     // depends on a sibling block's setup passes only in the right order.
     it('renders the shipped Chinese copy on a Chinese page', async () => {
-      const zhPage = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: ZH_BROWSER_LOCALE })
-      await zhPage.addInitScript(() => { Object.defineProperty(navigator, 'platform', { configurable: true, value: 'MacIntel' }) })
-      const zhTripwire = watchConsole(zhPage)
-      onTestFailed(() => saveFailureShot(zhPage, 'web-e2e-sidebar-right-zh'))
+      const ruPage = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: RU_BROWSER_LOCALE })
+      await ruPage.addInitScript(() => { Object.defineProperty(navigator, 'platform', { configurable: true, value: 'MacIntel' }) })
+      const ruTripwire = watchConsole(ruPage)
+      onTestFailed(() => saveFailureShot(ruPage, 'web-e2e-sidebar-right-ru'))
       try {
-        await zhPage.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
-        await zhPage.waitForSelector('[class*="frame"]', { timeout: 30_000 })
+        await ruPage.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
+        await ruPage.waitForSelector('[class*="frame"]', { timeout: 30_000 })
         // A fresh page opens the workspace on a blank session's hero, which has
         // no session header and so no expand button. The settled session is the
         // second row of the tree; pick it the way a user would.
-        await zhPage.getByRole('treeitem', { name: /Show the right sidebar\./u }).first().click()
-        const column = zhPage.locator('[data-rightbar-col]')
-        await expandOf(zhPage).waitFor({ timeout: 20_000 })
-        await expandOf(zhPage).click()
-        await expect.poll(async () => await tabTitles(column)).toEqual(['开始'])
+        await ruPage.getByRole('treeitem', { name: /Show the right sidebar\./u }).first().click()
+        const column = ruPage.locator('[data-rightbar-col]')
+        await expandOf(ruPage).waitFor({ timeout: 20_000 })
+        await expandOf(ruPage).click()
+        await expect.poll(async () => await tabTitles(column)).toEqual(['Начало'])
         await column.locator('[data-sidebar-right-guide-entry="files"]').click()
-        await expect.poll(async () => await tabTitles(column)).toEqual(['文件'])
+        await expect.poll(async () => await tabTitles(column)).toEqual(['Файлы'])
         await column.locator('[data-dockkit-add-tab]').click()
 
         const guide = column.locator('[data-sidebar-right-guide]')
@@ -1407,9 +1407,9 @@ describe('web e2e: shipped right Sidebar', () => {
         // the column has the width, and a screenshot taken mid-transition reads
         // as a layout defect that is not there.
         expect(await width(column)).toBeGreaterThan(300)
-        await expect.poll(async () => await tabTitles(column)).toEqual(['文件', '开始'])
+        await expect.poll(async () => await tabTitles(column)).toEqual(['Файлы', 'Начало'])
         await expect.poll(async () => await guide.locator('[data-sidebar-right-guide-entry="files"]').innerText())
-          .toBe('工作区文件\n浏览会话工作区的文件\n⌥\n⌘\nP')
+          .toBe('Файлы рабочей области\nПросматривайте файлы в рабочей области этой сессии\n⌥\n⌘\nP')
         const fileEntry = guide.locator('[data-sidebar-right-guide-entry="files"]')
         const terminalEntry = guide.locator('[data-sidebar-right-guide-entry="terminal"]')
         for (const entry of [fileEntry, terminalEntry]) {
@@ -1424,12 +1424,12 @@ describe('web e2e: shipped right Sidebar', () => {
           expect(await action.evaluate(node => getComputedStyle(node).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)')
         }
         await terminalActions.first().hover()
-        await shot(zhPage, '05-guide-copy-zh')
+        await shot(ruPage, '05-guide-copy-ru')
 
-        expect(zhTripwire.pageErrors).toEqual([])
-        expect(zhTripwire.warnings).toEqual([])
+        expect(ruTripwire.pageErrors).toEqual([])
+        expect(ruTripwire.warnings).toEqual([])
       } finally {
-        await zhPage.close()
+        await ruPage.close()
       }
     }, 120_000)
   })

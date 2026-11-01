@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "locale"
+    "title": "locale",
+    "description": "Locale plugin: Host-backed preference, extensible language catalog, browser fallback, and typed built-in dictionaries."
   }
 }

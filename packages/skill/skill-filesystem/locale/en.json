@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "skill-filesystem"
+    "title": "skill-filesystem",
+    "description": "Local filesystem skill provider for the VEGA Harness."
   }
 }

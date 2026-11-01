@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-settings-agent-loop"
+    "title": "ui-settings-agent-loop",
+    "description": "Settings page of the agent loop on the dsh web client's Plugins page: the parallel tool-call cap of the agent-loop namespace."
   }
 }

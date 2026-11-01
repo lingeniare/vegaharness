@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "storage"
+    "title": "storage",
+    "description": "Storage hub (ctx.storage): named backend registry plus mounted data-form facilities for the VEGA Harness."
   }
 }

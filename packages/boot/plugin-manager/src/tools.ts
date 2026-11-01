@@ -17,9 +17,9 @@ const ERROR_STEPS: Record<ManagementError['code'], string> = {
   'invalid-spec': 'Retry with an npm package name, a git URL, a tarball URL, or an absolute local directory.',
   'already-installed': 'The package is already installed; to install another version, call remove_bundle first, then install_bundle again.',
   'ambiguous-install': 'The dependency change named no single package; call list_bundles to see what was installed.',
-  'not-bundle': 'The package declares no dsh.bundle and cannot be managed as a plugin; install a DSH plugin bundle instead.',
+  'not-bundle': 'The package declares no dsh.bundle and cannot be managed as a plugin; install a VEGA Harness plugin bundle instead.',
   'not-removable': 'Call list_bundles; only bundles marked removable can be removed.',
-  'stop-profile': 'This profile runs without HMR; tell the user to stop DSH and run `dsh plugin --profile <profile> remove <bundle>`.',
+  'stop-profile': 'This profile runs without HMR; tell the user to stop VEGA Harness and run `dsh plugin --profile <profile> remove <bundle>`.',
   'bundle-in-use': 'Call list_plugins, disable the entries from other layers that still use this bundle, then retry.',
   'stale-approval': 'Call install_bundle again without approvedBuilds to read the current pendingBuilds.',
   'incompatible-version': 'Install a version compatible with the running DSH. A version exemption needs the user\'s explicit acceptance of crash and data-loss risk.',
@@ -35,17 +35,17 @@ const FAILURE_STEPS: Partial<Record<PluginInstallFailureKind, string>> = {
   'no-matching-version': 'Retry with a published version.',
   'network': 'Retry later or pass another registry.',
   'disk-full': 'Tell the user to free disk space, then retry.',
-  'permission': 'Tell the user DSH cannot write the profile directory; retry after they fix its permissions.',
+  'permission': 'Tell the user VEGA Harness cannot write the profile directory; retry after they fix its permissions.',
   'build-blocked': 'Ask the user whether to allow the install scripts of the packages in pendingBuilds; if they approve, retry with approvedBuilds.',
 }
 
 /** Why a change waits for a restart, as the model tells the user. */
 const RESTART_STEPS: Record<RestartReason, string> = {
   'no-hmr': 'this profile applies changes only at startup',
-  'package-moved': 'an installed package now resolves to another directory, or the change replaces a package the DSH installation provides; remove a package before installing it from another location',
-  'host-module': 'the change reaches modules DSH itself loaded',
+  'package-moved': 'an installed package now resolves to another directory, or the change replaces a package the VEGA Harness installation provides; remove a package before installing it from another location',
+  'host-module': 'the change reaches modules VEGA Harness itself loaded',
   'unmanaged-plugin': 'the change reaches a plugin running outside the plugin list',
-  'module-comparison': 'DSH could not compare loaded plugins with their files',
+  'module-comparison': 'VEGA Harness could not compare loaded plugins with their files',
 }
 
 /**
@@ -63,7 +63,7 @@ function withNextStep(result: ChangeResult): ChangeResult & { nextStep?: string 
       return { ...result, nextStep: 'Saved, but a higher-priority layer such as the agent preset overrides it; tell the user it is not in effect.' }
     case 'restart-required': {
       const reason = result.restartReason === undefined ? '' : `: ${RESTART_STEPS[result.restartReason]}`
-      return { ...result, nextStep: `Tell the user to restart DSH to apply this change${reason}.` }
+      return { ...result, nextStep: `Tell the user to restart VEGA Harness to apply this change${reason}.` }
     }
     case 'failed': {
       const code = result.error?.code ?? 'operation-error'
@@ -85,7 +85,7 @@ export const inject = ['tools', 'pluginManager', 'sandboxPolicy']
 export function apply(ctx: Context): void {
   ctx.tools.register(defineTool({
     name: 'plugin_manager',
-    description: 'List plugins or bundles in the current profile, enable or disable them, install a bundle, or remove an installed bundle. Every action requires danger-full-access permission or approval for this call. Approval does not change the session permission mode. Changes affect every session in this profile. List first to obtain exact identifiers. Package installation can execute allowed build scripts. Live profiles apply changes immediately, including upgrades of installed packages; a change result that is not applied carries nextStep, which says what to do or tell the user. Unmet DSH version requirements (engines.dsh, else DSH peer dependencies) block installation and activation. Version exemptions risk crashes and data loss: warn the user and obtain explicit permission for the exact plugin and runtime versions before granting one.',
+    description: 'List plugins or bundles in the current profile, enable or disable them, install a bundle, or remove an installed bundle. Every action requires danger-full-access permission or approval for this call. Approval does not change the session permission mode. Changes affect every session in this profile. List first to obtain exact identifiers. Package installation can execute allowed build scripts. Live profiles apply changes immediately, including upgrades of installed packages; a change result that is not applied carries nextStep, which says what to do or tell the user. Unmet VEGA Harness version requirements (engines.dsh, else VEGA Harness peer dependencies) block installation and activation. Version exemptions risk crashes and data loss: warn the user and obtain explicit permission for the exact plugin and runtime versions before granting one.',
     parameters: {
       action: { type: 'string', required: true, enum: ['list_plugins', 'list_bundles', 'set_plugin', 'set_bundle', 'install_bundle', 'remove_bundle', 'list_version_exemptions', 'set_version_exemption'], description: 'Management operation.' },
       target: { type: 'string', description: 'Plugin entry id, bundle package name, or installation spec, according to action. For an Official catalog entry, pass list_bundles installTarget.spec to install_bundle.' },

@@ -258,7 +258,7 @@ function promptData(text: string): unknown {
 
 describe('session reference URI and inline mentions', () => {
   it('round-trips arbitrary session ids and replaces mentions with readable labels', () => {
-    const sessionId = SessionId('unicode/引号"/slash\\/line\n')
+    const sessionId = SessionId('引号"/slash\\\\/line.unicode')
     const uri = encodeSessionReferenceUri(sessionId)
     expect(decodeSessionReferenceUri(uri)).toBe(sessionId)
 

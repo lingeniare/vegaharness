@@ -6,7 +6,7 @@ import { launchWebScaffold } from './scaffold.ts'
 
 it.each([
   { locale: 'en-US', preference: 'en-US' },
-  { locale: 'zh-CN', preference: 'zh' },
+  { locale: 'ru-RU', preference: 'ru' },
 ])('loads English DevTools under a prefix with browser locale $locale and saved preference $preference', async (copy) => {
   const scaffold = await launchWebScaffold({
     publicMount: { prefix: 'nested/devtools-test/' },

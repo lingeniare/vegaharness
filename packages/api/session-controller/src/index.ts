@@ -321,7 +321,8 @@ export class SessionController extends TypertRemoteService {
    */
   @Remote
   async initializeDefaultModel(): Promise<void> {
-    const provider = 'deepseek-account'
+    const provider = this.ctx.llm.listConfigurableProviders()
+      .find(entry => entry.accountManaged === true)?.provider ?? 'api-vega'
     if (await hasProviderApiKey(this.ctx)) return
     const catalog = await buildModelCatalog(this.ctx)
     const model = catalog.groups.find(group => group.id === provider)?.models[0]

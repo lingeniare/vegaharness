@@ -652,10 +652,10 @@ describe('web e2e: resident question composer round trip', () => {
         header: '确认思考等级',
         question: '选择 HF provider 的思考等级？',
         options: [
-          { label: '高（high）', description: '倾向更充分的推理，通常更慢、消耗更多 token，需模型支持。' },
+          { label: '高（high）', description: '倾向更充分的推理, 通常更慢、消耗更多 token, 需模型支持。' },
           { label: '中（medium）', description: '平衡推理深度与速度；需模型支持。' },
           { label: '低（low）', description: '优先速度与较低 token 消耗；需模型支持。' },
-          { label: '先查看当前配置', description: '先确认 HF provider 的模型及其支持的思考参数，再决定。' },
+          { label: '先查看当前配置', description: '先确认 HF provider 的模型及其支持的思考参数, 再决定。' },
         ],
       }],
     })

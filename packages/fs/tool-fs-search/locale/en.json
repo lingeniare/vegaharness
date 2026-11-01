@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "tool-fs-search"
+    "title": "tool-fs-search",
+    "description": "Model-facing filesystem discovery tools (glob, grep) backed by the packaged ripgrep binary (@vscode/ripgrep)."
   }
 }

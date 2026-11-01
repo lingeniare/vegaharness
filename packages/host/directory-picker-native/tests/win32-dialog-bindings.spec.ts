@@ -192,9 +192,9 @@ describe('loadWin32DialogBindings over the fake COM world', () => {
     const bindings = await loadWin32DialogBindings()
     const showing = vi.fn()
 
-    expect(runFolderDialog(bindings, '选择工作区目录', showing)).toBe('C:\\选中\\directory')
+    expect(runFolderDialog(bindings, 'Выбрать рабочую областьДиректория', showing)).toBe('C:\\选中\\directory')
     expect(world.dpiContexts).toEqual([-4])
-    expect(world.titles).toEqual(['选择工作区目录'])
+    expect(world.titles).toEqual(['Выбрать рабочую областьДиректория'])
     expect(world.options).toHaveLength(1)
     expect(showing).toHaveBeenCalledWith(31337)
     // One synthesized Alt press (down, then up) immediately precedes Show, so
@@ -225,10 +225,10 @@ describe('loadWin32DialogBindings over the fake COM world', () => {
   })
 
   it.each([
-    { label: 'zero-low-byte BMP code units', text: 'C:/fixture/安卓开发' },
+    { label: 'zero-low-byte BMP code units', text: 'fixture/安卓开发.C:' },
     { label: 'surrogate pairs', text: 'C:/fixture/😀' },
     { label: 'more than 32 KiB', text: 'C:/' + '开'.repeat(17_000) },
-    { label: 'NUL termination', text: 'C:/开' + String.fromCharCode(0) + 'ignored' },
+    { label: 'NUL termination', text: '开.C:' + String.fromCharCode(0) + 'ignored' },
   ])('decodes $label with real Koffi through resultPath', async ({ text }) => {
     const { default: koffi } = await vi.importActual<typeof import('koffi')>('koffi')
     const nul = String.fromCharCode(0)

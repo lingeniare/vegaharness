@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-commands"
+    "title": "ui-commands",
+    "description": "Client command surface: global directory cache, '/' source, three command UI kinds, popupSelect registry."
   }
 }

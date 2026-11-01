@@ -1,7 +1,5 @@
 # Configure models
 
-English | [中文](providers.zh.md)
-
 This guide assumes you started the Web UI through the [root README](../../../README.md#run). Model changes take effect on the next request without restarting the server.
 
 ## Configure DeepSeek
@@ -129,7 +127,7 @@ A signed-in DeepSeek account lists its models from the account service, so the M
         maxTokens: 131072
 ```
 
-A model that needs a newer DeepSeek Harness fails with `CLIENT_UPGRADE_REQUIRED`, which names the version to install. The [account provider reference](../../../packages/llm/llm-deepseek-account/README.md) owns the listing, fallback, and gating rules.
+A model that needs a newer VEGA Harness fails with `CLIENT_UPGRADE_REQUIRED`, which names the version to install. The [account provider reference](../../../packages/llm/llm-deepseek-account/README.md) owns the listing, fallback, and gating rules.
 
 ### Reasoning effort
 

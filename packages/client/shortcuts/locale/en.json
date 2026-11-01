@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "shortcuts"
+    "title": "shortcuts",
+    "description": "Application keyboard command registry and physical-key routing."
   }
 }

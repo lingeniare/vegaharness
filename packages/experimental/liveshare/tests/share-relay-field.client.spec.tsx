@@ -115,7 +115,7 @@ describe('Liveshare relay URL field', () => {
     expect(callsOf(host, 'setRelay')).toEqual([{ relayUrl: 'https://new.example.test' }])
     // Saving and checking is one action: the save itself probes the address it put in force.
     expect(callsOf(host, 'testRelay').length).toBeGreaterThan(0)
-    expect(screen.queryByRole('button', { name: 'Test connectivity' })).toBeNull()
+    expect(screen.queryByRole('button', { name: /^Создать сессию в рабочей области/u })).toBeNull()
     expect(screen.queryByRole('button', { name: 'Save and check' })).toBeNull()
     expect(screen.getByLabelText('Share service address')).toHaveProperty('value', 'https://new.example.test')
   })

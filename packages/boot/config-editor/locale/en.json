@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "config-editor"
+    "title": "config-editor",
+    "description": "Persist plugin configuration through profile patches and Loader reconciliation."
   }
 }

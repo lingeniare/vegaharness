@@ -30,6 +30,10 @@ export function AccountQuotaNotice({ matched, openPlatformPage, useAccount, useP
   const { dismiss, keepOpen, message } = matched
   const accountStatus = useAccount(snapshot => snapshot.view?.status)
   const accountFailed = useAccount(snapshot => snapshot.failed)
+  // VEGA-style providers have no embeddable authorized page; their Top up opens
+  // the account link in an external browser instead of the native host.
+  const embeddedPages = useAccount(snapshot => snapshot.view?.embeddedPages !== false)
+  const topUpUrl = useAccount(snapshot => snapshot.view?.links.topUpUrl)
   const signedIn = accountStatus === 'credential-stored'
   const platformPage = usePlatformPage(current => current)
   const [opened, setOpened] = useState(false)
@@ -58,9 +62,9 @@ export function AccountQuotaNotice({ matched, openPlatformPage, useAccount, useP
   // Await the first account snapshot without letting a Toast timer discard the
   // notice before the native account action becomes available. A terminal stream
   // failure ends that wait and leaves the generic warning available.
-  if (accountStatus === undefined && !accountFailed && openPlatformPage !== undefined) return null
-  // Signed out, unavailable, or without the native host, use generic notice copy.
-  if (!signedIn || openPlatformPage === undefined) {
+  if (accountStatus === undefined && !accountFailed && openPlatformPage !== undefined && embeddedPages) return null
+  // Signed out, unavailable, or without a destination for the action, use generic notice copy.
+  if (!signedIn || (openPlatformPage === undefined && embeddedPages) || (!embeddedPages && topUpUrl === undefined)) {
     return <Toast text={message} icon={<IconWarningOutlineRegular size={18} />} onDone={dismiss} />
   }
   // Defer the Modal until the native page closes; do not mount hidden focus or
@@ -71,10 +75,15 @@ export function AccountQuotaNotice({ matched, openPlatformPage, useAccount, useP
     footer={<>
       <Button variant="outline" onClick={dismiss}>{t('cancel')}</Button>
       <Button variant="primary" onClick={() => {
+        if (!embeddedPages) {
+          if (topUpUrl !== undefined) window.open(topUpUrl, '_blank', 'noreferrer')
+          dismiss()
+          return
+        }
         // Retain the notice before its page mounts; a later failure would
         // otherwise republish it and remount this entry.
         releaseHold.current = keepOpen()
-        releasePage.current = openPlatformPage('top-up', () => { releasePage.current = undefined; dismiss() })
+        releasePage.current = openPlatformPage?.('top-up', () => { releasePage.current = undefined; dismiss() })
         setOpened(true)
       }}>{t('quotaTopUp')}</Button>
     </>} />

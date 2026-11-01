@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-user-questions"
+    "title": "ui-user-questions",
+    "description": "Web ask_user_question composer takeover and plan-review presentation UI."
   }
 }

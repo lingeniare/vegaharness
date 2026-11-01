@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "hmr"
+    "title": "hmr",
+    "description": "Web client graph synchronization and rebuilt-bundle reload transport."
   }
 }

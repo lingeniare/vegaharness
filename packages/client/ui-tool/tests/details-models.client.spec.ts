@@ -3,9 +3,9 @@
 import { describe, expect, it } from 'vitest'
 import type { ToolResultNode } from '@deepseek-ai/dsh-client-ui-chat/client'
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import { en, zh } from '@deepseek-ai/dsh-client-ui-conversation/src/client/locales.ts'
+import { en, ru } from '@deepseek-ai/dsh-client-ui-conversation/src/client/locales.ts'
 import { en as commonEn } from '@deepseek-ai/dsh-client-locale/src/locales/en.ts'
-import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
+import { ru as commonRu } from '@deepseek-ai/dsh-client-locale/src/locales/ru.ts'
 import { statusLine } from '@deepseek-ai/dsh-tool-jobs/src/render.ts'
 import { presentation } from '@deepseek-ai/dsh-tool-session-query/src/presentation.ts'
 import { renderList, renderRead, renderSpawn } from '@deepseek-ai/dsh-tool-terminal/src/render.ts'
@@ -55,13 +55,13 @@ describe('shared detail values', () => {
 
 describe('control detail adapters', () => {
   it.each([
-    [{ timedOut: false }, '子智能体状态 · 检测到变化'],
-    [{ timedOut: true }, '子智能体状态 · 等待超时'],
-    [{ timedOut: false, noProgress: { message: 'No pending work' } }, '没有正在运行的子智能体'],
+    [{ timedOut: false }, 'Активность субагентов · Обнаружены изменения'],
+    [{ timedOut: true }, 'Активность субагентов · Время ожидания истекло'],
+    [{ timedOut: false, noProgress: { message: 'No pending work' } }, 'Нет активных субагентов'],
   ] as const)('names subagents in Chinese wait results (%j)', (value, summary) => {
-    const translate = makeTranslate(zh, commonZh)
-    expect(translate('tool.title.waitAgent')).toBe('等待子智能体')
-    expect(detailsCardModel(output('wait_agent', JSON.stringify(value)), translate, 'zh-CN')?.summary).toBe(summary)
+    const translate = makeTranslate(ru, commonRu)
+    expect(translate('tool.title.waitAgent')).toBe('Дождаться субагента')
+    expect(detailsCardModel(output('wait_agent', JSON.stringify(value)), translate, 'ru-CN')?.summary).toBe(summary)
   })
 
   it('uses producer wording for agent, job, terminal, and LSP lists', () => {

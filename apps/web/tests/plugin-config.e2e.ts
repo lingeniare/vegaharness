@@ -15,7 +15,7 @@ import {
   assertFixtureInventory, captureStableAria, compareOrRefreshGolden,
   launchWebScaffold, watchConsole, webSnapshotMode, type WebScaffold,
 } from './scaffold.ts'
-import { ZH_BROWSER_LOCALE, saveFailureShot } from './support.ts'
+import { RU_BROWSER_LOCALE, saveFailureShot } from './support.ts'
 
 const SNAPSHOT_DIR = fileURLToPath(new URL('./expected/plugin-config', import.meta.url))
 const OFFICIAL_EXPECTED = join(SNAPSHOT_DIR, 'official.expected.md')
@@ -41,7 +41,7 @@ describe('web e2e: plugin configuration pages', () => {
     browser = await chromium.launch()
     // Chinese browser: the pages assert the localized copy the client derives
     // from it, as the rest of the settings surface does.
-    page = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: ZH_BROWSER_LOCALE })
+    page = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: RU_BROWSER_LOCALE })
     tripwire = watchConsole(page)
     await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
     await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
@@ -58,23 +58,23 @@ describe('web e2e: plugin configuration pages', () => {
    * dialog a previous scenario left open and leaves whatever page it opened.
    */
   async function openPlugins(): Promise<Locator> {
-    if (await page.getByRole('dialog', { name: '设置' }).count() > 0) {
+    if (await page.getByRole('dialog', { name: 'Настройки' }).count() > 0) {
       await page.keyboard.press('Escape')
-      await expect.poll(() => page.getByRole('dialog', { name: '设置' }).count(), { timeout: 5_000 }).toBe(0)
+      await expect.poll(() => page.getByRole('dialog', { name: 'Настройки' }).count(), { timeout: 5_000 }).toBe(0)
     }
-    await page.getByRole('navigation', { name: '全局面板' }).getByRole('button', { name: '插件', exact: true }).click()
+    await page.getByRole('navigation', { name: 'Глобальные панели' }).getByRole('button', { name: 'Плагин', exact: true }).click()
     const panel = page.locator('[data-plugin-panel]')
     await panel.waitFor({ timeout: 10_000 })
     while (await panel.getByRole('button', { name: /^返回/ }).count() > 0) {
       await panel.getByRole('button', { name: /^返回/ }).first().click()
     }
-    await panel.getByRole('heading', { name: '内置插件配置', exact: true }).waitFor({ timeout: 20_000 })
+    await panel.getByRole('heading', { name: 'Настройки встроенных плагинов', exact: true }).waitFor({ timeout: 20_000 })
     return panel
   }
 
   /** Open one official plugin's page from its card and wait for its form. */
   async function openPage(panel: Locator, title: string): Promise<void> {
-    await panel.getByRole('button', { name: `查看 ${title}`, exact: true }).click()
+    await panel.getByRole('button', { name: `Проверить ${title}`, exact: true }).click()
     await panel.locator('[data-plugin-config]').waitFor({ timeout: 10_000 })
   }
 
@@ -89,27 +89,27 @@ describe('web e2e: plugin configuration pages', () => {
 
     // Every page the shipped web composition exposes: the shell executor, the
     // agent loop, subagent selection, and the DeepSeek search provider.
-    await panel.getByRole('button', { name: '查看 网页搜索', exact: true }).waitFor({ timeout: 20_000 })
+    await panel.getByRole('button', { name: 'Просмотреть Поиск', exact: true }).waitFor({ timeout: 20_000 })
     const basic = panel.locator('[data-plugin-group="basic"]')
     expect(await basic.locator('[data-plugin-item]').count()).toBe(4)
     expect(await basic.locator(':scope > ul > li').evaluateAll(cards => cards.map(card => card.getAttribute('data-plugin-item'))))
       .toEqual(['subagent', 'web-search', 'agent-loop', 'shell'])
-    for (const title of ['子智能体', '网页搜索', 'Agent 循环', '终端']) {
-      expect(await basic.getByRole('button', { name: `查看 ${title}`, exact: true }).count()).toBe(1)
+    for (const title of ['Субагенты', 'Поиск', 'Цикл агента', 'Терминал']) {
+      expect(await basic.getByRole('button', { name: `Проверить ${title}`, exact: true }).count()).toBe(1)
     }
     // A card carries the one-liner; the fields wait for the page.
-    expect(await basic.getByText('限制每条命令最多能跑多久、最多输出多少内容。', { exact: true }).count()).toBe(1)
-    expect(await panel.getByLabel('命令超时（毫秒）').count()).toBe(0)
+    expect(await basic.getByText('Ограничьте время выполнения каждой команды и объём её вывода.', { exact: true }).count()).toBe(1)
+    expect(await panel.getByLabel('Тайм-аут команды (мс)').count()).toBe(0)
 
     const extensions = panel.locator('[data-plugin-group="extensions"]')
-    const more = panel.getByRole('button', { name: '更多', exact: true })
-    expect(await extensions.getByRole('heading', { name: '实验性插件', exact: true }).count()).toBe(1)
-    expect(await extensions.getByRole('button', { name: '更多', exact: true }).textContent()).toBe('更多')
+    const more = panel.getByRole('button', { name: 'Ещё', exact: true })
+    expect(await extensions.getByRole('heading', { name: 'Экспериментальные плагины', exact: true }).count()).toBe(1)
+    expect(await extensions.getByRole('button', { name: 'Ещё', exact: true }).textContent()).toBe('Ещё')
     expect(await extensions.getByRole('list').isVisible()).toBe(true)
     expect(await panel.locator('[data-plugin-group="more"]').count()).toBe(0)
     await more.focus()
     await page.keyboard.press('Enter')
-    await panel.getByRole('heading', { name: '实验性插件', exact: true, level: 1 }).waitFor()
+    await panel.getByRole('heading', { name: 'Экспериментальные плагины', exact: true, level: 1 }).waitFor()
     // The More list omits the shipped bundles whose own rows do not run (the visibility rule lives in
     // ui-plugin-manager), so it holds fewer cards than the installed optional-bundle list.
     const bundles = await scaffold.ctx.pluginManager.listBundles()
@@ -123,11 +123,11 @@ describe('web e2e: plugin configuration pages', () => {
     expect(await basic.count()).toBe(0)
     expect(await extensions.count()).toBe(0)
     expect(await panel.locator('[data-plugin-group="bundles"]').count()).toBe(0)
-    await panel.getByRole('button', { name: '查看 Git 工作树', exact: true }).click()
+    await panel.getByRole('button', { name: 'Просмотреть Git Рабочее дерево', exact: true }).click()
     await panel.locator('[data-plugin-detail]').waitFor()
-    await panel.getByRole('button', { name: '返回 实验性插件', exact: true }).click()
-    await panel.getByRole('heading', { name: '实验性插件', exact: true, level: 1 }).waitFor()
-    await panel.getByRole('button', { name: '返回插件', exact: true }).focus()
+    await panel.getByRole('button', { name: 'Назад к Экспериментальные плагины', exact: true }).click()
+    await panel.getByRole('heading', { name: 'Экспериментальные плагины', exact: true, level: 1 }).waitFor()
+    await panel.getByRole('button', { name: 'Назад к плагинам', exact: true }).focus()
     await page.keyboard.press('Space')
     expect(await extensions.getByRole('list').isVisible()).toBe(true)
     expect(await panel.locator('[data-plugin-group="more"]').count()).toBe(0)
@@ -145,15 +145,15 @@ describe('web e2e: plugin configuration pages', () => {
   it('switches search and fetch to the Search and Fetch APIs together and preserves each API’s endpoint', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-search-api-settings'))
     const panel = await openPlugins()
-    await openPage(panel, '网页搜索')
-    const toggle = panel.getByRole('switch', { name: '启用新版 Web 搜索 API', exact: true })
+    await openPage(panel, 'Поиск')
+    const toggle = panel.getByRole('switch', { name: 'Использовать новый API веб-поиска', exact: true })
     const endpoint = panel.locator('#plugin-config-web-search-endpoint')
-    const maxUses = panel.getByLabel('单次请求最多搜索次数', { exact: true })
-    const save = panel.getByRole('button', { name: '保存', exact: true })
+    const maxUses = panel.getByLabel('Максимум поисковых запросов на один запрос', { exact: true })
+    const save = panel.getByRole('button', { name: 'Сохранить', exact: true })
     expect(await toggle.getAttribute('aria-checked')).toBe('false')
-    expect(await panel.getByRole('link', { name: '网页搜索与抓取指南', exact: true }).getAttribute('href'))
+    expect(await panel.getByRole('link', { name: 'руководстве Search & Fetch', exact: true }).getAttribute('href'))
       .toBe('https://api-docs.deepseek.com/zh-cn/guides/search')
-    expect(await panel.getByLabel('Messages API 基础地址', { exact: true }).count()).toBe(1)
+    expect(await panel.getByLabel('Базовый URL Messages API', { exact: true }).count()).toBe(1)
     expect(await maxUses.inputValue()).toBe('5')
     expect(await endpoint.inputValue()).toBe('')
     expect(await save.isDisabled()).toBe(true)
@@ -162,13 +162,13 @@ describe('web e2e: plugin configuration pages', () => {
     await expect.poll(() => save.isDisabled()).toBe(true)
     await toggle.focus()
     await page.keyboard.press('Space')
-    expect(await panel.getByLabel('Search / Fetch API 基础地址', { exact: true }).count()).toBe(1)
+    expect(await panel.getByLabel('Базовый URL API Search / Fetch', { exact: true }).count()).toBe(1)
     expect(await endpoint.inputValue()).toBe('https://api.deepseek.com/v1/tools')
     expect(await maxUses.count()).toBe(0)
-    const count = panel.getByLabel('每次搜索结果数', { exact: true })
+    const count = panel.getByLabel('Результатов на поиск', { exact: true })
     expect(await count.inputValue()).toBe('10')
     await count.fill('51')
-    await panel.getByText('请填 1–50 的整数；留空表示使用默认值。', { exact: true }).waitFor()
+    await panel.getByText('Введите целое число от 1 до 50 или оставьте поле пустым, чтобы использовать значение по умолчанию.', { exact: true }).waitFor()
     expect(await save.isDisabled()).toBe(true)
     expect(await toggle.isDisabled()).toBe(true)
     await count.fill('10')
@@ -182,12 +182,12 @@ describe('web e2e: plugin configuration pages', () => {
     await page.reload({ waitUntil: 'load' })
     await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
     await openPlugins()
-    await openPage(panel, '网页搜索')
+    await openPage(panel, 'Поиск')
     expect(await toggle.getAttribute('aria-checked')).toBe('true')
     expect(await endpoint.inputValue()).toBe('https://search-api.test/api/v1/tools')
     const snapshot = await captureStableAria(page, '[data-plugin-panel]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(join(SNAPSHOT_DIR, 'web-search.expected.md'), snapshot, MODE)
-    await panel.getByRole('button', { name: '恢复默认', exact: true }).click()
+    await panel.getByRole('button', { name: 'Сбросить до значения по умолчанию', exact: true }).click()
     expect(await endpoint.inputValue()).toBe('https://api.deepseek.com/v1/tools')
     await save.click()
     await expect.poll(() => save.isDisabled()).toBe(true)
@@ -204,76 +204,76 @@ describe('web e2e: plugin configuration pages', () => {
 
   it('saves subagent limits and resets them to the deployment defaults', async () => {
     const panel = await openPlugins()
-    await openPage(panel, '子智能体')
-    const depth = panel.getByLabel('最大递归深度', { exact: true })
-    const capacity = panel.getByLabel('子智能体并行数量上限', { exact: true })
+    await openPage(panel, 'Субагенты')
+    const depth = panel.getByLabel('Максимальная глубина рекурсии', { exact: true })
+    const capacity = panel.getByLabel('Лимит параллельных субагентов', { exact: true })
     expect(await depth.inputValue()).toBe('1')
     expect(await capacity.inputValue()).toBe('8')
     await depth.fill('2')
     await capacity.fill('12')
-    await panel.getByRole('button', { name: '保存', exact: true }).click()
-    await expect.poll(() => panel.getByRole('button', { name: '保存', exact: true }).isDisabled()).toBe(true)
+    await panel.getByRole('button', { name: 'Сохранить', exact: true }).click()
+    await expect.poll(() => panel.getByRole('button', { name: 'Сохранить', exact: true }).isDisabled()).toBe(true)
     await expect.poll(settingsDocument).toContain('maxActiveSubagents: 12')
     await expect.poll(settingsDocument).toContain('maxDepth: 2')
     await openPlugins()
-    await openPage(panel, '子智能体')
+    await openPage(panel, 'Субагенты')
     const snapshot = await captureStableAria(page, '[data-plugin-panel]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(join(SNAPSHOT_DIR, 'subagent.expected.md'), snapshot, MODE)
     const controlHeight = await depth.evaluate(element => element.getBoundingClientRect().height)
     await depth.fill('1.5')
     expect(await depth.evaluate(element => element.getBoundingClientRect().height)).toBe(controlHeight)
-    expect(await panel.getByRole('button', { name: '保存', exact: true }).isDisabled()).toBe(true)
+    expect(await panel.getByRole('button', { name: 'Сохранить', exact: true }).isDisabled()).toBe(true)
     await depth.fill('2')
-    await panel.getByRole('button', { name: '恢复默认', exact: true }).first().click()
-    await panel.getByRole('button', { name: '恢复默认', exact: true }).first().click()
-    await panel.getByRole('button', { name: '保存', exact: true }).click()
-    await expect.poll(() => panel.getByRole('button', { name: '保存', exact: true }).isDisabled()).toBe(true)
+    await panel.getByRole('button', { name: 'Сбросить до значения по умолчанию', exact: true }).first().click()
+    await panel.getByRole('button', { name: 'Сбросить до значения по умолчанию', exact: true }).first().click()
+    await panel.getByRole('button', { name: 'Сохранить', exact: true }).click()
+    await expect.poll(() => panel.getByRole('button', { name: 'Сохранить', exact: true }).isDisabled()).toBe(true)
     await openPlugins()
-    await openPage(panel, '子智能体')
+    await openPage(panel, 'Субагенты')
     expect(await depth.inputValue()).toBe('1')
     expect(await capacity.inputValue()).toBe('8')
-    await panel.getByRole('button', { name: '返回插件', exact: true }).click()
+    await panel.getByRole('button', { name: 'Назад к плагинам', exact: true }).click()
   })
 
   it('opens field explanations with the keyboard and retains unsaved edits', async () => {
     const panel = await openPlugins()
-    await openPage(panel, '子智能体')
-    const depth = panel.getByLabel('最大递归深度', { exact: true })
+    await openPage(panel, 'Субагенты')
+    const depth = panel.getByLabel('Максимальная глубина рекурсии', { exact: true })
     await depth.fill('2')
-    const depthHelp = panel.getByRole('button', { name: '最大递归深度说明', exact: true })
-    expect(await panel.getByRole('region', { name: '最大递归深度说明', exact: true }).count()).toBe(0)
+    const depthHelp = panel.getByRole('button', { name: 'О максимальной глубине рекурсии', exact: true })
+    expect(await panel.getByRole('region', { name: 'О максимальной глубине рекурсии', exact: true }).count()).toBe(0)
     await depthHelp.press('Enter')
-    const depthRules = panel.getByRole('region', { name: '最大递归深度说明', exact: true })
+    const depthRules = panel.getByRole('region', { name: 'О максимальной глубине рекурсии', exact: true })
     await depthRules.waitFor()
-    expect(await depthRules.getByText('限制 Agent 创建子智能体的递归层级。', { exact: true }).count()).toBe(1)
-    const depthTable = depthRules.getByRole('table', { name: '最大递归深度说明', exact: true })
-    expect(await depthTable.getByRole('row', { name: '0 禁用子智能体', exact: true }).count()).toBe(1)
-    expect(await depthTable.getByRole('row', { name: '1 仅允许主 Agent 创建子智能体', exact: true }).count()).toBe(1)
-    expect(await depthRules.getByText('如果某个工具单独设置了最大递归深度，以该工具的设置为准。', { exact: true }).count()).toBe(1)
+    expect(await depthRules.getByText('Ограничивает количество уровней субагентов, которые может создавать агент.', { exact: true }).count()).toBe(1)
+    const depthTable = depthRules.getByRole('table', { name: 'О максимальной глубине рекурсии', exact: true })
+    expect(await depthTable.getByRole('row', { name: '0 Отключить субагентов', exact: true }).count()).toBe(1)
+    expect(await depthTable.getByRole('row', { name: '1 Создавать субагентов может только главный агент', exact: true }).count()).toBe(1)
+    expect(await depthRules.getByText('Если для инструмента задана собственная максимальная глубина рекурсии, приоритет имеет это значение.', { exact: true }).count()).toBe(1)
     await depthHelp.press('Enter')
     expect(await depthRules.count()).toBe(0)
     expect(await depth.inputValue()).toBe('2')
-    await panel.getByRole('button', { name: '子智能体并行数量上限说明', exact: true }).click()
-    const capacityRules = panel.getByRole('region', { name: '子智能体并行数量上限说明', exact: true })
-    expect(await capacityRules.getByText('同一主 Agent 下，所有递归层级同时存活的子智能体总数，主 Agent 不计入。达到上限时，新的启动请求会被拒绝。', { exact: true }).count()).toBe(1)
-    await panel.getByRole('button', { name: '返回插件', exact: true }).click()
-    await openPage(panel, '子智能体')
+    await panel.getByRole('button', { name: 'О лимите параллельных субагентов', exact: true }).click()
+    const capacityRules = panel.getByRole('region', { name: 'О лимите параллельных субагентов', exact: true })
+    expect(await capacityRules.getByText('Общее количество одновременно работающих субагентов у одного главного агента на всех уровнях рекурсии. Главный агент не учитывается. При достижении лимита новые запросы на запуск отклоняются.', { exact: true }).count()).toBe(1)
+    await panel.getByRole('button', { name: 'Назад к плагинам', exact: true }).click()
+    await openPage(panel, 'Субагенты')
     expect(await depth.inputValue()).toBe('1')
   })
 
   it('saves limits and the model allowlist together from the shared card', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-config-subagent-model-selection'))
     const panel = await openPlugins()
-    await openPage(panel, '子智能体')
-    const toggle = panel.getByRole('switch', { name: '允许 Agent 为子智能体选择模型' })
+    await openPage(panel, 'Субагенты')
+    const toggle = panel.getByRole('switch', { name: 'Разрешить агентам выбирать модели для субагентов' })
 
-    await panel.getByLabel('最大递归深度', { exact: true }).fill('2')
+    await panel.getByLabel('Максимальная глубина рекурсии', { exact: true }).fill('2')
     await toggle.click()
-    const models = panel.getByRole('group', { name: 'Agent 可选择的模型' })
+    const models = panel.getByRole('group', { name: 'Модели, которые могут выбирать агенты' })
     await models.waitFor({ timeout: 10_000 })
     const firstModel = models.getByRole('checkbox').first()
     await firstModel.check()
-    const save = panel.getByRole('button', { name: '保存', exact: true })
+    const save = panel.getByRole('button', { name: 'Сохранить', exact: true })
     await save.click()
 
     // The Save label returns only after both namespace controllers settle.
@@ -298,11 +298,11 @@ describe('web e2e: plugin configuration pages', () => {
   it('stages an edit and writes it only when saved', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-config-write'))
     const panel = await openPlugins()
-    await openPage(panel, '终端')
+    await openPage(panel, 'Терминал')
     const entry = [...scaffold.ctx.loader.entries()].find(row => row.options.id === 'bash-sandbox')!
     const fiber = entry.fiber
 
-    const timeout = panel.getByLabel('命令超时（毫秒）')
+    const timeout = panel.getByLabel('Тайм-аут команды (мс)')
     await timeout.waitFor({ timeout: 10_000 })
     // The composed default this deployment ships, before any user layer.
     expect(await timeout.inputValue()).toBe('60000')
@@ -312,7 +312,7 @@ describe('web e2e: plugin configuration pages', () => {
     // Nothing crosses the wire until the user saves: leaving the control is
     // not a decision to store the value.
     expect(await settingsDocument()).not.toContain('timeoutMs')
-    const save = panel.getByRole('button', { name: '保存', exact: true })
+    const save = panel.getByRole('button', { name: 'Сохранить', exact: true })
     await expect.poll(() => save.isEnabled(), { timeout: 5_000 }).toBe(true)
     await save.click()
 
@@ -322,8 +322,8 @@ describe('web e2e: plugin configuration pages', () => {
     expect(entry.fiber === fiber).toBe(true)
     // Presence in the user layer is what the badge reports, and the reset is
     // offered only for a field that has one.
-    await expect.poll(() => panel.getByText('已覆盖').count(), { timeout: 5_000 }).toBe(1)
-    expect(await panel.getByRole('button', { name: '恢复默认' }).count()).toBe(1)
+    await expect.poll(() => panel.getByText('Переопределено').count(), { timeout: 5_000 }).toBe(1)
+    expect(await panel.getByRole('button', { name: 'Сбросить до значения по умолчанию' }).count()).toBe(1)
     // A settled form offers no save to repeat.
     await expect.poll(() => save.isDisabled(), { timeout: 5_000 }).toBe(true)
     expect(tripwire.pageErrors).toEqual([])
@@ -332,16 +332,16 @@ describe('web e2e: plugin configuration pages', () => {
   it('drops a staged edit when the page is left, without touching the document', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-config-leave'))
     const panel = await openPlugins()
-    await openPage(panel, '终端')
-    const timeout = panel.getByLabel('命令超时（毫秒）')
+    await openPage(panel, 'Терминал')
+    const timeout = panel.getByLabel('Тайм-аут команды (мс)')
     await timeout.waitFor({ timeout: 10_000 })
 
     await timeout.fill('7000')
-    await panel.getByRole('button', { name: '返回插件' }).click()
-    await panel.getByRole('heading', { name: '内置插件配置', exact: true }).waitFor({ timeout: 10_000 })
-    await openPage(panel, '终端')
+    await panel.getByRole('button', { name: 'Назад к плагинам' }).click()
+    await panel.getByRole('heading', { name: 'Настройки встроенных плагинов', exact: true }).waitFor({ timeout: 10_000 })
+    await openPage(panel, 'Терминал')
 
-    await expect.poll(() => panel.getByLabel('命令超时（毫秒）').inputValue(), { timeout: 5_000 }).toBe('12000')
+    await expect.poll(() => panel.getByLabel('Тайм-аут команды (мс)').inputValue(), { timeout: 5_000 }).toBe('12000')
     expect(await settingsDocument()).toContain('timeoutMs: 12000')
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
@@ -349,38 +349,38 @@ describe('web e2e: plugin configuration pages', () => {
   it('refuses to save a draft that is not a number', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-config-invalid'))
     const panel = await openPlugins()
-    await openPage(panel, '终端')
-    const timeout = panel.getByLabel('命令超时（毫秒）')
+    await openPage(panel, 'Терминал')
+    const timeout = panel.getByLabel('Тайм-аут команды (мс)')
     await timeout.waitFor({ timeout: 10_000 })
 
     await timeout.fill('soon')
 
-    const save = panel.getByRole('button', { name: '保存', exact: true })
+    const save = panel.getByRole('button', { name: 'Сохранить', exact: true })
     await expect.poll(() => save.isDisabled(), { timeout: 5_000 }).toBe(true)
-    expect(await panel.getByText('请填数字；留空表示使用默认值。').count()).toBe(1)
+    expect(await panel.getByText('Введите число или оставьте поле пустым, чтобы использовать значение по умолчанию.').count()).toBe(1)
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
 
   it('clears the field back to the composed default on reset', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-config-reset'))
     const panel = await openPlugins()
-    await openPage(panel, '终端')
-    const timeout = panel.getByLabel('命令超时（毫秒）')
+    await openPage(panel, 'Терминал')
+    const timeout = panel.getByLabel('Тайм-аут команды (мс)')
     await timeout.waitFor({ timeout: 10_000 })
     expect(await timeout.inputValue()).toBe('12000')
 
     // The reset stages the composed default; the document still carries the
     // override until the save lands.
-    await panel.getByRole('button', { name: '恢复默认' }).click()
+    await panel.getByRole('button', { name: 'Сбросить до значения по умолчанию' }).click()
     await expect.poll(() => timeout.inputValue(), { timeout: 5_000 }).toBe('60000')
     expect(await settingsDocument()).toContain('timeoutMs: 12000')
 
-    await panel.getByRole('button', { name: '保存', exact: true }).click()
+    await panel.getByRole('button', { name: 'Сохранить', exact: true }).click()
 
     await expect.poll(async () => (await settingsDocument()).includes('timeoutMs'), { timeout: 10_000 })
       .toBe(false)
     expect(await timeout.inputValue()).toBe('60000')
-    expect(await panel.getByText('已覆盖').count()).toBe(0)
+    expect(await panel.getByText('Переопределено').count()).toBe(0)
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
 
@@ -389,10 +389,10 @@ describe('web e2e: plugin configuration pages', () => {
     const panel = await openPlugins()
 
     // Off, the bundle's browser half is not loaded and the row has no configuration to open.
-    await panel.getByRole('button', { name: '查看 @fixture/live-client', exact: true }).click()
+    await panel.getByRole('button', { name: 'Проверить @fixture/live-client', exact: true }).click()
     const row = panel.locator('[data-plugin-row]', { hasText: 'fixture-live-client' })
     await row.waitFor({ timeout: 10_000 })
-    expect(await panel.getByRole('button', { name: '配置 @fixture/live-client' }).count()).toBe(0)
+    expect(await panel.getByRole('button', { name: 'Настроить @fixture/live-client' }).count()).toBe(0)
 
     // Off, the bundle's page carries no contribution either: the browser half
     // that would make them is not loaded.
@@ -403,13 +403,13 @@ describe('web e2e: plugin configuration pages', () => {
     // reload; its registration puts the configure control on the row, and
     // its detail contributions on the bundle's page: the action before the
     // page's own switch, the badge beside the title, the section after the rows.
-    await panel.getByRole('switch', { name: '启用 @fixture/live-client' }).click()
-    const configure = panel.getByRole('button', { name: '配置 @fixture/live-client' })
+    await panel.getByRole('switch', { name: 'Включить @fixture/live-client' }).click()
+    const configure = panel.getByRole('button', { name: 'Настроить @fixture/live-client' })
     await configure.waitFor({ timeout: 30_000 })
     await bundlePage.locator('[data-live-section="bundle"]').waitFor({ timeout: 10_000 })
     // The page's own view of the row follows the Host's change event, which
     // can land after the browser half mounted; the golden holds the settled page.
-    await row.getByText('运行中', { exact: true }).waitFor({ timeout: 10_000 })
+    await row.getByText('Выполняется', { exact: true }).waitFor({ timeout: 10_000 })
     expect(await bundlePage.getByRole('button', { name: '夹具操作' }).count()).toBe(1)
     expect(await bundlePage.locator('[data-live-badge="bundle"]').textContent()).toBe('夹具标签')
     expect(await bundlePage.getByRole('region', { name: '夹具区块' }).getByText('来自夹具的区块内容').count()).toBe(1)
@@ -429,17 +429,17 @@ describe('web e2e: plugin configuration pages', () => {
     expect(await rowPage.locator('[data-live-section="row"]').count()).toBe(1)
     const form = rowPage.getByRole('form', { name: '动态插件配置' })
     await form.getByLabel('问候语').fill('你好')
-    await form.getByRole('button', { name: '保存' }).click()
+    await form.getByRole('button', { name: 'Сохранить' }).click()
     await expect.poll(() => page.evaluate(() => document.documentElement.dataset.liveSaves), { timeout: 5_000 }).toBe('1')
 
     const snapshot = await captureStableAria(page, '[data-plugin-panel]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(ROW_EXPECTED, snapshot, MODE)
-    await rowPage.getByRole('button', { name: '返回 @fixture/live-client' }).click()
+    await rowPage.getByRole('button', { name: 'Назад к @fixture/live-client' }).click()
     await bundlePage.waitFor({ timeout: 10_000 })
 
     // An official plugin's page is another subject; the fixture's entries render nothing for it.
-    await panel.getByRole('button', { name: '返回插件' }).click()
-    await openPage(panel, '终端')
+    await panel.getByRole('button', { name: 'Назад к плагинам' }).click()
+    await openPage(panel, 'Терминал')
     const itemPage = panel.locator('[data-plugin-item-detail]')
     expect(await itemPage.locator('[data-live-action], [data-live-badge], [data-live-section]').count()).toBe(0)
     expect(tripwire.pageErrors).toEqual([])

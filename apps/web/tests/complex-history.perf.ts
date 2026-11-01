@@ -425,7 +425,7 @@ function textStream(deltas: readonly string[], inputTokens: number): StreamChunk
 function comparisonPrompt(index: number): string {
   if (index === COMPARISON_TURNS) return LIVE_PROMPT
   return (`${LONG_CONTINUATION_USER_PREFIX}_${String(index)} `
-    + `继续分析这个长会话的第 ${String(index)} 个增量问题，并保留当前滚动和输入响应。 `
+    + `继续分析这个长会话的第 ${String(index)} 个增量问题,  и 保留当前滚动和输入响应。 `
     + 'context '.repeat(80)).trimEnd()
 }
 
@@ -467,7 +467,7 @@ function soakTurn(index: number): ConversationTurnSpec {
     : undefined
   return {
     prompt: (`${SOAK_USER_PREFIX}_${suffix} `
-      + `持续对话第 ${String(index)} 轮，检查增量渲染与保留状态。 `
+      + `持续对话第 ${String(index)} 轮, 检查增量渲染与保留状态。 `
       + 'context '.repeat(20)).trimEnd(),
     deltas: Array.from({ length: SOAK_DELTA_COUNT }, (_, chunkIndex) => {
       if (chunkIndex === 0) return `${SOAK_FIRST_PREFIX}_${suffix} `

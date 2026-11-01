@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "agent-preset"
+    "title": "agent-preset",
+    "description": "Declare an Agent capability composition in Cordis YAML."
   }
 }

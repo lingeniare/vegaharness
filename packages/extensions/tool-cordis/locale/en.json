@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "tool-cordis"
+    "title": "tool-cordis",
+    "description": "Read-only runtime API inspection for Harness plugin development."
   }
 }

@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "otel"
+    "title": "otel",
+    "description": "Cordis service for independent ordinary-event and byte-bounded Session-log OTLP channels."
   }
 }

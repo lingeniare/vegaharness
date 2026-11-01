@@ -1,0 +1,44 @@
+[
+  {
+    "label": "О VEGA Harness",
+    "role": "about"
+  },
+  {
+    "type": "separator"
+  },
+  {
+    "label": "Проверить наличие обновлений…"
+  },
+  {
+    "label": "Управление командой dsh…"
+  },
+  {
+    "type": "separator"
+  },
+  {
+    "role": "toggleDevTools",
+    "label": "Инструменты разработчика"
+  },
+  {
+    "type": "separator"
+  },
+  {
+    "role": "hide",
+    "label": "Скрыть VEGA Harness"
+  },
+  {
+    "role": "hideOthers",
+    "label": "Скрыть других"
+  },
+  {
+    "role": "unhide",
+    "label": "Показать все"
+  },
+  {
+    "type": "separator"
+  },
+  {
+    "role": "quit",
+    "label": "Выйти из VEGA Harness"
+  }
+]

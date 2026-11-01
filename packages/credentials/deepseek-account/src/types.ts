@@ -26,6 +26,8 @@ export interface SignInAttemptView {
   readonly id: SignInAttemptId
   readonly phase: 'initializing' | 'waiting-browser' | 'exchanging' | 'committing' | 'succeeded' | 'cancelled' | 'expired' | 'failed'
   readonly authorizeUrl?: string
+  /** Device-flow code the user confirms on the authorization page; present only in `waiting-browser`. */
+  readonly userCode?: string
   readonly expiresAt?: number
   readonly errorCode?: SignInErrorCode
 }
@@ -39,6 +41,12 @@ export interface AccountView {
   readonly status: 'signed-out' | 'credential-stored'
   readonly links: AccountLinks
   readonly attempt: SignInAttemptView | null
+  /**
+   * Whether `links` destinations render inside embeddable platform pages. Absent
+   * or true means embeddable; false means the platform exposes no authorized
+   * embed and consumers must open the link in an external browser instead.
+   */
+  readonly embeddedPages?: boolean
 }
 
 /** Platform account identifier supplied by the current-user endpoint. */
@@ -53,7 +61,7 @@ export interface AccountProfile {
 }
 /** Platform recharge or bonus wallet balance; decimal strings retain server precision. */
 export interface AccountWallet {
-  readonly currency: 'CNY' | 'USD'
+  readonly currency: 'CNY' | 'USD' | 'RUB'
   readonly balance: string
 }
 /** Independent query outcomes allow profile and balance failures to render separately. */

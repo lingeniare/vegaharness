@@ -155,11 +155,11 @@ it('refuses retention before allocation commit and disposes an uncommitted scree
 it('preserves split UTF-8 and gives input control only to the newest attachment', async () => {
   const { terminal, output, handle } = fixture()
   const first = await attach(terminal)
-  const encoded = Buffer.from('终端')
+  const encoded = Buffer.from('Терминал')
   output.write(encoded.subarray(0, 2))
   await expect.poll(() => output.readableLength).toBe(0)
   output.write(encoded.subarray(2))
-  expect(await readFrame(first.iterator)).toMatchObject({ type: 'output', data: '终端' })
+  expect(await readFrame(first.iterator)).toMatchObject({ type: 'output', data: 'Терминал' })
   const second = await attach(terminal)
   expect(second.baseline).toMatchObject({ writable: true })
   expect(await readFrame(first.iterator)).toMatchObject({ type: 'state', writable: false })

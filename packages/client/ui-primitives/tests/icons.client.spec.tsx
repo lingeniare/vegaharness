@@ -190,16 +190,17 @@ describe('product icon set', () => {
   })
 })
 
-describe('FishLogo', () => {
-  it('renders the fish path in currentColor at the native ratio', () => {
-    const { container } = render(<primitives.FishLogo />)
+describe('BrandMark', () => {
+  it('renders the star path stroked in currentColor at the native square', () => {
+    const { container } = render(<primitives.BrandMark />)
     const svg = container.querySelector('svg')!
     expect(svg.getAttribute('width')).toBe('24')
-    expect(Number(svg.getAttribute('height'))).toBeCloseTo(17.66, 1)
-    expect(svg.getAttribute('viewBox')).toBe('0 0 23.16 17.04')
-    expect(container.querySelectorAll('path')).toHaveLength(1)
-    expect(container.innerHTML).toContain('currentColor')
-    expect(container.innerHTML).not.toContain('M0 0L23.16')
+    expect(svg.getAttribute('height')).toBe('24')
+    expect(svg.getAttribute('viewBox')).toBe('0 0 760 760')
+    const path = container.querySelector('path')!
+    expect(path.getAttribute('stroke')).toBe('currentColor')
+    expect(path.getAttribute('stroke-linecap')).toBe('round')
+    expect(Number(path.getAttribute('stroke-width'))).toBeGreaterThan(0)
   })
 })
 
@@ -207,11 +208,13 @@ describe('BrandWordmark', () => {
   it('can render the name artwork with or without its leading mark', () => {
     const view = render(<primitives.BrandWordmark />)
     const svg = view.container.querySelector('svg')!
-    expect(svg.getAttribute('width')).toBe('182')
-    expect(svg.getAttribute('viewBox')).toBe('0 0 182 24')
+    expect(svg.getAttribute('width')).toBe('148')
+    expect(svg.getAttribute('viewBox')).toBe('0 0 148 24')
+    expect(view.container.textContent).toContain('VEGA')
+    expect(view.container.textContent).toContain('HARNESS')
 
     view.rerender(<primitives.BrandWordmark includeMark={false} />)
-    expect(svg.getAttribute('width')).toBe('156')
-    expect(svg.getAttribute('viewBox')).toBe('26 0 156 24')
+    expect(svg.getAttribute('width')).toBe('118')
+    expect(svg.getAttribute('viewBox')).toBe('30 0 118 24')
   })
 })

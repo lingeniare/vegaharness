@@ -85,10 +85,17 @@ export function DesktopOnboarding({
     track?.('onboarding_page_click', { page_name: pageName, button_name, ...selected_content === undefined ? {} : { selected_content } })
   }
   const go = (next: 'welcome' | 'credit' | 'purpose' | 'process') => { void update({ step: next }) }
-  const canRecharge = openPlatformPage !== undefined
+  // Providers without embeddable authorized pages recharge through the account
+  // link in an external browser instead of the shared native host.
+  const externalTopUp = account.view?.embeddedPages === false ? account.view.links.topUpUrl : undefined
+  const canRecharge = openPlatformPage !== undefined || externalTopUp !== undefined
   const recharge = () => {
     setDialog(null)
     releaseRecharge.current?.()
+    if (externalTopUp !== undefined) {
+      window.open(externalTopUp, '_blank', 'noreferrer')
+      return
+    }
     // Every control that reaches this is disabled without the callback.
     releaseRecharge.current = openPlatformPage?.('top-up', () => { releaseRecharge.current = undefined })
   }
@@ -104,8 +111,8 @@ export function DesktopOnboarding({
   return <>
     <OnboardingSurface exiting={exiting}>
       <section key={step} ref={page} className={`${css.page} ${dialog !== null ? css.blurred : ''}`} data-desktop-onboarding={step} lang={locale} aria-labelledby="desktop-onboarding-title" aria-busy={busy}>
-        {step === 'welcome' && <OnboardingWelcomeStep t={t} locale={locale} heading={heading} busy={busy} onStart={() => { click('next'); go('credit') }} />}
-        {step === 'credit' && <OnboardingCreditStep t={t} locale={locale} heading={heading} busy={busy}
+        {step === 'welcome' && <OnboardingWelcomeStep t={t} heading={heading} busy={busy} onStart={() => { click('next'); go('credit') }} />}
+        {step === 'credit' && <OnboardingCreditStep t={t} heading={heading} busy={busy}
           funded={state.creditFunded} canRecharge={canRecharge} onContinue={() => { click('continue'); go('purpose') }} onRecharge={() => { click('charge'); recharge() }} onLater={() => { click('later'); later() }} />}
         {step === 'purpose' && <OnboardingPurposeStep t={t} heading={heading} busy={busy} purpose={progress.purpose}
           onSelect={(purpose) => { void update({ purpose }) }} onContinue={() => { click('next'); purposeNext() }} />}

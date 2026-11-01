@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-attachment"
+    "title": "ui-attachment",
+    "description": "Dynamic attachment presentation plugin for conversation input, message-image, and trajectory image slots."
   }
 }

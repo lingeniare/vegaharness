@@ -1,4 +1,4 @@
-import { es, fr, de, ru, pt } from '../src/client/locales.ts'
+import { ru } from '../src/client/locales.ts'
 // @vitest-environment jsdom
 /** Section, setup-card, and hand-written editor behavior over a scripted wire face. */
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
@@ -2418,14 +2418,14 @@ it('renders the localized account row as signed in without an edit action', asyn
   const { controller } = await mountFace(scripted)
   const row = controller.store.getSnapshot().rows[0]!
   await act(async () => { controller.store.update((state) => {
-    state.rows = [{ ...row, accountAvailable: true, entry: { ...row.entry, provider: 'deepseek-account' } }]
+    state.rows = [{ ...row, accountAvailable: true, entry: { ...row.entry, provider: 'deepseek-account', accountManaged: true } }]
   }) })
-  const item = screen.getByText(en.deepSeekAccount).closest('li')!
+  const item = screen.getByText(en.vegaAccount).closest('li')!
   expect(within(item).getByText(en.accountSignedIn)).toBeTruthy()
   expect(within(item).queryByText(en.edit)).toBeNull()
 })
 
-it.each([es, fr, de, ru, pt])('keeps capacity examples in translated validation messages parseable', (dictionary) => {
+it.each([ru])('keeps capacity examples in translated validation messages parseable', (dictionary) => {
   for (const [key, examples] of [
     ['modelContextInvalid', ['131072', '256K', '1M']],
     ['modelMaxTokensInvalid', ['8192', '64K', '1M']],

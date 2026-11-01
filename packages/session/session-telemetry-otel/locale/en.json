@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "session-telemetry-otel"
+    "title": "session-telemetry-otel",
+    "description": "Feedback-authorized Session logs over byte-bounded OpenTelemetry HTTP requests."
   }
 }

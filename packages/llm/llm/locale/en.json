@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "llm"
+    "title": "llm",
+    "description": "Provider-neutral LLM service interface for the VEGA Harness."
   }
 }

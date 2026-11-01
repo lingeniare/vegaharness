@@ -8,7 +8,7 @@ import { bindSnapshotSelector, makeTranslate, stubConfigForm } from '@deepseek-a
 import { TranslationPreferencesForm } from '../src/client/preferences-form.ts'
 import { TranslationSettings, type TranslationSettingsProps } from '../src/client/TranslationSettings.tsx'
 import type { CotTranslationPreferences } from '../src/preferences.ts'
-import { en, zh, formLabels } from '../src/client/locales.ts'
+import { en, ru, formLabels } from '../src/client/locales.ts'
 
 afterEach(cleanup)
 
@@ -29,12 +29,12 @@ it('stages provider and language together, rejects malformed codes, and resets t
   fireEvent.change(view.getByLabelText(en.targetLanguage), { target: { value: 'invalid code!' } })
   expect(view.getByRole('button', { name: en.save })).toHaveProperty('disabled', true)
   expect(scope.mutate).not.toHaveBeenCalled()
-  fireEvent.change(view.getByLabelText(en.targetLanguage), { target: { value: 'zh-Hant' } })
+  fireEvent.change(view.getByLabelText(en.targetLanguage), { target: { value: 'ru-Hant' } })
   fireEvent.click(view.getByRole('button', { name: en.save }))
   await vi.waitFor(() => { expect(scope.mutate).toHaveBeenCalledWith([
-    { op: 'set', path: ['provider'], value: 'google' }, { op: 'set', path: ['targetLanguage'], value: 'zh-Hant' },
+    { op: 'set', path: ['provider'], value: 'google' }, { op: 'set', path: ['targetLanguage'], value: 'ru-Hant' },
   ], 7) })
-  fireEvent.change(view.getByLabelText(en.targetLanguage), { target: { value: 'ja' } })
+  fireEvent.change(view.getByLabelText(en.targetLanguage), { target: { value: 'ru' } })
   fireEvent.click(view.getAllByRole('button', { name: en.reset }).at(-1)!)
   expect(view.getByLabelText(en.targetLanguage)).toHaveProperty('value', 'auto')
   view.unmount()
@@ -46,8 +46,8 @@ it('uses the shared unavailable and read-only states and supplies both dictionar
   const scope = stubConfigForm<CotTranslationPreferences>()
   const form = new TranslationPreferencesForm(scope.scope), { hooks, ...actions } = form.inject()
   try {
-    expect(Object.keys(en)).toEqual(Object.keys(zh))
-    expect(formLabels(makeTranslate(zh)).save).toBe('保存')
+    expect(Object.keys(en)).toEqual(Object.keys(ru))
+    expect(formLabels(makeTranslate(ru)).save).toBe('Сохранить')
     const props = { view: 'page' as const, ...actions,
       refreshProviders: vi.fn(), useAvailableProviders: bindSnapshotSelector(
         createSnapshotStore<readonly TranslationProvider[]>(['bing', 'google'])), useTranslationForm: bindSnapshotSelector(hooks.translationForm),
@@ -115,8 +115,7 @@ it('offers both version-free paid routes only when eligible and keeps selection 
     expect(view.getByText(en.paidNotice)).toBeTruthy()
     expect(en.paidNotice).toContain('Each uncached fragment sends a separate paid')
     expect(en.paidNotice).toContain('Reopening reasoning reuses saved results')
-    expect(zh.paidNotice).toContain('每个未缓存片段')
-    expect(zh.paidNotice).toContain('重新展开会复用已保存的译文')
+    expect(ru.paidNotice).toContain('Каждый фрагмент, отсутствующий в кэше, отправляется отдельным платным запросом к VEGA Flash через выбранный аккаунт или учётные данные официального API. При повторном открытии рассуждений используются сохранённые результаты; смена службы, языка, исходного текста или параметров запроса может привести к новому платному запросу.')
     expect(view.queryByText(en.anonymousNotice)).toBeNull()
     expect(scope.mutate).not.toHaveBeenCalled()
     fireEvent.click(view.getByRole('button', { name: en.save }))

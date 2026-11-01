@@ -7,7 +7,7 @@ import { SessionId } from '@deepseek-ai/dsh-session/types'
 import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
 import { OpenInAppController } from '../src/client/controller.ts'
 import { registerSessionReveal } from '../src/client/session-reveal.tsx'
-import { en, zh, NS } from '../src/client/locales.ts'
+import { en, ru, NS } from '../src/client/locales.ts'
 
 it.each([
   [['finder'], '/workspace', 'Show in Finder', false],
@@ -21,7 +21,7 @@ it.each([
   onTestFinished(() => ctx.fiber.dispose())
   const locale = new LocaleRuntime(ctx)
   ctx.provide('locale', locale)
-  locale.register(NS, { en, zh }); locale.setLocale('en')
+  locale.register(NS, { en, ru }); locale.setLocale('en')
   const registry = new MenuRegistry(vi.fn())
   onTestFinished(() => { registry.dispose() })
   ctx.provide('contextMenus', { register: registry.register.bind(registry) } as never)

@@ -17,6 +17,7 @@ type Page = 'entry' | 'key' | 'account'
 export function Welcome({ api }: { api: WelcomeApi }) {
   const { messages: m } = api
   const [expiryNotice, setExpiryNotice] = useState(false)
+  const [continueFailed, setContinueFailed] = useState(false)
   const [page, setPage] = useState<Page>('entry')
   const pageRef = useRef<Page>('entry')
   const visiblePage = useRef<Page>('entry')
@@ -33,7 +34,7 @@ export function Welcome({ api }: { api: WelcomeApi }) {
   const mounted = useRef(true)
   const revision = useRef(0)
   const input = useRef<HTMLInputElement>(null)
-  const keyButton = useRef<HTMLButtonElement>(null)
+  const entryButton = useRef<HTMLButtonElement>(null)
   const focusEntry = useRef(false)
 
   function navigate(next: Page) {
@@ -75,7 +76,7 @@ export function Welcome({ api }: { api: WelcomeApi }) {
     if (page === 'key') input.current?.focus()
     else if (page === 'entry' && focusEntry.current) {
       focusEntry.current = false
-      keyButton.current?.focus()
+      entryButton.current?.focus()
     }
   }, [page, api])
 
@@ -119,7 +120,10 @@ export function Welcome({ api }: { api: WelcomeApi }) {
       await api.skip()
       if (mounted.current) setDraft('')
     } catch {
-      if (mounted.current) setError(m.welcomeContinueFailed)
+      if (mounted.current) {
+        if (pageRef.current === 'key') setError(m.welcomeContinueFailed)
+        else setContinueFailed(true)
+      }
     } finally {
       busyRef.current = false
       if (mounted.current) setBusy(false)
@@ -173,9 +177,10 @@ export function Welcome({ api }: { api: WelcomeApi }) {
 
   return <>
     {expiryNotice && <Toast text={m.welcomeSessionExpired} onDone={() => { setExpiryNotice(false) }} />}
+    {continueFailed && <Toast text={m.welcomeContinueFailed} onDone={() => { setContinueFailed(false) }} />}
     <div className="titlebar" aria-hidden="true" />
     <main className="welcome" aria-labelledby={heading}>
-      <img className="brand" src="assets/welcome-brand.svg" alt={m.welcomeBrand} width="472" height="40" />
+      <img className="brand" src="assets/welcome-brand.svg" alt={m.welcomeBrand} width="232" height="40" />
       <div id="tagline" className="tagline" hidden={page !== 'entry'}>
         <h1 id="welcome-heading"><span>{m.welcomeTaglineBefore}</span><em>{m.welcomeTaglineBrand}</em><span>{m.welcomeTaglineAfter}</span></h1>
         <p id="welcome-description">{m.welcomeDescription}</p>
@@ -210,7 +215,7 @@ export function Welcome({ api }: { api: WelcomeApi }) {
       </div>
       <div id="entry-actions" className="actions" hidden={page !== 'entry'}>
         <button id="sign-in" className="primary" type="button" onClick={() => { void api.analytics?.('auth_page_click', { button_name: 'sign_in' }); void start() }}>{m.welcomeSignIn}</button>
-        <button ref={keyButton} id="api-key" className="secondary" type="button" onClick={() => { void api.analytics?.('auth_page_click', { button_name: 'api-key' }); navigate('key') }}>{m.welcomeApiKey}</button>
+        <button ref={entryButton} id="skip-welcome" className="secondary" type="button" disabled={busy} onClick={() => { void skip() }}>{m.welcomeSkip}</button>
       </div>
       <div id="key-actions" className="actions" hidden={page !== 'key'}>
         <button id="save-key" className="primary" type="submit" form="key-form" disabled={busy || draft.trim() === ''}>{m.welcomeKeySave}</button>

@@ -4,7 +4,7 @@ import type { Browser, Locator, Page } from 'playwright'
 import { chromium, webkit } from 'playwright'
 import { afterAll, beforeAll, describe, expect, it, onTestFailed } from 'vitest'
 import { launchWebScaffold, watchConsole, webSnapshotMode, type WebScaffold } from './scaffold.ts'
-import { ZH_BROWSER_LOCALE, connectFreshWorkspaceZh, saveFailureShot } from './support.ts'
+import { RU_BROWSER_LOCALE, connectFreshWorkspaceRu, saveFailureShot } from './support.ts'
 
 declare global {
   interface Window {
@@ -114,7 +114,7 @@ describe.skipIf(webSnapshotMode() === 'record').each([
       }])),
     })
     browser = await engine.launch()
-    page = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: ZH_BROWSER_LOCALE })
+    page = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: RU_BROWSER_LOCALE })
     await page.addInitScript(() => {
       window.__modelMenuRectReads = 0
       // oxlint-disable-next-line typescript/unbound-method -- The wrapper supplies the original Element receiver below.
@@ -130,7 +130,7 @@ describe.skipIf(webSnapshotMode() === 'record').each([
     tripwire = watchConsole(page)
     await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
     await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
-    await connectFreshWorkspaceZh(page, scaffold.workspaceCwd)
+    await connectFreshWorkspaceRu(page, scaffold.workspaceCwd)
   })
 
   afterAll(async () => {
@@ -148,21 +148,21 @@ describe.skipIf(webSnapshotMode() === 'record').each([
     for (const entry of ['button', 'command'] as const) {
       const composer = page.locator('[data-composer-input]').first()
       const surface = entry === 'button'
-        ? page.getByRole('group', { name: '模型与推理等级', exact: true })
-        : page.locator('[aria-label="/model 选项"]')
+        ? page.getByRole('group', { name: 'Модель и уровень усилий при рассуждении', exact: true })
+        : page.locator('[aria-label="/model Параметры"]')
       const viewport = entry === 'button'
-        ? surface.getByRole('menu', { name: '模型', exact: true })
+        ? surface.getByRole('menu', { name: 'Модель', exact: true })
         : surface.getByRole('listbox')
       const search = entry === 'button'
-        ? page.getByRole('searchbox', { name: '搜索模型…', exact: true })
-        : page.getByRole('textbox', { name: '筛选选项', exact: true })
+        ? page.getByRole('searchbox', { name: 'Поиск моделей…', exact: true })
+        : page.getByRole('textbox', { name: 'Фильтровать варианты', exact: true })
       const open = async (): Promise<void> => {
         if (entry === 'button') {
-          await page.getByRole('button', { name: /^选择模型/ }).click()
-          await page.getByRole('menuitem', { name: /^模型/ }).click()
+          await page.getByRole('button', { name: /^Выберите модели для добавления/ }).click()
+          await page.getByRole('menuitem', { name: /^Модель/ }).click()
         } else {
-          await page.getByRole('button', { name: '添加文件或调用指令', exact: true }).click()
-          await page.getByRole('option', { name: /^模型/ }).click()
+          await page.getByRole('button', { name: 'Добавить файлы или выполнить команды', exact: true }).click()
+          await page.getByRole('option', { name: /^Модель/ }).click()
         }
         await expect.poll(() => readGroups(viewport)).toEqual(EXPECTED_GROUPS)
         await expect.poll(() => search.evaluate(node => node === node.ownerDocument.activeElement)).toBe(true)

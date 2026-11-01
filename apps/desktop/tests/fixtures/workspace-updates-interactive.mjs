@@ -58,7 +58,7 @@ export async function runInteractiveUpdates({ mainWindow, server, fixture, check
     ] },
   ]))
   try {
-    await panel.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(`<!doctype html><html lang="zh-CN">
+    await panel.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(`<!doctype html><html lang="ru">
       <meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">
       <style>body{font:16px/1.8 system-ui;padding:24px;color:#222}h2{margin-top:0}strong{color:#165dff}</style>
       <h2>手动升级验收 · 不执行安装器</h2>

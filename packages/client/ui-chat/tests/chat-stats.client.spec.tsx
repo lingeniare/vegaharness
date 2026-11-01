@@ -7,14 +7,14 @@ import type {
 } from '@deepseek-ai/dsh-client-ui-chat/client'
 import { bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import { en as commonEn } from '@deepseek-ai/dsh-client-locale/src/locales/en.ts'
-import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
+import { ru as commonRu } from '@deepseek-ai/dsh-client-locale/src/locales/ru.ts'
 import { PartialArguments } from '@deepseek-ai/dsh-util-values'
 import { ActivityPill, UsagePill, deriveStats, formatDuration, type StatPillProps } from '../src/client/chat/StatsPills.tsx'
 import { formatTokens } from '../src/client/chat/token-format.ts'
-import { en, zh } from '../src/client/locale.ts'
+import { en, ru } from '../src/client/locale.ts'
 import { chatSnapshotFixture } from './chat-snapshot-fixture.client.ts'
 
-const t: StatPillProps['t'] = makeTranslate(zh, commonZh)
+const t: StatPillProps['t'] = makeTranslate(ru, commonRu)
 const tEn: StatPillProps['t'] = makeTranslate(en, commonEn)
 
 /** Both composer-dock entries in their registered order, as the dock renders them. */
@@ -359,20 +359,20 @@ describe('composer stats pills', () => {
     const { source } = makeSource({ nodes: [timedStep()] })
     const view = render(<StatsPills {...props(source, { tokenUsage: tokenUsage(9_995, 5) })} t={t} />)
     const [timePill, usagePill] = [...view.getAllByRole('button')] as [HTMLElement, HTMLElement]
-    expect(timePill.textContent).toBe('1 轮 1 步·20 tok/s')
+    expect(timePill.textContent).toBe('1 ходов, 1 шагов·20 ток/с')
     // Whole-log total 9995 + 5 + 1 compacts to 10K.
-    expect(usagePill.textContent).toBe('10K tok·缓存命中 99.95%')
+    expect(usagePill.textContent).toBe('10K ток.·Попадание в кэш: 99.95%')
     fireEvent.click(timePill)
     const timeDialog = view.getByRole('dialog')
-    expect(timeDialog.getAttribute('aria-label')).toBe('会话统计')
-    expect(timeDialog.textContent).toContain('模型用时3.8秒')
-    expect(timeDialog.textContent).toContain('首 token 平均（TTFT）0.8秒')
-    expect(timeDialog.textContent).toContain('输出速度（TPS）20 tok/s')
+    expect(timeDialog.getAttribute('aria-label')).toBe('Статистика сессии')
+    expect(timeDialog.textContent).toContain('Время работы LLM3.8с')
+    expect(timeDialog.textContent).toContain('Среднее время до первого токена (TTFT)0.8с')
+    expect(timeDialog.textContent).toContain('Токенов в секунду (TPS)20 ток/с')
     fireEvent.keyDown(document, { key: 'Escape' })
     fireEvent.click(usagePill)
     const usageDialog = view.getByRole('dialog')
-    expect(usageDialog.getAttribute('aria-label')).toBe('Token 用量')
-    expect(usageDialog.textContent).toContain('未缓存输入5 tok')
+    expect(usageDialog.getAttribute('aria-label')).toBe('Использование токенов')
+    expect(usageDialog.textContent).toContain('Входные данные без кэширования5 ток.')
   })
 
   describe('full reading of a cut-off pill', () => {

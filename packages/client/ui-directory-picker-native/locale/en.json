@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-directory-picker-native"
+    "title": "ui-directory-picker-native",
+    "description": "Native directory-picker surface: the renderless workspace directory-flow occupant driving the local Desktop or Host OS chooser."
   }
 }

@@ -476,7 +476,7 @@ describe('prompt and cancel errors', () => {
   it('routes an addressed child through non-activating history, continuation prompt, and interrupt only', async ({ mock, start }) => {
     const session = await sessionBench(mock, start, SID, { address: CHILD, parentAvailable: true })
     await session.open()
-    const prompted = await session.prompt([{ type: 'text', text: '继续' }], 'queue')
+    const prompted = await session.prompt([{ type: 'text', text: 'Продолжить' }], 'queue')
     const steered = await session.prompt([{ type: 'text', text: '现在处理' }], 'steer')
     const cancelled = await session.cancel()
 
@@ -493,7 +493,7 @@ describe('prompt and cancel errors', () => {
         requestId: expect.any(String) as unknown as string,
         ...CHILD,
         delivery: 'queue',
-        content: [{ type: 'text', text: '继续' }],
+        content: [{ type: 'text', text: 'Продолжить' }],
         clientTimeZone: TIME_ZONE,
       },
       {
@@ -516,12 +516,12 @@ describe('prompt and cancel errors', () => {
   it('sends an addressed child continuation under its echo request id and retires a refused echo', async ({ mock, start }) => {
     const session = await sessionBench(mock, start, SID, { address: CHILD, parentAvailable: true })
     await session.open()
-    const accepted = session.beginSubmission({ mode: 'queue', text: '继续', attachments: [] })
-    await session.prompt([{ type: 'text', text: '继续' }], 'queue', undefined, accepted.requestId)
+    const accepted = session.beginSubmission({ mode: 'queue', text: 'Продолжить', attachments: [] })
+    await session.prompt([{ type: 'text', text: 'Продолжить' }], 'queue', undefined, accepted.requestId)
     expect(mock.log.requests('subagents/prompt')).toMatchObject([{ requestId: accepted.requestId, ...CHILD }])
     expect(session.getSnapshot().pendingSubmissions.map(echo => echo.requestId)).toEqual([accepted.requestId])
 
-    const refused = session.beginSubmission({ mode: 'queue', text: '附件', attachments: [] })
+    const refused = session.beginSubmission({ mode: 'queue', text: 'Вложения', attachments: [] })
     await session.prompt([{ type: 'file', receiptId: 'receipt' as never }], 'queue', undefined, refused.requestId)
     expect(session.getSnapshot().pendingSubmissions.map(echo => echo.requestId)).toEqual([accepted.requestId])
   })
@@ -565,7 +565,7 @@ describe('prompt and cancel errors', () => {
 
     const prompted = await session.prompt([
       { type: 'file', receiptId: 'receipt' as never },
-      { type: 'text', text: '继续' },
+      { type: 'text', text: 'Продолжить' },
     ], 'queue')
 
     expect(prompted).toMatchObject({
@@ -584,7 +584,7 @@ describe('prompt and cancel errors', () => {
       'subagent/not-resumable', 'subagent cannot be resumed', { childSessionId: SID },
     )))
     await session.open()
-    const prompted = await session.prompt([{ type: 'text', text: '继续' }], 'queue')
+    const prompted = await session.prompt([{ type: 'text', text: 'Продолжить' }], 'queue')
     const cancelled = await session.cancel()
 
     // The Host reads the durable descriptor; the wire marker stays 'continuable'.
@@ -643,7 +643,7 @@ describe('prompt and cancel errors', () => {
   it('does not await a first turn when the history already contains one', async ({ mock, start }) => {
     const session = await sessionBench(mock, start, SID)
     session.handleBlank(false)
-    const inFlight = session.prompt([{ type: 'text', text: '继续' }], 'queue')
+    const inFlight = session.prompt([{ type: 'text', text: 'Продолжить' }], 'queue')
     expect(session.getSnapshot()).toMatchObject({ blank: false, promptAttempted: false, awaitingFirstTurn: false })
     expect((await inFlight).ok).toBe(true)
     expect(session.getSnapshot()).toMatchObject({ blank: false, promptAttempted: true, awaitingFirstTurn: false })
@@ -665,7 +665,7 @@ describe('prompt and cancel errors', () => {
   it('keeps an accepted first prompt converted when a later prompt is rejected', async ({ mock, start }) => {
     const session = await sessionBench(mock, start, SID)
     session.handleBlank(true)
-    expect((await session.prompt([{ type: 'text', text: '第一次' }], 'queue')).ok).toBe(true)
+    expect((await session.prompt([{ type: 'text', text: 'Каждые  第' }], 'queue')).ok).toBe(true)
     session.handleRunning(true)
     session.handleRunning(false)
     mock.remote.session.prompt.mockResolvedValue(err(new RemoteError('session/agent-busy', 'busy', { reason: 'x' })))
@@ -1055,7 +1055,7 @@ describe('snapshot ownership', () => {
     const sessionBefore = session.getSnapshot()
     const windowBefore = session.eventSource.getSnapshot()
     const firstEntry = windowBefore.entries[0]
-    await pushEvent(mock, ev.user(SessionSeq(6), '追加'))
+    await pushEvent(mock, ev.user(SessionSeq(6), 'Добавить'))
     const windowAfter = session.eventSource.getSnapshot()
     expect(session.getSnapshot()).toBe(sessionBefore)
     expect(windowAfter).not.toBe(windowBefore)

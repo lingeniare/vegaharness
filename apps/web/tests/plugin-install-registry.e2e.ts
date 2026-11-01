@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 import { expect, it, onTestFinished } from 'vitest'
 import { launchWebScaffold, captureStableAria, compareOrRefreshGolden, webSnapshotMode, watchConsole, type WebScaffold } from './scaffold.ts'
-import { ZH_BROWSER_LOCALE } from './support.ts'
+import { RU_BROWSER_LOCALE } from './support.ts'
 import { expectSelectableTerminalCommand } from './terminal-command-browser.ts'
 
 const MIRROR = 'https://registry.npmmirror.com/'
@@ -60,14 +60,14 @@ it.each(['https://registry.npmjs.org/', MIRROR])('selects the fastest responding
         console.log('Installed from ' + (process.argv.find(arg => arg.startsWith('--registry=')) ?? 'the registry pnpm names'));
         });
       `)
-      const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, locale: ZH_BROWSER_LOCALE })
+      const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, locale: RU_BROWSER_LOCALE })
       const tripwire = watchConsole(page)
       await page.goto(scaffold.authenticatedUrl)
       await page.waitForSelector('[class*="frame"]')
-      if (await page.getByRole('dialog', { name: '设置' }).count() > 0) await page.keyboard.press('Escape')
-      await page.getByRole('navigation', { name: '全局面板' }).getByRole('button', { name: '插件', exact: true }).click()
+      if (await page.getByRole('dialog', { name: 'Настройки' }).count() > 0) await page.keyboard.press('Escape')
+      await page.getByRole('navigation', { name: 'Глобальные панели' }).getByRole('button', { name: 'Плагин', exact: true }).click()
       const panel = page.locator('[data-plugin-panel]')
-      await panel.getByRole('button', { name: '添加插件', exact: true }).click()
+      await panel.getByRole('button', { name: 'ДобавитьПлагин', exact: true }).click()
       const dialog = page.getByRole('dialog')
       // Folded, the registry control names pnpm's own registry; unfolded, its options float from it and offer the configured
       // mirror and a typed address.
@@ -75,10 +75,10 @@ it.each(['https://registry.npmjs.org/', MIRROR])('selects the fastest responding
       await registryToggle.waitFor()
       expect(await page.getByRole('radio').count()).toBe(0)
       await registryToggle.click()
-      const options = page.getByRole('group', { name: '从哪个 npm 源下载插件', exact: true })
+      const options = page.getByRole('group', { name: 'npm-реестр, из которого загружается плагин', exact: true })
       const mirror = options.getByRole('radio', { name: '中国大陆镜像源 registry.npmmirror.com', exact: true })
-      await expect.poll(async () => (await readFile(requestLog, 'utf8')).trim().split('\n').filter(Boolean)).toHaveLength(2)
-      const pingUrls = (await readFile(requestLog, 'utf8')).trim().split('\n').sort()
+      await expect.poll(async () => (await readFile(requestLog, 'utf8')).trim().split('\\\\n').filter(Boolean)).toHaveLength(2)
+      const pingUrls = (await readFile(requestLog, 'utf8')).trim().split('\\\\n').sort()
       expect(pingUrls).toEqual(['https://registry.npmjs.org/-/ping', 'https://registry.npmmirror.com/-/ping'].map(url => JSON.stringify(url)))
       if (winner === MIRROR) {
         expect(await mirror.isChecked()).toBe(true)
@@ -92,7 +92,7 @@ it.each(['https://registry.npmjs.org/', MIRROR])('selects the fastest responding
       }
       expect(await options.getByRole('radio').count()).toBe(3)
       await dialog.getByRole('button', { name: '安装源 中国大陆镜像源', exact: true }).waitFor()
-      await dialog.getByRole('textbox', { name: '包名或地址' }).fill('mirrored-package')
+      await dialog.getByRole('textbox', { name: '包名 или 地址' }).fill('mirrored-package')
       const picker = (await captureStableAria(page, '[data-install-registry]', scaffold.workspaceCwd))
         .split(process.execPath).join('{{node}}')
         .split(scaffold.harnessHome).join('{{harnessHome}}')
@@ -102,24 +102,24 @@ it.each(['https://registry.npmjs.org/', MIRROR])('selects the fastest responding
       await page.keyboard.press('Escape')
       await options.waitFor({ state: 'detached' })
       await dialog.getByRole('button', { name: '安装源 中国大陆镜像源', exact: true }).waitFor()
-      await dialog.getByRole('button', { name: '安装', exact: true }).click()
+      await dialog.getByRole('button', { name: 'Установить', exact: true }).click()
       // The check asked the mirror first, which answered; the run that lost the mirror sent the install on to
       // the registry after it, which finished it. Each run shows behind the details with the registry it asked.
-      await dialog.getByRole('button', { name: '立即启用', exact: true }).waitFor({ timeout: 20_000 })
-      await dialog.getByText('版本 2.0.0', { exact: true }).waitFor()
-      const lookups = (await readFile(join(profile, '.registry-lookups'), 'utf8')).trim().split('\n')
+      await dialog.getByRole('button', { name: 'Включить сейчас', exact: true }).waitFor({ timeout: 20_000 })
+      await dialog.getByText('Версия 2.0.0', { exact: true }).waitFor()
+      const lookups = (await readFile(join(profile, '.registry-lookups'), 'utf8')).trim().split('\\\\n')
         .map(line => JSON.parse(line) as string[])
       // The inspection asked the mirror first, and each install attempt checked the named package's
-      // DSH peers at the registry that attempt would use: the mirror, then pnpm's own.
+      // VEGA peers at the registry that attempt would use: the mirror, then pnpm's own.
       expect(lookups.map(call => call.filter(argument => argument.startsWith('--registry=')))).toEqual([
         ['--registry=' + MIRROR], ['--registry=' + MIRROR], [],
       ])
-      await dialog.getByRole('button', { name: '查看安装详情', exact: true }).click()
+      await dialog.getByRole('button', { name: 'Показать подробности установки', exact: true }).click()
       await dialog.getByText('Installed from the registry pnpm names', { exact: true }).waitFor()
-      await dialog.getByText('第 1 次 · 中国大陆镜像源', { exact: true }).waitFor()
-      await dialog.getByText('第 2 次 · npm 官方源', { exact: true }).waitFor()
+      await dialog.getByText('Попытка 1 · 中国大陆镜像源', { exact: true }).waitFor()
+      await dialog.getByText('Попытка 2 · npm 官方源', { exact: true }).waitFor()
       await expectSelectableTerminalCommand(page, dialog.locator('[data-terminal]').first(),
-        `pnpm add mirrored-package --registry=${MIRROR}`, 380, '命令第 1 行')
+        `pnpm add mirrored-package --registry=${MIRROR}`, 380, 'Командная строка 1')
       expect(JSON.parse(await readFile(manifestPath, 'utf8'))).toMatchObject({ dependencies: { 'mirrored-package': '2.0.0' } })
       const installed = (await captureStableAria(page, '[role="dialog"]', scaffold.workspaceCwd))
         .split(process.execPath).join('{{node}}')
@@ -127,8 +127,8 @@ it.each(['https://registry.npmjs.org/', MIRROR])('selects the fastest responding
         .replace(/operation-[A-Za-z0-9]+/g, 'operation-{{suffix}}')
       await compareOrRefreshGolden(fileURLToPath(new URL('./expected/plugin-install-registry/installed.expected.md', import.meta.url)), installed, webSnapshotMode())
       // The dialog opened again starts from the registry picked for the last install.
-      await dialog.getByRole('button', { name: '立即启用', exact: true }).click()
-      await panel.getByRole('button', { name: '添加插件', exact: true }).click()
+      await dialog.getByRole('button', { name: 'Включить сейчас', exact: true }).click()
+      await panel.getByRole('button', { name: 'Добавить плагин', exact: true }).click()
       await page.getByRole('dialog').getByRole('button', { name: '安装源 中国大陆镜像源', exact: true }).waitFor()
       expect(tripwire.pageErrors).toEqual([])
     } finally { await browser.close() }

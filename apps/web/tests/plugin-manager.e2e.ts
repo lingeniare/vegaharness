@@ -17,7 +17,7 @@ import {
   launchWebScaffold, watchConsole, webSnapshotMode, type WebScaffold,
 } from './scaffold.ts'
 import {
-  ZH_BROWSER_LOCALE, connectFreshWorkspaceZh, experimentalBundleDescription, openSettings, PLUGIN_TOGGLE_SETTLE_MS, saveFailureShot,
+  RU_BROWSER_LOCALE, connectFreshWorkspaceRu, experimentalBundleDescription, openSettings, PLUGIN_TOGGLE_SETTLE_MS, saveFailureShot,
 } from './support.ts'
 
 const SNAPSHOT_DIR = fileURLToPath(new URL('./expected/plugin-manager', import.meta.url))
@@ -45,7 +45,7 @@ describe('web e2e: plugin manager', () => {
       profile: { packages: [{ dir: join(FIXTURE_PLUGINS, 'fixture-bundle') }], bundles: ['@fixture/missing-bundle'] },
     })
     browser = await chromium.launch()
-    page = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: ZH_BROWSER_LOCALE })
+    page = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: RU_BROWSER_LOCALE })
     tripwire = watchConsole(page)
     await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
     await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
@@ -58,24 +58,24 @@ describe('web e2e: plugin manager', () => {
 
   /** Close any open settings dialog, so the sidebar and the main column are clickable. */
   async function closeSettings() {
-    if (await page.getByRole('dialog', { name: '设置' }).count() > 0) {
+    if (await page.getByRole('dialog', { name: 'Настройки' }).count() > 0) {
       await page.keyboard.press('Escape')
-      await expect.poll(() => page.getByRole('dialog', { name: '设置' }).count(), { timeout: 5_000 }).toBe(0)
+      await expect.poll(() => page.getByRole('dialog', { name: 'Настройки' }).count(), { timeout: 5_000 }).toBe(0)
     }
   }
 
   /** Change the UI language through Settings and close the dialog. */
-  async function setLanguage(language: 'en' | 'zh'): Promise<void> {
+  async function setLanguage(language: 'en' | 'ru'): Promise<void> {
     if (await page.locator('html').getAttribute('lang') === language) return
-    const settings = language === 'en' ? '设置' : 'Settings'
-    const source = language === 'en' ? '中文' : 'English'
-    const target = language === 'en' ? 'English' : '中文'
+    const settings = language === 'en' ? 'Настройки' : 'Settings'
+    const source = language === 'en' ? 'китайский' : 'English'
+    const target = language === 'en' ? 'English' : 'китайский'
     if (await page.getByRole('dialog', { name: settings }).count() === 0) {
-      await openSettings(page, language === 'en' ? 'zh' : 'en')
+      await openSettings(page, language === 'en' ? 'ru' : 'en')
     }
     await page.getByRole('dialog', { name: settings }).getByRole('button', { name: source }).click()
     await page.getByRole('menuitem', { name: target }).click()
-    const dialog = page.getByRole('dialog', { name: language === 'en' ? 'Settings' : '设置' })
+    const dialog = page.getByRole('dialog', { name: language === 'en' ? 'Settings' : 'Настройки' })
     await dialog.waitFor()
     await page.keyboard.press('Escape')
     await expect.poll(() => dialog.count()).toBe(0)
@@ -84,13 +84,13 @@ describe('web e2e: plugin manager', () => {
   /** Select the sidebar's Plugins entry and wait for the management page in the main column. */
   async function openPluginsPanel() {
     await closeSettings()
-    await page.getByRole('navigation', { name: '全局面板' }).getByRole('button', { name: '插件', exact: true }).click()
+    await page.getByRole('navigation', { name: 'Глобальные панели' }).getByRole('button', { name: 'Плагин', exact: true }).click()
     const panel = page.locator('[data-plugin-panel]')
     await panel.waitFor({ timeout: 10_000 })
     while (await panel.getByRole('button', { name: /^返回/ }).count() > 0) {
       await panel.getByRole('button', { name: /^返回/ }).first().click()
     }
-    await panel.getByRole('heading', { name: '插件', exact: true }).waitFor({ timeout: 10_000 })
+    await panel.getByRole('heading', { name: 'Плагин', exact: true }).waitFor({ timeout: 10_000 })
     return panel
   }
 
@@ -111,22 +111,22 @@ describe('web e2e: plugin manager', () => {
       // widths shrink the actions to icons before they wrap; the collapsed-bar case
       // pins those widths.
       const PINNED_PLACEMENT: Record<number, 'beside' | 'below'> = { 1680: 'beside', 1024: 'beside' }
-      for (const language of ['en', 'zh'] as const) {
+      for (const language of ['en', 'ru'] as const) {
         const context = await browser.newContext({
-          viewport: { width: 1680, height: 1000 }, locale: language === 'en' ? 'en-US' : ZH_BROWSER_LOCALE,
+          viewport: { width: 1680, height: 1000 }, locale: language === 'en' ? 'en-US' : RU_BROWSER_LOCALE,
           reducedMotion: 'reduce',
         })
         try {
           const probe = await context.newPage()
           const consoleWatch = watchConsole(probe)
           await probe.goto(headerScaffold.authenticatedUrl, { waitUntil: 'load' })
-          const title = language === 'en' ? 'Plugins' : '插件'
+          const title = language === 'en' ? 'Plugins' : 'Плагин'
           await probe.getByRole('button', { name: title, exact: true }).click()
           const panel = probe.locator('[data-plugin-panel]')
           const header = panel.locator('[data-plugin-bar] > header')
           await header.getByRole('heading', { name: title, exact: true }).waitFor()
           await probe.evaluate(() => document.fonts.ready)
-          const add = header.getByRole('button', { name: language === 'en' ? 'Add plugin' : '添加插件', exact: true })
+          const add = header.getByRole('button', { name: language === 'en' ? 'Add plugin' : 'Добавить плагин', exact: true })
           await expect.poll(() => add.isEnabled()).toBe(true)
           await add.focus()
           const measure = () => header.evaluate((element) => {
@@ -229,7 +229,7 @@ describe('web e2e: plugin manager', () => {
           }
           await probe.setViewportSize({ width: 390, height: 1000 })
           await expect.poll(async () => validLayout(await measure())).toBe(true)
-          const menuTrigger = header.getByRole('button', { name: language === 'en' ? 'Choose how to add a plugin' : '选择添加插件方式' })
+          const menuTrigger = header.getByRole('button', { name: language === 'en' ? 'Choose how to add a plugin' : 'Выберите способ добавления плагина' })
           await menuTrigger.click()
           await probe.getByRole('menu').waitFor()
           await probe.keyboard.press('Escape')
@@ -346,8 +346,8 @@ describe('web e2e: plugin manager', () => {
       const barHeight = () => bar.evaluate(element => element.getBoundingClientRect().height)
       const resting = await headerTop()
       const restingHeight = await barHeight()
-      const refreshButton = bar.getByRole('button', { name: '刷新', exact: true })
-      const addButton = bar.getByRole('button', { name: '添加插件', exact: true })
+      const refreshButton = bar.getByRole('button', { name: 'Обновить', exact: true })
+      const addButton = bar.getByRole('button', { name: 'Добавить плагин', exact: true })
       const restingActions = await Promise.all([refreshButton.boundingBox(), addButton.boundingBox()])
       expect(resting).toBe(await panel.evaluate(element => element.getBoundingClientRect().top))
       const restingBarBottom = await bar.evaluate(element => element.getBoundingClientRect().bottom)
@@ -415,7 +415,7 @@ describe('web e2e: plugin manager', () => {
     let aria = ''
     const shots = MODE === 'refresh' ? await mkdtemp(join(tmpdir(), 'dsh-plugin-loading-')) : undefined
     for (const width of [1680, 1000]) {
-      const context = await browser.newContext({ viewport: { width, height: 1000 }, locale: ZH_BROWSER_LOCALE })
+      const context = await browser.newContext({ viewport: { width, height: 1000 }, locale: RU_BROWSER_LOCALE })
       const release = Promise.withResolvers<undefined>()
       const listBundles = scaffold.ctx.pluginManager.listBundles.bind(scaffold.ctx.pluginManager)
       const reads: ReturnType<typeof listBundles>[] = []
@@ -429,7 +429,7 @@ describe('web e2e: plugin manager', () => {
         const consoleWatch = watchConsole(probe)
         await probe.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
         await probe.waitForSelector('[class*="frame"]', { timeout: 30_000 })
-        await probe.getByRole('navigation', { name: '全局面板' }).getByRole('button', { name: '插件', exact: true }).click()
+        await probe.getByRole('navigation', { name: 'Глобальные панели' }).getByRole('button', { name: 'Плагин', exact: true }).click()
         await expect.poll(() => spy.mock.calls.length, { timeout: 10_000 }).toBeGreaterThan(0)
         const panel = probe.locator('[data-plugin-panel]')
         const skeleton = panel.locator('[data-plugin-loading]')
@@ -437,12 +437,12 @@ describe('web e2e: plugin manager', () => {
         await probe.evaluate(() => document.fonts.ready)
         expect(await skeleton.locator(':scope > ul > li').count()).toBe(4)
         expect(await skeleton.getAttribute('role')).toBe('status')
-        expect(await skeleton.getAttribute('aria-label')).toBe('正在读取插件…')
+        expect(await skeleton.getAttribute('aria-label')).toBe('Загрузка плагинов…')
         expect(await panel.getAttribute('aria-busy')).toBe('true')
         const actions = panel.locator('[data-plugin-bar] > header > div:last-child button')
         expect(await actions.count()).toBe(3)
         for (const action of await actions.all()) expect(await action.isDisabled()).toBe(true)
-        expect(await panel.getByRole('button', { name: '插件说明' }).isEnabled()).toBe(true)
+        expect(await panel.getByRole('button', { name: 'О плагинах' }).isEnabled()).toBe(true)
         const loadingAria = await captureStableAria(probe, '[data-plugin-panel]', scaffold.workspaceCwd)
         if (aria === '') aria = loadingAria
         else expect(loadingAria).toBe(aria)
@@ -539,7 +539,7 @@ describe('web e2e: plugin manager', () => {
   })
 
   it('delays refresh hints and keeps cards through manual refresh, failure, and retry', async () => {
-    const context = await browser.newContext({ viewport: { width: 1680, height: 1000 }, locale: ZH_BROWSER_LOCALE })
+    const context = await browser.newContext({ viewport: { width: 1680, height: 1000 }, locale: RU_BROWSER_LOCALE })
     const listBundles = scaffold.ctx.pluginManager.listBundles.bind(scaffold.ctx.pluginManager)
     const reads: ReturnType<typeof listBundles>[] = []
     try {
@@ -548,17 +548,17 @@ describe('web e2e: plugin manager', () => {
       onTestFailed(() => saveFailureShot(probe, 'web-e2e-plugin-manager-refresh'))
       await probe.clock.install()
       await probe.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
-      await probe.getByRole('navigation', { name: '全局面板' }).getByRole('button', { name: '插件', exact: true }).click()
+      await probe.getByRole('navigation', { name: 'Глобальные панели' }).getByRole('button', { name: 'Плагин', exact: true }).click()
       const panel = probe.locator('[data-plugin-panel]')
-      const refresh = panel.getByRole('button', { name: '刷新', exact: true })
-      const add = panel.getByRole('button', { name: '添加插件', exact: true })
-      await panel.getByRole('button', { name: '查看 @fixture/bundle', exact: true }).waitFor()
+      const refresh = panel.getByRole('button', { name: 'Обновить', exact: true })
+      const add = panel.getByRole('button', { name: 'Добавить плагин', exact: true })
+      await panel.getByRole('button', { name: 'Проверить @fixture/bundle', exact: true }).waitFor()
       await expect.poll(() => refresh.isEnabled()).toBe(true)
       await probe.evaluate(() => document.fonts.ready)
       const cards = panel.locator('[data-plugin-package], [data-plugin-item]')
       const cardText = await cards.allTextContents()
       expect(cardText.length).toBeGreaterThan(0)
-      const tooltip = probe.getByRole('tooltip').filter({ hasText: '刷新' })
+      const tooltip = probe.getByRole('tooltip').filter({ hasText: 'Обновить' })
       const trace: string[] = []
       const recordRefresh = async (phase: string) => {
         trace.push(phase, await refresh.ariaSnapshot(), JSON.stringify({
@@ -567,7 +567,7 @@ describe('web e2e: plugin manager', () => {
           cards: await cards.count(),
           skeletons: await panel.locator('[data-plugin-loading]').count(),
           alerts: await panel.getByRole('alert').allTextContents(),
-          retry: await panel.getByRole('button', { name: '重试', exact: true }).count(),
+          retry: await panel.getByRole('button', { name: 'Повторить', exact: true }).count(),
           toasts: await probe.locator('body > [role="alert"]').allTextContents(),
         }))
       }
@@ -640,9 +640,9 @@ describe('web e2e: plugin manager', () => {
             expect(await cards.allTextContents()).toEqual(cardText)
             expect(await panel.locator('[data-plugin-loading]').count()).toBe(0)
             expect(await panel.getByRole('alert').count()).toBe(0)
-            expect(await panel.getByRole('button', { name: '重试', exact: true }).count()).toBe(0)
+            expect(await panel.getByRole('button', { name: 'Повторить', exact: true }).count()).toBe(0)
             const toasts = probe.locator('body > [role="alert"]')
-            await expect.poll(() => toasts.allTextContents()).toEqual(['刷新失败，请重试'])
+            await expect.poll(() => toasts.allTextContents()).toEqual(['Не удалось обновить. Повторите попытку.'])
             await recordRefresh(`${outcome}: settled`)
           } finally {
             release.resolve(undefined)
@@ -666,7 +666,7 @@ describe('web e2e: plugin manager', () => {
 
   it('keeps touch actions direct before keyboard focus and mouse hover', async () => {
     const context = await browser.newContext({
-      viewport: { width: 1280, height: 900 }, locale: ZH_BROWSER_LOCALE,
+      viewport: { width: 1280, height: 900 }, locale: RU_BROWSER_LOCALE,
     })
     try {
       const probe = await context.newPage()
@@ -685,10 +685,10 @@ describe('web e2e: plugin manager', () => {
       onTestFailed(() => saveFailureShot(probe, 'web-e2e-touch-tooltips'))
       await probe.clock.install()
       await probe.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
-      await probe.getByRole('button', { name: '插件', exact: true }).click()
+      await probe.getByRole('button', { name: 'Плагин', exact: true }).click()
       const panel = probe.locator('[data-plugin-panel]')
-      const refresh = panel.getByRole('button', { name: '刷新', exact: true })
-      const info = panel.getByRole('button', { name: '插件说明', exact: true })
+      const refresh = panel.getByRole('button', { name: 'Обновить', exact: true })
+      const info = panel.getByRole('button', { name: 'О плагинах', exact: true })
       await expect.poll(() => refresh.isEnabled()).toBe(true)
       await probe.setViewportSize({ width: 390, height: 844 })
       await probe.evaluate(() => document.fonts.ready)
@@ -719,25 +719,25 @@ describe('web e2e: plugin manager', () => {
       expect(await help.count()).toBe(0)
       await tap(info)
       await help.waitFor()
-      await tap(panel.getByRole('heading', { name: '插件', exact: true }))
+      await tap(panel.getByRole('heading', { name: 'Плагин', exact: true }))
       expect(await help.count()).toBe(0)
       facts.push('Explanation closes on another tap or an outside touch')
 
       await probe.keyboard.press('Tab')
       await refresh.focus()
       await probe.clock.runFor(500)
-      await probe.getByRole('tooltip').filter({ hasText: '刷新' }).waitFor()
+      await probe.getByRole('tooltip').filter({ hasText: 'Обновить' }).waitFor()
       facts.push('Keyboard focus after touch: refresh tooltip visible')
       await probe.keyboard.press('Tab')
       expect(await probe.evaluate(() => matchMedia('(any-hover: hover)').matches)).toBe(true)
       await refresh.hover()
       await probe.clock.runFor(500)
-      await probe.getByRole('tooltip').filter({ hasText: '刷新' }).waitFor()
+      await probe.getByRole('tooltip').filter({ hasText: 'Обновить' }).waitFor()
       facts.push('Mouse hover after touch: refresh tooltip visible')
       await probe.mouse.move(0, 843)
       // Tab moved focus to the icon-only Add plugin button, whose focus tooltip stays; the hovered ones leave.
-      expect(await probe.getByRole('tooltip').filter({ hasText: '刷新' }).count()).toBe(0)
-      expect(await probe.getByRole('tooltip').filter({ hasText: '在这里配置官方插件' }).count()).toBe(0)
+      expect(await probe.getByRole('tooltip').filter({ hasText: 'Обновить' }).count()).toBe(0)
+      expect(await probe.getByRole('tooltip').filter({ hasText: 'Здесь можно настраивать официальные плагины' }).count()).toBe(0)
       await input.detach()
       await probe.clock.resume()
       await compareOrRefreshGolden(join(SNAPSHOT_DIR, 'touch-tooltips.expected.md'),
@@ -751,8 +751,8 @@ describe('web e2e: plugin manager', () => {
   it('starts with an unavailable selected bundle and lets the user clear its error', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-manager-missing-bundle'))
     const panel = await openPluginsPanel()
-    await panel.getByRole('button', { name: '查看 @fixture/missing-bundle', exact: true }).click()
-    const toggle = panel.getByRole('switch', { name: '启用 @fixture/missing-bundle', exact: true })
+    await panel.getByRole('button', { name: 'Проверить @fixture/missing-bundle', exact: true }).click()
+    const toggle = panel.getByRole('switch', { name: 'Включить @fixture/missing-bundle', exact: true })
     expect(await toggle.getAttribute('aria-checked')).toBe('true')
     expect(await toggle.isDisabled()).toBe(false)
     await panel.getByText(/cannot resolve profile bundle/).waitFor({ timeout: 10_000 })
@@ -775,10 +775,10 @@ describe('web e2e: plugin manager', () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-manager-list'))
     const panel = await openPluginsPanel()
 
-    const info = panel.getByRole('button', { name: '插件说明' })
+    const info = panel.getByRole('button', { name: 'О плагинах' })
     const infoBounds = await info.boundingBox()
     const iconBounds = await info.locator('svg').boundingBox()
-    const subtitleBounds = await panel.getByText('安装、启用和配置插件', { exact: true }).boundingBox()
+    const subtitleBounds = await panel.getByText('Устанавливайте, включайте и настраивайте плагины', { exact: true }).boundingBox()
     if (infoBounds === null || iconBounds === null || subtitleBounds === null) {
       throw new Error('Plugin information button, icon, and subtitle must be visible')
     }
@@ -791,29 +791,29 @@ describe('web e2e: plugin manager', () => {
     await info.hover()
     const hoverHelp = page.getByRole('tooltip')
     await hoverHelp.waitFor()
-    expect(await hoverHelp.textContent()).toBe('在这里配置官方插件，安装和管理其他插件。内置插件列表及运行状态可在「设置 → 内置插件」中查看')
-    await panel.getByRole('heading', { name: '插件', exact: true }).hover()
+    expect(await hoverHelp.textContent()).toBe('Здесь можно настраивать официальные плагины, а также устанавливать другие плагины и управлять ими. Список встроенных плагинов и их состояние во время работы можно посмотреть в разделе «Настройки → Встроенные плагины».')
+    await panel.getByRole('heading', { name: 'Плагин', exact: true }).hover()
     await hoverHelp.waitFor({ state: 'hidden' })
     await info.focus()
     await page.keyboard.press('Enter')
     const help = page.getByRole('tooltip')
     await help.waitFor()
-    expect(await help.textContent()).toContain('设置 → 内置插件')
+    expect(await help.textContent()).toContain('Настройки → Встроенные плагины')
     await page.keyboard.press('Escape')
     expect(await help.count()).toBe(0)
     expect(await info.evaluate(element => element === document.activeElement)).toBe(true)
     await info.click()
-    await panel.getByRole('heading', { name: '插件', exact: true }).hover()
+    await panel.getByRole('heading', { name: 'Плагин', exact: true }).hover()
     await help.hover()
     expect(await help.isVisible()).toBe(true)
-    await panel.getByRole('heading', { name: '插件', exact: true }).click()
+    await panel.getByRole('heading', { name: 'Плагин', exact: true }).click()
     expect(await help.count()).toBe(0)
 
-    await panel.getByRole('button', { name: '查看 @fixture/bundle', exact: true }).waitFor({ timeout: 20_000 })
-    const toggle = panel.getByRole('switch', { name: '启用 @fixture/bundle' })
+    await panel.getByRole('button', { name: 'Проверить @fixture/bundle', exact: true }).waitFor({ timeout: 20_000 })
+    const toggle = panel.getByRole('switch', { name: 'Включить @fixture/bundle' })
     expect(await toggle.getAttribute('aria-checked')).toBe('false')
     const card = panel.locator('[data-plugin-package="@fixture/bundle"]')
-    const open = card.getByRole('button', { name: '查看 @fixture/bundle', exact: true })
+    const open = card.getByRole('button', { name: 'Проверить @fixture/bundle', exact: true })
     await open.hover()
     const hoverRadius = await card.evaluate(element => getComputedStyle(element).borderRadius)
     await toggle.focus()
@@ -836,19 +836,19 @@ describe('web e2e: plugin manager', () => {
     expect(await panel.locator('[data-plugin-group="bundles"] [data-plugin-package]').count()).toBe(2)
     expect(await panel.locator('[data-plugin-group="basic"] [data-plugin-item]').count()).toBe(4)
     expect(await panel.locator('[data-plugin-package="@deepseek-ai/dsh-experimental-inspector"]').count()).toBe(0)
-    expect(await panel.getByRole('switch', { name: '启用 语音输入', exact: true }).getAttribute('aria-checked')).toBe('false')
-    expect(await panel.getByRole('switch', { name: '启用 自定义插件索引', exact: true }).getAttribute('aria-checked')).toBe('false')
-    expect(await panel.getByRole('switch', { name: '启用 开发者工具', exact: true }).count()).toBe(0)
+    expect(await panel.getByRole('switch', { name: 'Включить 语音输入', exact: true }).getAttribute('aria-checked')).toBe('false')
+    expect(await panel.getByRole('switch', { name: 'Включить Cron (Каталог плагинов)', exact: true }).getAttribute('aria-checked')).toBe('false')
+    expect(await panel.getByRole('switch', { name: 'Включить Инструменты разработчика', exact: true }).count()).toBe(0)
     expect(await panel.getByText(/Cordis|Chrome DevTools/).count()).toBe(0)
     // A bundle the installation ships but the profile runs no row of stays out of both lists: the
     // LiveShare card appears only once its own plugins run (covered by the visibility scenario below).
     expect(await panel.locator('[data-plugin-group="extensions"] [data-plugin-package="@deepseek-ai/dsh-experimental-liveshare"]').count()).toBe(0)
-    await panel.getByRole('button', { name: '更多', exact: true }).click()
-    await panel.getByRole('heading', { name: '实验性插件', exact: true, level: 1 }).waitFor()
-    expect(await panel.getByText(experimentalBundleDescription('inspector-profile', 'zh'), { exact: true }).count()).toBe(1)
+    await panel.getByRole('button', { name: 'Ещё', exact: true }).click()
+    await panel.getByRole('heading', { name: 'Экспериментальные плагины', exact: true, level: 1 }).waitFor()
+    expect(await panel.getByText(experimentalBundleDescription('inspector-profile', 'ru'), { exact: true }).count()).toBe(1)
     const bundles = await scaffold.ctx.pluginManager.listBundles()
     expect(bundles.some(bundle => bundle.name === '@deepseek-ai/dsh-experimental-terminal-bundle')).toBe(true)
-    expect(await panel.getByRole('switch', { name: '启用 持久终端', exact: true }).count()).toBe(0)
+    expect(await panel.getByRole('switch', { name: 'Включить 持久终端', exact: true }).count()).toBe(0)
     // The More list also omits LiveShare until its rows run, so the offered count is one lower than
     // the eligible installed optional-bundle list.
     expect(await panel.locator('[data-plugin-group="more"] [data-plugin-package="@deepseek-ai/dsh-experimental-liveshare"]').count()).toBe(0)
@@ -867,7 +867,7 @@ describe('web e2e: plugin manager', () => {
     const cards = await panel.locator('[data-plugin-group="more"] [data-plugin-package]').all()
     expect(await Promise.all(cards.map(async card => [
       await card.getAttribute('data-plugin-package'),
-      await card.getByText('实验性', { exact: true }).count(),
+      await card.getByText('Экспериментальный', { exact: true }).count(),
     ]))).toEqual([
       ['@deepseek-ai/dsh-experimental-agent-team-profile', 1],
       ['@deepseek-ai/dsh-experimental-voice-input-bundle', 1],
@@ -884,15 +884,15 @@ describe('web e2e: plugin manager', () => {
       ['@deepseek-ai/dsh-subagent-claude-code', 0],
     ])
     expect(await panel.locator('[data-plugin-group="bundles"]').count()).toBe(0)
-    await panel.getByRole('button', { name: '返回插件', exact: true }).click()
+    await panel.getByRole('button', { name: 'Назад к плагинам', exact: true }).click()
     expect(await panel.locator('[data-plugin-group="bundles"] [data-plugin-package]').count()).toBe(2)
     // A bundle that is off still shows the rows its patch declares, without switches.
-    await panel.getByRole('button', { name: '查看 @fixture/bundle' }).click()
+    await panel.getByRole('button', { name: 'Проверить @fixture/bundle' }).click()
     await panel.locator('[data-plugin-row]', { hasText: 'fixture-row' }).waitFor({ timeout: 10_000 })
-    expect(await panel.getByRole('switch', { name: '启用组件 @fixture/bundle' }).count()).toBe(0)
-    await panel.getByRole('button', { name: '卸载 @fixture/bundle' }).waitFor({ timeout: 5_000 })
-    await panel.getByRole('button', { name: '返回插件' }).click()
-    await expect.poll(() => panel.getByRole('button', { name: '卸载 @fixture/bundle' }).count(), { timeout: 5_000 }).toBe(0)
+    expect(await panel.getByRole('switch', { name: 'Включить компонент @fixture/bundle' }).count()).toBe(0)
+    await panel.getByRole('button', { name: 'Удалить @fixture/bundle' }).waitFor({ timeout: 5_000 })
+    await panel.getByRole('button', { name: 'Назад к плагинам' }).click()
+    await expect.poll(() => panel.getByRole('button', { name: 'Удалить @fixture/bundle' }).count(), { timeout: 5_000 }).toBe(0)
 
     const snapshot = await captureStableAria(page, '[data-plugin-panel]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(MANAGER_EXPECTED, snapshot, MODE)
@@ -904,25 +904,25 @@ describe('web e2e: plugin manager', () => {
     const profileDir = join(scaffold.harnessHome, 'profiles', 'scaffold')
     const before = readProfileManifest('dsh', profileDir).dependencies
     for (const [name, title] of [
-      ['@deepseek-ai/dsh-experimental-session-search', '会话搜索'],
+      ['@deepseek-ai/dsh-experimental-session-search', 'СессииПоиск'],
       ['@deepseek-ai/dsh-experimental-ralph-bundle', 'Ralph 循环'],
     ] as const) {
       const panel = await openPluginsPanel()
       expect(await panel.locator(`[data-plugin-package="${name}"]`).count()).toBe(0)
-      await panel.getByRole('button', { name: '添加插件', exact: true }).click()
-      const dialog = page.getByRole('dialog', { name: '添加插件', exact: true })
-      await dialog.getByRole('textbox', { name: '包名或地址', exact: true }).fill(name)
-      await dialog.getByRole('button', { name: '安装', exact: true }).click()
-      const ready = page.getByRole('dialog', { name: '插件已随 DSH 提供', exact: true })
+      await panel.getByRole('button', { name: 'Добавить плагин', exact: true }).click()
+      const dialog = page.getByRole('dialog', { name: 'Добавить плагин', exact: true })
+      await dialog.getByRole('textbox', { name: 'Имя пакета или адрес', exact: true }).fill(name)
+      await dialog.getByRole('button', { name: 'Установить', exact: true }).click()
+      const ready = page.getByRole('dialog', { name: 'Этот плагин поставляется с VEGA.', exact: true })
       await ready.waitFor()
       expect((await scaffold.ctx.pluginManager.listBundles()).find(bundle => bundle.name === name)?.enabled).toBe(false)
-      expect(await ready.getByText('无需下载，启用即可使用', { exact: true }).count()).toBe(1)
-      await ready.getByRole('button', { name: '立即启用', exact: true }).click()
+      expect(await ready.getByText('Включите его, не загружая другую копию.', { exact: true }).count()).toBe(1)
+      await ready.getByRole('button', { name: 'Включить сейчас', exact: true }).click()
       const card = panel.locator(`[data-plugin-package="${name}"]`)
       await card.waitFor()
       expect((await scaffold.ctx.pluginManager.listBundles()).find(bundle => bundle.name === name)?.enabled).toBe(true)
       expect(readProfileManifest('dsh', profileDir).dependencies).toEqual(before)
-      await card.getByRole('switch', { name: `启用 ${title}`, exact: true }).click()
+      await card.getByRole('switch', { name: `Включить ${title}`, exact: true }).click()
       await card.waitFor({ state: 'hidden' })
       expect((await scaffold.ctx.pluginManager.listBundles()).find(bundle => bundle.name === name)?.enabled).toBe(false)
     }
@@ -932,14 +932,14 @@ describe('web e2e: plugin manager', () => {
   it('keeps off-state switch thumbs light in both themes', async () => {
     // The off-state thumb must stay light so an operable toggle cannot read as
     // disabled, whose only other difference is reduced opacity.
-    for (const [theme, label] of [['light', '浅色'], ['dark', '深色']] as const) {
-      await openSettings(page, 'zh')
-      const settings = page.getByRole('dialog', { name: '设置', exact: true })
-      await settings.getByRole('button', { name: '通用设置', exact: true }).click()
+    for (const [theme, label] of [['light', 'Светлая'], ['dark', 'Тёмная']] as const) {
+      await openSettings(page, 'ru')
+      const settings = page.getByRole('dialog', { name: 'Настройки', exact: true })
+      await settings.getByRole('button', { name: 'Общие', exact: true }).click()
       await settings.getByRole('button', { name: label, exact: true }).click()
       await expect.poll(() => page.evaluate(() => document.body.hasAttribute('data-ds-dark-theme'))).toBe(theme === 'dark')
       const panel = await openPluginsPanel()
-      const toggle = panel.getByRole('switch', { name: '启用 @fixture/bundle', exact: true })
+      const toggle = panel.getByRole('switch', { name: 'Включить @fixture/bundle', exact: true })
       await expect.poll(() => toggle.getAttribute('aria-checked')).toBe('false')
       const appearance = await toggle.evaluate((element) => {
         const thumb = element.firstElementChild
@@ -960,10 +960,10 @@ describe('web e2e: plugin manager', () => {
       })
     }
     // Leave the shared page in the default theme for the tests after this one.
-    await openSettings(page, 'zh')
-    const settings = page.getByRole('dialog', { name: '设置', exact: true })
-    await settings.getByRole('button', { name: '通用设置', exact: true }).click()
-    await settings.getByRole('button', { name: '浅色', exact: true }).click()
+    await openSettings(page, 'ru')
+    const settings = page.getByRole('dialog', { name: 'Настройки', exact: true })
+    await settings.getByRole('button', { name: 'Общие', exact: true }).click()
+    await settings.getByRole('button', { name: 'Светлая', exact: true }).click()
     await expect.poll(() => page.evaluate(() => document.body.hasAttribute('data-ds-dark-theme'))).toBe(false)
     await closeSettings()
   })
@@ -1003,25 +1003,25 @@ describe('web e2e: plugin manager', () => {
     } finally {
       await page.emulateMedia({ colorScheme: null })
     }
-    await panel.getByRole('button', { name: '查看 智能体团队', exact: true }).click()
+    await panel.getByRole('button', { name: 'Просмотреть Команда агентов', exact: true }).click()
     await checkImage('[data-plugin-detail]', teamIcon, 'Agent Teams detail')
-    await panel.getByRole('button', { name: '返回插件' }).click()
-    await panel.getByRole('button', { name: '查看 @fixture/bundle', exact: true }).click()
+    await panel.getByRole('button', { name: 'Назад к плагинам' }).click()
+    await panel.getByRole('button', { name: 'Проверить @fixture/bundle', exact: true }).click()
     await checkImage('[data-plugin-detail]', fixtureIcon, 'Third-party bundle detail')
     await checkImage('[data-plugin-row="fixture-search"]', fallbackIcon, 'Independent search row')
     expect(await panel.locator('[data-plugin-row="fixture-review"] img').count()).toBe(0)
     expect(await panel.locator('[data-plugin-row="fixture-review"] svg').count()).toBeGreaterThan(0)
     images.push('Independent review row: generic artwork')
     await compareOrRefreshGolden(join(SNAPSHOT_DIR, 'icons.expected.md'), images.join('\n'), MODE)
-    await panel.getByRole('button', { name: '返回插件' }).click()
+    await panel.getByRole('button', { name: 'Назад к плагинам' }).click()
     expect(tripwire.pageErrors).toEqual([])
   })
 
   it('shows a bundle detail document image before activation and leaves other plugin details unchanged', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-manager-preview'))
     const panel = await openPluginsPanel()
-    await panel.getByRole('button', { name: '更多', exact: true }).click()
-    await panel.getByRole('button', { name: '查看 DSH 徽章技能', exact: true }).click()
+    await panel.getByRole('button', { name: 'Ещё', exact: true }).click()
+    await panel.getByRole('button', { name: 'Просмотреть DSH 徽章技能', exact: true }).click()
     const detail = panel.locator('[data-plugin-detail]')
     const preview = detail.locator('[data-detail-document]').getByRole('img', { name: 'DSH 徽章技能功能预览', exact: true })
     await preview.waitFor()
@@ -1050,16 +1050,16 @@ describe('web e2e: plugin manager', () => {
       expect(await englishPreview.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(640)
       expect(await englishPreview.getAttribute('src')).not.toBe(chineseSource)
     } finally {
-      await setLanguage('zh')
+      await setLanguage('ru')
     }
     expect(await preview.getAttribute('src')).toBe(chineseSource)
-    await panel.getByRole('button', { name: '返回 实验性插件', exact: true }).click()
-    await panel.getByRole('button', { name: '返回插件', exact: true }).click()
-    await panel.getByRole('button', { name: '查看 @fixture/bundle', exact: true }).click()
+    await panel.getByRole('button', { name: 'Назад к Экспериментальные плагины', exact: true }).click()
+    await panel.getByRole('button', { name: 'Назад к плагинам', exact: true }).click()
+    await panel.getByRole('button', { name: 'Проверить @fixture/bundle', exact: true }).click()
     // A bundle without meta.detail still shows its README; this one has no images.
     await panel.locator('[data-detail-document] h1').waitFor()
     expect(await panel.getByRole('img').count()).toBe(0)
-    await panel.getByRole('button', { name: '返回插件', exact: true }).click()
+    await panel.getByRole('button', { name: 'Назад к плагинам', exact: true }).click()
     expect(tripwire.pageErrors).toEqual([])
   })
 
@@ -1067,10 +1067,10 @@ describe('web e2e: plugin manager', () => {
     onTestFinished(closeSettings)
     onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-manager-exports'))
     const panel = await openPluginsPanel()
-    await panel.getByRole('button', { name: '查看 @fixture/bundle' }).click()
+    await panel.getByRole('button', { name: 'Проверить @fixture/bundle' }).click()
     const search = panel.locator('[data-plugin-row]', { hasText: '@fixture/bundle/search' })
     const review = panel.locator('[data-plugin-row]', { hasText: '@fixture/bundle/review' })
-    await search.getByText('文件搜索', { exact: true }).waitFor()
+    await search.getByText('ФайлПоиск', { exact: true }).waitFor()
     await review.getByText('代码审查', { exact: true }).waitFor()
     expect(await search.getByText('搜索工作区中的文件。', { exact: true }).count()).toBe(1)
     expect(await review.getByText('审查工作区中的改动。', { exact: true }).count()).toBe(1)
@@ -1094,9 +1094,9 @@ describe('web e2e: plugin manager', () => {
       }), MODE)
       expect(await panel.locator('[data-plugin-name]').textContent()).toBe('@fixture/bundle')
     } finally {
-      await setLanguage('zh')
+      await setLanguage('ru')
     }
-    await panel.getByRole('button', { name: '返回插件' }).click()
+    await panel.getByRole('button', { name: 'Назад к плагинам' }).click()
     expect(tripwire.pageErrors).toEqual([])
   })
 
@@ -1104,13 +1104,13 @@ describe('web e2e: plugin manager', () => {
     onTestFinished(closeSettings)
     onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-manager-locale'))
     const panel = await openPluginsPanel()
-    await panel.getByRole('button', { name: '查看 智能体团队', exact: true }).click()
+    await panel.getByRole('button', { name: 'Просмотреть Команда агентов', exact: true }).click()
     const packageName = panel.locator('[data-plugin-name]')
     expect(await packageName.textContent()).toBe('@deepseek-ai/dsh-experimental-agent-team-profile')
-    expect(await panel.getByText(experimentalBundleDescription('agent-team-profile', 'zh')).count()).toBe(1)
+    expect(await panel.getByText(experimentalBundleDescription('agent-team-profile', 'ru')).count()).toBe(1)
     const child = panel.locator('[data-plugin-row]', { hasText: 'tool-agent-team' })
     await child.getByText('团队工具', { exact: true }).waitFor()
-    expect(await child.getByText('为智能体提供成员协调、消息通信和共享任务管理工具。', { exact: true }).count()).toBe(1)
+    expect(await child.getByText('为智能体提供成员协调, 消息通信和共享任务管理工具。', { exact: true }).count()).toBe(1)
     try {
       await setLanguage('en')
       await panel.getByRole('heading', { name: 'Agent teams', exact: true }).waitFor()
@@ -1128,23 +1128,23 @@ describe('web e2e: plugin manager', () => {
         await panel.getByRole('button', { name: `View ${title}`, exact: true }).waitFor()
       }
     } finally {
-      await setLanguage('zh')
+      await setLanguage('ru')
     }
-    await panel.getByRole('button', { name: '查看 智能体团队', exact: true }).waitFor()
+    await panel.getByRole('button', { name: 'Просмотреть Команда агентов', exact: true }).waitFor()
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
 
   it('enables the Team tools and browser plugin with one bundle switch', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-manager-team'))
     const panel = await openPluginsPanel()
-    const toggle = panel.getByRole('switch', { name: '启用 智能体团队', exact: true })
+    const toggle = panel.getByRole('switch', { name: 'Включить Команда агентов', exact: true })
     const teamRows = () => [...scaffold.ctx.loader.entries()]
       .filter(entry => ['agent-team', 'tool-agent-team', 'ui-agent-team'].includes(entry.options.id))
-    const teamPage = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: ZH_BROWSER_LOCALE })
+    const teamPage = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: RU_BROWSER_LOCALE })
     const teamTripwire = watchConsole(teamPage)
     try {
       await teamPage.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
-      await connectFreshWorkspaceZh(teamPage, scaffold.workspaceCwd)
+      await connectFreshWorkspaceRu(teamPage, scaffold.workspaceCwd)
       const agent = scaffold.ctx.agents.list()[0]
       if (agent === undefined) throw new Error('connected Team workspace did not create an Agent')
       // Session actions render only after the conversation leaves its blank state.
@@ -1155,7 +1155,7 @@ describe('web e2e: plugin manager', () => {
       agent.session.append('turn/end', { turn: 1, reason: { kind: 'completed' } })
       await scaffold.ctx.sessions.flush(agent.session)
       // The current crumb renders as plain text inside the zh-labeled hierarchy nav.
-      await teamPage.getByRole('navigation', { name: '会话层级' })
+      await teamPage.getByRole('navigation', { name: 'Иерархия сессий' })
         .getByText('Team UI lifecycle', { exact: true }).waitFor()
       const action = teamPage.locator('[data-team-action]')
       expect(await action.count()).toBe(0)
@@ -1164,24 +1164,24 @@ describe('web e2e: plugin manager', () => {
         await expect.poll(() => teamRows().filter(entry => entry.fiber?.state === FiberState.ACTIVE).length, { timeout: 20_000 }).toBe(3)
         await expect.poll(() => toggle.getAttribute('aria-checked'), { timeout: PLUGIN_TOGGLE_SETTLE_MS }).toBe('true')
         await action.waitFor({ timeout: 20_000 })
-        await action.getByRole('button', { name: '智能体团队', exact: true }).click()
-        const teamPanel = teamPage.getByRole('dialog', { name: '智能体团队', exact: true })
-        await teamPanel.getByText('Team 暂不可用', { exact: true }).waitFor()
+        await action.getByRole('button', { name: 'Команда агентов', exact: true }).click()
+        const teamPanel = teamPage.getByRole('dialog', { name: 'Команда агентов', exact: true })
+        await teamPanel.getByText('Команда недоступна', { exact: true }).waitFor()
         await teamPage.reload({ waitUntil: 'load' })
-        await action.getByRole('button', { name: '智能体团队', exact: true }).click()
-        await teamPanel.getByText('暂无共享任务，可以通过对话创建').waitFor()
+        await action.getByRole('button', { name: 'Команда агентов', exact: true }).click()
+        await teamPanel.getByText('Общих задач пока нет. Создайте их в диалоге.').waitFor()
         await teamPanel.getByText('lead', { exact: true }).waitFor()
         const manifest = JSON.parse(await homeFile('profiles', 'scaffold', 'package.json')) as {
           dsh: { profile: { bundles: string[] } }
         }
         expect(manifest.dsh.profile.bundles).toEqual([...SCAFFOLD_BUNDLES, '@deepseek-ai/dsh-experimental-agent-team-profile'])
-        await panel.getByRole('button', { name: '查看 智能体团队', exact: true }).click()
+        await panel.getByRole('button', { name: 'Просмотреть Команда агентов', exact: true }).click()
         for (const id of ['agent-team', 'tool-agent-team', 'ui-agent-team']) {
           await panel.locator('[data-plugin-row]', { hasText: id }).first().waitFor()
         }
-        await panel.getByRole('button', { name: '返回插件' }).click()
+        await panel.getByRole('button', { name: 'Назад к плагинам' }).click()
       } finally {
-        const back = panel.getByRole('button', { name: '返回插件' })
+        const back = panel.getByRole('button', { name: 'Назад к плагинам' })
         if (await back.count() > 0) await back.click()
         if (await toggle.getAttribute('aria-checked') === 'true') await toggle.click()
         await expect.poll(() => teamRows().filter(entry => entry.fiber?.state === FiberState.ACTIVE).length, { timeout: 20_000 }).toBe(0)
@@ -1204,14 +1204,14 @@ describe('web e2e: plugin manager', () => {
     // offers a switch for them.
     expect(scheduleRows()).toHaveLength(2)
     expect(scheduleRows().every(entry => entry.fiber?.state === FiberState.ACTIVE)).toBe(true)
-    expect(await panel.getByRole('button', { name: '查看 自动化任务', exact: true }).count()).toBe(0)
-    expect(await panel.getByRole('switch', { name: '启用 自动化任务', exact: true }).count()).toBe(0)
-    await page.getByRole('navigation', { name: '全局面板' }).getByRole('button', { name: '自动化任务', exact: true }).waitFor()
+    expect(await panel.getByRole('button', { name: 'Просмотреть Задача автоматизации', exact: true }).count()).toBe(0)
+    expect(await panel.getByRole('switch', { name: 'Включить Задача автоматизации', exact: true }).count()).toBe(0)
+    await page.getByRole('navigation', { name: 'Глобальные панели' }).getByRole('button', { name: 'Задача автоматизации', exact: true }).waitFor()
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
 
   it('keeps IME confirmation Enter in install fields and submits only a plain Enter', async () => {
-    const context = await browser.newContext({ viewport: { width: 1680, height: 1000 }, locale: ZH_BROWSER_LOCALE })
+    const context = await browser.newContext({ viewport: { width: 1680, height: 1000 }, locale: RU_BROWSER_LOCALE })
     const manager = scaffold.ctx.pluginManager
     const manifest = await homeFile('profiles', 'scaffold', 'package.json')
     const registrySpy = vi.spyOn(manager, 'registries').mockResolvedValue({
@@ -1230,28 +1230,28 @@ describe('web e2e: plugin manager', () => {
       onTestFailed(() => saveFailureShot(probe, 'web-e2e-plugin-manager-ime-enter'))
       await probe.clock.install()
       await probe.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
-      await probe.getByRole('navigation', { name: '全局面板' }).getByRole('button', { name: '插件', exact: true }).click()
+      await probe.getByRole('navigation', { name: 'Глобальные панели' }).getByRole('button', { name: 'Плагин', exact: true }).click()
       const panel = probe.locator('[data-plugin-panel]')
-      await panel.getByRole('button', { name: '查看 @fixture/bundle', exact: true }).waitFor({ timeout: 20_000 })
+      await panel.getByRole('button', { name: 'Проверить @fixture/bundle', exact: true }).waitFor({ timeout: 20_000 })
       const trace: string[] = ['Synthetic browser KeyboardEvents, not an OS input-method test.']
       for (const target of ['package', 'custom registry'] as const) {
         inspectSpy.mockClear()
         installSpy.mockClear()
-        await panel.getByRole('button', { name: '添加插件', exact: true }).click()
-        const dialog = probe.getByRole('dialog', { name: '添加插件', exact: true })
+        await panel.getByRole('button', { name: 'Добавить плагин', exact: true }).click()
+        const dialog = probe.getByRole('dialog', { name: 'Добавить плагин', exact: true })
         await dialog.waitFor({ timeout: 10_000 })
         const spec = target === 'package' ? 'ime-confirm-package' : 'ime-confirm-registry'
-        const specField = dialog.getByRole('textbox', { name: '包名或地址', exact: true })
+        const specField = dialog.getByRole('textbox', { name: 'Имя пакета или адрес', exact: true })
         await specField.fill(spec)
         let field = specField
         const customRegistry = 'https://registry.example.test/'
         if (target === 'custom registry') {
-          const registryToggle = dialog.getByRole('button', { name: /^安装源/ })
+          const registryToggle = dialog.getByRole('button', { name: /^Источник установки/ })
           await registryToggle.click()
           const registry = probe.locator('[data-install-registry]')
-          const offered = registry.getByRole('radio', { name: 'npm 官方源 registry.npmjs.org', exact: true })
-          const custom = registry.getByRole('radio', { name: '自定义地址', exact: true })
-          field = registry.getByRole('textbox', { name: '自定义地址', exact: true })
+          const offered = registry.getByRole('radio', { name: 'Официальный реестр npm registry.npmjs.org', exact: true })
+          const custom = registry.getByRole('radio', { name: 'Пользовательский адрес', exact: true })
+          field = registry.getByRole('textbox', { name: 'Пользовательский адрес', exact: true })
           expect(await offered.isChecked()).toBe(true)
           expect(await custom.isChecked()).toBe(false)
           await offered.focus()
@@ -1288,7 +1288,7 @@ describe('web e2e: plugin manager', () => {
         const assertUnsubmitted = async (label: string) => {
           expect(await field.inputValue()).toBe(value)
           expect(await field.isEditable()).toBe(true)
-          expect(await dialog.getByRole('button', { name: '安装', exact: true }).isEnabled()).toBe(true)
+          expect(await dialog.getByRole('button', { name: 'Установить', exact: true }).isEnabled()).toBe(true)
           expect(inspectSpy).not.toHaveBeenCalled()
           expect(installSpy).not.toHaveBeenCalled()
           trace.push(`${target} / ${label}: inspect=0, install=0; editable; value retained`, await field.ariaSnapshot())
@@ -1325,10 +1325,10 @@ describe('web e2e: plugin manager', () => {
         expect(inspectSpy.mock.calls[0]?.[0]).toBe(spec)
         expect(installSpy.mock.calls[0]?.[0]).toBe(spec)
         expect(installSpy.mock.calls[0]?.[1]).toMatchObject({ enabled: false, registry: target === 'package' ? null : customRegistry })
-        const failed = probe.getByRole('dialog', { name: '插件安装失败', exact: true })
+        const failed = probe.getByRole('dialog', { name: 'Не удалось установить плагин', exact: true })
         await failed.waitFor({ timeout: 10_000 })
         trace.push(`${target} / plain Enter: inspect=1, install=1`, await failed.ariaSnapshot())
-        await failed.getByRole('button', { name: '关闭', exact: true }).click()
+        await failed.getByRole('button', { name: 'Закрыть', exact: true }).click()
         await failed.waitFor({ state: 'hidden', timeout: 10_000 })
       }
       expect(await homeFile('profiles', 'scaffold', 'package.json')).toBe(manifest)
@@ -1348,65 +1348,65 @@ describe('web e2e: plugin manager', () => {
   it('checks a spec before installing it and words what the check refused', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-manager-install'))
     const panel = await openPluginsPanel()
-    await panel.getByRole('button', { name: '添加插件', exact: true }).click()
-    const dialog = page.getByRole('dialog', { name: '添加插件' })
+    await panel.getByRole('button', { name: 'Добавить плагин', exact: true }).click()
+    const dialog = page.getByRole('dialog', { name: 'Добавить плагин' })
     await dialog.waitFor({ timeout: 10_000 })
-    const field = dialog.getByRole('textbox', { name: '包名或地址' })
+    const field = dialog.getByRole('textbox', { name: 'Имя пакета или адрес' })
     expect(await page.getByRole('menu').count()).toBe(0)
     await expect.poll(() => field.evaluate(element => document.activeElement === element)).toBe(true)
-    await dialog.getByRole('button', { name: '关闭', exact: true }).click()
+    await dialog.getByRole('button', { name: 'Закрыть', exact: true }).click()
     await dialog.waitFor({ state: 'hidden' })
-    await panel.getByRole('button', { name: '选择添加插件方式', exact: true }).click()
+    await panel.getByRole('button', { name: 'Выберите способ добавления плагина', exact: true }).click()
     const menu = page.getByRole('menu')
-    await menu.getByRole('menuitem', { name: /^安装第三方插件/ }).click()
+    await menu.getByRole('menuitem', { name: /^Установить сторонний плагин/ }).click()
     await menu.waitFor({ state: 'hidden' })
     await dialog.waitFor({ state: 'visible' })
     await expect.poll(() => field.evaluate(element => document.activeElement === element)).toBe(true)
-    const install = dialog.getByRole('button', { name: '安装', exact: true })
+    const install = dialog.getByRole('button', { name: 'Установить', exact: true })
     expect(await install.isDisabled()).toBe(true)
-    expect(await dialog.getByRole('note').textContent()).toContain('请确认插件来源可信')
-    expect(await dialog.getByRole('note').textContent()).toContain('按需安装的官方插件会在版本与 DSH 不同时提供“更新”')
-    expect(await dialog.getByRole('note').textContent()).toContain('其他插件请先卸载再安装新版')
-    await dialog.getByRole('button', { name: '插件安装引导和示例' }).click()
+    expect(await dialog.getByRole('note').textContent()).toContain('Устанавливайте только плагины, которым доверяете')
+    expect(await dialog.getByRole('note').textContent()).toContain('Для официальных плагинов, устанавливаемых по запросу, доступно обновление, если их версия отличается от версии VEGA')
+    expect(await dialog.getByRole('note').textContent()).toContain('Чтобы обновить другие плагины, удалите их и установите заново')
+    await dialog.getByRole('button', { name: 'Инструкция по установке и примеры' }).click()
     // The guide carries the package-name example only; the former template strings keep their replacement reminder.
     await expect.poll(() => dialog.getByRole('listitem').count()).toBe(1)
-    await dialog.getByRole('button', { name: '填入示例 dsh-plugin-whale-pet' }).click()
+    await dialog.getByRole('button', { name: 'whale-pet.plugin.Вставить пример dsh' }).click()
     expect(await field.inputValue()).toBe('dsh-plugin-whale-pet')
     expect(await dialog.getByRole('status').count()).toBe(0)
     for (const [example, hint] of [
-      ['https://github.com/author/dsh-plugin', '请替换为实际的 Git 仓库地址'],
-      ['/Users/name/my-plugin', '请替换为本机插件目录的实际路径'],
+      ['https://github.com/author/dsh-plugin', 'Замените это значение на фактический адрес Git-репозитория.'],
+      ['/Users/name/my-plugin', 'Замените это значение на фактический путь к локальной папке плагина.'],
     ] as const) {
       await field.fill(example)
       expect(await dialog.getByRole('status').textContent()).toBe(hint)
     }
     await field.fill('/actual/plugin-directory')
     expect(await dialog.getByRole('status').count()).toBe(0)
-    await dialog.getByRole('button', { name: '收起引导' }).click()
-    expect(await dialog.getByRole('note').textContent()).toContain('请确认插件来源可信')
+    await dialog.getByRole('button', { name: 'Скрыть инструкцию' }).click()
+    expect(await dialog.getByRole('note').textContent()).toContain('Устанавливайте только плагины, которым доверяете')
     // A name the list already shows is refused without asking the Host.
     await field.fill('@fixture/bundle')
     await install.click()
     await dialog.getByRole('alert').waitFor({ timeout: 5_000 })
-    expect(await dialog.getByRole('alert').textContent()).toBe('该插件已安装。如需升级，请卸载后重新安装')
+    expect(await dialog.getByRole('alert').textContent()).toBe('Этот плагин уже установлен. Чтобы обновить его, удалите его и установите снова')
     // A path the Host cannot read as a package is refused with its reason, and the spec stays editable.
     await field.fill(join(scaffold.harnessHome, 'no-such-plugin'))
     await install.click()
-    await expect.poll(() => dialog.getByRole('alert').textContent(), { timeout: 10_000 }).toBe('该路径不存在或不是有效的插件包')
+    await expect.poll(() => dialog.getByRole('alert').textContent(), { timeout: 10_000 }).toBe('Путь не существует или не указывает на допустимый пакет плагина')
     expect(await field.isDisabled()).toBe(false)
     // A name the registry would refuse never reaches it.
     await field.fill('Not A Package')
     await install.click()
-    await expect.poll(() => dialog.getByRole('alert').textContent(), { timeout: 10_000 }).toContain('无法识别这个包名或地址')
-    await dialog.getByRole('button', { name: '关闭' }).click()
-    await expect.poll(() => page.getByRole('dialog', { name: '添加插件' }).count(), { timeout: 5_000 }).toBe(0)
+    await expect.poll(() => dialog.getByRole('alert').textContent(), { timeout: 10_000 }).toContain('Это не имя пакета или адрес')
+    await dialog.getByRole('button', { name: 'Закрыть' }).click()
+    await expect.poll(() => page.getByRole('dialog', { name: 'Добавить плагин' }).count(), { timeout: 5_000 }).toBe(0)
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
 
   it('enables a bundle into the profile manifest, mounts its rows live, and switches one of them', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-manager-enable'))
     const panel = await openPluginsPanel()
-    const toggle = panel.getByRole('switch', { name: '启用 @fixture/bundle' })
+    const toggle = panel.getByRole('switch', { name: 'Включить @fixture/bundle' })
     await toggle.waitFor({ timeout: 20_000 })
     const mounted = () => [...scaffold.ctx.loader.entries()].find(entry => entry.options.id === 'fixture-row')
     expect(mounted()?.fiber?.state).toBeUndefined()
@@ -1424,8 +1424,8 @@ describe('web e2e: plugin manager', () => {
     const snapshot = await captureStableAria(page, '[data-plugin-panel]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(LIVE_EXPECTED, snapshot, MODE)
     // The pack's page lists its rows as the Host runs them, each with a switch that writes the profile patch.
-    await panel.getByRole('button', { name: '查看 @fixture/bundle' }).click()
-    const rowSwitch = panel.getByRole('switch', { name: '启用组件 @fixture/bundle' })
+    await panel.getByRole('button', { name: 'Проверить @fixture/bundle' }).click()
+    const rowSwitch = panel.getByRole('switch', { name: 'Включить компонент @fixture/bundle' })
     await rowSwitch.waitFor({ timeout: 10_000 })
     expect(await rowSwitch.getAttribute('aria-checked')).toBe('true')
     await rowSwitch.click()
@@ -1435,7 +1435,7 @@ describe('web e2e: plugin manager', () => {
     await expect.poll(() => mounted()?.fiber?.state, { timeout: 20_000 }).not.toBe(2)
     await rowSwitch.click()
     await expect.poll(() => mounted()?.fiber?.state, { timeout: 20_000 }).toBe(2)
-    await panel.getByRole('button', { name: '返回插件' }).click()
+    await panel.getByRole('button', { name: 'Назад к плагинам' }).click()
 
     await toggle.click()
     await expect.poll(() => mounted()?.fiber?.state, { timeout: 20_000 }).not.toBe(2)
@@ -1446,15 +1446,15 @@ describe('web e2e: plugin manager', () => {
   it('reveals LiveShare only while its plugin rows run, and hides it again when they stop', async () => {
     // A dedicated scaffold keeps this profile patch away from the shared fixture profile above.
     const visibilityScaffold = await launchWebScaffold({ profile: { packages: [] } })
-    const context = await browser.newContext({ viewport: { width: 1680, height: 1000 }, locale: ZH_BROWSER_LOCALE })
+    const context = await browser.newContext({ viewport: { width: 1680, height: 1000 }, locale: RU_BROWSER_LOCALE })
     try {
       const probe = await context.newPage()
       onTestFailed(() => saveFailureShot(probe, 'web-e2e-plugin-manager-liveshare-visibility'))
       const consoleWatch = watchConsole(probe)
       await probe.goto(visibilityScaffold.authenticatedUrl, { waitUntil: 'load' })
-      await probe.getByRole('button', { name: '插件', exact: true }).click()
+      await probe.getByRole('button', { name: 'Плагин', exact: true }).click()
       const panel = probe.locator('[data-plugin-panel]')
-      await panel.getByRole('heading', { name: '插件', exact: true }).waitFor({ timeout: 20_000 })
+      await panel.getByRole('heading', { name: 'Плагин', exact: true }).waitFor({ timeout: 20_000 })
       const liveShare = '@deepseek-ai/dsh-experimental-liveshare'
       const card = panel.locator(`[data-plugin-package="${liveShare}"]`)
       // The profile is a managed one (the plugin manager lists its bundles) whose base bundle keeps HMR
@@ -1463,18 +1463,18 @@ describe('web e2e: plugin manager', () => {
       const patchFile = join(visibilityScaffold.harnessHome, 'profiles', 'scaffold', 'cordis.patch.yml')
       const declarationsRow = (): boolean => [...visibilityScaffold.ctx.loader.entries()]
         .some(entry => entry.options.id === 'liveshare-viewer-declarations')
-      const refresh = panel.getByRole('button', { name: '刷新', exact: true })
+      const refresh = panel.getByRole('button', { name: 'Обновить', exact: true })
 
       // Default install: the package ships, but no row it declares runs, so neither list offers it.
       await expect.poll(() => card.count(), {
         timeout: 20_000, message: 'the default profile lists a LiveShare card before its rows run',
       }).toBe(0)
-      await panel.getByRole('button', { name: '更多', exact: true }).click()
-      await probe.getByRole('heading', { name: '实验性插件', exact: true, level: 1 }).waitFor()
+      await panel.getByRole('button', { name: 'Ещё', exact: true }).click()
+      await probe.getByRole('heading', { name: 'Экспериментальные плагины', exact: true, level: 1 }).waitFor()
       await expect.poll(() => card.count(), {
         timeout: 20_000, message: 'the default More list offers a LiveShare card before its rows run',
       }).toBe(0)
-      await panel.getByRole('button', { name: '返回插件', exact: true }).click()
+      await panel.getByRole('button', { name: 'Назад к плагинам', exact: true }).click()
 
       // Enabling through cordis.patch.yml runs one of the bundle's declared rows while the profile still
       // selects no such bundle: the card joins the experimental list.
@@ -1501,8 +1501,8 @@ describe('web e2e: plugin manager', () => {
       await expect.poll(() => card.count(), {
         timeout: 30_000, message: 'the card stayed listed after its rows stopped',
       }).toBe(0)
-      await panel.getByRole('button', { name: '更多', exact: true }).click()
-      await probe.getByRole('heading', { name: '实验性插件', exact: true, level: 1 }).waitFor()
+      await panel.getByRole('button', { name: 'Ещё', exact: true }).click()
+      await probe.getByRole('heading', { name: 'Экспериментальные плагины', exact: true, level: 1 }).waitFor()
       await expect.poll(() => card.count(), {
         timeout: 20_000, message: 'the More list kept the card after its rows stopped',
       }).toBe(0)
@@ -1533,13 +1533,13 @@ describe('web e2e: startup-applied plugin management', () => {
     let browser: Browser | undefined
     try {
       browser = await chromium.launch()
-      const page = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: ZH_BROWSER_LOCALE })
+      const page = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: RU_BROWSER_LOCALE })
       const tripwire = watchConsole(page)
       onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-manager-live'))
       await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
-      await page.getByRole('navigation', { name: '全局面板' }).getByRole('button', { name: '插件', exact: true }).click()
+      await page.getByRole('navigation', { name: 'Глобальные панели' }).getByRole('button', { name: 'Плагин', exact: true }).click()
       const panel = page.locator('[data-plugin-panel]')
-      const toggle = panel.getByRole('switch', { name: '启用 @fixture/bundle' })
+      const toggle = panel.getByRole('switch', { name: 'Включить @fixture/bundle' })
       await toggle.waitFor({ timeout: 20_000 })
       const mounted = () => [...scaffold.ctx.loader.entries()].find(entry => entry.options.id === 'fixture-row')
       const bundles = async () => {
@@ -1551,13 +1551,13 @@ describe('web e2e: startup-applied plugin management', () => {
       // The selection is saved and the switch turns on, but nothing mounts before the next start; a toast says so.
       await expect.poll(bundles, { timeout: PLUGIN_TOGGLE_SETTLE_MS }).toEqual([...SCAFFOLD_BUNDLES, '@fixture/bundle'])
       await expect.poll(() => toggle.getAttribute('aria-checked'), { timeout: PLUGIN_TOGGLE_SETTLE_MS }).toBe('true')
-      await page.getByText('请重启 DSH 使更改生效。这个 profile 只在启动时应用更改。', { exact: true }).waitFor({ timeout: 10_000 })
+      await page.getByText('Перезапустите VEGA, чтобы применить изменения. В этом профиле изменения применяются только при запуске.', { exact: true }).waitFor({ timeout: 10_000 })
       expect(mounted()?.fiber?.state).toBeUndefined()
       // The pack's page lists its rows from their declarations, with no live entry to switch.
-      await panel.getByRole('button', { name: '查看 @fixture/bundle' }).click()
+      await panel.getByRole('button', { name: 'Проверить @fixture/bundle' }).click()
       await panel.locator('[data-plugin-row]', { hasText: 'fixture-row' }).waitFor({ timeout: 10_000 })
-      expect(await panel.getByRole('switch', { name: '启用组件 @fixture/bundle' }).isDisabled()).toBe(true)
-      await panel.getByRole('button', { name: '返回插件' }).click()
+      expect(await panel.getByRole('switch', { name: 'Включить компонент @fixture/bundle' }).isDisabled()).toBe(true)
+      await panel.getByRole('button', { name: 'Назад к плагинам' }).click()
 
       await toggle.click()
       await expect.poll(bundles, { timeout: PLUGIN_TOGGLE_SETTLE_MS }).toEqual(SCAFFOLD_BUNDLES)

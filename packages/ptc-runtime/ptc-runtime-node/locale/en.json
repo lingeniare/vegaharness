@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ptc-runtime-node"
+    "title": "ptc-runtime-node",
+    "description": "Node PTC execution with async function, REPL and VM Script evaluators and optional retained state."
   }
 }

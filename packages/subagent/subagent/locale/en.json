@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "subagent"
+    "title": "subagent",
+    "description": "Abstract subagent seam (ctx.subagents): named-provider registry for delegating to child agents."
   }
 }

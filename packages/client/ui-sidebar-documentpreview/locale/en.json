@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-sidebar-documentpreview"
+    "title": "ui-sidebar-documentpreview",
+    "description": "Extensible Sidebar previews for Office documents, spreadsheets, Markdown, code, images, PDF, HTML, and plain text."
   }
 }

@@ -511,7 +511,7 @@ describe('goal tool state transitions', () => {
     closeTurn(root, turn)
     await agentEvents(ctx, root.agent).serial('agent/created', { source: 'resume' })
     expect(ctx.goals.get(root.agent)?.activation).toBe('disarmed')
-    turn = openTurn(root, { kind: 'user' }, '继续')
+    turn = openTurn(root, { kind: 'user' }, 'Продолжить')
     const resumed = await execute(ctx, 'update_goal', {
       goal_id: created.id, revision: created.revision, action: 'resume',
     }, root.agent)

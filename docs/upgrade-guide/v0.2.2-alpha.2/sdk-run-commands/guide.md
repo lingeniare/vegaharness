@@ -5,11 +5,9 @@ description: "SDK run recognizes native commands and returns RunResult after its
 
 # SDK run accepts native commands
 
-English | [中文](guide.zh.md)
-
 ## Change
 
-Python and TypeScript `run()` accept strings and content-block arrays through the existing entry and always return `RunResult`. Supported native commands are recognized by their definition identities and effective registered names. English and Chinese aliases follow renamed definitions; unrelated exact-name replacements remain ordinary input. See the [supported command rules](../../../../packages/sdk/server/README.md#command-input).
+Python and TypeScript `run()` accept strings and content-block arrays through the existing entry and always return `RunResult`. Supported native commands are recognized by their definition identities and effective registered names. English and Russian aliases follow renamed definitions; unrelated exact-name replacements remain ordinary input. See the [supported command rules](../../../../packages/sdk/server/README.md#command-input).
 
 `final_response` / `finalResponse` contains the final assistant text, or an empty string when the activity emits none. State-only commands return the native handler's result text. `finish_reason` / `finishReason` reports the terminal outcome. Every result retains its Session id, root events and Session-tree notifications. State-only commands finish without waiting for a model turn; `/plan <task>` waits for its admitted activity, including native review and any approved continuation. Goal creation and resume wait across automatic rounds until the goal stops and its closing activity ends. Low-level strict command calls still return `CommandExecution` after the native handler settles.
 

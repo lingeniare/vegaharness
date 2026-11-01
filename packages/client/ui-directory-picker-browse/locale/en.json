@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-directory-picker-browse"
+    "title": "ui-directory-picker-browse",
+    "description": "In-app directory browsing surface: the workspace directory-flow owner rendering the host's listing and creation primitives."
   }
 }

@@ -1,0 +1,32 @@
+{
+  "formatVersion": 2,
+  "roots": [
+    {"key":"event:web/vega-fetch-llm-request","kind":"event","event":"web/vega-fetch-llm-request","surface":false,"digest":"72360a4817d81e78bf128a8674ff57de1e12d53c30c8eaa1ff7debfbbad57090"},
+    {"key":"event:web/vega-search-llm-request","kind":"event","event":"web/vega-search-llm-request","surface":false,"digest":"ba5cc8863f2730e657a8853b0c8654f0a13f94478596ffc8cab93b16e499ece6"}
+  ],
+  "types": [],
+  "nodes": {
+    "02911b2e77254516": {"kind":"object","properties":[{"name":"content","type":"4cd48f3e5108bd6e","optional":false},{"name":"role","type":"68f44f59e91c4139","optional":false}],"indices":[]},
+    "0657d3ca5ac4e7bf": {"kind":"primitive","type":"number"},
+    "0c4205180f75b9ee": {"kind":"literal","value":false},
+    "24c3bb45b8c8ad3d": {"kind":"literal","value":"web/vega-search-llm-request"},
+    "2e60777ff62e6f0c": {"kind":"literal","value":"openrouter:web_search"},
+    "3526f0b0d3490509": {"kind":"tuple","elements":[{"type":"02911b2e77254516","optional":false,"rest":false}]},
+    "4c630c6b500f3517": {"kind":"literal","value":"openrouter:web_fetch"},
+    "4cd48f3e5108bd6e": {"kind":"primitive","type":"string"},
+    "59d7f97051c79b53": {"kind":"object","properties":[{"name":"parameters","type":"d37ea68829ff724f","optional":true},{"name":"type","type":"2e60777ff62e6f0c","optional":false}],"indices":[]},
+    "5da67756bea78035": {"kind":"object","properties":[{"name":"messages","type":"3526f0b0d3490509","optional":false},{"name":"model","type":"4cd48f3e5108bd6e","optional":false},{"name":"stream","type":"0c4205180f75b9ee","optional":false},{"name":"tools","type":"a095be3b5e347ca1","optional":false}],"indices":[]},
+    "68f44f59e91c4139": {"kind":"literal","value":"user"},
+    "72360a4817d81e78": {"kind":"object","properties":[{"name":"data","type":"98254c364d357ea7","optional":false},{"name":"ignorable","type":"dacf3d5f3e4ff619","optional":true},{"name":"seq","type":"0657d3ca5ac4e7bf","optional":false},{"name":"time","type":"0657d3ca5ac4e7bf","optional":false},{"name":"type","type":"a66d4a6219ae3855","optional":false}],"indices":[]},
+    "7e62e040daf4889b": {"kind":"object","properties":[{"name":"body","type":"ba9a19d081fe6bd6","optional":false},{"name":"endpoint","type":"4cd48f3e5108bd6e","optional":false}],"indices":[]},
+    "8425e7dcb522feb2": {"kind":"tuple","elements":[{"type":"59d7f97051c79b53","optional":false,"rest":false}]},
+    "98254c364d357ea7": {"kind":"object","properties":[{"name":"body","type":"5da67756bea78035","optional":false},{"name":"endpoint","type":"4cd48f3e5108bd6e","optional":false}],"indices":[]},
+    "a095be3b5e347ca1": {"kind":"tuple","elements":[{"type":"f5c0b8bb0fb717d5","optional":false,"rest":false}]},
+    "a66d4a6219ae3855": {"kind":"literal","value":"web/vega-fetch-llm-request"},
+    "ba5cc8863f2730e6": {"kind":"object","properties":[{"name":"data","type":"7e62e040daf4889b","optional":false},{"name":"ignorable","type":"dacf3d5f3e4ff619","optional":true},{"name":"seq","type":"0657d3ca5ac4e7bf","optional":false},{"name":"time","type":"0657d3ca5ac4e7bf","optional":false},{"name":"type","type":"24c3bb45b8c8ad3d","optional":false}],"indices":[]},
+    "ba9a19d081fe6bd6": {"kind":"object","properties":[{"name":"messages","type":"3526f0b0d3490509","optional":false},{"name":"model","type":"4cd48f3e5108bd6e","optional":false},{"name":"stream","type":"0c4205180f75b9ee","optional":false},{"name":"tools","type":"8425e7dcb522feb2","optional":false}],"indices":[]},
+    "d37ea68829ff724f": {"kind":"object","properties":[{"name":"max_results","type":"0657d3ca5ac4e7bf","optional":false}],"indices":[]},
+    "dacf3d5f3e4ff619": {"kind":"literal","value":true},
+    "f5c0b8bb0fb717d5": {"kind":"object","properties":[{"name":"type","type":"4c630c6b500f3517","optional":false}],"indices":[]}
+  }
+}

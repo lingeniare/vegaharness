@@ -24,10 +24,10 @@ interface ViewFacts {
 /** Open the Automation tasks page and return its panel. */
 async function openTaskManager(page: Page, url: string): Promise<Locator> {
   await page.goto(url, { waitUntil: 'load' })
-  await revealNavigationDrawer(page, 'zh')
-  await page.getByRole('button', { name: '自动化任务', exact: true }).click()
+  await revealNavigationDrawer(page, 'ru')
+  await page.getByRole('button', { name: 'Задача автоматизации', exact: true }).click()
   const panel = page.getByTestId('task-manager-page')
-  await panel.getByRole('heading', { name: '自动化任务', exact: true }).waitFor({ timeout: 30_000 })
+  await panel.getByRole('heading', { name: 'Задача автоматизации', exact: true }).waitFor({ timeout: 30_000 })
   await page.evaluate(() => document.fonts.ready)
   return panel
 }
@@ -66,7 +66,7 @@ it('keeps the automation page on screen with its text fields at the touch step',
       // A coarse pointer is the touch device, so the phone context takes the
       // 16px step.
       const phone = await browser.newContext({
-        viewport: { width: PHONE_PAGE_WIDTH, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: 'zh-CN',
+        viewport: { width: PHONE_PAGE_WIDTH, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: 'ru-CN',
       })
       const phonePage = await phone.newPage()
       const phoneConsole = watchConsole(phonePage)
@@ -82,7 +82,7 @@ it('keeps the automation page on screen with its text fields at the touch step',
       // The editor keeps the touch floor for its name and instruction fields.
       await phonePanel.getByRole('button', { name: PHONE_TASK_TITLE, exact: true }).click()
       await phonePanel.locator('[class*="_detailScroll"]').waitFor({ timeout: 10_000 })
-      await phonePanel.getByRole('button', { name: '编辑', exact: true }).click()
+      await phonePanel.getByRole('button', { name: 'Редактирование', exact: true }).click()
       await expect.poll(() => viewFacts(phonePage)).toEqual({
         width: PHONE_PAGE_WIDTH,
         documentWidth: PHONE_PAGE_WIDTH,
@@ -94,7 +94,7 @@ it('keeps the automation page on screen with its text fields at the touch step',
       await phone.close()
 
       // A fine pointer keeps the compact steps: the floor is pointer-scoped.
-      const desktop = await browser.newContext({ viewport: { width: 1024, height: 800 }, locale: 'zh-CN' })
+      const desktop = await browser.newContext({ viewport: { width: 1024, height: 800 }, locale: 'ru-CN' })
       const desktopPage = await desktop.newPage()
       const desktopConsole = watchConsole(desktopPage)
       const desktopPanel = await openTaskManager(desktopPage, url)
@@ -108,7 +108,7 @@ it('keeps the automation page on screen with its text fields at the touch step',
       })
       await desktopPanel.getByRole('button', { name: PHONE_TASK_TITLE, exact: true }).click()
       await desktopPanel.locator('[class*="_detailScroll"]').waitFor({ timeout: 10_000 })
-      await desktopPanel.getByRole('button', { name: '编辑', exact: true }).click()
+      await desktopPanel.getByRole('button', { name: 'Редактирование', exact: true }).click()
       await expect.poll(() => viewFacts(desktopPage)).toEqual({
         width: 1024,
         documentWidth: 1024,

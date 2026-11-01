@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "commands"
+    "title": "commands",
+    "description": "Plugin-owned human command registry for VEGA Harness UIs."
   }
 }

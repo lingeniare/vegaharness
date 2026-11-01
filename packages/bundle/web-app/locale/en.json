@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "web-app"
+    "title": "web-app",
+    "description": "The dsh browser-surface bundle: the web patch layer over dsh-base plus the runtime glue plugin (frontend dist serving, bash runtime variables, URL line)."
   }
 }

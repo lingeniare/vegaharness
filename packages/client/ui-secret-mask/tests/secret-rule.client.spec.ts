@@ -54,7 +54,7 @@ describe('secretRule recognition', () => {
   })
 
   it.each([
-    ['ordinary prose', '把密码改一下，token 用量也看看，password=hunter2'],
+    ['ordinary prose', '把密码改一下, token 用量也看看, password=hunter2'],
     ['a hyphenated identifier without digits', 'sk-button-primary-large-rounded'],
     ['a key prefix that is too short', 'sk-12345'],
     ['a key prefix inside a longer word', join('task', '-', hex(32))],
@@ -237,9 +237,9 @@ describe('secretRule scheduling', () => {
     const end = join('-----END', ' PRIVATE KEY-----')
     const block = [begin, 'MIIEvQIBADANBgkq', end].join('\n')
     const evaluate = setup([createSecretRule(), collapseWhitespaceRule, trimWhitespaceRule])
-    const nodes = evaluate({ text: `  私钥：\n${block}\n  `, facts: { collapseWhitespace: true, trimWhitespace: true } })
+    const nodes = evaluate({ text: `  私钥: \\n${block}\\n  `, facts: { collapseWhitespace: true, trimWhitespace: true } })
     const display = (node: UserTextNode): string =>
       isSecret(node) ? node.data.masked : node.id === 'text' ? node.data.display ?? node.data.text : ''
-    expect(nodes.map(display).join('')).toBe(`私钥： ${[begin, stars(16), end].join('\n')}`)
+    expect(nodes.map(display).join('')).toBe(`私钥:  ${[begin, stars(16), end].join('\\n')}`)
   })
 })

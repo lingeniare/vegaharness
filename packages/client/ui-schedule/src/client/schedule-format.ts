@@ -7,7 +7,7 @@ import type { CronDescriptionKey } from './task-cron.ts'
 import { cronPreview, parseCronExpression } from './task-cron.ts'
 
 type TimeUnit = 'day' | 'hour' | 'minute' | 'second'
-type UnitKey = `unit.${TimeUnit}.${'one' | 'other'}`
+type UnitKey = `unit.${TimeUnit}.${'one' | 'few' | 'many' | 'other'}`
 type WeekdayKey = `frequency.weekday.${1 | 2 | 3 | 4 | 5 | 6 | 7}`
 
 /** Dictionary keys required to display exact reminder frequencies. */
@@ -53,7 +53,7 @@ export interface FrequencyZone {
 }
 
 /** Dictionary keys required to display relative reminder targets. */
-export type RelativeTimeKey = UnitKey | 'relative.now' | 'relative.future' | 'relative.overdue'
+export type RelativeTimeKey = UnitKey | 'time.locale' | 'relative.now' | 'relative.future' | 'relative.overdue'
 
 const SECOND_MS = 1_000
 const SECOND_UNIT = { unit: 'second', seconds: 1 } as const
@@ -68,9 +68,11 @@ const WEEKDAY_KEYS = [
   'frequency.weekday.5', 'frequency.weekday.6', 'frequency.weekday.7',
 ] as const satisfies readonly WeekdayKey[]
 
-/** Localized unit word for one integral magnitude. */
-function unitLabel(unit: TimeUnit, value: number, t: Translate<UnitKey>): string {
-  return t(`unit.${unit}.${value === 1 ? 'one' : 'other'}`, { count: value })
+/** Localized unit word for one integral magnitude, pluralized for the active ICU locale. */
+function unitLabel(unit: TimeUnit, value: number, t: Translate<UnitKey | 'time.locale'>): string {
+  const category = new Intl.PluralRules(t('time.locale')).select(value)
+  const form = category === 'one' || category === 'few' || category === 'many' ? category : 'other'
+  return t(`unit.${unit}.${form}`, { count: value })
 }
 
 /**

@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "llm-pi-ai"
+    "title": "llm-pi-ai",
+    "description": "pi-ai-backed DeepSeek adapter for the VEGA Harness LLM seam (design-verification twin of dsh-llm-deepseek)."
   }
 }

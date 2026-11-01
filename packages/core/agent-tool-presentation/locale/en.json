@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "agent-tool-presentation"
+    "title": "agent-tool-presentation",
+    "description": "Deprecated tool presentation selector; use dsh-tool-executor-native or dsh-tool-executor-ptc directly."
   }
 }

@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "api-remotes"
+    "title": "api-remotes",
+    "description": "Remote BFF assembly for application-selected Host capabilities."
   }
 }

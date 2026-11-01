@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-permission-presets"
+    "title": "ui-permission-presets",
+    "description": "Permission surfaces: a new-session default in General settings and a current-session /permission popup over the permissions projection."
   }
 }

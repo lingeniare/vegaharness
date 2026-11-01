@@ -5,8 +5,6 @@ kind: "package-bundle"
 
 # @deepseek-ai/dsh-base
 
-English | [中文](README.zh.md)
-
 ## Summary
 
 Every base-backed `dsh --profile` surface runs on `dsh-base`, so those surfaces share a model connection, the full tool set, durable session history, and workspace safety defaults. The shipped `sdk-minimal` profile deliberately uses a complete standalone tree instead. You rarely touch this bundle directly — shipped base-backed profiles already include it, and a custom base-backed profile names it first. When you need different defaults, change your profile patch or add a later bundle; this package is not a library you import.
@@ -47,7 +45,7 @@ Run `dsh --profile my-profile "your task"` and you get a working agent with mode
 
 ### What you get
 
-Out of the box, every profile built on this core provides: a DeepSeek model connection (the provider and model are configurable, and you can enable extra providers from your settings), the full tool set — file editing, shell commands, web search, HTTP(S) fetch, subagents, task and goal tracking — durable sessions that survive restarts, and the default permission policy that confines file writes to your workspace and asks before risky actions. Web fetch runs without per-call approval and can reach loopback and private-network hosts. Feedback stays in the Session log. [OTel session upload](../../session/session-telemetry-otel/README.md) defaults to `FEEDBACK_ONLY` for all users, including `deepseek-official`: new text feedback, message ratings, edits, and withdrawals release the complete canonical prefix through that event, including context. Later records wait for the next explicit feedback; sending an authorized batch needs no further interaction or model call. `DISABLED` prevents OTel capture. The default-on [DeepSeek session-log contributor](../../session/session-log-deepseek/README.md) remains a separate request path.
+Out of the box, every profile built on this core provides: a DeepSeek model connection (the provider and model are configurable, and you can enable extra providers from your settings), the full tool set — file editing, shell commands, web search, HTTP(S) fetch, subagents, task and goal tracking — durable sessions that survive restarts, and the default permission policy that confines file writes to your workspace and asks before risky actions. Web fetch runs without per-call approval and can reach loopback and private-network hosts. Feedback stays in the Session log. [OTel session upload](../../session/session-telemetry-otel/README.md) ships `DISABLED`: no session record leaves the process. A deployment can opt back into `FEEDBACK_ONLY` — new text feedback, message ratings, edits, and withdrawals then release the complete canonical prefix through that event, including context — by naming an exporter endpoint; the shipped row reads `DSH_TELEMETRY_MODE` and `DSH_TELEMETRY_OTLP_URL` for development, and a non-empty `DSH_TELEMETRY_DISABLED` force-disables the row at launch. The opt-in [DeepSeek session-log contributor](../../session/session-log-deepseek/README.md) remains a separate request path.
 
 Both `subagent` and `subagent_fork` create managed children and return a child id immediately. Use `send_message` to steer active children or continue their conversations after completion. [Delegation-tool behavior](../../subagent/tool-subagent/README.md) describes result delivery and backend capabilities.
 
@@ -126,7 +124,6 @@ The bundle itself adds no request prefix; each inserted row's package owns any c
 ## Known Limitations and Deferred Work
 
 <a id="known-limitations-and-deferred-work"></a>
-
 
 These limits tell you when the core needs extra care or where an override must go. They are current package constraints, not a general comparison or a task backlog.
 

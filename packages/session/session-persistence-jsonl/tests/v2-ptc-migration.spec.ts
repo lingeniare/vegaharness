@@ -13,7 +13,7 @@ import { generationLogPath } from '../src/format.ts'
 
 const userMessage = {
   id: 'tools-code-mode:user', role: 'user', source: { kind: 'user' },
-  content: [{ type: 'text', text: 'Keep tools-code-mode and tool/code-dispatch in this text. 图片' }],
+  content: [{ type: 'text', text: 'code-dispatch in this text. 图片.Keep tools-code-mode and tool' }],
 }
 const titleMessage = {
   id: 'tools-code-mode:title-input', role: 'user',

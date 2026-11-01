@@ -17,7 +17,7 @@ import {
   WELCOME_NOTICE_ACK_FIELD, WELCOME_NOTICE_COPY, WELCOME_NOTICE_SETTINGS_NAMESPACE,
   WELCOME_NOTICE_VERSION,
 } from './scaffold.ts'
-import { openSettings, ZH_BROWSER_LOCALE, connectFreshWorkspaceZh, saveFailureShot } from './support.ts'
+import { openSettings, RU_BROWSER_LOCALE, connectFreshWorkspaceRu, saveFailureShot } from './support.ts'
 
 const SNAPSHOT_DIR = fileURLToPath(new URL('./expected/onboarding-deepseek-config', import.meta.url))
 const WELCOME_EXPECTED = join(SNAPSHOT_DIR, 'welcome.expected.md')
@@ -38,7 +38,7 @@ describe.skipIf(MODE === 'record')('web e2e: first-run DeepSeek credential setup
     scaffold = await launchWebScaffold({ deepSeekMissingCredential: true, welcomeNoticePending: true })
     browser = await chromium.launch()
     // The scenario asserts the shipped Chinese copy, so the browser asks for it.
-    page = await browser.newPage({ viewport: { width: 1440, height: 960 }, locale: ZH_BROWSER_LOCALE })
+    page = await browser.newPage({ viewport: { width: 1440, height: 960 }, locale: RU_BROWSER_LOCALE })
     tripwire = watchConsole(page)
     page.on('console', message => browserConsole.push(message.text()))
     await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
@@ -52,14 +52,14 @@ describe.skipIf(MODE === 'record')('web e2e: first-run DeepSeek credential setup
 
   it('stores a key write-only and observes configured state without restarting', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-onboarding-deepseek-config'))
-    const welcome = page.getByRole('dialog', { name: WELCOME_NOTICE_COPY.zh.title })
+    const welcome = page.getByRole('dialog', { name: WELCOME_NOTICE_COPY.ru.title })
     await welcome.waitFor({ timeout: 15_000 })
     expect(await page.locator('#root').evaluate(root => (root as HTMLElement).inert)).toBe(true)
-    for (const paragraph of WELCOME_NOTICE_COPY.zh.body.split('\n\n')) {
+    for (const paragraph of WELCOME_NOTICE_COPY.ru.body.split('\n\n')) {
       expect(await welcome.getByText(paragraph, { exact: true }).count()).toBe(1)
     }
     expect(await welcome.getByRole('button').allTextContents()).toEqual([
-      WELCOME_NOTICE_COPY.zh.continueLabel,
+      WELCOME_NOTICE_COPY.ru.continueLabel,
     ])
     const welcomeAria = await captureStableAria(page, '[role="dialog"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(WELCOME_EXPECTED, welcomeAria, MODE)
@@ -71,24 +71,24 @@ describe.skipIf(MODE === 'record')('web e2e: first-run DeepSeek credential setup
     acknowledgeReloadConnectionLoss(tripwire, firstReloadWarnings)
     await welcome.waitFor({ timeout: 15_000 })
 
-    await welcome.getByRole('button', { name: WELCOME_NOTICE_COPY.zh.continueLabel }).click()
+    await welcome.getByRole('button', { name: WELCOME_NOTICE_COPY.ru.continueLabel }).click()
     await welcome.waitFor({ state: 'detached', timeout: 15_000 })
 
-    const signIn = page.getByRole('dialog', { name: '开始使用', exact: true })
+    const signIn = page.getByRole('dialog', { name: 'Начало работы', exact: true })
     await signIn.waitFor({ timeout: 15_000 })
     await compareOrRefreshGolden(SIGN_IN_EXPECTED,
       await captureStableAria(page, '[role="dialog"]', scaffold.workspaceCwd), MODE)
-    await signIn.getByRole('button', { name: '添加 API Key', exact: true }).click()
-    const credentialStep = page.getByRole('dialog', { name: '添加一个 API Key 开始使用' })
+    await signIn.getByRole('button', { name: 'Добавить ключ API', exact: true }).click()
+    const credentialStep = page.getByRole('dialog', { name: 'Добавьте ключ API, чтобы начать работу.' })
     await credentialStep.waitFor({ timeout: 15_000 })
-    const keyInput = credentialStep.getByLabel('API 密钥', { exact: true })
+    const keyInput = credentialStep.getByLabel('API Key', { exact: true })
     await keyInput.waitFor({ timeout: 10_000 })
     const initial = await captureStableAria(page, '[role="dialog"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(MISSING_EXPECTED, initial, MODE)
 
     const secret = `dsh_onboarding_${randomBytes(12).toString('hex')}`
     await keyInput.fill(secret)
-    await credentialStep.getByRole('button', { name: '保存并继续' }).click()
+    await credentialStep.getByRole('button', { name: 'Сохранить и продолжить' }).click()
     await credentialStep.waitFor({ state: 'detached', timeout: 15_000 })
     expect(await page.locator('#root').evaluate(root => (root as HTMLElement).inert)).toBe(false)
 
@@ -103,26 +103,26 @@ describe.skipIf(MODE === 'record')('web e2e: first-run DeepSeek credential setup
 
     // The ordinary Models surface reuses the refreshed join and exposes the
     // configured write-only placeholder without a reload.
-    await openSettings(page, 'zh')
-    const settings = page.getByRole('dialog', { name: '设置' })
+    await openSettings(page, 'ru')
+    const settings = page.getByRole('dialog', { name: 'Настройки' })
     await settings.waitFor({ timeout: 10_000 })
-    await settings.getByRole('button', { name: '模型', exact: true }).click()
+    await settings.getByRole('button', { name: 'Модель', exact: true }).click()
     const deepSeekRow = settings.getByText('DeepSeek', { exact: true }).first()
     await deepSeekRow.waitFor({ timeout: 10_000 })
-    await deepSeekRow.locator('xpath=ancestor::li').getByRole('button', { name: '编辑' }).click()
-    const configuredInput = settings.getByLabel('API 密钥', { exact: true })
+    await deepSeekRow.locator('xpath=ancestor::li').getByRole('button', { name: 'Редактировать' }).click()
+    const configuredInput = settings.getByLabel('API Key', { exact: true })
     await configuredInput.waitFor({ timeout: 10_000 })
     await expect.poll(
       () => configuredInput.getAttribute('placeholder'),
       { timeout: 10_000 },
-    ).toBe('留空使用已保存凭据')
+    ).toBe('Оставьте поле пустым, чтобы использовать сохранённые учётные данные')
 
     const secondReloadWarnings = tripwire.warnings.length
     await page.reload({ waitUntil: 'load' })
     acknowledgeReloadConnectionLoss(tripwire, secondReloadWarnings)
     await page.waitForSelector('[class*="frame"]', { timeout: 15_000 })
-    expect(await page.getByRole('dialog', { name: WELCOME_NOTICE_COPY.zh.title }).count()).toBe(0)
-    expect(await page.getByRole('dialog', { name: '添加一个 API Key 开始使用' }).count()).toBe(0)
+    expect(await page.getByRole('dialog', { name: WELCOME_NOTICE_COPY.ru.title }).count()).toBe(0)
+    expect(await page.getByRole('dialog', { name: 'Добавьте ключ API, чтобы начать работу.' }).count()).toBe(0)
 
     // An old acknowledgement means materially revised copy: welcome returns,
     // while the already-configured provider step remains complete.
@@ -133,9 +133,9 @@ describe.skipIf(MODE === 'record')('web e2e: first-run DeepSeek credential setup
     await page.reload({ waitUntil: 'load' })
     acknowledgeReloadConnectionLoss(tripwire, thirdReloadWarnings)
     await welcome.waitFor({ timeout: 15_000 })
-    await welcome.getByRole('button', { name: WELCOME_NOTICE_COPY.zh.continueLabel }).click()
+    await welcome.getByRole('button', { name: WELCOME_NOTICE_COPY.ru.continueLabel }).click()
     await welcome.waitFor({ state: 'detached', timeout: 15_000 })
-    expect(await page.getByRole('dialog', { name: '添加一个 API Key 开始使用' }).count()).toBe(0)
+    expect(await page.getByRole('dialog', { name: 'Добавьте ключ API, чтобы начать работу.' }).count()).toBe(0)
 
     expect((await page.content()).includes(secret)).toBe(false)
     expect((await page.locator('body').ariaSnapshot()).includes(secret)).toBe(false)
@@ -162,9 +162,9 @@ describe.skipIf(MODE === 'record')('web e2e: first-run DeepSeek credential setup
       ;(window as unknown as { __takeoverSightings: string[] }).__takeoverSightings = sightings
       setInterval(() => {
         if (document.querySelector(
-          '[role="dialog"][aria-label="预览版说明"], '
-          + '[role="dialog"][aria-label="开始使用"], '
-          + '[role="dialog"][aria-label="添加一个 API Key 开始使用"]',
+          '[role="dialog"][aria-label="Уведомление о предварительной версии"], '
+          + '[role="dialog"][aria-label="Начало работы"], '
+          + '[role="dialog"][aria-label="Добавьте ключ API, чтобы начать работу."]',
         ) !== null) {
           sightings.push('chrome')
         }
@@ -195,8 +195,8 @@ describe.skipIf(MODE === 'record')('web e2e: first-run DeepSeek credential setup
     acknowledgeReloadConnectionLoss(tripwire, warningsBefore)
     expect(await page.evaluate(() =>
       (window as unknown as { __takeoverSightings: string[] }).__takeoverSightings)).toEqual([])
-    expect(await page.getByRole('dialog', { name: WELCOME_NOTICE_COPY.zh.title }).count()).toBe(0)
-    expect(await page.getByRole('dialog', { name: '添加一个 API Key 开始使用' }).count()).toBe(0)
+    expect(await page.getByRole('dialog', { name: WELCOME_NOTICE_COPY.ru.title }).count()).toBe(0)
+    expect(await page.getByRole('dialog', { name: 'Добавьте ключ API, чтобы начать работу.' }).count()).toBe(0)
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
 
@@ -204,29 +204,29 @@ describe.skipIf(MODE === 'record')('web e2e: first-run DeepSeek credential setup
     onTestFailed(() => saveFailureShot(page, 'web-e2e-onboarding-deepseek-models'))
     // Opened here rather than inherited: the credential test reloads the page
     // after configuring the key, so nothing carries an open dialog across.
-    await openSettings(page, 'zh')
-    const settings = page.getByRole('dialog', { name: '设置' })
+    await openSettings(page, 'ru')
+    const settings = page.getByRole('dialog', { name: 'Настройки' })
     await settings.waitFor({ timeout: 10_000 })
-    await settings.getByRole('button', { name: '模型', exact: true }).click()
+    await settings.getByRole('button', { name: 'Модель', exact: true }).click()
     const deepSeek = settings.getByText('DeepSeek', { exact: true }).first()
     await deepSeek.waitFor({ timeout: 10_000 })
-    await deepSeek.locator('xpath=ancestor::li').getByRole('button', { name: '编辑' }).click()
-    await settings.getByText('自定义设置').click()
-    expect(await settings.getByLabel('模型 ID 1').inputValue()).toBe('deepseek-flash')
-    expect(await settings.getByLabel('显示名称 1').inputValue()).toBe('DeepSeek-V4.1-Flash')
-    expect(await settings.getByLabel('模型 ID 2').inputValue()).toBe('deepseek-v4-pro')
-    expect(await settings.getByRole('button', { name: /删除模型/ }).count()).toBe(2)
-    await settings.getByRole('button', { name: '模型选项 1' }).click()
-    expect(await settings.getByRole('group', { name: '输入类型 1' }).getByRole('checkbox', { name: '图片' }).isChecked()).toBe(true)
+    await deepSeek.locator('xpath=ancestor::li').getByRole('button', { name: 'Редактировать' }).click()
+    await settings.getByText('Настроено вручную').click()
+    expect(await settings.getByLabel('ID модели 1').inputValue()).toBe('deepseek-flash')
+    expect(await settings.getByLabel('Отображаемое имя 1').inputValue()).toBe('DeepSeek-V4.1-Flash')
+    expect(await settings.getByLabel('ID модели 2').inputValue()).toBe('deepseek-v4-pro')
+    expect(await settings.getByRole('button', { name: /Удалить модель/ }).count()).toBe(2)
+    await settings.getByRole('button', { name: 'Параметры модели 1' }).click()
+    expect(await settings.getByRole('group', { name: 'Типы входных данных 1' }).getByRole('checkbox', { name: 'Изображение' }).isChecked()).toBe(true)
     await assertModelInputLayout(page, settings)
     const defaultModels = await captureStableAria(page, '[role="dialog"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(DEFAULT_MODELS_EXPECTED, defaultModels, MODE)
-    await settings.getByLabel('显示名称 1').fill('Configured Flash')
-    await settings.getByRole('group', { name: '输入类型 1' }).getByRole('checkbox', { name: '图片' }).uncheck()
-    await settings.getByRole('button', { name: '保存', exact: true }).click()
-    await settings.getByLabel('模型 ID 1').waitFor({ state: 'detached', timeout: 15_000 })
+    await settings.getByLabel('Отображаемое имя 1').fill('Configured Flash')
+    await settings.getByRole('group', { name: 'Типы входных данных 1' }).getByRole('checkbox', { name: 'Изображение' }).uncheck()
+    await settings.getByRole('button', { name: 'Сохранить', exact: true }).click()
+    await settings.getByLabel('ID модели 1').waitFor({ state: 'detached', timeout: 15_000 })
     // The save notice settles the directory refresh before Edit clears it for the next draft.
-    await settings.getByText('已保存 DeepSeek (deepseek-official)。', { exact: true }).waitFor({ timeout: 15_000 })
+    await settings.getByText('Настройки поставщика DeepSeek (deepseek-official сохранены.', { exact: true }).waitFor({ timeout: 15_000 })
     const savedDefaults = await readFile(join(scaffold.harnessHome, 'profiles', 'scaffold', 'cordis.patch.yml'), 'utf8')
     expect(savedDefaults).toContain('id: deepseek-flash')
     expect(savedDefaults).toContain('inputModalities:')
@@ -238,31 +238,31 @@ describe.skipIf(MODE === 'record')('web e2e: first-run DeepSeek credential setup
     await expect(scaffold.ctx.llm.resolveModelInfo('deepseek-official', 'deepseek-v4-pro')).resolves.toMatchObject({
       name: 'DeepSeek-V4-Pro', inputModalities: ['text'],
     })
-    await deepSeek.locator('xpath=ancestor::li').getByRole('button', { name: '编辑' }).click()
-    await settings.getByText('自定义设置').click()
+    await deepSeek.locator('xpath=ancestor::li').getByRole('button', { name: 'Редактировать' }).click()
+    await settings.getByText('Настроено вручную').click()
     for (let index = 0; index < 2; index++) {
-      await settings.getByRole('button', { name: /删除模型/ }).first().click()
+      await settings.getByRole('button', { name: /Удалить модель/ }).first().click()
     }
-    await settings.getByRole('button', { name: '添加模型', exact: true }).click()
+    await settings.getByRole('button', { name: 'Добавить модель', exact: true }).click()
     const model = settings.locator('[data-row-key]')
-    const customModelId = model.getByLabel('模型 ID 1')
+    const customModelId = model.getByLabel('ID модели 1')
     await customModelId.fill('private-preview')
-    await model.getByLabel('显示名称 1').fill('Private Preview')
-    expect(await settings.getByRole('button', { name: '模型选项 1' }).getAttribute('aria-expanded')).toBe('true')
-    await model.getByLabel('上下文窗口 1').fill('131072')
-    await model.getByLabel('最大输出 token 数 1').fill('64K')
-    expect(await settings.getByRole('group', { name: '输入类型 1' }).getByRole('checkbox', { name: '图片' }).isChecked()).toBe(false)
-    await settings.getByRole('group', { name: '输入类型 1' }).getByRole('checkbox', { name: '图片' }).check()
+    await model.getByLabel('Отображаемое имя 1').fill('Private Preview')
+    expect(await settings.getByRole('button', { name: 'Параметры модели 1' }).getAttribute('aria-expanded')).toBe('true')
+    await model.getByLabel('Окно контекста 1').fill('131072')
+    await model.getByLabel('Максимум выходных токенов 1').fill('64K')
+    expect(await settings.getByRole('group', { name: 'Типы входных данных 1' }).getByRole('checkbox', { name: 'Изображение' }).isChecked()).toBe(false)
+    await settings.getByRole('group', { name: 'Типы входных данных 1' }).getByRole('checkbox', { name: 'Изображение' }).check()
 
     await expect.poll(
-      () => settings.getByLabel('API 密钥', { exact: true }).getAttribute('placeholder'),
+      () => settings.getByLabel('API Key', { exact: true }).getAttribute('placeholder'),
       { timeout: 10_000 },
-    ).toBe('留空使用已保存凭据')
+    ).toBe('Оставьте поле пустым, чтобы использовать сохранённые учётные данные')
     const modelEditor = await captureStableAria(page, '[role="dialog"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(MODELS_EXPECTED, modelEditor, MODE)
-    await settings.getByRole('button', { name: '保存', exact: true }).click()
+    await settings.getByRole('button', { name: 'Сохранить', exact: true }).click()
     await customModelId.waitFor({ state: 'detached', timeout: 15_000 })
-    await settings.getByText('已保存 DeepSeek (deepseek-official)。', { exact: true }).waitFor({ timeout: 15_000 })
+    await settings.getByText('Настройки поставщика DeepSeek (deepseek-official сохранены.', { exact: true }).waitFor({ timeout: 15_000 })
 
     const document = await readFile(join(scaffold.harnessHome, 'profiles', 'scaffold', 'cordis.patch.yml'), 'utf8')
     expect(document).toContain('id: private-preview')
@@ -273,18 +273,18 @@ describe.skipIf(MODE === 'record')('web e2e: first-run DeepSeek credential setup
     await expect(scaffold.ctx.llm.resolveModelInfo('deepseek-official', 'private-preview')).resolves.toMatchObject({
       inputModalities: ['text', 'image'],
     })
-    await deepSeek.locator('xpath=ancestor::li').getByRole('button', { name: '编辑' }).click()
-    await settings.getByText('自定义设置').click()
-    await settings.getByRole('button', { name: '模型选项 1' }).click()
-    expect(await settings.getByRole('group', { name: '输入类型 1' }).getByRole('checkbox', { name: '图片' }).isChecked()).toBe(true)
-    await settings.getByRole('button', { name: '取消', exact: true }).click()
+    await deepSeek.locator('xpath=ancestor::li').getByRole('button', { name: 'Редактировать' }).click()
+    await settings.getByText('Настроено вручную').click()
+    await settings.getByRole('button', { name: 'Параметры модели 1' }).click()
+    expect(await settings.getByRole('group', { name: 'Типы входных данных 1' }).getByRole('checkbox', { name: 'Изображение' }).isChecked()).toBe(true)
+    await settings.getByRole('button', { name: 'Отмена', exact: true }).click()
 
     await page.keyboard.press('Escape')
     // A connected Workspace is what puts a live composer — and its model
     // trigger — on the page; the scaffold boots without one.
-    await connectFreshWorkspaceZh(page, scaffold.workspaceCwd, 'model-fallback-e2e', false)
+    await connectFreshWorkspaceRu(page, scaffold.workspaceCwd, 'model-fallback-e2e', false)
 
-    const modelTrigger = page.getByRole('button', { name: '请选择模型', exact: true })
+    const modelTrigger = page.getByRole('button', { name: 'Выбрать модель', exact: true })
     await modelTrigger.waitFor({ timeout: 10_000 })
     await modelTrigger.click()
     expect(await page.getByText('Configured Flash', { exact: true }).count()).toBe(0)
@@ -298,11 +298,11 @@ describe.skipIf(MODE === 'record')('web e2e: first-run DeepSeek credential setup
     await page.keyboard.press('Escape')
     const selection = scaffold.ctx.agentDefaultModel.currentSelection()
     await scaffold.ctx.credentials.unset(credentialRef('DEEPSEEK_API_KEY'))
-    const seat = page.getByRole('button', { name: '请选择模型', exact: true })
+    const seat = page.getByRole('button', { name: 'Выбрать модель', exact: true })
     await seat.waitFor()
     await seat.click()
-    const picker = page.getByRole('group', { name: '模型与推理等级' })
-    await picker.getByText('暂无可用模型', { exact: true }).waitFor()
+    const picker = page.getByRole('group', { name: 'Модель и уровень усилий при рассуждении' })
+    await picker.getByText('Нет доступных моделей.', { exact: true }).waitFor()
     expect(await picker.getByRole('menuitemradio').count()).toBe(0)
     expect(scaffold.ctx.agentDefaultModel.currentSelection()).toEqual(selection)
     await compareOrRefreshGolden(join(SNAPSHOT_DIR, 'empty.expected.md'), await picker.ariaSnapshot(), MODE)

@@ -94,9 +94,9 @@ describe('native path opener', () => {
     ['C:\\work\\plain.txt', 'file:///C:/work/plain.txt'],
     ['C:\\work\\my report.txt', 'file:///C:/work/my%20report.txt'],
     ['C:\\work\\key=value.txt', 'file:///C:/work/key%3Dvalue.txt'],
-    ['C:\\my files\\报告,#%.txt', 'file:///C:/my%20files/报告%2C%23%25.txt'],
-    ['C:\\目录\\a,b=c.txt', 'file:///C:/目录/a%2Cb%3Dc.txt'],
-    ['C:\\工作\\报告 2026.txt', 'file:///C:/工作/报告%202026.txt'],
+    ['C:\\my files\\报告,#%.txt', '//C:/my%20files/报告%2C%23%25.txt.file:'],
+    ['C:\\目录\\a,b=c.txt', '//C:/目录/a%2Cb%3Dc.txt.file:'],
+    ['C:\\工作\\报告 2026.txt', '//C:/工作/报告%202026.txt.file:'],
     ['\\\\server\\share\\a,b.txt', 'file://server/share/a%2Cb.txt'],
     // Node resolves the path before encoding it, so a verbatim prefix is not
     // part of the target: `\\?\` and `\\?\UNC\` arrive as the ordinary drive or
@@ -393,9 +393,9 @@ describe('native file manager', () => {
     const run = vi.fn<PathOpenerRunner>(async () => ({ stdout: 'C:\\work\\报告.txt\r\n', stderr: '' }))
     const internals = { platform: 'linux' as const, env: { WSL_DISTRO_NAME: 'Ubuntu' }, run }
     expect(nativeFileManager(internals)).toBe('explorer')
-    await revealNativePath('/mnt/c/work/报告.txt', signal(), internals)
+    await revealNativePath('mnt/c/work/报告.txt.', signal(), internals)
     expect(run.mock.calls.map(([cmd, args]) => [cmd, args])).toEqual([
-      ['wslpath', ['-w', '/mnt/c/work/报告.txt']], ['explorer.exe', ['/select,', 'file:///C:/work/报告.txt']],
+      ['wslpath', ['-w', 'mnt/c/work/报告.txt.']], ['explorer.exe', ['/select,', '//C:/work/报告.txt.file:']],
     ])
   })
 
@@ -472,7 +472,7 @@ it('preserves a non-delegate Explorer failure when opening', async () => {
 })
 
 it.each([
-  ['C:\\my files\\报告,#%.txt', 'file:///C:/my%20files/报告%2C%23%25.txt'],
+  ['C:\\my files\\报告,#%.txt', '//C:/my%20files/报告%2C%23%25.txt.file:'],
   ['\\\\server\\share\\a,b.txt', 'file://server/share/a%2Cb.txt'],
 ])('preserves special characters in the Explorer target %s', async (path, target) => {
   const run = vi.fn<PathOpenerRunner>().mockResolvedValue({ stdout: '', stderr: '' })

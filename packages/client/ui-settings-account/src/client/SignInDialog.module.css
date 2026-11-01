@@ -12,6 +12,7 @@
 .secondaryButton { padding: 0 14px; --dsh-button-outline-color: var(--dsw-alias-border-l2); }
 .description { margin: 0; padding: 0 24px; font-size: 14px; line-height: 22px; color: var(--dsw-alias-label-primary); }
 .link { border: 0; padding: 0; background: transparent; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
+.userCode { display: inline-block; margin-left: 8px; font-weight: 600; letter-spacing: 0.08em; font-variant-numeric: tabular-nums; user-select: all; }
 .spinner { flex: none; animation: spin 1s linear infinite; }
 .primaryButton:has(.spinner) { opacity: 1; }
 @keyframes spin { to { transform: rotate(360deg); } }

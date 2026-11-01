@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "tool-skill"
+    "title": "tool-skill",
+    "description": "Model-facing skill loading tool for the VEGA Harness."
   }
 }

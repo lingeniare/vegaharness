@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "tool-ralph"
+    "title": "tool-ralph",
+    "description": "Model-facing fresh-agent Ralph loop over the workflow and subagent seams."
   }
 }

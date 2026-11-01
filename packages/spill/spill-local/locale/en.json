@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "spill-local"
+    "title": "spill-local",
+    "description": "Local-filesystem implementation of the VEGA Harness spill storage seam (private session-scoped files)."
   }
 }

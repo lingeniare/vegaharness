@@ -15,7 +15,7 @@ describe('dsh-skill-badge', () => {
 
     expect(await ctx.skills.list()).toEqual([{
       name: 'dsh-badge',
-      description: 'Add the official “powered by dsh” badge to documents, pull requests, merge requests, and other content produced with DeepSeek Harness. Use whenever creating a pull request or merge request. Also use when the user asks for a dsh badge, powered-by-dsh attribution, or a reusable dsh badge asset or snippet.',
+      description: 'Add the official “powered by VEGA” badge to documents, pull requests, merge requests, and other content produced with VEGA Harness. Use whenever creating a pull request or merge request. Also use when the user asks for a VEGA badge, powered-by-VEGA attribution, or a reusable VEGA badge asset or snippet.',
       invocation: { modelInvocable: true, userInvocable: true },
       provider: 'dsh-badge',
       source: 'bundled',
@@ -29,14 +29,14 @@ describe('dsh-skill-badge', () => {
     expect(await ctx.skills.list()).toEqual([])
   })
 
-  it('presents the component as DSH with the bundle tag artwork in both locales', async () => {
+  it('presents the component as VEGA with the bundle tag artwork in both locales', async () => {
     expect(JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'))).toMatchObject({
       icon: './icon.svg',
       exports: { './locale/*.json': './locale/*.json' },
     })
-    for (const language of ['en', 'zh']) {
+    for (const language of ['en', 'ru']) {
       expect(JSON.parse(await readFile(new URL(`../locale/${language}.json`, import.meta.url), 'utf8')))
-        .toMatchObject({ meta: { title: 'DSH' } })
+        .toMatchObject({ meta: { title: 'VEGA' } })
     }
     expect(await readFile(new URL('../icon.svg', import.meta.url), 'utf8'))
       .toBe(await readFile(new URL('../../badge-skill-bundle/icon.svg', import.meta.url), 'utf8'))
@@ -47,7 +47,7 @@ describe('dsh-skill-badge', () => {
     expect(image.readUInt32BE(16)).toBe(726)
     expect(image.readUInt32BE(20)).toBe(120)
     expect(createHash('sha256').update(image).digest('hex')).toBe(
-      'f2c4f5ec9cbe847c0c763545c4d839efa8485bc74203733d0a0e8259f233c653',
+      'f9da215f88006b1c1459524c2a8b06da4d3df252f6e702545bc9fc0b99426613',
     )
   })
 })

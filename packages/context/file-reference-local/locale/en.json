@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "file-reference-local"
+    "title": "file-reference-local",
+    "description": "Local-filesystem ctx.fileReferences provider with bounded fuzzy indexes."
   }
 }

@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "api-terminal-controller"
+    "title": "api-terminal-controller",
+    "description": "Session-owned interactive terminals with shell discovery, screen recovery and typed Remote control."
   }
 }

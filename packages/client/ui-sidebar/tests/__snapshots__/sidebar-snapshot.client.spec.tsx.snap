@@ -121,10 +121,10 @@ exports[`sidebar shell snapshots > renders Windows caption controls in expanded 
               >
                 <svg
                   aria-hidden="true"
-                  data-content="965fe321"
+                  data-content="90eb988c"
                   fill="none"
-                  height="17.6580310880829"
-                  viewBox="0 0 23.16 17.04"
+                  height="24"
+                  viewBox="0 0 760 760"
                   width="24"
                 />
               </span>
@@ -144,7 +144,7 @@ exports[`sidebar shell snapshots > renders Windows caption controls in expanded 
                 <span
                   class="localBuildTitle"
                 >
-                  DSH Local Build
+                  VEGA Local Build
                 </span>
                 <span
                   class="buildVersion"
@@ -259,10 +259,10 @@ exports[`sidebar shell snapshots > renders the collapsed rail after the crossfad
           >
             <svg
               aria-hidden="true"
-              data-content="965fe321"
+              data-content="90eb988c"
               fill="none"
-              height="17.6580310880829"
-              viewBox="0 0 23.16 17.04"
+              height="24"
+              viewBox="0 0 760 760"
               width="24"
             />
           </div>
@@ -369,10 +369,10 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
               >
                 <svg
                   aria-hidden="true"
-                  data-content="965fe321"
+                  data-content="90eb988c"
                   fill="none"
-                  height="17.6580310880829"
-                  viewBox="0 0 23.16 17.04"
+                  height="24"
+                  viewBox="0 0 760 760"
                   width="24"
                 />
               </span>
@@ -392,7 +392,7 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
                 <span
                   class="localBuildTitle"
                 >
-                  DSH Local Build
+                  VEGA Local Build
                 </span>
                 <span
                   class="buildVersion"
@@ -478,7 +478,7 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
 </div>
 `;
 
-exports[`sidebar shell snapshots > renders the expanded column in the default locale (zh, no setLocale) 1`] = `
+exports[`sidebar shell snapshots > renders the expanded column in the default locale (ru, no setLocale) 1`] = `
 <div
   data-slot="sidebar"
   style="display: contents;"
@@ -492,7 +492,7 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
       data-window-drag="true"
     >
       <button
-        aria-label="新建会话"
+        aria-label="Новая сессия"
         class="brand wide"
         type="button"
       >
@@ -513,10 +513,10 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
               >
                 <svg
                   aria-hidden="true"
-                  data-content="965fe321"
+                  data-content="90eb988c"
                   fill="none"
-                  height="17.6580310880829"
-                  viewBox="0 0 23.16 17.04"
+                  height="24"
+                  viewBox="0 0 760 760"
                   width="24"
                 />
               </span>
@@ -536,7 +536,7 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
                 <span
                   class="localBuildTitle"
                 >
-                  DSH 本地构建
+                  Локальная сборка VEGA
                 </span>
                 <span
                   class="buildVersion"
@@ -549,7 +549,7 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
         </span>
       </button>
       <button
-        aria-label="收起侧边栏"
+        aria-label="Свернуть боковую панель"
         class="iconButton toggle"
         data-sidebar-toggle="true"
         type="button"
@@ -565,7 +565,7 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
       </button>
     </div>
     <button
-      aria-label="新建会话"
+      aria-label="Новая сессия"
       class="newSession"
       type="button"
     >
@@ -585,7 +585,7 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
           <span
             class="newSessionLabel wide"
           >
-            新会话
+            Новая сессия
           </span>
         </span>
       </span>

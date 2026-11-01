@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "storage-json"
+    "title": "storage-json",
+    "description": "JSON file KV storage backend for the VEGA Harness storage hub."
   }
 }

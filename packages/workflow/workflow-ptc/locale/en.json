@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "workflow-ptc"
+    "title": "workflow-ptc",
+    "description": "Workflow orchestration in the shared sandboxed Node PTC runtime."
   }
 }

@@ -27,7 +27,7 @@ function load(mainFrame: boolean, response: unknown, origin = 'https://platform.
   return { bridge: bridges.get('dsh'), invoke, ipc }
 }
 it('provides a synchronous getter immediately after exactly one bootstrap IPC', () => {
-  const { bridge, invoke } = load(true, { origin: 'https://platform.deepseek.com', token: 'fixture-secret', locale: 'zh_CN' })
+  const { bridge, invoke } = load(true, { origin: 'https://platform.deepseek.com', token: 'fixture-secret', locale: 'ru_RU' })
   expect(bridge!.displayMode).toBe('embedded')
   expect(bridge!.getAuthToken()).toBe('fixture-secret')
   expect(bridge!.getAuthToken()).toBe('fixture-secret')
@@ -40,7 +40,7 @@ it('does not expose the credential bridge to subframes', () => {
   expect(invoke).not.toHaveBeenCalled()
 })
 it('rejects a mismatched issuer before exposing credentials', () => {
-  const { bridge } = load(true, { origin: 'https://other.example', token: 'fixture-secret', locale: 'zh_CN' })
+  const { bridge } = load(true, { origin: 'https://other.example', token: 'fixture-secret', locale: 'ru_RU' })
   expect(bridge!.displayMode).toBe('embedded')
   expect(() => bridge!.getAuthToken()).toThrow()
 })
@@ -58,16 +58,16 @@ it('exposes no bridge when the document leaves the allowed origin', () => {
 
 
 it('caches language changes before subscription and removes disposed listeners', () => {
-  const { bridge, ipc, invoke } = load(true, { origin: 'https://platform.deepseek.com', token: 'fixture-secret', locale: 'zh_CN' })
-  expect(bridge!.getLocale()).toBe('zh_CN')
+  const { bridge, ipc, invoke } = load(true, { origin: 'https://platform.deepseek.com', token: 'fixture-secret', locale: 'ru_RU' })
+  expect(bridge!.getLocale()).toBe('ru_RU')
   ipc.emit('dsh-platform:locale-changed', {}, 'en_US')
   expect(bridge!.getLocale()).toBe('en_US')
   const listener = vi.fn()
   const dispose = bridge!.onLocaleChange(listener)
-  ipc.emit('dsh-platform:locale-changed', {}, 'zh_CN')
-  expect(listener).toHaveBeenCalledWith('zh_CN')
+  ipc.emit('dsh-platform:locale-changed', {}, 'ru_RU')
+  expect(listener).toHaveBeenCalledWith('ru_RU')
   ipc.emit('dsh-platform:locale-changed', {}, 'invalid')
-  expect(bridge!.getLocale()).toBe('zh_CN')
+  expect(bridge!.getLocale()).toBe('ru_RU')
   expect(listener).toHaveBeenCalledOnce()
   dispose()
   ipc.emit('dsh-platform:locale-changed', {}, 'en_US')

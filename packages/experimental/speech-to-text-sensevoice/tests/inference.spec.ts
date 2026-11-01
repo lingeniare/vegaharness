@@ -44,12 +44,12 @@ function wave(samples = 1024, first = 0): Uint8Array {
 }
 it('loads one model pair, carries language changes, and copies VAD buffers for Electron', () => {
   const transcribe = createTranscriber(Object.assign(Config({ dataRoot: '/cache' }), { model: '/model', tokens: '/tokens', vad: '/vad' }))
-  const result = transcribe(wave(), 'zh')
+  const result = transcribe(wave(), 'ru')
   expect(result).toMatchObject({ text: '第一句。 第二句。', audioSeconds: 1024 / 16000 })
   expect(result.inferenceSeconds).toBeGreaterThanOrEqual(0)
   expect(native.accepted).toEqual([512, 512])
   expect(native.front).toHaveBeenCalledWith(false)
-  expect(native.configs.at(-1)).toMatchObject({ modelConfig: { senseVoice: { language: 'zh', useInverseTextNormalization: 1 } } })
+  expect(native.configs.at(-1)).toMatchObject({ modelConfig: { senseVoice: { language: 'ru', useInverseTextNormalization: 1 } } })
   native.speech = false
   expect(transcribe(wave(100), 'en').text).toBe('')
   expect(native.configs.at(-1)).toMatchObject({ modelConfig: { senseVoice: { language: 'en' } } })
@@ -59,15 +59,15 @@ it('loads one model pair, carries language changes, and copies VAD buffers for E
 it('rejects unsupported language, malformed audio and recordings above the worker limit', () => {
   const transcribe = createTranscriber(Object.assign(Config({ dataRoot: '/cache', maxAudioBytes: 64 }), { model: '/model', tokens: '/tokens', vad: '/vad' }))
   expect(() => transcribe(wave(1), 'invalid')).toThrow('language')
-  expect(() => transcribe(new Uint8Array(46), 'zh')).toThrow('WAV')
-  expect(() => transcribe(wave(), 'zh')).toThrow('byte limit')
+  expect(() => transcribe(new Uint8Array(46), 'ru')).toThrow('WAV')
+  expect(() => transcribe(wave(), 'ru')).toThrow('byte limit')
 })
 it('restores the onset a cold VAD reports late, for the first segment only and within the window', () => {
   const transcribe = createTranscriber(Object.assign(Config({ dataRoot: '/cache' }), { model: '/model', tokens: '/tokens', vad: '/vad' }))
   const run = (start: number, samples: number, first = 0): void => {
     native.speech = true; native.accepted.length = 0; native.heads.length = 0
     native.starts = [start]; native.texts = ['第一句。', '第二句。']
-    transcribe(wave(samples, first), 'zh')
+    transcribe(wave(samples, first), 'ru')
   }
   run(900, 1024, 1000)
   expect(native.accepted).toEqual([900 + 512, 512])
@@ -80,6 +80,6 @@ it('restores the onset a cold VAD reports late, for the first segment only and w
   const off = createTranscriber(Object.assign(Config({ dataRoot: '/cache', vadOnsetPaddingSeconds: 0 }), { model: '/model', tokens: '/tokens', vad: '/vad' }))
   native.speech = true; native.accepted.length = 0
   native.starts = [900]; native.texts = ['第一句。', '第二句。']
-  off(wave(1024, 1000), 'zh')
+  off(wave(1024, 1000), 'ru')
   expect(native.accepted).toEqual([512, 512])
 })

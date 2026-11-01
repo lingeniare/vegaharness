@@ -29,7 +29,7 @@ import type { AgentPresetRow } from '@deepseek-ai/dsh-agent-preset-registry/type
 
 // These specs assert the shipped Chinese copy. The lane has no jsdom `window`,
 // so browser-language detection never runs and a fresh LocaleRuntime opens on
-// FALLBACK_LOCALE (en); each bench stages zh explicitly on the locale instead.
+// FALLBACK_LOCALE (en); each bench stages ru explicitly on the locale instead.
 
 /** The Developer tools half of `ctx.configForms`, which filters preset choices. */
 function developerTools(enabled = true): { configForms: { developerTools: { enabled: ObservableSnapshot<boolean> } } } {
@@ -85,7 +85,7 @@ async function bench(options: {
   const moveDefault = (): void => { ROSTER = ROSTER_MOVED }
   await ctx.plugin(SlotRegistry).await()
   const locale = new LocaleRuntime(ctx)
-  locale.setLocale('zh')
+  locale.setLocale('ru')
   ctx.provide('locale', locale)
   const calls: string[] = []
   let savedDefault = ROSTER.value.presets.find(row => row.isDefault)?.id ?? 'standard'
@@ -365,7 +365,7 @@ describe('ui-agent-preset apply', () => {
     expect(section.component).toBe(AgentPresetSection)
     expect(section.options).toMatchObject({ id: 'agent-presets', order: 20 })
     // The nav label is a locale-following thunk; owners resolve it at read time.
-    expect(resolveSlotLabel(section.options.label)).toBe('Agent 预设')
+    expect(resolveSlotLabel(section.options.label)).toBe('Режимы агента')
   })
 
   it('registers into a declaration that arrives after apply', async () => {

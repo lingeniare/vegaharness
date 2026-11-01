@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "connection"
+    "title": "connection",
+    "description": "Authenticated RPC transport and generation lifecycle."
   }
 }

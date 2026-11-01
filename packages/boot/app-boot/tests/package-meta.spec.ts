@@ -135,7 +135,7 @@ describe('plugin locale display metadata', () => {
       title: { en: 'localized', zh: '中文标题' }, description: { en: 'English introduction' },
     })
     dictionary('en', {})
-    dictionary('zh', {})
+    dictionary('ru', {})
     expect(readPluginMeta('localized', parentURL)).toEqual({ title: 'localized', description: 'Package introduction' })
   })
 
@@ -389,9 +389,9 @@ describe('plugin locale display metadata', () => {
     file(join(dir, 'lib', 'review.js'), 'throw new Error("must not execute review")\n')
     dictionary('en', { meta: { title: 'Whole package' } })
     dictionary('en', { meta: { title: 'Search' } }, join(dir, 'resources', 'search'))
-    dictionary('zh', { meta: { title: '搜索' } }, join(dir, 'resources', 'search'))
+    dictionary('zh', { meta: { title: 'Поиск' } }, join(dir, 'resources', 'search'))
     dictionary('en', { meta: { title: 'Review' } }, join(dir, 'resources', 'review'))
-    expect(readPluginMeta('localized/search', parentURL)).toEqual({ title: { en: 'Search', zh: '搜索' } })
+    expect(readPluginMeta('localized/search', parentURL)).toEqual({ title: { en: 'Search', zh: 'Поиск' } })
     expect(readPluginMeta('localized/review', parentURL)).toEqual({ title: { en: 'Review' } })
     expect(readPluginMeta('localized/private', parentURL)).toBeUndefined()
   })
@@ -419,14 +419,14 @@ describe('plugin locale display metadata', () => {
     manifest({ './locale/en.json': './locale/en.json' })
     dictionary('en', { meta: { title: 'English' } })
     dictionary('zh', { meta: { title: '中文' } })
-    expect(readPluginMeta('localized', parentURL)?.error).toContain('./locale/zh.json')
+    expect(readPluginMeta('localized', parentURL)?.error).toContain('./locale/ru.json')
   })
 
   it('reports language resources mapped outside their English directory', () => {
-    manifest({ './locale/*.json': './locale/*.json', './locale/zh.json': './separate/zh.json' })
+    manifest({ './locale/*.json': './locale/*.json', './locale/ru.json': './separate/ru.json' })
     dictionary('en', { meta: { title: 'English' } })
-    dictionary('zh', { meta: { title: 'Local Chinese' } })
-    dictionary('zh', { meta: { title: 'Mapped Chinese' } }, join(dir, 'separate'))
+    dictionary('ru', { meta: { title: 'Local Chinese' } })
+    dictionary('ru', { meta: { title: 'Mapped Chinese' } }, join(dir, 'separate'))
     expect(readPluginMeta('localized', parentURL)?.error).toContain('must share the English locale directory')
   })
 
@@ -458,9 +458,9 @@ describe('plugin locale display metadata', () => {
 
   it('reports malformed JSON and invalid language filenames', () => {
     dictionary('en', { meta: { title: 'Title' } })
-    file(join(dir, 'locale', 'zh.json'), '{')
-    expect(readPluginMeta('localized', parentURL)?.error).toContain('zh.json')
-    rmSync(join(dir, 'locale', 'zh.json'))
+    file(join(dir, 'locale', 'ru.json'), '{')
+    expect(readPluginMeta('localized', parentURL)?.error).toContain('ru.json')
+    rmSync(join(dir, 'locale', 'ru.json'))
     dictionary('not_a_language', { meta: { title: 'Title' } })
     expect(readPluginMeta('localized', parentURL)?.error).toContain('not_a_language.json must use a language id')
   })

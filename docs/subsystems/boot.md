@@ -1,7 +1,5 @@
 # Profile management
 
-English | [中文](boot.zh.md)
-
 The [boot package group](../../packages/boot/README.md) owns launcher-provided profile access and the plugin manager. [Plugin Manager](../../packages/boot/plugin-manager/README.md) documents persistence, reload and package-operation behavior.
 
 ## Management records
@@ -207,7 +205,7 @@ Manage profile files and apply their declared reload lifecycle.
  * README. An installed bundle is read from its directory without network access; an official bundle the installation
  * offers before it is installed is read from the npm file CDNs at its offered version. Nothing is cached.
  * @param name - the bundle's package name, as `listBundles()` lists it.
- * @param language - the display language, such as `zh-CN`; documents fall back through its prefixes to English.
+ * @param language - the display language, such as `ru-RU`; documents fall back through its prefixes to English.
  * @param options - `npmFileSources` names npm file CDNs to ask first for an offered bundle, in order, such as the one
  *   a Client measured as fastest; configured CDNs it omits follow, and CDNs that are not configured are not asked.
  * @returns the document with its origin and path, or `none`.
@@ -390,7 +388,7 @@ async entry(url: string, name: string): Promise<MarketListingEntry | undefined>
  * @param url - a configured index URL.
  * @param name - the plugin's package name.
  * @param version - one listed version.
- * @param language - the display language, such as `zh-CN`; documents fall back through its prefixes to English.
+ * @param language - the display language, such as `ru-RU`; documents fall back through its prefixes to English.
  * @param options - `refresh` reads again instead of reusing a result cached for `cacheTtlMs`; `npmFileSources` names
  *   npm file CDNs to ask first for an npm version, in order; configured CDNs it omits follow, and CDNs that are not
  *   configured are not asked.

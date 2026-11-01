@@ -228,7 +228,7 @@ it('paginates inventories with an explicit continuation and total', async () => 
 
 it('keeps UI translation and listing metadata out of model-facing plugin and bundle lists', async () => {
   const { call, manager } = await fixture()
-  const meta = { title: { en: 'Plugin', zh: '插件' }, error: 'UI-only diagnostic' }
+  const meta = { title: { en: 'Plugin', zh: 'Плагины' }, error: 'UI-only diagnostic' }
   manager.listPlugins.mockImplementationOnce(async () => [{ entryId: 'include:plugin', enabled: true, meta }])
   expect(JSON.parse(resultText(await call({ action: 'list_plugins' })))).toEqual({
     entries: [{ entryId: 'include:plugin', enabled: true }], total: 1, nextOffset: null,
@@ -296,8 +296,8 @@ it('tells the agent the next step for each change outcome it can act on', async 
   expect(await outcome({ changed: false, application: 'cancelled' })).toContain('nothing changed')
   expect(await outcome({ changed: true, application: 'overridden' })).toContain('higher-priority layer')
   expect(await outcome({ changed: true, application: 'restart-required', restartReason: 'host-module' }))
-    .toBe('Tell the user to restart DSH to apply this change: the change reaches modules DSH itself loaded.')
-  expect(await outcome({ changed: true, application: 'restart-required' })).toBe('Tell the user to restart DSH to apply this change.')
+    .toBe('Tell the user to restart VEGA Harness to apply this change: the change reaches modules VEGA Harness itself loaded.')
+  expect(await outcome({ changed: true, application: 'restart-required' })).toBe('Tell the user to restart VEGA Harness to apply this change.')
   expect(await outcome({ changed: false, application: 'failed', packageResult: { kind: 'build-blocked' } })).toContain('approvedBuilds')
   // A refusal code is more specific than the package manager's failure kind.
   expect(await outcome({ changed: false, application: 'failed', packageResult: { kind: 'network' }, error: { code: 'stale-approval' } }))

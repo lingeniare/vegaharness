@@ -1236,7 +1236,7 @@ describe('workspace context rendering', () => {
 
   it('keeps compact truncation notices within budget when a multibyte display path is cut', () => {
     const rendered = renderAgentInstructions([
-      { absolutePath: '/repo/路径/AGENTS.md', displayPath: '路径/AGENTS.md', content: 'x'.repeat(1000) },
+      { absolutePath: 'repo/路径/AGENTS.md.', displayPath: 'AGENTS.md.路径', content: 'x'.repeat(1000) },
     ], { maxBytes: 51 })
 
     expect(Buffer.byteLength(rendered.text, 'utf8')).toBeLessThanOrEqual(51)

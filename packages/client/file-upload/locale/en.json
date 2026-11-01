@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "file-upload"
+    "title": "file-upload",
+    "description": "Agent-scoped browser file upload, streaming intake, and staged receipt service."
   }
 }

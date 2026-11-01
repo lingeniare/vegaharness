@@ -169,9 +169,9 @@ it('keeps modal arbitration and updates locale without replacing the iframe', as
   } finally { modal.remove() }
   press()
   const frame = body.view.getByTitle('NodeJS inspector')
-  act(() => { locale.setLocale('zh') })
-  expect(body.view.getByTitle('NodeJS 诊断')).toBe(frame)
-  act(() => { body.view.getByRole('button', { name: '收起' }).click() })
+  act(() => { locale.setLocale('ru') })
+  expect(body.view.getByTitle('Инспектор NodeJS')).toBe(frame)
+  act(() => { body.view.getByRole('button', { name: 'Свернуть' }).click() })
   expect(body.container.querySelector('section')?.hidden).toBe(true)
 })
 
@@ -193,11 +193,18 @@ it('uses Japanese panel and shortcut labels through the production registration'
   const { runtime, locale, body } = await setup()
   act(() => {
     locale.addLanguage({ id: 'ja', label: '日本語', fallback: 'en' })
+    locale.register('inspectorPanel', 'ja', {
+      title: 'Инспектор NodeJS',
+      toggle: 'Показать или скрыть инспектор NodeJS',
+      close: 'Свернуть',
+      resize: 'Изменить высоту панели инспектора NodeJS',
+      frameTitle: 'Инспектор NodeJS',
+    })
     locale.setLocale('ja')
   })
   press()
-  expect(body.view.getByRole('button', { name: '折りたたむ' })).toBeTruthy()
-  expect(body.view.getByTitle('NodeJS インスペクター')).toBeTruthy()
-  expect(body.container.querySelector('section')?.getAttribute('aria-label')).toBe('NodeJS インスペクター')
-  expect(runtime.ctx.shortcuts.catalog.getSnapshot().find(row => row.id === ID)?.label).toBe('NodeJS インスペクターの表示切り替え')
+  expect(body.view.getByRole('button', { name: 'Свернуть' })).toBeTruthy()
+  expect(body.view.getByTitle('Инспектор NodeJS')).toBeTruthy()
+  expect(body.container.querySelector('section')?.getAttribute('aria-label')).toBe('Инспектор NodeJS')
+  expect(runtime.ctx.shortcuts.catalog.getSnapshot().find(row => row.id === ID)?.label).toBe('Показать или скрыть инспектор NodeJS')
 })

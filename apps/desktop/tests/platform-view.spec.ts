@@ -151,7 +151,7 @@ it('injects the deployment and client identity headers only at the Platform orig
 })
 
 it('samples the language and UTC offset on every Platform request', async () => {
-  let locale: 'en_US' | 'zh_CN' = 'en_US'
+  let locale: 'en_US' | 'ru_RU' = 'en_US'
   const owner = Object.assign(new EventEmitter(), {
     webContents: new EventEmitter(), contentView: { addChildView: vi.fn(), removeChildView: vi.fn() }, isDestroyed: () => false,
   })
@@ -162,10 +162,10 @@ it('samples the language and UTC offset on every Platform request', async () => 
   expect(interceptHeaders(1, 'https://platform.deepseek.com/usage', {})).toMatchObject({
     'x-client-locale': 'en_US', 'x-client-timezone-offset': '-28800',
   })
-  locale = 'zh_CN'
+  locale = 'ru_RU'
   offset.mockReturnValue(-300)
   expect(interceptHeaders(1, 'https://platform.deepseek.com/usage', {})).toMatchObject({
-    'x-client-locale': 'zh_CN', 'x-client-timezone-offset': '18000',
+    'x-client-locale': 'ru_RU', 'x-client-timezone-offset': '18000',
   })
   offset.mockRestore()
   manager.close()
@@ -314,13 +314,13 @@ it('does not reveal a pending view after the owner reloads or remove a replaceme
 
 it('bootstraps the current language and updates an open view without reloading', async () => {
   const { owner } = setup()
-  let locale: 'en_US' | 'zh_CN' = 'zh_CN'
+  let locale: 'en_US' | 'ru_RU' = 'ru_RU'
   const manager = new DesktopPlatformView('/bundled/preload.cjs', () => locale, 'win32', () => false)
   manager.setSession({ origin: 'https://platform.deepseek.com', userId: 'fixture-user' as AccountUserId, token: 'fixture-secret' })
   manager.notifyLocaleChanged()
   await manager.open(owner, 'usage', bounds)
   const sender = view().webContents
-  expect(manager.bootstrap({ sender, senderFrame: sender.mainFrame }).locale).toBe('zh_CN')
+  expect(manager.bootstrap({ sender, senderFrame: sender.mainFrame }).locale).toBe('ru_RU')
   locale = 'en_US'
   manager.notifyLocaleChanged()
   expect(sender.send).toHaveBeenCalledWith('dsh-platform:locale-changed', 'en_US')

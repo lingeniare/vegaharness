@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-tool"
+    "title": "ui-tool",
+    "description": "Client Tool call-tree renderer and keyed per-tool presentation slot."
   }
 }

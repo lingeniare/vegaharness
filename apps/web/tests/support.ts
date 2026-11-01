@@ -47,7 +47,7 @@ export function requireBuilt(name: string): unknown {
  * surface: with no stored preference the client derives its initial locale
  * from the browser, and Playwright's default browser asks for English.
  */
-export const ZH_BROWSER_LOCALE = 'zh-CN'
+export const RU_BROWSER_LOCALE = 'ru-RU'
 
 /** Same-day anchor for seeded event times and the Asia/Shanghai browser clock. */
 export const WEB_FIXTURE_TIME = Date.parse('2026-01-15T12:00:00+08:00')
@@ -118,8 +118,8 @@ export async function pinBrowserClock(page: Page): Promise<void> {
  * Open the standard browser-test page advertising English before client boot.
  * This keeps role locators and goldens deterministic while leaving the Host
  * settings document free to override the provisional browser-derived locale;
- * scenarios asserting the Chinese surface advertise
- * {@link ZH_BROWSER_LOCALE} instead. The context uses Asia/Shanghai to preserve
+ * scenarios asserting the Russian surface advertise
+ * {@link RU_BROWSER_LOCALE} instead. The context uses Asia/Shanghai to preserve
  * the recorded Web user-source timezone independently of the host timezone.
  * @param browser - Playwright browser owning the page.
  * @param height - Viewport height; width is fixed to the lane baseline.
@@ -205,14 +205,14 @@ export function probeFreePort(): Promise<number> {
  * @param page - browser page with the mounted sidebar.
  * @param locale - current UI language.
  */
-export async function revealNavigationDrawer(page: Page, locale: 'en' | 'zh' | 'ja'): Promise<void> {
+export async function revealNavigationDrawer(page: Page, locale: 'en' | 'ru'): Promise<void> {
   const drawer = await page.evaluate(() => window.innerWidth < 768
     && !document.documentElement.hasAttribute('data-windows-titlebar'))
   await page.waitForFunction(expected => Boolean(document.querySelector('[data-sidebar-drawer]')) === expected, drawer)
   const closed = page.locator('[data-sidebar-drawer][data-sidebar-collapsed]')
   if (await closed.count() === 0) return
   await page.locator('[data-shell-leading]').getByRole('button', {
-    name: { en: 'Open sidebar', zh: '打开侧边栏', ja: 'サイドバーを開く' }[locale], exact: true,
+    name: { en: 'Open sidebar', ru: 'Открыть боковую панель' }[locale], exact: true,
   }).click()
   await closed.waitFor({ state: 'detached' })
 }
@@ -253,27 +253,27 @@ export async function connectFreshWorkspace(page: Page, root: string, name = 'wo
 
 /**
  * {@link connectFreshWorkspace} over a page that advertises
- * {@link ZH_BROWSER_LOCALE}: the English helper's anchors assume the locale
- * most other scenarios boot, so a scenario that deliberately keeps zh needs
+ * {@link RU_BROWSER_LOCALE}: the English helper's anchors assume the locale
+ * most other scenarios boot, so a scenario that deliberately keeps ru needs
  * the localized picker copy.
  * @param page - the browser page under test.
  * @param root - workspace parent directory.
  * @param name - directory created under `root` and connected.
  * @param modelAvailable - require an editable composer when the selected model is available.
  */
-export async function connectFreshWorkspaceZh(page: Page, root: string, name = 'workspace', modelAvailable = true): Promise<void> {
+export async function connectFreshWorkspaceRu(page: Page, root: string, name = 'workspace', modelAvailable = true): Promise<void> {
   mkdirSync(join(root, name), { recursive: true })
-  await revealNavigationDrawer(page, 'zh')
-  await page.getByRole('button', { name: '添加工作区', exact: true }).click()
-  const dialog = page.getByRole('dialog', { name: '选择工作区目录' })
+  await revealNavigationDrawer(page, 'ru')
+  await page.getByRole('button', { name: 'Добавить рабочую область', exact: true }).click()
+  const dialog = page.getByRole('dialog', { name: 'Выбор рабочей директории' })
   await dialog.waitFor({ timeout: 10_000 })
-  await dialog.getByRole('button', { name: '编辑路径' }).click()
-  const pathInput = dialog.getByRole('textbox', { name: '编辑路径' })
+  await dialog.getByRole('button', { name: 'Изменить путь' }).click()
+  const pathInput = dialog.getByRole('textbox', { name: 'Изменить путь' })
   await pathInput.fill(join(root, name))
   await pathInput.press('Enter')
-  await dialog.getByRole('button', { name: '打开', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Открыть', exact: true }).click()
   const editable = modelAvailable ? '[contenteditable="true"]' : ''
-  await page.locator(`[data-composer-input]${editable}[data-placeholder="描述你想要构建的内容, / 调用指令, @ 文件或对话"]`)
+  await page.locator(`[data-composer-input]${editable}[data-placeholder="Опишите, что хотите создать, / команды, @ файлы или сессии"]`)
     .waitFor({ timeout: 15_000 })
 }
 
@@ -363,15 +363,15 @@ export function conversationContextKey(kind: string, id: string): string {
  * @param page - browser page with the mounted sidebar.
  * @param locale - current UI language.
  */
-export async function openSettings(page: Page, locale: 'en' | 'zh' | 'ja'): Promise<void> {
-  const labels = { en: ['Account menu', 'Settings'], zh: ['账号菜单', '设置'], ja: ['アカウントメニュー', '設定'] } as const
+export async function openSettings(page: Page, locale: 'en' | 'ru'): Promise<void> {
+  const labels = { en: ['Account menu', 'Settings'], ru: ['Меню аккаунта', 'Настройки'] } as const
   const trigger = page.getByRole('button', {
     name: labels[locale][0], exact: true, includeHidden: true,
   })
   await trigger.waitFor({ state: 'attached' })
   await revealNavigationDrawer(page, locale)
   if (!await trigger.isVisible()) {
-    await page.getByRole('button', { name: { en: 'Open sidebar', zh: '打开侧边栏', ja: 'サイドバーを開く' }[locale], exact: true }).click()
+    await page.getByRole('button', { name: { en: 'Open sidebar', ru: 'Открыть боковую панель' }[locale], exact: true }).click()
   }
   await trigger.click()
   await page.getByRole('menuitem', { name: labels[locale][1], exact: true }).click()

@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-model-selection"
+    "title": "ui-model-selection",
+    "description": "Model selection over the shared model catalog, Session projection, and session.selectModel."
   }
 }

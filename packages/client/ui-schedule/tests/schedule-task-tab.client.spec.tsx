@@ -14,7 +14,7 @@ import { formatScheduleFrequency } from '../src/client/schedule-format.ts'
 import { ScheduleTaskTab, type ScheduleTaskTabProps } from '../src/client/ScheduleTaskTab.tsx'
 import { ScheduleTaskTabTitle, type ScheduleTaskTabTitleProps } from '../src/client/ScheduleTaskTabTitle.tsx'
 import { TaskTabBindings, type TaskTabPage } from '../src/client/task-tab-bindings.ts'
-import { en, zh } from '../src/client/task-manager-locales.ts'
+import { en, ru } from '../src/client/task-manager-locales.ts'
 import css from '../src/client/TaskManagerPage.module.css'
 
 type Entry = ScheduleCatalogEntry
@@ -83,7 +83,7 @@ function tabInfo(params: unknown, revision = 1): SidebarRightTabInfo {
 function mount(
   initial: Partial<CatalogSnapshot<Entry>> = {},
   params: unknown = { sessionId: SESSION, id: at.id },
-  dictionary: typeof en | typeof zh = en,
+  dictionary: typeof en | typeof ru = en,
   sessionState: SessionListState = sessions,
   overrides: Partial<ScheduleTaskTabProps> = {},
 ) {
@@ -167,7 +167,7 @@ function boundTo(id: ScheduleId): TaskTabBindings {
   return bindings
 }
 
-describe.each([['English', en], ['Chinese', zh]] as const)('task tab body in %s', (_name, dictionary) => {
+describe.each([['English', en], ['Chinese', ru]] as const)('task tab body in %s', (_name, dictionary) => {
   it('renders the named task rule, its actions, and its target Session entry without a close control', () => {
     const h = mount({}, { sessionId: SESSION, id: at.id }, dictionary)
     const detail = screen.getByRole('complementary', { name: dictionary['detail.label'] })

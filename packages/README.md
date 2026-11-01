@@ -1,11 +1,9 @@
 ---
-description: "The DeepSeek Harness package workspace: how the npm packages under packages/ are grouped, what each group owns, and the conventions that bind them."
+description: "The VEGA Harness package workspace: how the npm packages under packages/ are grouped, what each group owns, and the conventions that bind them."
 kind: "package-group"
 ---
 
 # Packages
-
-English | [中文](README.zh.md)
 
 ## Summary
 

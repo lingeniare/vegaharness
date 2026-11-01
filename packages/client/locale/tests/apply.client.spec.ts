@@ -76,38 +76,38 @@ describe('locale apply', () => {
     try {
       await vi.waitFor(() => { expect(read).toHaveBeenCalledOnce() })
       const disposal = fiber.dispose()
-      if (outcome === 'resolve') ready.resolve({ languages: ['zh-CN'], preference: null })
+      if (outcome === 'resolve') ready.resolve({ languages: ['ru-RU'], preference: null })
       else ready.reject(new Error('native window closed'))
       await disposal
       expect(b.ctx.get('locale')).toBeUndefined()
       expect(onChange).not.toHaveBeenCalled()
     } finally {
-      ready.resolve({ languages: ['zh-CN'], preference: null })
+      ready.resolve({ languages: ['ru-RU'], preference: null })
       await b.ctx.fiber.dispose()
     }
   })
 
   it('awaits native initialization and reports later changes only while mounted', async () => {
-    const b = await bench('zh')
+    const b = await bench('ru')
     const ready = Promise.withResolvers<unknown>()
     const onChange = vi.fn()
     vi.stubGlobal('__DSH_LOCALE__', { read: () => ready.promise, onChange })
     const fiber = b.ctx.plugin({ inject: [...inject], apply })
     try {
       expect(b.ctx.get('locale')).toBeUndefined()
-      ready.resolve({ languages: ['en-US'], preference: 'zh' })
+      ready.resolve({ languages: ['en-US'], preference: 'ru' })
       await fiber.await()
       const locale = b.ctx.get('locale') as LocaleRuntime
-      expect(locale.getSnapshot().active).toBe('zh')
-      expect(onChange).toHaveBeenLastCalledWith('zh')
+      expect(locale.getSnapshot().active).toBe('ru')
+      expect(onChange).toHaveBeenLastCalledWith('ru')
       locale.setLocale('en')
       expect(onChange).toHaveBeenLastCalledWith('en')
       await fiber.dispose()
       const calls = onChange.mock.calls.length
-      b.ctx.emit('locale/change', { active: 'zh', locales: [], revision: 99 })
+      b.ctx.emit('locale/change', { active: 'ru', locales: [], revision: 99 })
       expect(onChange).toHaveBeenCalledTimes(calls)
     } finally {
-      ready.resolve({ languages: ['en-US'], preference: 'zh' })
+      ready.resolve({ languages: ['en-US'], preference: 'ru' })
       await b.ctx.fiber.dispose()
     }
   })
@@ -127,12 +127,12 @@ describe('locale apply', () => {
     await before.ctx.plugin({ inject: [...inject], apply }).await()
     const locale = before.ctx.get('locale') as LocaleRuntime
     // Base dictionaries are registered: the (ns, locale) seats are occupied.
-    expect(() => locale.register('common', 'zh', {})).toThrow('already has locale')
     expect(() => locale.register('common', 'en', {})).toThrow('already has locale')
+    expect(() => locale.register('common', 'ru', {})).toThrow('already has locale')
     // The lane has no jsdom `window`, so detection never runs and a fresh
-    // service opens on FALLBACK_LOCALE (en); read the zh side explicitly.
-    locale.setLocale('zh')
-    expect(locale.bind(SETTINGS_NS)('language.title')).toBe('语言')
+    // service opens on FALLBACK_LOCALE (en); read the ru side explicitly.
+    locale.setLocale('ru')
+    expect(locale.bind(SETTINGS_NS)('language.title')).toBe('Язык')
     const entry = before.slots.entries(SLOT).find(e => e.component === LanguageRow)!
     expect(entry.options).toMatchObject({ id: 'language', order: 0 })
 
@@ -161,10 +161,10 @@ describe('locale apply', () => {
     expect(entry.locale).toBe(SETTINGS_NS)
     expect(locale.bind(SETTINGS_NS)('language.title')).toBe('Language')
 
-    face.setLocale('zh')
-    expect(locale.getLocale().active).toBe('zh')
-    expect(instance.getSnapshot().active).toBe('zh')
-    expect(locale.bind(SETTINGS_NS)('language.title')).toBe('语言')
+    face.setLocale('ru')
+    expect(locale.getLocale().active).toBe('ru')
+    expect(instance.getSnapshot().active).toBe('ru')
+    expect(locale.bind(SETTINGS_NS)('language.title')).toBe('Язык')
     await vi.waitFor(() => { expect(b.mutate).toHaveBeenCalledTimes(2) })
   })
 
@@ -183,29 +183,17 @@ describe('locale apply', () => {
     })
     await languagePack.await()
     expect(instance.getSnapshot().options).toEqual([
-      { id: 'zh', label: '中文' },
       { id: 'en', label: 'English' },
-      { id: 'ja', label: '日本語' },
-      { id: 'es', label: 'Español' },
-      { id: 'fr', label: 'Français' },
-      { id: 'de', label: 'Deutsch' },
       { id: 'ru', label: 'Русский' },
-      { id: 'pt', label: 'Português' },
       { id: 'it', label: 'Italiano' },
     ])
 
     await languagePack.dispose()
-    expect(instance.getSnapshot().options.map(option => option.id)).toEqual(['zh', 'en', 'ja', 'es', 'fr', 'de', 'ru', 'pt'])
+    expect(instance.getSnapshot().options.map(option => option.id)).toEqual(['en', 'ru'])
   })
 
-  it.each([
-    ['ja', '日本語', '言語', 'キャンセル'],
-    ['es', 'Español', 'Idioma', 'Cancelar'],
-    ['fr', 'Français', 'Langue', 'Annuler'],
-    ['de', 'Deutsch', 'Sprache', 'Abbrechen'],
-    ['ru', 'Русский', 'Язык', 'Отмена'],
-    ['pt', 'Português', 'Idioma', 'Cancelar'],
-  ])('restores %s from the Host and releases its language and dictionaries on unload', async (id, label, languageTitle, cancel) => {
+  it('restores ru from the Host and releases its dictionaries on unload', async () => {
+    const id = 'ru'
     const b = await bench(id)
     onTestFinished(() => b.ctx.fiber.dispose())
     declareItems(b.slots)
@@ -214,19 +202,20 @@ describe('locale apply', () => {
     const locale = b.ctx.get('locale') as LocaleRuntime
     const { instance, face } = faceOf(b.slots)
     expect(instance.getSnapshot().active).toBe(id)
-    expect(locale.bind(SETTINGS_NS)('language.title')).toBe(languageTitle)
-    expect(locale.bind('common')('cancel')).toBe(cancel)
+    expect(locale.bind(SETTINGS_NS)('language.title')).toBe('Язык')
+    expect(locale.bind('common')('cancel')).toBe('Отмена')
     face.setLocale('en')
     face.setLocale(id)
     await vi.waitFor(() => { expect(b.mutate).toHaveBeenCalledTimes(2) })
     expect(b.mutate.mock.calls.at(-1)?.[1]).toEqual([{ op: 'set', path: ['preference'], value: id }])
     await fiber.dispose()
-    expect(locale.getSnapshot().locales.map(option => option.id)).toEqual(['zh', 'en'])
-    expect(() => { locale.setLocale(id) }).toThrow('not registered')
-    const remove = locale.addLanguage({ id, label, fallback: 'en' })
+    // A built-in language stays selectable after unload; only the contributed
+    // dictionaries are released, so lookups fall back to echoing the key.
+    expect(locale.getSnapshot().locales.map(option => option.id)).toEqual(['en', 'ru'])
     locale.setLocale(id)
+    expect(locale.getLocale().active).toBe(id)
     expect(locale.bind('common')('cancel')).toBe('cancel')
-    remove()
+    expect(locale.bind(SETTINGS_NS)('language.title')).toBe('language.title')
   })
 
   it('loads and refreshes the explicit Host preference after nonblocking activation', async () => {
@@ -235,21 +224,21 @@ describe('locale apply', () => {
     // through the document invalidation, exactly as production announces one.
     // Preference must differ from the provisional locale (FALLBACK_LOCALE = en
     // with no window), or clearing it below would be unobservable.
-    b.setHostPreference('zh')
+    b.setHostPreference('ru')
     b.events.emit('settings/document-updated', [LOCALE_SETTINGS_NAMESPACE, 0])
     declareItems(b.slots)
     await b.ctx.plugin({ inject: [...inject], apply }).await()
     const locale = b.ctx.get('locale') as LocaleRuntime
-    await vi.waitFor(() => { expect(locale.getLocale().active).toBe('zh') })
+    await vi.waitFor(() => { expect(locale.getLocale().active).toBe('ru') })
     // Cleared preference falls back to the provisional locale.
     b.setHostPreference(undefined)
     b.events.emit('settings/document-updated', [LOCALE_SETTINGS_NAMESPACE, 0])
     await vi.waitFor(() => { expect(locale.getLocale().active).toBe('en') })
-    // Re-selecting zh after the clear is an explicit pick of the provisional
+    // Re-selecting ru after the clear is an explicit pick of the provisional
     // value and must persist as a written preference.
-    b.setHostPreference('zh')
+    b.setHostPreference('ru')
     b.events.emit('settings/document-updated', [LOCALE_SETTINGS_NAMESPACE, 0])
-    await vi.waitFor(() => { expect(locale.getLocale().active).toBe('zh') })
+    await vi.waitFor(() => { expect(locale.getLocale().active).toBe('ru') })
     expect(b.describe).toHaveBeenCalledTimes(4)
   })
 

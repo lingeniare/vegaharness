@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "tool-pwsh"
+    "title": "tool-pwsh",
+    "description": "Model-facing pwsh tool over the bash executor seam."
   }
 }

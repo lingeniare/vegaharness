@@ -5,8 +5,6 @@ kind: "package-reference"
 
 # @deepseek-ai/dsh-client-ui-plugin-manager
 
-English | [中文](README.zh.md)
-
 Desktop product events use the optional [product analytics service](../product-analytics/README.md); ordinary Web interactions are excluded.
 
 ## Summary
@@ -183,7 +181,6 @@ None; this package neither assembles nor sends a provider request.
 
 <a id="known-limitations-and-deferred-work"></a>
 
-
 These limits define the reach of the management view; they are current package constraints.
 
 - **Log path for the settled run only** — the details name the complete Host log of the run that settled the dialog, on the Host's filesystem; earlier registry attempts have no link, and a browser connected to a remote Host may not be able to open that path.
@@ -191,7 +188,7 @@ These limits define the reach of the management view; they are current package c
 - **Only bundles are managed** — a dependency without a bundle patch is refused before it installs; one the profile already holds is left off the page unless the profile selects it, and loading plain plugin modules stays a file operation.
 - **Rows show a phase, not a reason** — a failed row reads as failed without the Host's error text; the Host log has it.
 - **One install at a time** — the dialog runs one pnpm command; a second spec waits for the first to finish.
-- **No version picker** — the spec is typed as pnpm accepts it; the page does not list registry versions. Official on-demand entries offer the [running installation’s target](../../boot/plugin-manager/README.md#use-this-package). Other profile-installed plugins use uninstall and reinstall to change versions; installation-carried bundles upgrade with DSH.
+- **No version picker** — the spec is typed as pnpm accepts it; the page does not list registry versions. Official on-demand entries offer the [running installation’s target](../../boot/plugin-manager/README.md#use-this-package). Other profile-installed plugins use uninstall and reinstall to change versions; installation-carried bundles upgrade with VEGA.
 - **The registry choice is this browser's** — it lives in `localStorage`, so another browser applies its own initial recommendation; the `dsh plugin` command and the agent tool use the Host's configured registry.
 - **Every registry read runs pnpm** — opening the dialog, the check, and the install each ask pnpm what its own configuration names; a machine without pnpm reads it as unknown and is offered no fallback.
 

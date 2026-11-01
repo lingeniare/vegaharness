@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-input-trigger"
+    "title": "ui-input-trigger",
+    "description": "Input trigger pipeline: '/' and '@' detection, candidate menu, pick routing to registered sources."
   }
 }

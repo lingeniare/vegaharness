@@ -1,7 +1,7 @@
 /** Authenticated Remote operations for account UI consumers. */
 import { Context } from '@deepseek-ai/cordis'
 import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
-import { isRunningAccountTask } from '@deepseek-ai/dsh-deepseek-account'
+import { accountManagedProviders, isRunningAccountTask } from '@deepseek-ai/dsh-deepseek-account'
 import type {} from '@deepseek-ai/dsh-agent'
 import type { AccountBonusBatch, AccountBonusOrderId, AccountClientMetadata, AccountDetails, AccountUserId } from '@deepseek-ai/dsh-deepseek-account/types'
 import type { AccountView, SignInAttemptId } from './types.ts'
@@ -79,7 +79,8 @@ export class AccountController extends TypertRemoteService {
    */
   @Remote
   hasRunningAccountTasks(): boolean {
-    return this.ctx.agents.list().some(isRunningAccountTask)
+    const providers = accountManagedProviders(this.ctx)
+    return this.ctx.agents.list().some(agent => isRunningAccountTask(agent, providers))
   }
   /**
    * Remove the local account grant and revoke it through Platform in the background, without deleting API keys.

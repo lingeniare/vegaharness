@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "tool-workflow"
+    "title": "tool-workflow",
+    "description": "Model-facing workflow tool: run a JavaScript orchestration script over ctx.workflowEngine."
   }
 }

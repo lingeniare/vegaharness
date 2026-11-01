@@ -275,24 +275,24 @@ describe('web e2e: PTC mode round renders nested sub-calls', () => {
     expect(await wrap.getAttribute('aria-pressed')).toBe('true')
   })
 
-  it.skipIf(MODE === 'record')('renders the same recorded tool round in Japanese without translating model or tool data', async () => {
-    onTestFailed(() => saveFailureShot(page, 'web-e2e-ptc-japanese'))
+  it.skipIf(MODE === 'record')('renders the same recorded tool round in Russian without translating model or tool data', async () => {
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-ptc-russian'))
     await openSettings(page, 'en')
     const settings = page.getByRole('dialog', { name: 'Settings', exact: true })
     await settings.getByRole('button', { name: 'English', exact: true }).click()
-    await page.getByRole('menuitem', { name: '日本語', exact: true }).click()
-    await page.getByRole('dialog', { name: '設定', exact: true }).waitFor()
+    await page.getByRole('menuitem', { name: 'Русский', exact: true }).click()
+    await page.getByRole('dialog', { name: 'Настройки', exact: true }).waitFor()
     await page.keyboard.press('Escape')
-    await page.getByRole('tab', { name: 'チャット', exact: true }).click()
+    await page.getByRole('tab', { name: 'Чат', exact: true }).click()
     await page.getByText('DONE', { exact: true }).waitFor()
-    expect(await page.evaluate(() => document.documentElement.lang)).toBe('ja')
+    expect(await page.evaluate(() => document.documentElement.lang)).toBe('ru')
     const row = page.locator('[data-subcalls] [data-sample="bash"]').first()
     await expandOwningTurnProcess(page, row)
     if (await row.getAttribute('aria-expanded') !== 'true') await row.click()
     await row.locator('xpath=..').getByText('echo CODE_ROUND_OK', { exact: true }).waitFor()
     const snapshot = await captureExpandedTurnProcessAria(page, '[class*="centerCol"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(
-      fileURLToPath(new URL('../../../snapshots/web/ptc-round/ui-ja.expected.md', import.meta.url)), snapshot, MODE,
+      fileURLToPath(new URL('../../../snapshots/web/ptc-round/ui-ru.expected.md', import.meta.url)), snapshot, MODE,
     )
   })
 

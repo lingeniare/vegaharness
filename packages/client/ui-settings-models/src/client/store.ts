@@ -29,6 +29,8 @@ export interface ProviderDirectoryEntry {
   readonly settingsNs: string
   readonly settingsPath: readonly string[]
   readonly active: boolean
+  /** Whether an account sign-in owns this route's credential (no editable profile). */
+  readonly accountManaged?: boolean
   readonly declared?: boolean
   readonly defaultBaseURL?: string
   readonly baseURLEnv?: readonly string[]
@@ -54,6 +56,7 @@ export function joinProviderDirectory(
     settingsNs: entry.settingsNs,
     settingsPath: [...entry.settingsPath],
     active: active.has(entry.provider),
+    ...entry.accountManaged === undefined ? {} : { accountManaged: entry.accountManaged },
     ...entry.declared === undefined ? {} : { declared: entry.declared },
     ...entry.defaultBaseURL === undefined ? {} : { defaultBaseURL: entry.defaultBaseURL },
     ...entry.baseURLEnv === undefined ? {} : { baseURLEnv: entry.baseURLEnv },
@@ -71,8 +74,8 @@ export function joinProviderDirectory(
     })
   }
   return rows.toSorted((left, right) =>
-    (left.provider === 'deepseek-account' ? 0 : left.provider === 'deepseek-official' ? 1 : 2)
-      - (right.provider === 'deepseek-account' ? 0 : right.provider === 'deepseek-official' ? 1 : 2))
+    (left.accountManaged === true ? 0 : left.provider === 'deepseek-official' ? 1 : 2)
+      - (right.accountManaged === true ? 0 : right.provider === 'deepseek-official' ? 1 : 2))
 }
 
 /** One provider row the page renders. */
@@ -260,18 +263,18 @@ export class ModelsSettingsStore {
         entry,
         configured,
         removable,
-        apiKeyEnv: entry.provider === 'deepseek-account' ? undefined : apiKeyEnvOf(namespace, entry.settingsPath, this.schema),
+        apiKeyEnv: entry.accountManaged === true ? undefined : apiKeyEnvOf(namespace, entry.settingsPath, this.schema),
         credential: undefined,
       }
     })
-    if (rows.some(row => row.entry.provider === 'deepseek-account')) {
+    if (rows.some(row => row.entry.accountManaged === true)) {
       const catalog = await this.ctx.remote.session.modelCatalog()
       for (const row of rows) {
-        if (row.entry.provider === 'deepseek-account') row.accountAvailable = catalog.ok
-          && catalog.value.groups.some(group => group.id === 'deepseek-account' && group.models.length > 0)
+        if (row.entry.accountManaged === true) row.accountAvailable = catalog.ok
+          && catalog.value.groups.some(group => group.id === row.entry.provider && group.models.length > 0)
       }
     }
-    const refs = [...new Set(rows.filter(row => row.entry.provider !== 'deepseek-account').flatMap(row =>
+    const refs = [...new Set(rows.filter(row => row.entry.accountManaged !== true).flatMap(row =>
       row.apiKeyEnv === undefined ? [deriveKeyRef(row.entry.provider), ...row.entry.nativeAuth?.env ?? []] : [row.apiKeyEnv]))]
     const credentials: Record<string, CredentialInfo> = {}
     let credentialError: string | null = null
@@ -290,8 +293,8 @@ export class ModelsSettingsStore {
       s.error = null
       s.credentialError = credentialError
       s.writable = writable
-      s.rows = rows.filter(row => row.entry.provider !== 'deepseek-account' || row.accountAvailable === true).map((row) => {
-        if (row.entry.provider === 'deepseek-account') return row
+      s.rows = rows.filter(row => row.entry.accountManaged !== true || row.accountAvailable === true).map((row) => {
+        if (row.entry.accountManaged === true) return row
         const named = row.apiKeyEnv === undefined ? undefined : credentials[row.apiKeyEnv]
         const derived = row.apiKeyEnv !== undefined ? undefined : credentials[deriveKeyRef(row.entry.provider)]
         return {
@@ -340,7 +343,7 @@ export class ModelsSettingsStore {
  */
 export function providerUsable(row: ProviderRow): boolean {
   if (!row.entry.active) return false
-  if (row.entry.provider === 'deepseek-account') return row.accountAvailable === true
+  if (row.entry.accountManaged === true) return row.accountAvailable === true
   if (row.apiKeyEnv === undefined) return true
   return row.credential?.configured === true
 }

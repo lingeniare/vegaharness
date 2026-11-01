@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "terminal"
+    "title": "terminal",
+    "description": "Persistent PTY session seam for the VEGA Harness — owner-scoped ids, backend registry, interactive sends, reads, signals, and awaited cleanup."
   }
 }

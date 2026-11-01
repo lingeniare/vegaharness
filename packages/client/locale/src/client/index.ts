@@ -20,11 +20,8 @@ import {
   LOCALE_ID_PATTERN, LOCALE_IDS, LOCALE_PREFERENCE_FIELD, LOCALE_SETTINGS_NAMESPACE,
   type BuiltInLocaleId, type LocaleId, type LocaleSettings,
 } from '../locale-settings.ts'
-import { en, ja, es, fr, de, ru, pt, zh, type CommonKey } from '../locales/index.ts'
-import {
-  en as settingsEn, ja as settingsJa, es as settingsEs, fr as settingsFr,
-  de as settingsDe, ru as settingsRu, pt as settingsPt, zh as settingsZh, type SettingsLocaleKey,
-} from '../locales/settings.ts'
+import { en, ru, type CommonKey } from '../locales/index.ts'
+import { en as settingsEn, ru as settingsRu, type SettingsLocaleKey } from '../locales/settings.ts'
 import type { LanguageRowInjected } from './LanguageRow.tsx'
 import { LanguageRow } from './LanguageRow.tsx'
 import { createLanguageRowStore } from './settings-store.ts'
@@ -102,10 +99,8 @@ declare module '@deepseek-ai/cordis' {
  * English is both the locale the UI opens in when the browser names no registered
  * language (and for non-browser runs), and the dictionary consulted after the
  * active locale misses a key. One constant serves both because the shipped
- * `zh`/`en` dictionaries carry identical key sets, so neither direction can
- * leave a key unresolved; the residual case points at English rather than
- * zh because a browser naming no registered language is the reader least
- * likely to read Chinese.
+ * `en`/`ru` dictionaries carry identical key sets, so neither direction can
+ * leave a key unresolved.
  */
 export const FALLBACK_LOCALE: BuiltInLocaleId = 'en'
 
@@ -117,8 +112,8 @@ export const SETTINGS_NS = 'settings.locale'
 
 /** The baseline locales required by typed dictionary registrations. */
 const BUILT_IN_LOCALE_METADATA = {
-  zh: { label: '中文', fallback: 'en' },
   en: { label: 'English' },
+  ru: { label: 'Русский', fallback: 'en' },
 } as const satisfies Record<BuiltInLocaleId, Omit<LocaleDefinition, 'id'>>
 const BUILT_IN_LOCALES: readonly LocaleDefinition[] = Object.freeze(
   LOCALE_IDS.map(id => Object.freeze({ id, ...BUILT_IN_LOCALE_METADATA[id] })),
@@ -149,8 +144,7 @@ function normalizeLanguage(input: LanguageRegistration): Readonly<LanguageRegist
 function syncDocumentLanguage(snapshot: LocaleSnapshot): void {
   // Non-browser runs (node boots of the client tree) have no document.
   if (typeof document === 'undefined') return
-  const language = snapshot.active === 'zh' ? 'zh-CN' : snapshot.active
-  if (document.documentElement.lang !== language) document.documentElement.lang = language
+  if (document.documentElement.lang !== snapshot.active) document.documentElement.lang = snapshot.active
 }
 
 /**
@@ -248,7 +242,7 @@ export class LocaleRuntime {
    * locale, because the active value may be a provisional browser-derived or
    * fallback resolution that nothing has stored yet. Picking the language
    * already on screen is still an explicit choice, and it must survive a
-   * different browser sharing the same DSH home. Only the render notification
+   * different browser sharing the same VEGA home. Only the render notification
    * is conditional: republishing an unchanged locale would churn every
    * subscriber for nothing.
    * @param id - a registered locale id; unknown ids throw.
@@ -580,11 +574,8 @@ export async function apply(ctx: ClientContext): Promise<void> {
   }
   const host = ctx.configForms.get<LocaleSettings>(LOCALE_SETTINGS_NAMESPACE)
   const locale = new LocaleRuntime(ctx, host, bootstrap)
-  for (const [id, label] of [['ja', '日本語'], ['es', 'Español'], ['fr', 'Français'], ['de', 'Deutsch'], ['ru', 'Русский'], ['pt', 'Português']] as const) {
-    ctx.effect(() => locale.addLanguage({ id, label, fallback: 'en' }), `locale: ${id} language`)
-  }
-  ctx.effect(() => locale.register(COMMON_NS, { zh, en, ja, es, fr, de, ru, pt }), 'locale: common dictionaries')
-  ctx.effect(() => locale.register(SETTINGS_NS, { zh: settingsZh, en: settingsEn, ja: settingsJa, es: settingsEs, fr: settingsFr, de: settingsDe, ru: settingsRu, pt: settingsPt }), 'locale: settings dictionaries')
+  ctx.effect(() => locale.register(COMMON_NS, { en, ru }), 'locale: common dictionaries')
+  ctx.effect(() => locale.register(SETTINGS_NS, { en: settingsEn, ru: settingsRu }), 'locale: settings dictionaries')
   ctx.provide('locale', locale)
   if (bridge !== undefined) {
     ctx.on('locale/change', (snapshot) => { bridge.onChange(snapshot.active) })

@@ -46,7 +46,7 @@ it('serves the built DevTools frontend under its own path without rebuilding Dev
     expect(response.headers()['content-type']).toMatch(asset.endsWith('.js') ? /javascript/u : /text\/css/u)
     expect((await response.body()).byteLength).toBeGreaterThan(0)
   }
-  for (const locale of ['en-US', 'zh', 'fr']) expect((await page.request.get(`${root}core/i18n/locales/${locale}.json`)).status()).toBe(404)
+  for (const locale of ['zh', 'ja', 'fr']) expect((await page.request.get(`${root}core/i18n/locales/${locale}.json`)).status()).toBe(404)
   expect((await page.request.get(`${root}entrypoints/heap_snapshot_worker/heap_snapshot_worker-entrypoint.js`)).status()).toBe(200)
   expect((await page.request.get(`${root}entrypoints/lighthouse_worker/lighthouse_worker.js`)).status()).toBe(200)
   expect((await page.request.get(`${root}missing.js`)).status()).toBe(404)

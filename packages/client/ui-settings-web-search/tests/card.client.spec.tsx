@@ -8,7 +8,7 @@ import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import type { SettingsFieldState, SettingsFormShell } from '@deepseek-ai/dsh-client-ui-primitives'
 import { WebSearchCard, type WebSearchCardProps } from '../src/client/WebSearchCard.tsx'
 import type { WebSearchCardState } from '../src/client/web-search-card-controller.ts'
-import { en, zh } from '../src/client/locales.ts'
+import { en, ru } from '../src/client/locales.ts'
 
 afterEach(cleanup)
 
@@ -35,7 +35,7 @@ describe('WebSearchCard', () => {
       ...settled,
       apiSwitchAvailable: true,
       apiSwitchBlocked: state.invalid === true || state.failed === true,
-      baseURL: state.useSearchApi === true ? endpoints.api : endpoints.messages, useSearchApi: false, maxUses: field('5'),
+      baseURL: state.useSearchApi === true ? endpoints.api : endpoints.messages, useVega: false, useSearchApi: false, maxUses: field('5'),
       count: field('10'),
       apiKey: field(''),
       apiKeyConfigured: false,
@@ -50,7 +50,7 @@ describe('WebSearchCard', () => {
 
   it('renders its one-liner alone in the summary view', () => {
     const store = createSnapshotStore<WebSearchCardState>({
-      ...settled, baseURL: endpoints.messages, apiSwitchAvailable: true, apiSwitchBlocked: false, useSearchApi: false,
+      ...settled, baseURL: endpoints.messages, apiSwitchAvailable: true, apiSwitchBlocked: false, useVega: false, useSearchApi: false,
       maxUses: field('5'), count: field('10'), apiKey: field(''), apiKeyConfigured: false, apiKeyWritable: true,
     })
     const props = { ...cardActions(), view: 'summary', t, useWebSearchCard: bindSnapshotSelector(store) } as WebSearchCardProps
@@ -127,7 +127,7 @@ describe('WebSearchCard', () => {
     expect(screen.getByLabelText(en.maxUses)).toBeTruthy()
     expect(screen.getByText(en.baseUrlHint)).toBeTruthy()
     expect(screen.queryByText(en.searchApiBaseUrlHint)).toBeNull()
-    expect(zh.useSearchApi).toBe('启用新版 Web 搜索 API')
+    expect(ru.useSearchApi).toBe('Использовать новый API веб-поиска')
     fireEvent.click(toggle)
     expect(actions.setSearchApi).toHaveBeenCalledWith(true)
     expect(actions.save).not.toHaveBeenCalled()
@@ -140,8 +140,8 @@ describe('WebSearchCard', () => {
     expect(guide.getAttribute('target')).toBe('_blank')
     expect(guide.getAttribute('rel')).toBe('noopener noreferrer')
     expect(guide.parentElement?.textContent).toBe(`${en.useSearchApiHint}${en.searchGuide}`)
-    expect(`${zh.useSearchApiHint}${zh.searchGuide}`).toBe('默认关闭，搜索通过 DeepSeek Messages 完成。新版 Web 搜索 API 功能与计费详见网页搜索与抓取指南')
-    expect(zh.searchGuideUrl).toBe('https://api-docs.deepseek.com/zh-cn/guides/search')
+    expect(`${ru.useSearchApiHint}${ru.searchGuide}`).toBe('По умолчанию выключен: поиск выполняется через VEGA Messages. Возможности и тарифы нового API веб-поиска см. в руководстве Search & Fetch')
+    expect(ru.searchGuideUrl).toBe('https://api.vega.chat')
   })
 
   it('omits the switch while the Host serves no Search and Fetch API section', () => {

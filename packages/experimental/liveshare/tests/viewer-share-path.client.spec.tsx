@@ -16,12 +16,12 @@ import { apply as menusApply, inject as menusInject } from '@deepseek-ai/dsh-cli
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { apply as resourcesApply, inject as resourcesInject } from '@deepseek-ai/dsh-client-resources/src/client/index.ts'
 import { apply as sidebarApply, inject as sidebarInject } from '@deepseek-ai/dsh-client-ui-sidebar-right/src/client/index.ts'
-import { en, NS, zh } from '../src/client/locales.ts'
+import { en, NS, ru } from '../src/client/locales.ts'
 import { apply, inject } from '../src/client/viewer-share-path.tsx'
 
 const SESSION = 'reader' as SessionId
 const ADDRESS = `dsh-resource://file/session/${SESSION}/src/a.ts`
-const UNAVAILABLE = '此页面无法打开工作区文件：分享提供的是文件路径，不是文件内容。'
+const UNAVAILABLE = 'Эта страница не может открыть файлы рабочего пространства: общий доступ передаёт пути к файлам, а не их содержимое.'
 const SHORTCUT_CATALOG: readonly never[] = []
 let runtime: SlotTestRuntime | undefined
 
@@ -45,9 +45,9 @@ async function boot() {
   const locale = new LocaleRuntime(rt.ctx)
   rt.ctx.provide('locale', locale)
   // The Liveshare client face registers the dictionaries this child plugin renders with.
-  locale.register(NS, { zh, en })
+  locale.register(NS, { ru, en })
   rt.slots.installLocale(locale)
-  await act(async () => { locale.setLocale('zh') })
+  await act(async () => { locale.setLocale('ru') })
   await rt.declare({ rightbar: { kind: 'single', scope: 'root' } })
   await rt.sessions.add({ id: SESSION })
   await rt.sessions.retainFor(rt.ctx, SESSION, { source: 'mainView' }).ready

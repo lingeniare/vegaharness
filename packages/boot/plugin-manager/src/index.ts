@@ -394,7 +394,7 @@ export class PluginManager extends TypertRemoteService {
    * README. An installed bundle is read from its directory without network access; an official bundle the installation
    * offers before it is installed is read from the npm file CDNs at its offered version. Nothing is cached.
    * @param name - the bundle's package name, as `listBundles()` lists it.
-   * @param language - the display language, such as `zh-CN`; documents fall back through its prefixes to English.
+   * @param language - the display language, such as `ru-RU`; documents fall back through its prefixes to English.
    * @param options - `npmFileSources` names npm file CDNs to ask first for an offered bundle, in order, such as the one
    *   a Client measured as fastest; configured CDNs it omits follow, and CDNs that are not configured are not asked.
    * @returns the document with its origin and path, or `none`.

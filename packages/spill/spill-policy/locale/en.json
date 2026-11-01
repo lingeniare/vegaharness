@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "spill-policy"
+    "title": "spill-policy",
+    "description": "Token-budgeted tool-result retention with recoverable text and image paths."
   }
 }

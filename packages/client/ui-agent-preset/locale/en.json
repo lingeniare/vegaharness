@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-agent-preset"
+    "title": "ui-agent-preset",
+    "description": "Agent-preset surfaces: the default for later sessions, this session's seat, and the composition editor."
   }
 }

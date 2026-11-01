@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "session-turn-outline"
+    "title": "session-turn-outline",
+    "description": "Whole-log turn outline projection (turnOutline) for the VEGA Harness."
   }
 }

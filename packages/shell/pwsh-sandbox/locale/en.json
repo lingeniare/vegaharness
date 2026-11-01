@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "pwsh-sandbox"
+    "title": "pwsh-sandbox",
+    "description": "Sandbox-consuming implementation of the VEGA Harness PowerShell executor seam (confines every command via ctx.sandbox, reports denial/enforcement result facts)."
   }
 }

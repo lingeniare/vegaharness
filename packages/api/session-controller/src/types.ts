@@ -118,6 +118,8 @@ export interface ModelCatalogModel {
 export interface ModelProviderGroup {
   readonly id: string
   readonly name: string
+  /** Whether an account sign-in owns this route's credential (see `LlmConfigurableProvider.accountManaged`). */
+  readonly accountManaged?: boolean
   readonly models: readonly ModelCatalogModel[]
 }
 
@@ -125,6 +127,8 @@ export interface ModelProviderGroup {
 export interface ModelCatalogFailure {
   readonly id: string
   readonly name: string
+  /** Whether an account sign-in owns this route's credential (see `LlmConfigurableProvider.accountManaged`). */
+  readonly accountManaged?: boolean
   readonly message: string
 }
 

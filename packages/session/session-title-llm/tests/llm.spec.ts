@@ -276,7 +276,7 @@ describe('executeSessionTitleLlm', () => {
   it('enforces the exact multibyte input byte limit before logging or dispatch', async () => {
     const { ctx, adapter } = await withScript(SCRIPT)
     const providerRequest = request(ctx)
-    const input = '标题输入："番茄"'
+    const input = '标题输入: "番茄"'
     const inputBytes = Buffer.byteLength(input, 'utf8')
     expect(inputBytes).toBeGreaterThan(input.length)
 

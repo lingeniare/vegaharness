@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "subagent-fork-in-process"
+    "title": "subagent-fork-in-process",
+    "description": "In-process fork subagent backend: runs a child agent seeded with a prefix of the parent's log."
   }
 }

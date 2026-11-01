@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "llm-deepseek-account"
+    "title": "llm-deepseek-account",
+    "description": "DeepSeek account provider authentication and discovery."
   }
 }

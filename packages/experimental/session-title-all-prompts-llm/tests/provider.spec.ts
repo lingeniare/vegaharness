@@ -318,7 +318,7 @@ describe('all-messages LLM title provider', () => {
       { type: 'finish', reason: { kind: 'stop' } },
     ])
     const session = ctx.sessions.create(SessionId('all-stability'))
-    const first = appendHumanPrompt(session, '我想在阳台种番茄和罗勒，请给入门建议。')
+    const first = appendHumanPrompt(session, '我想在阳台种番茄和罗勒, 请给入门建议。')
     await ctx.sessionTitle.refresh(session)
     expect(ctx.sessionTitle.get(session)?.title).toBe('阳台种番茄与罗勒')
 

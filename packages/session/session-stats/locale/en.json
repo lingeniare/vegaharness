@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "session-stats"
+    "title": "session-stats",
+    "description": "Whole-log conversation counts and wall times projection (sessionStats) for the VEGA Harness."
   }
 }

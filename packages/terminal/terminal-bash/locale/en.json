@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "terminal-bash"
+    "title": "terminal-bash",
+    "description": "Persistent shell PTY backend over the VEGA Harness subprocess terminal primitive."
   }
 }

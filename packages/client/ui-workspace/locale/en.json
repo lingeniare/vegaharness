@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-workspace"
+    "title": "ui-workspace",
+    "description": "Workspace picker plugin: one WorkspacePicker registered into the sidebar and empty-state workspace slots."
   }
 }

@@ -1,8 +1,5 @@
 /** Client-only filtering and page-scroll headers for original Markdown tables. */
-const messages = {
-  en: { placeholder: 'Search...', filter: 'Filter table', clear: 'Clear', empty: 'No matching rows.' },
-  zh: { placeholder: 'Search...', filter: '筛选表格', clear: '清空', empty: '没有匹配的行。' },
-}
+const messages = { placeholder: 'Search...', filter: 'Filter table', clear: 'Clear', empty: 'No matching rows.' }
 
 class FilterableTable {
   readonly #controls: HTMLDivElement
@@ -17,7 +14,7 @@ class FilterableTable {
     private readonly table: HTMLTableElement,
     private readonly head: HTMLTableSectionElement,
     rows: HTMLTableRowElement[],
-    copy: typeof messages.en,
+    copy: typeof messages,
     private readonly changed: () => void,
   ) {
     const doc = table.ownerDocument
@@ -59,7 +56,7 @@ class FilterableTable {
       && rows.every((row, index) => row === this.#rows[index]?.element)
   }
 
-  localize(copy: typeof messages.en): void {
+  localize(copy: typeof messages): void {
     this.#input.placeholder = copy.placeholder
     this.#input.setAttribute('aria-label', copy.filter)
     this.#clear.setAttribute('aria-label', copy.clear)
@@ -109,9 +106,8 @@ export class DocumentTables {
 
   /**
    * @param doc Browser document containing the rendered VitePress article.
-   * @param language Current VitePress language, read again on content refresh.
    */
-  constructor(private readonly doc: Document, private readonly language: () => string) {
+  constructor(private readonly doc: Document) {
     this.#sizes = new ResizeObserver(() => { this.#schedule() })
     const content = doc.querySelector('#VPContent')
     if (content) this.#sizes.observe(content)
@@ -130,7 +126,7 @@ export class DocumentTables {
       this.#sizes.unobserve(table)
       this.#tables.delete(table)
     }
-    const copy = this.language().startsWith('zh') ? messages.zh : messages.en
+    const copy = messages
     for (const table of tables) {
       const rows = Array.from(table.tBodies).flatMap(body => Array.from(body.rows))
       const existing = this.#tables.get(table)

@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "command-compact"
+    "title": "command-compact",
+    "description": "Human-facing slash command for explicit session compaction."
   }
 }

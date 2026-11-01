@@ -35,8 +35,8 @@ export const WEB_NS = 'web'
 
 /** Provider ids the switch writes into the web service's selection. */
 const PROVIDERS = {
-  searchProvider: { api: 'deepseek-search-api', messages: 'deepseek-official' },
-  fetchProvider: { api: 'deepseek-fetch-api', messages: 'http' },
+  searchProvider: { api: 'deepseek-search-api', messages: 'deepseek-official', vega: 'api-vega' },
+  fetchProvider: { api: 'deepseek-fetch-api', messages: 'http', vega: 'api-vega' },
 } as const
 
 /** Credential reference the providers resolve when a section names none. */
@@ -91,6 +91,8 @@ export interface WebSearchCardState extends SettingsFormShell {
   apiSwitchBlocked: boolean
   /** Staged switch position: true selects the Search and Fetch APIs. */
   useSearchApi: boolean
+  /** Staged switch position: true selects the signed-in API VEGA account's server tools. */
+  useVega: boolean
   /** Endpoint of the selected API. */
   baseURL: SettingsFieldState
   /** Maximum Messages server-tool uses. */
@@ -113,6 +115,8 @@ export interface WebSearchCardFace extends SettingsFormActions {
   }
   /** Stage the API switch: true selects the Search and Fetch APIs, false Messages search with local fetch. */
   setSearchApi: (enabled: boolean) => void
+  /** Stage the VEGA switch: true selects the account-managed server tools over the DeepSeek providers. */
+  setVega: (enabled: boolean) => void
 }
 
 /** Settings scopes for the namespaces the page edits. */
@@ -191,6 +195,11 @@ export class WebSearchCardController {
     return this.switchAvailable() && this.selection.field('searchProvider').text === PROVIDERS.searchProvider.api
   }
 
+  /** Whether the staged selection names the account-managed VEGA server tools. */
+  private vega(): boolean {
+    return this.switchAvailable() && this.selection.field('searchProvider').text === PROVIDERS.searchProvider.vega
+  }
+
   private projection(): WebSearchCardState {
     const primary = this.messages.shell()
     const served = [primary, this.selection.shell(), this.api.shell()].filter(item => item.available)
@@ -208,6 +217,7 @@ export class WebSearchCardController {
       apiSwitchAvailable: this.switchAvailable(),
       apiSwitchBlocked: shell.invalid || shell.failed,
       useSearchApi: searchApi,
+      useVega: this.vega(),
       baseURL: (searchApi ? this.api : this.messages).field('baseURL'),
       maxUses: this.messages.field('maxUses'),
       count: this.api.field('count'),
@@ -304,6 +314,7 @@ export class WebSearchCardController {
       edit: (field, text) => { formOf(field).actions().edit(field, text) },
       resetField: (field) => { formOf(field).actions().resetField(field) },
       setSearchApi: (enabled) => { this.select(enabled) },
+      setVega: (enabled) => { this.selectVega(enabled) },
       save: () => { void this.save() },
       discard: () => {
         for (const form of [this.selection, this.messages, this.api]) form.actions().discard()
@@ -322,6 +333,21 @@ export class WebSearchCardController {
     const actions = this.selection.actions()
     for (const field of ['searchProvider', 'fetchProvider'] as const) {
       const target = PROVIDERS[field][enabled ? 'api' : 'messages']
+      if (base?.[field] === target) actions.resetField(field)
+      else actions.edit(field, target)
+    }
+  }
+
+  /**
+   * Stage both provider selections for the VEGA account's server tools. Turning
+   * the switch off returns to the Messages search and local fetch pair.
+   * @param enabled - true for the account-managed VEGA server tools.
+   */
+  private selectVega(enabled: boolean): void {
+    const base = this.scopes.web.getSnapshot().base as WebProviderSelection | undefined
+    const actions = this.selection.actions()
+    for (const field of ['searchProvider', 'fetchProvider'] as const) {
+      const target = PROVIDERS[field][enabled ? 'vega' : 'messages']
       if (base?.[field] === target) actions.resetField(field)
       else actions.edit(field, target)
     }

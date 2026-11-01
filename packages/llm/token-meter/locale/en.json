@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "token-meter"
+    "title": "token-meter",
+    "description": "Replay-aware token measurement service (ctx.tokenMeter) for the VEGA Harness."
   }
 }

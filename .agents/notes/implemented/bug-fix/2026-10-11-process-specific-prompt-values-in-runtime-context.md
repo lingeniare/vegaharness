@@ -2,8 +2,6 @@
 
 Status: implemented
 
-English | [中文](2026-10-11-process-specific-prompt-values-in-runtime-context.zh.md)
-
 ## Problem
 
 `dsh web` wrote two process-specific values directly into the system prompt: the implementation checkout path in the `harness:source` section (four directories above the web-app module) and the Web GUI URL in the `app:web-surface` section (the bound port or `publicUrl`). These operations change them without the user perceiving a system-prompt change:
@@ -35,10 +33,10 @@ The plugin injects `systemPrompt`, `sessionProjections`, and `webApp` and reads 
 
 | Registration | Content |
 |---|---|
-| Section `harness:source` (the `HARNESS_SOURCE` slot) | `The runtime context names the DeepSeek Harness implementation checkout. …`, the remaining guidance unchanged |
-| Context `harness:source` (`CONTEXT_ORDERS.HARNESS_SOURCE = 200`) | `Current DeepSeek Harness implementation checkout: "<path>".` |
-| Section `app:web-surface` (the `WEB_SURFACE` slot) | `You are interacting with the user through the DeepSeek Harness Web GUI whose URL the runtime context names. …`, the remaining guidance unchanged |
-| Context `app:web-surface` (`CONTEXT_ORDERS.WEB_SURFACE = 210`) | `Current DeepSeek Harness Web GUI URL: "<url>".` |
+| Section `harness:source` (the `HARNESS_SOURCE` slot) | `The runtime context names the VEGA Harness implementation checkout. …`, the remaining guidance unchanged |
+| Context `harness:source` (`CONTEXT_ORDERS.HARNESS_SOURCE = 200`) | `Current VEGA Harness implementation checkout: "<path>".` |
+| Section `app:web-surface` (the `WEB_SURFACE` slot) | `You are interacting with the user through the VEGA Harness Web GUI whose URL the runtime context names. …`, the remaining guidance unchanged |
+| Context `app:web-surface` (`CONTEXT_ORDERS.WEB_SURFACE = 210`) | `Current VEGA Harness Web GUI URL: "<url>".` |
 
 Both contexts are optional (no `required`). The only complete persona, web-app's minimal preset, also disables optional runtime context, so it still sees neither value. Runtime context follows the existing mechanism: an unchanged value emits no snapshot, a change appends a complete snapshot before the step's user message, and resume compares against the latest logged snapshot, never rewriting a committed message.
 
@@ -48,8 +46,8 @@ The plugin registers the host-only session projection `harnessDevLegacyPrompt`, 
 
 | Earlier template | Matching rule |
 |---|---|
-| `harness:source` | Starts with `The DeepSeek Harness implementation checkout is at `, ends with the earlier fixed guidance, no line break between |
-| `app:web-surface` | Starts with `You are interacting with the user through the DeepSeek Harness Web GUI at `, ends with `. ` plus the guidance as earlier releases rendered it, frozen as a literal, no line break between |
+| `harness:source` | Starts with `The VEGA Harness implementation checkout is at `, ends with the earlier fixed guidance, no line break between |
+| `app:web-surface` | Starts with `You are interacting with the user through the VEGA Harness Web GUI at `, ends with `. ` plus the guidance as earlier releases rendered it, frozen as a literal, no line break between |
 
 Both section text providers read the projection state of `AssembleContext.agent.session`: with an earlier paragraph they return it verbatim (`interpolate: false`), otherwise the current guidance. Diagnostic assemblies without an agent use the current guidance. `sessionProjections` is a required injection and the plugin registers its own unit, so the state is readable whenever an agent exists.
 

@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "compaction-image-offload"
+    "title": "compaction-image-offload",
+    "description": "Durable image offload for image-capable routes: replace over-budget request images with placeholders and retry."
   }
 }

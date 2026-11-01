@@ -1103,7 +1103,7 @@ describe('headless stream-json snapshots', () => {
       configPath: teamConfigPath,
       binArgs: [
         teamConfigPath,
-        '请先运行 workflow 检查，再使用 Agent Teams 把调研和实现拆给两个 teammate，等待完成后汇总。',
+        '请先运行 workflow 检查, 再使用 Agent Teams 把调研和实现拆给两个 teammate, 等待完成后汇总。',
       ],
       tsconfigPath,
       processTimeoutMs: 60_000,

@@ -10,12 +10,18 @@ it('cancels running account tasks with their inboxes retained and detaches with 
   const cancelOther = vi.fn()
   const cancelIdle = vi.fn()
   const tasks = [
-    { status: 'running', session: { requestContext: () => ({ provider: 'deepseek-account' }) }, cancel: cancelAccount },
+    { status: 'running', session: { requestContext: () => ({ provider: 'api-vega' }) }, cancel: cancelAccount },
     { status: 'running', session: { requestContext: () => ({ provider: 'deepseek-official' }) }, cancel: cancelOther },
-    { status: 'idle', session: { requestContext: () => ({ provider: 'deepseek-account' }) }, cancel: cancelIdle },
+    { status: 'idle', session: { requestContext: () => ({ provider: 'api-vega' }) }, cancel: cancelIdle },
     { status: 'running', session: { requestContext: () => undefined }, cancel: cancelOther },
   ]
   ctx.provide('agents', { list: () => tasks } as never)
+  ctx.provide('llm', {
+    listConfigurableProviders: () => [
+      { provider: 'api-vega', accountManaged: true },
+      { provider: 'deepseek-official', accountManaged: false },
+    ],
+  } as never)
   const owner = ctx.plugin((scope) => { installAccountTaskCancellation(scope) })
   try {
     await owner.await()

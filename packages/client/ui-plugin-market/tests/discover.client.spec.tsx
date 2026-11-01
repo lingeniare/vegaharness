@@ -8,7 +8,7 @@ import type { LocaleSnapshot } from '@deepseek-ai/dsh-client-locale/client'
 import { DiscoverSection, type DiscoverSectionProps } from '../src/client/DiscoverSection.tsx'
 import type { DetailsState, DiscoverState, ListingState } from '../src/client/market-store.ts'
 import { INITIAL_QUERY, type DiscoverQuery } from '../src/client/presentation.ts'
-import { en, zh, type PluginMarketLocaleKey } from '../src/client/locales.ts'
+import { en, ru, type PluginMarketLocaleKey } from '../src/client/locales.ts'
 
 afterEach(cleanup)
 
@@ -50,7 +50,7 @@ const LISTING: MarketSearchResult = {
   fetchedAt: 1,
   total: 6,
   nextOffset: null,
-  title: { en: 'Alpha index', zh: '甲索引' },
+  title: { en: 'Alpha index', ru: 'Альфа-индекс' },
   metadata: {
     categories: { tools: { title: 'Tools' }, themes: { title: 'Themes' } },
     labels: { official: { title: 'Official' }, beta: { title: 'Beta' } },
@@ -58,7 +58,7 @@ const LISTING: MarketSearchResult = {
   },
   entries: [
     entry('dsh-a', {
-      title: { en: 'Alpha', zh: '甲' }, description: 'Does A', author: 'Jane', icon: 'https://cdn.example/a.png',
+      title: { en: 'Alpha', ru: 'Альфа' }, description: 'Does A', author: 'Jane', icon: 'https://cdn.example/a.png',
       homepage: 'https://example.com/alpha#readme', repository: { url: 'https://github.com/o/plugins', directory: 'packages/a' },
     }, { category: 'tools', labels: ['official', 'beta'], sortKeys: { downloads: 1 } }, {
       source: { type: 'npm', registry: 'https://r.example/' }, install: { spec: 'dsh-a@1.0.0', registry: 'https://r.example/' },
@@ -80,7 +80,7 @@ const READY: DiscoverState = {
 
 function renderTab(state: Partial<DiscoverState> = {}, dictionary: Record<PluginMarketLocaleKey, string> = en) {
   const store = createSnapshotStore<DiscoverState>({ ...READY, ...state })
-  const language = dictionary === en ? 'en' : 'zh'
+  const language = dictionary === en ? 'en' : 'ru'
   const locale = createSnapshotStore<LocaleSnapshot>({ active: language, locales: [], revision: 0 })
   const actions = {
     ensure: vi.fn(), reload: vi.fn(), select: vi.fn(), search: vi.fn(), more: vi.fn(), refresh: vi.fn(), retry: vi.fn(),
@@ -452,10 +452,10 @@ describe('DiscoverSection', () => {
   })
 
   it('renders the Chinese copy and dates', () => {
-    renderTab({}, zh)
-    expect(screen.getByRole('button', { name: '切换插件索引，当前为 甲索引' })).toBeTruthy()
-    expect(card('dsh-a').getByText('甲')).toBeTruthy()
-    expect(card('dsh-a').getByText(/^1\.0\.0 · Jane · 2026年9月/)).toBeTruthy()
-    expect(card('dsh-b').getByText(zh.statusInstalled)).toBeTruthy()
+    renderTab({}, ru)
+    expect(screen.getByRole('button', { name: 'Переключить каталог плагинов, сейчас Альфа-индекс' })).toBeTruthy()
+    expect(card('dsh-a').getByText('Альфа')).toBeTruthy()
+    expect(card('dsh-a').getByText(/^1\.0\.0 · Jane · 27 сент. 2026 г./)).toBeTruthy()
+    expect(card('dsh-b').getByText(ru.statusInstalled)).toBeTruthy()
   })
 })

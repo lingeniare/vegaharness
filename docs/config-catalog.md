@@ -2325,6 +2325,43 @@ export type Config = Readonly<Record<string, never>>
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-llm-retry -->
 
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-llm-vega-account -->
+<a id="deepseek-aidsh-llm-vega-account"></a>
+
+## `@deepseek-ai/dsh-llm-vega-account`
+
+- `inject`: `llm`
+- `refs`: [`RetryPolicyConfig`](../packages/llm/llm/src/index.ts) · `Volatile` (`@deepseek-ai/cordis`)
+- `source`: [`packages/llm/llm-vega-account/src/config.ts:8`](../packages/llm/llm-vega-account/src/config.ts)
+
+```ts config-catalog
+/** Deployment options for the account-managed VEGA route. */
+export interface Config {
+  /** VEGA Messages-compatible endpoint; the listing is `<baseURL>/models`. */
+  baseURL: string
+  /** Send `X-Vega-Anonymize: true` on every request (PII shield opt-in). */
+  anonymize: boolean
+  /**
+   * Whether the deployed key name is registered for shielding, which is a
+   * server-side list the client cannot observe. When true the directory entry
+   * badges the route as PII-shielded; the header alone does not shield a key
+   * the server has not enrolled.
+   */
+  piiShield: boolean
+  /** Provider-owned retry policy for this route. */
+  retryPolicy: Volatile<RetryPolicyConfig | undefined>
+  /** Context capacity for models the listing does not size (default 1,000,000). */
+  defaultContextWindow: Volatile<number>
+  /** Output capability for models the listing does not size (default 128,000). */
+  defaultMaxTokens: Volatile<number>
+  /** Deadline of one model-listing request and of a first-use wait. */
+  modelsTimeoutMs: Volatile<number>
+  /** Listing refresh interval after first use; zero disables automatic refresh. */
+  modelsMaxAgeMs: Volatile<number>
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-llm-vega-account -->
+
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-lsp-stdio -->
 <a id="deepseek-aidsh-lsp-stdio"></a>
 
@@ -3007,7 +3044,7 @@ export interface JsonRpcConfig {
 ```ts config-catalog
 /** Session-log request contribution configuration. */
 export interface Config {
-  /** Contribute `dsh_session_log` to official DeepSeek requests. Defaults to `true`. */
+  /** Contribute `dsh_session_log` to official DeepSeek requests. Defaults to `false`. */
   enabled: Volatile<boolean>
   /**
    * Largest serialized `dsh_session_log` field, in UTF-8 bytes, that one request carries.
@@ -3286,7 +3323,7 @@ export interface Config extends SessionTitleLlmConfig {
 ```ts config-catalog
 /** Plugin config (all optional — the built-in facts resolve without defaults). */
 export interface Config {
-  /** DeepSeek Harness home directory exposed as `DSH_HOME`; defaults to `$DSH_HOME` or `~/.dsh`. */
+  /** VEGA Harness home directory exposed as `DSH_HOME`; defaults to `$DSH_HOME` or `~/.dsh`. */
   dshHome?: string
 }
 ```
@@ -3323,7 +3360,7 @@ export interface Config {
   providerName?: string
   /** Whether project and user roots are included around custom roots. */
   includeDefaultRoots?: boolean
-  /** DeepSeek Harness config root. Defaults to `$DSH_HOME` or `~/.dsh`. */
+  /** VEGA Harness config root. Defaults to `$DSH_HOME` or `~/.dsh`. */
   dshHome?: string
   /** Shared agent config root. Defaults to `$DSH_AGENTS_HOME` or `~/.agents`. */
   agentsHome?: string
@@ -3778,7 +3815,7 @@ export interface Config {
 ```ts config-catalog
 /** Plugin config: the deployment-authored fragment of the system prompt (see {@link Config.personaPrefix} for its contract). */
 export interface Config {
-  /** Include the fixed DeepSeek Harness identity before the deployment persona (default true). */
+  /** Include the fixed VEGA Harness identity before the deployment persona (default true). */
   includeHarnessIdentity?: boolean
   /** Include optional runtime-context snapshots in model history (default true); required context remains. */
   includeRuntimeContext?: boolean
@@ -4532,6 +4569,47 @@ export type ApprovalPolicy = 'ask' | 'never'
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-user-approval -->
 
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-vega-account -->
+<a id="deepseek-aidsh-vega-account"></a>
+
+## `@deepseek-ai/dsh-vega-account`
+
+- `inject`: `credentials` · `authorization`
+- `source`: [`packages/credentials/vega-account/src/index.ts:26`](../packages/credentials/vega-account/src/index.ts)
+
+```ts config-catalog
+/** Deployment-specific VEGA endpoints, client registration and request deadlines. */
+export interface Config {
+  /** VEGA origin serving device auth, account and inference APIs. */
+  platformOrigin?: string
+  /** Registered OAuth client name; also the managed-key route segment. */
+  clientId?: string
+  /** Requested device-authorization scope. */
+  scope?: string
+  /** Native desktop identity for VEGA request headers; null identifies the client as web. */
+  desktopPlatform?: 'darwin' | 'win32' | null
+  /** External billing pages; VEGA exposes no embeddable authorized page. */
+  usageUrl?: string
+  /** External top-up page; defaults to the billing section of the dashboard. */
+  topUpUrl?: string
+  /** Allow HTTP only on loopback for development mocks. */
+  allowLoopbackHttp?: boolean
+  /** Host-only headers sent exclusively to platformOrigin; authorization cannot be overridden. */
+  requestHeaders?: Record<string, string>
+  /** Deadline for each VEGA HTTP request. */
+  requestTimeoutMs?: number
+  /** Deadline for balance queries; timeout returns a failed balance outcome. */
+  balanceTimeoutMs?: number
+  /** Additional revoke attempts after the first request fails, at most five. */
+  logoutMaxRetries?: number
+  /** Delay before the first revoke retry; each later delay doubles. */
+  logoutRetryDelayMs?: number
+  /** Upper bound for the entire local attempt, even if the server advertises a longer TTL. */
+  attemptTimeoutMs?: number
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-vega-account -->
+
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-web -->
 <a id="deepseek-aidsh-web"></a>
 
@@ -4720,6 +4798,28 @@ export interface Config {
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-web-search-perplexity -->
+
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-web-vega -->
+<a id="deepseek-aidsh-web-vega"></a>
+
+## `@deepseek-ai/dsh-web-vega`
+
+- `inject`: `web`
+- `refs`: `Volatile` (`@deepseek-ai/cordis`)
+- `source`: [`packages/web/web-vega/src/index.ts:47`](../packages/web/web-vega/src/index.ts)
+
+```ts config-catalog
+/** Plugin config (all optional — `apply` fills constant defaults). */
+export interface Config {
+  /** VEGA endpoint base; `/chat/completions` is appended. Defaults to `https://api.vega.chat/api/v1`. */
+  baseURL: Volatile<string | undefined>
+  /** Fallback auxiliary model used when the initiating request names none. Must be whitelisted. */
+  model: Volatile<string>
+  /** Upper bound on generated tokens for the auxiliary request. Defaults to 4096. */
+  maxTokens: Volatile<number>
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-web-vega -->
 
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-webhook-github -->
 <a id="deepseek-aidsh-webhook-github"></a>

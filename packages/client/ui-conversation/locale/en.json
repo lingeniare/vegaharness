@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-conversation"
+    "title": "ui-conversation",
+    "description": "Target-neutral Conversation assembly, shell, composer, queue, and view navigation."
   }
 }

@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "directory-picker-native"
+    "title": "directory-picker-native",
+    "description": "Native-OS-chooser backend of the directory-picker seam for the VEGA Harness web GUI host."
   }
 }

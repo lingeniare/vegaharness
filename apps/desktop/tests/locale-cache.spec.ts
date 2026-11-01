@@ -1,5 +1,5 @@
 import { SHIPPED_LOCALE_IDS } from '../../../scripts/shipped-locales.ts'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, it, onTestFinished, vi } from 'vitest'
@@ -12,24 +12,22 @@ function fixture() {
   return directory
 }
 
-it('uses the confirmed Chinese language for recovery before Host settings are available', () => {
+it('uses the confirmed Russian language for recovery before Host settings are available', () => {
   const directory = fixture()
   expect(readDesktopLocaleCache(directory)).toBeUndefined()
-  writeDesktopLocaleCache(directory, 'zh-CN')
+  writeDesktopLocaleCache(directory, 'ru')
   const cached = readDesktopLocaleCache(directory)
   const locale = cached === undefined ? resolveDesktopStartupLocale(null, ['en-US']) : resolveDesktopLocale(cached)
-  expect(locale.messages.fatalSummary).toBe('应用无法启动或已意外停止。')
+  expect(locale.messages.fatalSummary).toBe('Приложение не могло запуститься или неожиданно остановилось.')
   writeDesktopLocaleCache(directory, 'en')
   expect(readDesktopLocaleCache(directory)).toBe('en')
 })
 
-it('uses the confirmed Japanese language for recovery before Host settings are available', () => {
+it.each(['zh-CN', 'ja', 'de-DE'])('ignores a %s cache left by an older release', (value) => {
   const directory = fixture()
-  writeDesktopLocaleCache(directory, 'ja')
-  const cached = readDesktopLocaleCache(directory)
-  const locale = cached === undefined ? resolveDesktopStartupLocale(null, ['en-US']) : resolveDesktopLocale(cached)
-  expect(locale.id).toBe('ja')
-  expect(locale.messages.getDiagnosticReport).toBe('診断レポートを取得')
+  mkdirSync(join(directory, 'desktop'), { recursive: true })
+  writeFileSync(join(directory, 'desktop', 'locale-cache'), `${value}\n`, { encoding: 'utf8' })
+  expect(readDesktopLocaleCache(directory)).toBeUndefined()
 })
 
 it.each(SHIPPED_LOCALE_IDS)('restores the confirmed shipped language %s before Host settings are available', (id) => {
@@ -44,6 +42,7 @@ it.each(SHIPPED_LOCALE_IDS)('restores the confirmed shipped language %s before H
 it.each(['', 'it', '{invalid'])('falls back to system language for an invalid cache: %s', (value) => {
   const directory = fixture()
   writeDesktopLocaleCache(directory, 'en')
+  mkdirSync(join(directory, 'desktop'), { recursive: true })
   writeFileSync(join(directory, 'desktop', 'locale-cache'), value)
   const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
   onTestFinished(() => { warn.mockRestore() })
@@ -56,7 +55,7 @@ it('keeps read and write failures from blocking recovery', () => {
   writeFileSync(join(directory, 'desktop'), 'not a directory')
   const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
   onTestFinished(() => { warn.mockRestore() })
-  expect(() => { writeDesktopLocaleCache(directory, 'zh-CN') }).not.toThrow()
+  expect(() => { writeDesktopLocaleCache(directory, 'ru') }).not.toThrow()
   expect(readDesktopLocaleCache(directory)).toBeUndefined()
   expect(warn).toHaveBeenCalled()
 })

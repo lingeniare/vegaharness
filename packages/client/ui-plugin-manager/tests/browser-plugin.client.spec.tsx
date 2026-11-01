@@ -18,7 +18,7 @@ import { PluginsPanelIcon } from '../src/client/PluginsPanelIcon.tsx'
 import type { PluginManagerFace } from '../src/client/manager-store.ts'
 import type { createNavigationStore } from '../src/client/navigation-store.ts'
 
-usePinnedBrowserLanguages('zh-CN')
+usePinnedBrowserLanguages('ru')
 beforeEach(() => { localStorage.clear() })
 afterEach(cleanup)
 
@@ -258,7 +258,7 @@ describe('ui-plugin-manager browser plugin', () => {
     expect(glyph.container.querySelector('svg')?.getAttribute('width')).toBe('18')
     expect(icon.options).toMatchObject({ id: PANEL_ID, order: 0 })
     expect(icon.locale).toBe(NS)
-    expect(resolveSlotLabel(icon.options.label)).toBe('插件')
+    expect(resolveSlotLabel(icon.options.label)).toBe('Плагины')
     // The page declares the slots a plugin's configuration arrives through, and binds their projection beside its state.
     expect(b.slots.spec('plugins.add.actions')).toMatchObject({ kind: 'list', scope: 'root' })
     expect(b.slots.spec('plugins.item')).toMatchObject({ kind: 'list', scope: 'root' })
@@ -283,7 +283,7 @@ describe('ui-plugin-manager browser plugin', () => {
     expect(face.resolveText(text)).toBe('本地工具')
     b.locale.setLocale('en')
     expect(face.resolveText(text)).toBe('Local tools')
-    b.locale.setLocale('zh')
+    b.locale.setLocale('ru')
     expect(face.hooks.configLedger.getSnapshot()).toEqual({ items: [], bundles: new Set(), rows: new Set() })
     // A Host change before the first render is not a reason to read.
     b.remote.emit('plugin-manager/changed', [{ reason: 'install' }])
@@ -299,7 +299,7 @@ describe('ui-plugin-manager browser plugin', () => {
     const loadedDetails = face.hooks.bundleDetails.getSnapshot()
     face.retryDetail('dsh-a', '1.0.0', 'en', false)
     expect(face.detailImage('dsh-a', 'README.md', 'a.png', false)).toContain('api/plugin-manager/detail-file?bundle=dsh-a')
-    expect(face.hooks.locale.getSnapshot().active).toBe('zh')
+    expect(face.hooks.locale.getSnapshot().active).toBe('ru')
     b.remote.emit('plugin-manager/changed', [{ reason: 'bundle' }])
     await vi.waitFor(() => { expect(b.list).toHaveBeenCalledTimes(2) })
     expect(face.hooks.bundleDetails.getSnapshot()).toEqual(loadedDetails)

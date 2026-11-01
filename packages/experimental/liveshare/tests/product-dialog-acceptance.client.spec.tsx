@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type {} from '../src/client/index.ts'
 import { LiveshareShareDialog, type LiveshareShareDialogProps } from '../src/client/ShareDialog.tsx'
-import { en, zh } from '../src/client/locales.ts'
+import { en, ru } from '../src/client/locales.ts'
 import css from '../src/client/ShareDialog.module.css'
 import type {
   CreatedShare, OwnerIdentityStatus, OwnerRelayState, RelayConnectivityView, RelayPublishView, SharePermissions,
@@ -352,10 +352,10 @@ describe('Liveshare dialog product acceptance', () => {
     expect(await screen.findByText(en['dialog.identity.loginExpired'])).toBeDefined()
   })
 
-  it('[P1] both locales define the same copy and the Chinese flow renders it', async () => {
-    expect(Object.keys(zh).sort()).toEqual(Object.keys(en).sort())
+  it('[P1] both locales define the same copy and the Russian flow renders it', async () => {
+    expect(Object.keys(ru).sort()).toEqual(Object.keys(en).sort())
     const zhTranslate: LiveshareShareDialogProps['t'] = (key, params) => {
-      let result: string = (zh as Readonly<Record<string, string>>)[key] ?? key
+      let result: string = (ru as Readonly<Record<string, string>>)[key] ?? key
       for (const [name, value] of Object.entries(params ?? {})) result = result.replace(`{${name}}`, String(value))
       return result
     }
@@ -370,11 +370,11 @@ describe('Liveshare dialog product acceptance', () => {
         t={zhTranslate}
       />)
     })
-    expect(screen.getByText('分享会话')).toBeDefined()
+    expect(screen.getByText('Поделиться сеансом')).toBeDefined()
     // The dialog states the tier it will grant, not a fixed description of what a share shows.
-    expect(screen.getByText(/^仅可查看：/u)).toBeDefined()
-    expect(document.body.textContent).not.toContain('历史消息、工具输出、文件路径与附件')
-    expect(screen.getByRole('button', { name: '创建分享' })).toBeDefined()
+    expect(screen.getByText(/^Только чтение:/u)).toBeDefined()
+    expect(document.body.textContent).not.toContain('истории сообщений, выводов инструментов, путей к файлам и вложений')
+    expect(screen.getByRole('button', { name: 'Создать общий доступ' })).toBeDefined()
   })
 
   it('[P1] opens global share management as a separate owner flow', async () => {

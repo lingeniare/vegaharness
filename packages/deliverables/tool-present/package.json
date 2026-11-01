@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-ai/dsh-tool-present",
-  "description": "Explicit workspace file delivery declarations for the DeepSeek Harness",
+  "description": "Explicit workspace file delivery declarations for the VEGA Harness",
   "version": "0.2.2-alpha.2",
   "publishConfig": {
     "access": "public"

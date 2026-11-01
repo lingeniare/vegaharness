@@ -118,9 +118,7 @@
       name: '@deepseek-ai/dsh-authorization'
 
     - id: deepseek-account
-      name: '@deepseek-ai/dsh-deepseek-account-platform'
-      config:
-        desktopPlatform: !!js "ctx.get('profileContext')?.name === 'desktop' && ['darwin', 'win32'].includes(process.platform) ? process.platform : null"
+      name: '@deepseek-ai/dsh-vega-account'
 
     - id: credentials
       name: '@deepseek-ai/dsh-credentials-local'
@@ -202,27 +200,31 @@
     - id: otel
       name: '@deepseek-ai/dsh-otel'
 
-    # OTel releases a Session-log prefix only after explicit user feedback,
-    # regardless of model provider. Ordinary activity never triggers capture.
-    # DSH_TELEMETRY_OTLP_URL overrides the production endpoint. A non-empty
-    # DSH_TELEMETRY_DISABLED — any value, including '0'/'false' — opts the
-    # process out (the launchers patch the row disabled; config cannot disable
-    # a row). Exports carry the harness home's anonymous user id ($DSH_HOME/.anonymous-user-id,
-    # random UUID; delete the file to reset the identity) as the Resource's
-    # user.id. Byte-bounded batching may turn an authorized prefix into
-    # several HTTP requests. Requests run serially; each has its own 1s
-    # transport timeout and 1.5s watchdog. A watchdog does not release the
-    # active request slot. The outer 3s shutdown deadline stops queued sends;
-    # large prefixes or an unsettled transport may leave records unsent.
-    # Every CLI exit path drains by disposing the root on SIGINT/SIGTERM.
+    # Session-record upload ships DISABLED in this deployment: the backend
+    # mounts only to report `sharing: 'disabled'` and warn that recorded
+    # feedback stays local — no coordinator, processor, or exporter is
+    # constructed, so no session record leaves the process.
+    # DSH_TELEMETRY_MODE plus an explicit DSH_TELEMETRY_OTLP_URL endpoint opt
+    # an upload mode back in for development; uploading modes reject a missing
+    # endpoint at load and no collector ships here. A non-empty
+    # DSH_TELEMETRY_DISABLED — any value, including '0'/'false' — also opts
+    # the process out (the launchers patch the row disabled; config cannot
+    # disable a row). In upload modes, exports carry the harness home's
+    # anonymous user id ($DSH_HOME/.anonymous-user-id, random UUID; delete the
+    # file to reset the identity) as the Resource's user.id; byte-bounded
+    # batching may turn an authorized prefix into several serial HTTP
+    # requests, each with its own 1s transport timeout and 1.5s watchdog that
+    # does not release the active request slot; the outer 3s shutdown deadline
+    # stops queued sends, and every CLI exit path drains by disposing the root
+    # on SIGINT/SIGTERM.
     - id: session-telemetry-otel
       name: '@deepseek-ai/dsh-session-telemetry-otel'
       config:
-        mode: !!js process.env.DSH_TELEMETRY_MODE || 'FEEDBACK_ONLY'
+        mode: !!js process.env.DSH_TELEMETRY_MODE || 'DISABLED'
         shutdownTimeoutMillis: 3000
         maxRequestBytes: 4000000
         exporter:
-          url: !!js process.env.DSH_TELEMETRY_OTLP_URL ?? 'https://dsh-otel-collector.deepseeksvc.com/v1/logs'
+          url: !!js process.env.DSH_TELEMETRY_OTLP_URL
           compression: gzip
           timeoutMillis: 1000
         processor:
@@ -466,8 +468,8 @@
     - id: web
       name: '@deepseek-ai/dsh-web'
       config:
-        searchProvider: deepseek-official
-        fetchProvider: http
+        searchProvider: api-vega
+        fetchProvider: api-vega
 
     - id: web-search-deepseek
       name: '@deepseek-ai/dsh-web-search-deepseek'
@@ -478,6 +480,9 @@
       name: '@deepseek-ai/dsh-web-deepseek-api'
       config:
         apiKeyEnv: DEEPSEEK_API_KEY
+
+    - id: web-vega
+      name: '@deepseek-ai/dsh-web-vega'
 
     - id: web-fetch-http
       name: '@deepseek-ai/dsh-web-fetch-http'
@@ -530,5 +535,5 @@
     - id: llm-deepseek
       name: '@deepseek-ai/dsh-llm-deepseek-api-key'
 
-    - id: llm-deepseek-account
-      name: '@deepseek-ai/dsh-llm-deepseek-account'
+    - id: llm-vega-account
+      name: '@deepseek-ai/dsh-llm-vega-account'

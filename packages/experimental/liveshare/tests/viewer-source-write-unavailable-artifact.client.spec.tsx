@@ -46,8 +46,8 @@ describe('Assembled liveshare viewer page stopping a run the Host cannot confine
     vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) =>
       window.setTimeout(() => { callback(0) }, 0))
     vi.stubGlobal('cancelAnimationFrame', (id: number) => { clearTimeout(id) })
-    Object.defineProperty(navigator, 'languages', { value: ['zh-CN'], configurable: true })
-    Object.defineProperty(navigator, 'language', { value: 'zh-CN', configurable: true })
+    Object.defineProperty(navigator, 'languages', { value: ['ru'], configurable: true })
+    Object.defineProperty(navigator, 'language', { value: 'ru', configurable: true })
     const owner = createFixtureFaces({ viewerSourceGrant: () => ({ sessionMode: 'write' }),
       cancelRefusal: 'source-write-unavailable' })
     owned.disposeOwner = () => { owner.dispose() }
@@ -76,7 +76,7 @@ describe('Assembled liveshare viewer page stopping a run the Host cannot confine
     await waitFor(() => {
       expect(document.querySelector('[data-sample="bash"]')).not.toBeNull()
     }, { timeout: 30_000 })
-    const stop = await screen.findByRole('button', { name: '停止生成' }, { timeout: 15_000 })
+    const stop = await screen.findByRole('button', { name: 'Остановить генерацию' }, { timeout: 15_000 })
     await act(async () => { fireEvent.click(stop) })
 
     // The reader sees the Host's message with its stable code, and nothing here states that the run was
@@ -88,6 +88,6 @@ describe('Assembled liveshare viewer page stopping a run the Host cannot confine
     }, { timeout: 15_000 })
     // The run the Host kept running still has its own action, so the page never reports an end that did
     // not happen.
-    expect(screen.getByRole('button', { name: '停止生成' })).toBeDefined()
+    expect(screen.getByRole('button', { name: 'Остановить генерацию' })).toBeDefined()
   }, 180_000)
 })

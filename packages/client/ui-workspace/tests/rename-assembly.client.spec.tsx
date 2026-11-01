@@ -28,14 +28,14 @@ import { apply, inject } from '@deepseek-ai/dsh-client-ui-workspace/client'
 
 // The service reads its initial locale from the browser; these specs assert
 // the shipped Chinese copy, so they state the browser they assume.
-usePinnedBrowserLanguages('zh-CN')
+usePinnedBrowserLanguages('ru')
 
 const SID = 's1' as SessionId
 
 afterEach(cleanup)
 beforeEach(() => { localStorage.clear() })
 
-/** Runtime with the locale face installed (the browser entry declares `locale:` — zh default backs the t seat). */
+/** Runtime with the locale face installed (the browser entry declares `locale:` — ru default backs the t seat). */
 async function createRuntime(): Promise<SlotTestRuntime> {
   const runtime = await SlotTestRuntime.create()
   runtime.ctx.provide('shortcuts', { register: () => () => {}, catalog: createSnapshotStore([]) })
@@ -118,18 +118,18 @@ describe('session rename through the assembled browser', () => {
     const view = runtime.renderRoot()
 
     const row = (await view.findByText('Persisted title')).closest('[role="treeitem"]')!
-    const trigger = within(row as HTMLElement).getByLabelText('会话“Persisted title”的操作')
+    const trigger = within(row as HTMLElement).getByLabelText('Действия для сессии Persisted title')
     fireEvent.click(trigger)
-    await view.findByRole('menuitem', { name: '置顶会话' })
+    await view.findByRole('menuitem', { name: 'Закрепить сессию' })
     expect(view.getAllByRole('menuitem').map(item => item.textContent)).toEqual([
-      '置顶会话', '重命名', '分叉会话', '复制 Session ID', 'Export action', 'Last action', '归档会话',
+      'Закрепить сессию', 'Переименовать', 'Разветвить сессию', 'Копировать ID сессии', 'Export action', 'Last action', 'Архивировать сессию',
     ])
     expect(view.getAllByRole('separator')).toHaveLength(3)
     const last = view.getByRole('menuitem', { name: 'Last action' })
     const exportRow = view.getByRole('menuitem', { name: 'Export action' })
     trigger.focus()
     fireEvent.keyDown(trigger, { key: 'End' })
-    const archive = view.getByRole('menuitem', { name: '归档会话' })
+    const archive = view.getByRole('menuitem', { name: 'Архивировать сессию' })
     expect(document.activeElement).toBe(archive)
     fireEvent.keyDown(archive, { key: 'ArrowUp' })
     expect(document.activeElement).toBe(last)
@@ -150,10 +150,10 @@ describe('session rename through the assembled browser', () => {
       else Object.defineProperty(navigator, 'clipboard', clipboard)
     })
     fireEvent.click(trigger)
-    fireEvent.click(await view.findByRole('menuitem', { name: '复制 Session ID' }))
+    fireEvent.click(await view.findByRole('menuitem', { name: 'Копировать ID сессии' }))
     expect(view.queryByRole('menu')).toBeNull()
     expect(writeText).toHaveBeenCalledExactlyOnceWith(SID)
-    await view.findByText('Session ID 已复制')
+    await view.findByText('ID сессии скопирован')
     await runtime.dispose()
   })
 
@@ -175,22 +175,22 @@ describe('session rename through the assembled browser', () => {
 
     // The current session's group auto-expands; open the row's action menu.
     const row = (await view.findByText('旧标题')).closest('[role="treeitem"]')!
-    fireEvent.click(within(row as HTMLElement).getByLabelText('会话“旧标题”的操作'))
-    fireEvent.click(await view.findByRole('menuitem', { name: '重命名' }))
+    fireEvent.click(within(row as HTMLElement).getByLabelText('Действия для сессии 旧标题'))
+    fireEvent.click(await view.findByRole('menuitem', { name: 'Переименовать' }))
     // The rename row dismissed the menu; the dialog lives in the overlay list.
     expect(view.queryByRole('menu')).toBeNull()
 
     // The dialog seeds from the current title; submit a padded value.
-    const input = await view.findByLabelText('会话名称') as HTMLInputElement
+    const input = await view.findByLabelText('Название сессии') as HTMLInputElement
     expect(input.value).toBe('旧标题')
     fireEvent.change(input, { target: { value: '  分叉  实验记录  ' } })
-    fireEvent.click(view.getByRole('button', { name: '重命名' }))
+    fireEvent.click(view.getByRole('button', { name: 'Переименовать' }))
 
     // The injected hop reached the session face with the edge-trimmed draft
     // (the dialog trims edges; interior normalization is host-side).
     await waitFor(() => { expect(rename).toHaveBeenCalledWith('分叉  实验记录') })
     // Acceptance closes the dialog without any push-frame wait.
-    await waitFor(() => { expect(view.queryByLabelText('会话名称')).toBeNull() })
+    await waitFor(() => { expect(view.queryByLabelText('Название сессии')).toBeNull() })
     // The manager lands the unary echo in the list store (its own package
     // tests own that hop); the row re-labels from list state alone.
     await runtime.sessions.updateSummary(SID, { displayTitle: '分叉 实验记录', title: '分叉 实验记录' })
@@ -217,17 +217,17 @@ describe('session rename through the assembled browser', () => {
     await runtime.flush()
 
     const row = (await view.findByText('旧标题')).closest('[role="treeitem"]')!
-    fireEvent.click(within(row as HTMLElement).getByLabelText('会话“旧标题”的操作'))
-    fireEvent.click(await view.findByRole('menuitem', { name: '重命名' }))
-    const input = await view.findByLabelText('会话名称')
+    fireEvent.click(within(row as HTMLElement).getByLabelText('Действия для сессии 旧标题'))
+    fireEvent.click(await view.findByRole('menuitem', { name: 'Переименовать' }))
+    const input = await view.findByLabelText('Название сессии')
     fireEvent.change(input, { target: { value: '新名' } })
-    fireEvent.click(view.getByRole('button', { name: '重命名' }))
+    fireEvent.click(view.getByRole('button', { name: 'Переименовать' }))
 
     // Failure: the injected hop rethrows the business error; the dialog
     // stays open with the alert and the row keeps its title.
     const alert = await view.findByRole('alert')
     expect(alert.textContent).toContain('title write failed')
-    expect(view.getByLabelText('会话名称')).toBeTruthy()
+    expect(view.getByLabelText('Название сессии')).toBeTruthy()
     expect(view.getByText('旧标题')).toBeTruthy()
     await runtime.dispose()
   })

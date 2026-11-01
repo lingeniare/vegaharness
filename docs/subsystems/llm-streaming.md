@@ -1,7 +1,5 @@
 # LLM Streaming
 
-English | [中文](llm-streaming.zh.md)
-
 The conversation and streaming types from [`packages/llm`](../../packages/llm/README.md): durable `Message` values, request-only user inputs, shared `ContentBlock` variants, the fully assembled model request, the raw `StreamChunk` protocol, the adapter contract every adapter must implement, and the shared assembler. The [core packages](core.md) hold and log these values on every turn; this page declares them.
 
 Source: [`packages/llm/llm/src/types.ts`](../../packages/llm/llm/src/types.ts)
@@ -510,6 +508,18 @@ interface LlmConfigurableProvider {
   nativeAuth?: LlmNativeAuth
   /** Configuration diagnostic for repair; unaffected models may remain serviceable. */
   error?: string
+  /**
+   * Whether an account sign-in owns this route's credential. Account-managed
+   * routes have no user-editable profile, so configuration surfaces must not
+   * offer Edit/Delete; the route appears and disappears with the account grant.
+   */
+  accountManaged?: boolean
+  /**
+   * Whether the route passes model inputs through provider-side PII
+   * de-identification before the model sees them. Informational for
+   * configuration surfaces that badge shielded routes.
+   */
+  piiShielded?: boolean
 }
 ```
 
@@ -858,7 +868,7 @@ interface LlmCallConfigAdapterDefaults {
 
 `ctx.deepseekLlmApiExtensions` is the provider-specific registry for additive top-level fields on `deepseek-official` requests. Contributor plugins use `register(field, provider)` to claim one field; the adapter calls `prepare(request)` after serializing its base body and merges the returned fields before HTTP. The prepared `accept()` transaction runs after 2xx, so a contributor can commit delivery state without treating a transport or provider rejection as acceptance. A contributor whose preparation throws is logged and omitted from that request, and an acceptance failure is logged without failing the request; a base-field collision uses `REQUEST_EXTENSION` and fails the model request. A merged body that fails to serialize is sent without extension fields; acceptance is skipped and the provider plugin logs the omitted field names.
 
-The [wire reference](../deepseek-llm-api-wire-extensions.md) defines the exact request headers, extension transaction, field versions, and receiver obligations. The shipped composition registers [`dsh_session_log`](../../packages/session/session-log-deepseek/README.md) as a lossless incremental canonical-log suffix and [`dsh_plugin_packages`](../../packages/llm/plugin-package-inventory-deepseek/README.md) as the complete active Loader-backed package set. These fields remain outside model messages and are absent from the pi-ai adapter path.
+The [wire reference](../deepseek-llm-api-wire-extensions.md) defines the exact request headers, extension transaction, field versions, and receiver obligations. The shipped composition registers [`dsh_session_log`](../../packages/session/session-log-deepseek/README.md) as an opt-in lossless incremental canonical-log suffix and [`dsh_plugin_packages`](../../packages/llm/plugin-package-inventory-deepseek/README.md) as the complete active Loader-backed package set. These fields remain outside model messages and are absent from the pi-ai adapter path.
 
 ## Pi-ai request headers
 

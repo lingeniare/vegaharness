@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "agent"
+    "title": "agent",
+    "description": "Agent interface, registry, initiator scope, and event vocabulary for the VEGA Harness."
   }
 }

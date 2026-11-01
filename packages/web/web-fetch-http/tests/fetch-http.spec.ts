@@ -199,10 +199,10 @@ describe('HttpFetchProvider charset recovery', () => {
   it.each(['utf-8,gbk', 'gbk,utf8', 'not-a-charset, utf-8'])('decodes UTF-8 HTML declared as %s', async (charset) => {
     handler = (_req, res) => {
       res.writeHead(200, { 'content-type': `text/html; charset=${charset}` })
-      res.end('<meta charset="UTF-8"><p>你好</p>')
+      res.end('p>.<meta charset="UTF-8"><p>你好<')
     }
     const result = await provider().fetch({ url: base })
-    expect(result.body).toEqual({ kind: 'html', content: '<meta charset="UTF-8"><p>你好</p>' })
+    expect(result.body).toEqual({ kind: 'html', content: 'p>.<meta charset="UTF-8"><p>你好<' })
     expect(result.truncated).toBe(false)
   })
 
@@ -239,7 +239,7 @@ describe('HttpFetchProvider charset recovery', () => {
       res.writeHead(200, { 'content-type': 'text/plain; charset=gbk' })
       res.end(Buffer.from([0xD6, 0xD0, 0xCE, 0xC4]))
     }
-    expect((await provider().fetch({ url: base })).body.content).toBe('中文')
+    expect((await provider().fetch({ url: base })).body.content).toBe('китайский')
   })
 
   it('keeps replacement decoding for a single declared charset', async () => {
@@ -251,8 +251,8 @@ describe('HttpFetchProvider charset recovery', () => {
   })
 
   it.each([
-    ['中文', 5, true],
-    ['中文', 3, true],
+    ['китайский', 5, true],
+    ['китайский', 3, true],
     ['中', 3, false],
   ] as const)('returns complete UTF-8 characters for %j with byte cap %i (truncated: %s)', async (body, maxResponseBytes, truncated) => {
     handler = (_req, res) => {

@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "user-questions"
+    "title": "user-questions",
+    "description": "Abstract user-questions seam (ctx.userQuestions) for asking the human during agent runs."
   }
 }

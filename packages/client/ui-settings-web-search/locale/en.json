@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-settings-web-search"
+    "title": "ui-settings-web-search",
+    "description": "Settings page of the DeepSeek web-search provider on the dsh web client's Plugins page: its API key, endpoint, and per-request search budget."
   }
 }

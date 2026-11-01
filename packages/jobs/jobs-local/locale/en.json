@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "jobs-local"
+    "title": "jobs-local",
+    "description": "Process-local implementation of the VEGA Harness background job registry seam."
   }
 }

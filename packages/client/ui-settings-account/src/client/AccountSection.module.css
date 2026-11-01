@@ -120,6 +120,17 @@
   outline-offset: 2px;
 }
 
+/* Device-flow code the user confirms on the authorization page. */
+.userCode {
+  flex: none;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  color: var(--dsw-alias-label-primary);
+  user-select: all;
+}
+
 /* A failed wallet read keeps its muted copy, but as a link: the user can still
    inspect the balance on Platform through the same destination as Usage. */
 .unavailableLink {

@@ -78,9 +78,9 @@ it('reads a market entry detail document and serves its images through the compo
       name: 'from-git', versions: [{ version: '1.0.0', publishTimestamp: 1, source: { type: 'git', url: 'https://github.com/o/r', commit, path: 'pkg' }, engines: { dsh: '*' } }],
     }] }),
     [`${raw}/locale/en.json`]: JSON.stringify({ meta: { detail: 'guide/DETAIL.md' } }),
-    [`${raw}/locale/zh.json`]: JSON.stringify({ meta: { detail: 'guide/DETAIL.zh.md' } }),
+    [`${raw}/locale/ru.json`]: JSON.stringify({ meta: { detail: 'guide/DETAIL.ru.md' } }),
+    [`${raw}/guide/DETAIL.ru.md`]: '# Тестовая запись\n',
     [`${raw}/guide/DETAIL.md`]: '# Test entry\n\n![diagram](img/diagram.svg)\n',
-    [`${raw}/guide/DETAIL.zh.md`]: '# 测试条目\n',
     [`${raw}/guide/img/diagram.svg`]: '<svg xmlns="http://www.w3.org/2000/svg"/>',
     // The repository is public, so a file missing from the raw host is missing from the repository.
     'https://github.com/o/r.git/info/refs?service=git-upload-pack': 'refs',
@@ -109,7 +109,7 @@ it('reads a market entry detail document and serves its images through the compo
     const market = ctx.get('pluginMarket')!
     const detail = await market.readEntryDetail('https://first.example/index.json', 'from-git', '1.0.0', 'en-US')
     expect(detail).toMatchObject({ status: 'found', origin: 'locale', markdown: '# Test entry\n\n![diagram](img/diagram.svg)\n' })
-    expect(await market.readEntryDetail('https://first.example/index.json', 'from-git', '1.0.0', 'zh-CN')).toMatchObject({ origin: 'locale', markdown: '# 测试条目\n' })
+    expect(await market.readEntryDetail('https://first.example/index.json', 'from-git', '1.0.0', 'ru-RU')).toMatchObject({ origin: 'locale', markdown: '# Тестовая запись\n' })
     if (detail.status !== 'found') throw new Error('expected a document')
     const serve = RecordingConnection.routes.get('/api/plugin-market/detail-file')!
     const image = await serve(new Request(`http://dsh.local/api/plugin-market/detail-file?document=${detail.document}&path=img%2Fdiagram.svg`))

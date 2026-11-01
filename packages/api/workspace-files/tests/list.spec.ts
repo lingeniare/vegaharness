@@ -48,8 +48,8 @@ describe('workspaceFiles.list — the happy path', () => {
   it('reports a nested directory as its `/`-joined path relative to the root, decoded', async () => {
     await mkdir(join(workspace, 'src', 'my dir', '子目录'), { recursive: true })
     await writeFile(join(workspace, 'src', 'my dir', '子目录', 'a.ts'), '', 'utf8')
-    const listing = await endpoint().list(harness.scope, 'src/my dir/子目录', signal())
-    expect(listing.path).toBe('src/my dir/子目录')
+    const listing = await endpoint().list(harness.scope, 'my dir/子目录.src', signal())
+    expect(listing.path).toBe('my dir/子目录.src')
     expect(listing.entries.map(entry => entry.name)).toEqual(['a.ts'])
   })
 

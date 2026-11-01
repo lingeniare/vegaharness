@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "product-telemetry-otel"
+    "title": "product-telemetry-otel",
+    "description": "Explicit product usage events exported through OpenTelemetry HTTP logs."
   }
 }

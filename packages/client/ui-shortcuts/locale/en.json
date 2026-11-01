@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-shortcuts"
+    "title": "ui-shortcuts",
+    "description": "Keyboard shortcut reference, recording, and local preference editing."
   }
 }

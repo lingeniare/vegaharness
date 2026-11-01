@@ -15,7 +15,7 @@ import { AttachmentId, type ImageAttachmentRef } from '@deepseek-ai/dsh-attachme
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import { bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import { StatsView } from '../src/client/StatsView.tsx'
-import { zh } from '../src/client/locales.ts'
+import { ru } from '../src/client/locales.ts'
 import css from '../src/client/stats.module.css'
 import {
   barShare, formatChars, formatClock, formatDateTime, formatDateTimeMs, formatDateTimeShort, formatMs, formatPercent,
@@ -28,10 +28,10 @@ import type {
   LoadOlderResult,
 } from '../src/client/stats-contract.ts'
 
-const t = makeTranslate(zh)
+const t = makeTranslate(ru)
 
 /** Translate one dictionary key with its interpolation params. */
-function say(key: keyof typeof zh, params?: Record<string, unknown>): string {
+function say(key: keyof typeof ru, params?: Record<string, unknown>): string {
   return t(key, params)
 }
 
@@ -656,7 +656,7 @@ describe('turn rows', () => {
   it('names the sending agent on team-message triggers', () => {
     mount({
       turns: [turn({
-        prompt: 'Team message from hfai-deploy: P1 已 rebase 完成',
+        prompt: 'Team message from hfai-deploy: P1  rebase 完成',
         promptSource: 'team-message',
         promptSender: 'hfai-deploy',
       })],
@@ -664,9 +664,9 @@ describe('turn rows', () => {
     })
     const cell = cellsOf(rowWithPrefix(say('turn.label', { turn: 1 })))[1] as HTMLTableCellElement
     expect(cell.textContent).toContain(`${say('trigger.team-message')} · hfai-deploy`)
-    expect(cell.textContent).toContain('P1 已 rebase 完成')
+    expect(cell.textContent).toContain('P1  rebase 完成')
     expect(cell.textContent).not.toContain('Team message from')
-    expect(cell.getAttribute('title')).toBe('Team message from hfai-deploy: P1 已 rebase 完成')
+    expect(cell.getAttribute('title')).toBe('Team message from hfai-deploy: P1  rebase 完成')
   })
 
   it('shows the frame label and body without opaque session ids', () => {
@@ -674,7 +674,7 @@ describe('turn rows', () => {
       turns: [
         turn({
           turn: 1,
-          prompt: 'Agent 52224ac7-b02b-4d25-8c6e-123456789abc sent a message: 请检查构建',
+          prompt: '123456789abc sent a message: 请检查构建.b02b.Agent 52224ac7.8c6e.4d25',
           promptSource: 'agent-message',
         }),
         turn({
@@ -682,7 +682,7 @@ describe('turn rows', () => {
           prompt: 'Background subagent 10a0dbaa-08dd-4e3f-838d-d6f84b36babe finished and will do no further work.',
           promptSource: 'subagent-settled',
         }),
-        turn({ turn: 3, prompt: 'Team message from stack-rebase: P2 已合并', promptSource: 'team-message', promptSender: 'stack-rebase' }),
+        turn({ turn: 3, prompt: 'Team message from stack-rebase: P2 已合 и ', promptSource: 'team-message', promptSender: 'stack-rebase' }),
       ],
       stepCount: 3,
     })
@@ -696,7 +696,7 @@ describe('turn rows', () => {
     expect(second.textContent).toContain('and will do no further work.')
     const third = cellsOf(rowWithPrefix(say('turn.label', { turn: 3 })))[1] as HTMLTableCellElement
     expect(third.textContent).toContain(`${say('trigger.team-message')} · stack-rebase`)
-    expect(third.textContent).toContain('P2 已合并')
+    expect(third.textContent).toContain('P2 已合 и ')
     expect(third.textContent).not.toContain('Team message from')
   })
 
@@ -735,7 +735,7 @@ describe('turn rows', () => {
     const did = cellsOf(rowWithPrefix(say('turn.label', { turn: 1 })))[2] as HTMLTableCellElement
     expect(within(did).queryByText(say('did.more', { count: 1 }))).toBeNull()
     expect(within(did).queryByText(say('tool.failed', { count: 1 }))).toBeNull()
-    expect(within(did).queryByText(/字符/)).toBeNull()
+    expect(within(did).queryByText(/симв/)).toBeNull()
     expect(did.getAttribute('title')).toBe(say('did.title', { calls: 3, tools: 'read ×1 · edit ×1 · write ×1' }))
   })
 
@@ -920,7 +920,7 @@ describe('turn rows', () => {
     expect(second[1]?.getAttribute('title')).toBe([
       say('step.started.title', { time: formatDateTimeMs(BASE + 4_000) }),
       say('bar.gap', { value: formatMs(3_000) }),
-    ].join('\n'))
+    ].join('\\\\n'))
     const partial = cellsOf(stepRow(4))
     expect(partial[1]?.textContent).toBe('')
     expect(partial[1]?.getAttribute('title')).toBeNull()
@@ -1008,7 +1008,7 @@ describe('turn rows', () => {
     expect(screen.getByText(say('event.system.detail', {
       action: say('event.system.clear'), chars: formatChars(0),
     }))).toBeTruthy()
-    expect(screen.getAllByText(/新增 read|added read/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/добавлено read|added read/).length).toBeGreaterThan(0)
     expect(screen.getByText(say('event.prune.detail', { tokens: formatTokens(4_000) }))).toBeTruthy()
     expect(screen.getAllByText(say('event.request-context'))).toHaveLength(3)
     expect(screen.getByText(say('event.context.detail', { provider: 'p', model: 'm', mode: 'in-history' }))).toBeTruthy()
@@ -1216,13 +1216,13 @@ describe('step rows', () => {
   })
 
   it('previews the answered text in the did cell and skips blank answers', () => {
-    mount(turnSnapshot([step({ answer: 'first line\nsecond line' })]))
+    mount(turnSnapshot([step({ answer: 'first line\\\\nsecond line' })]))
     const stepDid = cellsOf(stepRow(1))[2] as HTMLTableCellElement
     expect(stepDid.textContent).toContain('first line')
-    expect(within(stepDid).getByTitle(/first line/).getAttribute('title')).toBe('first line\nsecond line')
+    expect(within(stepDid).getByTitle(/first line/).getAttribute('title')).toBe('first line\\\\nsecond line')
 
     cleanup()
-    mount(turnSnapshot([step({ answer: '   \n  ' })]))
+    mount(turnSnapshot([step({ answer: '   \\\\n  ' })]))
     expect(cellsOf(stepRow(1))[2]?.textContent).toBe(say('did.answer'))
 
     cleanup()
@@ -1266,7 +1266,7 @@ describe('step rows', () => {
     const fourth = cellsOf(stepRow(4))
     expect(fourth[3]?.textContent).toBe(formatTokensShort(1_500))
     expect(fourth[3]?.getAttribute('title')).toBeNull()
-    expect(timeTitle(stepRow(4))).not.toContain('距上一步')
+    expect(timeTitle(stepRow(4))).not.toContain('назад')
 
     const fifth = cellsOf(stepRow(5))
     expect(fifth[3]?.textContent).toBe(formatTokensShort(900))
@@ -1322,7 +1322,7 @@ describe('step rows', () => {
     const firstDid = cellsOf(stepRow(1))[2] as HTMLTableCellElement
     expect(within(firstDid).getByText('×2')).toBeTruthy()
     expect(within(firstDid).getByText(say('did.lines', { lines: '3' }))).toBeTruthy()
-    expect(within(firstDid).getByText('+2 行')).toBeTruthy()
+    expect(within(firstDid).getByText('+2 стр.')).toBeTruthy()
     expect(within(firstDid).getByText('/a')).toBeTruthy()
     expect(within(firstDid).getByText(say('did.chars', { chars: formatChars(300) }))).toBeTruthy()
     expect(within(firstDid).getAllByText('·')).toHaveLength(2)
@@ -1331,15 +1331,15 @@ describe('step rows', () => {
     const mixed = cellsOf(stepRow(2))[2] as HTMLTableCellElement
     expect(within(mixed).getByText('+1')).toBeTruthy()
     expect(within(mixed).getByText('−2')).toBeTruthy()
-    expect(within(cellsOf(stepRow(3))[2] as HTMLTableCellElement).getByText('+3 行')).toBeTruthy()
-    expect(within(cellsOf(stepRow(4))[2] as HTMLTableCellElement).getByText('−4 行')).toBeTruthy()
+    expect(within(cellsOf(stepRow(3))[2] as HTMLTableCellElement).getByText('+3 стр.')).toBeTruthy()
+    expect(within(cellsOf(stepRow(4))[2] as HTMLTableCellElement).getByText('−4 стр.')).toBeTruthy()
 
     const zero = cellsOf(stepRow(5))[2] as HTMLTableCellElement
     expect(within(zero).getByText('mystery')).toBeTruthy()
     expect(within(zero).getByText('bash')).toBeTruthy()
     expect(within(zero).queryByText('write')).toBeNull()
     expect(within(zero).queryByText(say('did.lines', { lines: formatTokens(0) }))).toBeNull()
-    expect(within(zero).queryByText(/字符/)).toBeNull()
+    expect(within(zero).queryByText(/симв/)).toBeNull()
 
     expect(within(cellsOf(stepRow(6))[2] as HTMLTableCellElement).getByText('?')).toBeTruthy()
     // An empty tool name hashes to a tone instead of falling back to the marker.
@@ -1356,7 +1356,7 @@ describe('step rows', () => {
     fireEvent.click(stepRow(1))
     const detail = detailRow()
     expect(detail.textContent).toContain(say('detail.calls', { count: 1 }))
-    expect(detail.textContent).not.toContain('还有')
+    expect(detail.textContent).not.toContain('ещё')
   })
 })
 

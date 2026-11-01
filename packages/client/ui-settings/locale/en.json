@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-settings"
+    "title": "ui-settings",
+    "description": "Settings domain base plugin: shared configuration forms and the canonical settings slot-type contract."
   }
 }

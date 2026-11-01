@@ -1,6 +1,6 @@
-DeepSeek Harness
-DeepSeek Harness
-Welcome to DeepSeek Harness
+VEGA Harness
+VEGA Harness
+Welcome to VEGA Harness
 Build potential. Explore intelligence.
-Sign in
-Add API Key
+Sign In API VEGA
+Skip

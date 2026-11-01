@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "goal"
+    "title": "goal",
+    "description": "Event-sourced same-session goal state and lifecycle service for the VEGA Harness."
   }
 }

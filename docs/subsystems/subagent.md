@@ -1,7 +1,5 @@
 # Subagents
 
-English | [中文](subagent.zh.md)
-
 The unified activation API manages local conversations and external executions.
 
 ## Capabilities and activation requests
@@ -389,8 +387,6 @@ type SubagentDescendantListEntry = SubagentListEntry & {
   readonly depth: number
 }
 ```
-
-
 
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 

@@ -42,38 +42,38 @@ const ROWS: readonly StatusRow[] = [
   {
     facts: { notFound: true },
     status: 'invalid',
-    message: '链接无效，或这条分享已被删除。',
-    action: { kind: 'directory', label: '回到分享列表' },
+    message: 'Ссылка недействительна или этот общий доступ удалён.',
+    action: { kind: 'directory', label: 'Назад к общим доступам' },
   },
   {
     facts: { ownerOnline: false },
     status: 'offline',
-    message: '分享者当前不在线，会自动重连。',
-    action: { kind: 'retry', label: '重试' },
+    message: 'Владелец сейчас не в сети; страница переподключится автоматически.',
+    action: { kind: 'retry', label: 'Повторить' },
   },
   {
     facts: { reason: 'share-stopped' },
     status: 'stopped',
-    message: '分享者已停止这条分享。',
-    action: { kind: 'directory', label: '回到分享列表' },
+    message: 'Владелец остановил этот общий доступ.',
+    action: { kind: 'directory', label: 'Назад к общим доступам' },
   },
   {
     facts: { reason: 'share-expired' },
     status: 'expired',
-    message: '这条分享已过期。',
-    action: { kind: 'directory', label: '回到分享列表' },
+    message: 'Этот общий доступ истёк.',
+    action: { kind: 'directory', label: 'Назад к общим доступам' },
   },
   {
     facts: { unauthenticated: true },
     status: 'reauthenticate',
-    message: '登录已过期。',
-    action: { kind: 'sign-in', label: '重新登录' },
+    message: 'Срок входа истёк.',
+    action: { kind: 'sign-in', label: 'Войти снова' },
   },
   {
     facts: { unreachable: true },
     status: 'unavailable',
-    message: '服务暂时不可用，正在重试。',
-    action: { kind: 'reload', label: '刷新' },
+    message: 'Сервис общего доступа сейчас недоступен; повторная попытка.',
+    action: { kind: 'reload', label: 'Обновить' },
   },
 ]
 
@@ -192,7 +192,7 @@ describe('viewer status', () => {
     await fiber.await()
     try {
       await vi.waitFor(() => {
-        expect(document.getElementById(MESSAGE_ID)?.textContent).toBe('分享者当前不在线，会自动重连。')
+        expect(document.getElementById(MESSAGE_ID)?.textContent).toBe('Владелец сейчас не в сети; страница переподключится автоматически.')
       })
 
       // The statement is plain DOM rather than a slot-rendered surface, so a language switch repaints
@@ -202,20 +202,20 @@ describe('viewer status', () => {
         expect(document.getElementById(MESSAGE_ID)?.textContent)
           .toBe('The owner is offline right now; this page reconnects automatically.')
       })
-      locale.setLocale('zh')
+      locale.setLocale('ru')
 
       // The share itself ends: the page states the owner's own action, not the connection.
       context = { capabilities: { sessionMode: 'view', sessionModeReason: 'share-stopped', online: true } }
       await act(async () => { window.dispatchEvent(new Event('focus')) })
       await vi.waitFor(() => {
-        expect(document.getElementById(MESSAGE_ID)?.textContent).toBe('分享者已停止这条分享。')
+        expect(document.getElementById(MESSAGE_ID)?.textContent).toBe('Владелец остановил этот общий доступ.')
       })
 
       // A reader the Relay does not know: the link is the thing to check, and the page says so.
       notFound = true
       await act(async () => { window.dispatchEvent(new Event('focus')) })
       await vi.waitFor(() => {
-        expect(document.getElementById(MESSAGE_ID)?.textContent).toBe('链接无效，或这条分享已被删除。')
+        expect(document.getElementById(MESSAGE_ID)?.textContent).toBe('Ссылка недействительна или этот общий доступ удалён.')
       })
     } finally {
       await fiber.dispose()
@@ -252,7 +252,7 @@ describe('viewer status', () => {
     try {
       await vi.waitFor(() => {
         // An unreadable share is not confirmed read-only, and no pending-approval state exists to claim.
-        expect(document.getElementById(MESSAGE_ID)?.textContent).toBe('正在连接分享…')
+        expect(document.getElementById(MESSAGE_ID)?.textContent).toBe('Подключение к общему доступу…')
         expect(asked.length).toBeGreaterThan(0)
       })
       expect(document.querySelector('button[data-liveshare-action="request-access"]')).toBeNull()

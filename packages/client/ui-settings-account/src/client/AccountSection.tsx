@@ -127,7 +127,7 @@ export function AccountSection({ t, useAccount, useTheme, start, cancel, openPla
    * @returns nothing; on Desktop the embedded page replaces the pending navigation.
    */
   const openUsage = (event: MouseEvent<HTMLAnchorElement>): void => {
-    if (openPlatformPage !== undefined && signedIn) { event.preventDefault(); showPage(openPlatformPage, 'usage') }
+    if (openPlatformPage !== undefined && signedIn && state.embeddedPages !== false) { event.preventDefault(); showPage(openPlatformPage, 'usage') }
   }
   /**
    * The Platform entry the balance rows share with the Usage action: an embedded page on
@@ -181,6 +181,7 @@ export function AccountSection({ t, useAccount, useTheme, start, cancel, openPla
           target="_blank" rel="noreferrer">
           {t('open')}
         </a>}
+        {attempt.userCode !== undefined && <span className={css.userCode}>{t('deviceCode')}: {attempt.userCode}</span>}
         <Button variant="outline" disabled={busy || attempt.phase === 'committing'}
           onClick={() => { void run(() => cancel(attempt.id)) }}>{t('cancel')}</Button>
       </div>}
@@ -189,7 +190,7 @@ export function AccountSection({ t, useAccount, useTheme, start, cancel, openPla
           <span>{t('balance')}</span>
           {signedIn && wallets !== undefined && wallets.length > 0
             ? <span className={css.amount}>{wallets.map(wallet => <span key={wallet.currency}>
-              {formatBalance(wallet.balance, wallet.currency === 'CNY' ? '¥' : '$')}
+              {formatBalance(wallet.balance, wallet.currency === 'CNY' ? '¥' : wallet.currency === 'RUB' ? '₽' : '$')}
             </span>)}</span>
             : !signedIn || details?.balance === undefined
               ? <span className={css.unavailable}>{t(!signedIn ? 'balanceSignedOut' : 'loading')}</span>
@@ -202,7 +203,7 @@ export function AccountSection({ t, useAccount, useTheme, start, cancel, openPla
             <span className={css.bonusValue}>
               {bonusWallets.length > 0
                 ? <span className={css.amount}>{bonusWallets.map(wallet => <span key={wallet.currency}>
-                  {formatBalance(wallet.balance, wallet.currency === 'CNY' ? '¥' : '$')}
+                  {formatBalance(wallet.balance, wallet.currency === 'CNY' ? '¥' : wallet.currency === 'RUB' ? '₽' : '$')}
                 </span>)}</span>
                 : details?.balance === undefined
                   ? <span className={css.unavailable}>{t('loading')}</span>
@@ -217,7 +218,7 @@ export function AccountSection({ t, useAccount, useTheme, start, cancel, openPla
             {platformLink(t('usage'), css.linkButton)}
             <a className={`${css.linkButton} ${css.primary}`} href={state?.links.topUpUrl} aria-disabled={state === undefined}
               target="_blank" rel="noreferrer"
-              onClick={(event) => { if (openPlatformPage !== undefined && signedIn) { event.preventDefault(); showPage(openPlatformPage, 'top-up') } }}>{t('topUp')}</a>
+              onClick={(event) => { if (openPlatformPage !== undefined && signedIn && state.embeddedPages !== false) { event.preventDefault(); showPage(openPlatformPage, 'top-up') } }}>{t('topUp')}</a>
           </div>
         </div>
       </div>

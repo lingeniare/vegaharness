@@ -1,0 +1,67 @@
+{
+  "dialogs": [
+    {
+      "type": "info",
+      "title": "Управление командой dsh",
+      "message": "Добавьте команду «Desktop» в свой терминал.",
+      "detail": "Команда Desktop: /usr/local/bin/dsh",
+      "buttons": [
+        "Установить",
+        "Отмена"
+      ],
+      "defaultId": 0,
+      "cancelId": 1
+    },
+    {
+      "type": "info",
+      "title": "Управление командой dsh",
+      "message": "Команда «Desktop» установлена.",
+      "detail": "Команда Desktop: /usr/local/bin/dsh\n\nТекущая команда dsh: /usr/local/bin/dsh.",
+      "buttons": [
+        "Закрыть",
+        "Исправить",
+        "Удалить"
+      ],
+      "defaultId": 0,
+      "cancelId": 0
+    },
+    {
+      "type": "info",
+      "title": "Управление командой dsh",
+      "message": "Команда Desktop требует ремонта.",
+      "detail": "Команда Desktop: /usr/local/bin/dsh",
+      "buttons": [
+        "Закрыть",
+        "Исправить",
+        "Удалить"
+      ],
+      "defaultId": 0,
+      "cancelId": 0
+    },
+    {
+      "type": "warning",
+      "title": "Управление командой dsh",
+      "message": "Команда «Desktop» установлена.",
+      "detail": "Команда Desktop: /usr/local/bin/dsh\n\nТекущая команда dsh: /opt/homebrew/bin/dsh.\n\nДругой dsh имеет приоритет. Удалите или измените порядок установки, чтобы использовать команду «Desktop» по умолчанию. Вы также можете запустить команду «Desktop» по ее полному пути.",
+      "buttons": [
+        "Закрыть",
+        "Исправить",
+        "Удалить"
+      ],
+      "defaultId": 0,
+      "cancelId": 0
+    },
+    {
+      "type": "info",
+      "title": "Управление командой dsh",
+      "message": "Добавьте команду «Desktop» в свой терминал.",
+      "detail": "Команда Desktop: /usr/local/bin/dsh\n\nНе удалось проверить вашу команду оболочки. Псевдоним или другая установка dsh может иметь приоритет.",
+      "buttons": [
+        "Установить",
+        "Отмена"
+      ],
+      "defaultId": 0,
+      "cancelId": 1
+    }
+  ]
+}

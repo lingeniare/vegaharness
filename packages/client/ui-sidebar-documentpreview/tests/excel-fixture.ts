@@ -36,7 +36,7 @@ export async function excelFixture(): Promise<Uint8Array<ArrayBuffer>> {
   details.getCell('A2').value = { formula: 'SUM(1,2)' }
   details.getCell('B1').value = new Date('2026-09-16T00:00:00Z')
   details.getCell('B1').numFmt = 'yyyy-mm-dd'
-  details.getCell('C1').value = { richText: [{ text: '富文本', font: { bold: true } }, { text: ' 示例', font: { italic: true } }] }
+  details.getCell('C1').value = { richText: [{ text: '富文本', font: { bold: true } }, { text: 'Пример: ', font: { italic: true } }] }
   details.getCell('D1').value = { text: 'Link text', hyperlink: 'https://example.com' }
   // ExcelJS's reader permits rich text here even though its hyperlink declaration requires a string.
   details.getCell('D2').value = { text: { richText: [{ text: 'Rich', font: { bold: true } }, { text: ' link' }] }, hyperlink: 'https://example.com' } as never
@@ -86,7 +86,7 @@ export async function meetingMinutesFixture(): Promise<Uint8Array<ArrayBuffer>> 
   workbook.addWorksheet('风险与依赖')
   const dashboard = workbook.addWorksheet('统计看板')
   dashboard.getCell('A1').value = '会议纪要 · 统计看板'
-  dashboard.getCell('A5').value = '未开始'
+  dashboard.getCell('A5').value = 'Не начато'
   dashboard.getCell('B5').value = { formula: 'COUNTIF(行动计划!$G$4:$G$23,$A5)' }
   dashboard.getCell('C5').value = { formula: 'IF($B5=0,"",REPT("█",MAX(1,ROUND($B5/MAX(1,$B$5)*16,0))))' }
   dashboard.getCell('D5').value = { formula: 'IFERROR($B5/$B$10,0)' }

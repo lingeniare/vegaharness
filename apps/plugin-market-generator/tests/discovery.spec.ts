@@ -157,7 +157,7 @@ describe('PackageFiles', () => {
 
 describe('readDisplayMetadata', () => {
   it.each([
-    { keywords: ['search', '', ' search ', 'search', '搜索'] },
+    { keywords: ['search', '', ' search ', 'search', 'Поиск'] },
     { keywords: [] },
   ])('preserves manifest keywords $keywords', async ({ keywords }) => {
     const result = await readDisplay(tree({}), { name: 'dsh-a', keywords })

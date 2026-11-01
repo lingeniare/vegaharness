@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "api-job-controller"
+    "title": "api-job-controller",
+    "description": "Job Remote observation stream and the reference-counted client job-output service."
   }
 }

@@ -250,15 +250,15 @@ async function launchDraftFixture(beforeBrowserOpen?: (page: Page, scaffold: Web
 
 function structuredDraft(sessionId: SessionId, title: string): DraftSnapshot {
   const file = `@"${FILE_NAME}"`
-  const folder = '@"目录/"'
-  const session = formatSessionReferenceMention({ sessionId, label: '关联会话 🧩' })
+  const folder = '@"Директория/"'
+  const session = formatSessionReferenceMention({ sessionId, label: 'Связанная сессия 🧩' })
   const references: DraftSnapshot['references'] = []
   let text = `${title} 🧭 e\u0301 雪\n`
   for (let repeat = 0; repeat < 2; repeat++) {
     for (const item of [
       { ref: file, label: FILE_NAME, appearance: 'file' },
-      { ref: folder, label: '目录/', appearance: 'folder' },
-      { ref: session, label: '关联会话 🧩', appearance: 'session' },
+      { ref: folder, label: 'Директория', appearance: 'folder' },
+      { ref: session, label: 'Связанная сессия 🧩', appearance: 'session' },
     ] as const) {
       references.push({
         ...item, offset: text.length, length: item.ref.length,
@@ -269,13 +269,13 @@ function structuredDraft(sessionId: SessionId, title: string): DraftSnapshot {
     text += '\n'
   }
   // Equal mention text without a reference entry remains ordinary text.
-  text += `普通文字 ${file}，末尾 🦉`
+  text += `普通文字 ${file}, 末尾 🦉`
   return { text, references }
 }
 
 it('preserves drafts through explicit Workspace draft navigation and treats empty prompts according to clearPreviousDraft', async () => {
   const { scaffold, page, console, first, firstId, second } = await launchDraftFixture()
-  const initial = { text: '纯文字 🧭\n第二行 e\u0301', references: [] }
+  const initial = { text: '纯文字 🧭\n第二 стр. e\u0301', references: [] }
   await initialize(page, initial.text, second.id)
   await expect.poll(() => second.sessionIds.length, SETTLE).toBe(1)
   const secondId = second.sessionIds[0]!
@@ -340,7 +340,7 @@ it('rebuilds a claimed command chip from the stored draft after reload without s
 it('restores repeated file, folder and Session capsules across edits, Workspace switches and reload without submitting', async () => {
   const { scaffold, page, console, first, firstId, second } = await launchDraftFixture()
   for (const workspace of [first, second]) {
-    await mkdir(join(workspace.path, '目录'))
+    await mkdir(join(workspace.path, 'Директория'))
     await writeFile(join(workspace.path, FILE_NAME), FILE_BODY)
   }
   await initialize(page, '', second.id)
@@ -371,12 +371,12 @@ it('restores repeated file, folder and Session capsules across edits, Workspace 
         },
         {
           "editable": "false",
-          "label": "目录/",
+          "label": "Директория",
           "source": "reference",
         },
         {
           "editable": "false",
-          "label": "关联会话 🧩",
+          "label": "Связанная сессия 🧩",
           "source": "reference",
         },
         {
@@ -386,20 +386,20 @@ it('restores repeated file, folder and Session capsules across edits, Workspace 
         },
         {
           "editable": "false",
-          "label": "目录/",
+          "label": "Директория",
           "source": "reference",
         },
         {
           "editable": "false",
-          "label": "关联会话 🧩",
+          "label": "Связанная сессия 🧩",
           "source": "reference",
         },
       ],
       "paragraphs": [
         "工作区乙 🧭 é 雪",
-        "notes 雪.md 目录/ 关联会话 🧩 ",
-        "notes 雪.md 目录/ 关联会话 🧩 ",
-        "普通文字 @\"notes 雪.md\"，末尾 🦉",
+        " 关联会话 🧩 .notes 雪.md 目录",
+        " 关联会话 🧩 .notes 雪.md 目录",
+        "普通文字 @\"notes 雪.md\", 末尾 🦉",
       ],
     }
   `)
@@ -416,7 +416,7 @@ it('restores repeated file, folder and Session capsules across edits, Workspace 
       await assertDraft(page, item.id, item.draft)
       await composer(page).click()
       await page.keyboard.press(EDITOR_END)
-      const suffix = ` · 编辑${round} 🧪`
+      const suffix = ` · Редактировать${round} 🧪`
       await page.keyboard.insertText(suffix)
       item.draft = { ...item.draft, text: item.draft.text + suffix }
       await assertDraft(page, item.id, item.draft)
@@ -460,8 +460,8 @@ it('reads a legacy string from the existing conversation key and saves ordinary 
   expect(await composer(page).locator('[data-composer-chip]').count()).toBe(0)
   await composer(page).click()
   await page.keyboard.press(EDITOR_END)
-  await page.keyboard.insertText('，继续编辑')
-  await assertDraft(page, firstId, { text: `${legacy}，继续编辑`, references: [] })
+  await page.keyboard.insertText('，ПродолжитьРедактировать')
+  await assertDraft(page, firstId, { text: `${legacy}，ПродолжитьРедактировать`, references: [] })
   await assertUnsubmitted(scaffold, [firstId])
   expect(console.pageErrors).toEqual([])
   expect(console.warnings).toEqual([])
@@ -570,7 +570,7 @@ it('rematches the current draft after a delayed real skills catalog without repl
 it('carries all reference capsules through the real Workspace picker and leaves the source draft empty', async () => {
   const { scaffold, page, console, first, firstId, second } = await launchDraftFixture()
   for (const workspace of [first, second]) {
-    await mkdir(join(workspace.path, '目录'))
+    await mkdir(join(workspace.path, 'Директория'))
     await writeFile(join(workspace.path, FILE_NAME), FILE_BODY)
   }
   const draft = structuredDraft(firstId, '切换工作区携带')
@@ -601,7 +601,7 @@ it('applies a parameter transition matrix to one reusable target without changin
   const { scaffold, page, console, first, firstId, second } = await launchDraftFixture()
   const source = structuredDraft(firstId, '源草稿保持不变')
   const structured = structuredDraft(firstId, '目标结构草稿')
-  const restored = structuredDraft(firstId, '目标恢复草稿')
+  const restored = structuredDraft(firstId, 'ЦельВосстановитьЧерновик')
   const replacement = { text: '目标替换文字 🧭', references: [] }
   const plain = { text: '已有目标文字 🧭', references: [] }
   const literalReferences = { text: structured.text, references: [] }

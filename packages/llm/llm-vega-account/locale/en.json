@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "llm-vega-account",
+    "description": "VEGA (api.vega.chat) account-managed provider over the pi-ai transport."
+  }
+}

@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-settings-subagent"
+    "title": "ui-settings-subagent",
+    "description": "Settings page of Subagent delegation on the dsh web client's Plugins page: recursion depth, parallel capacity, and the models agents may choose for subagents."
   }
 }

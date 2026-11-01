@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "tool-ask-user"
+    "title": "tool-ask-user",
+    "description": "Model-facing ask_user_question tool over the ctx.userQuestions seam."
   }
 }

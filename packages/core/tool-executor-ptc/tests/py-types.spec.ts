@@ -431,7 +431,7 @@ describe('renderToolsSdkPy', () => {
     // `camelCase` has to pass the same characters through instead of splitting
     // on them.
     const tool: ToolSdkSchema = {
-      name: '搜索',
+      name: 'Поиск',
       description: 'Unicode identifiers.',
       parameters: {
         type: 'object',

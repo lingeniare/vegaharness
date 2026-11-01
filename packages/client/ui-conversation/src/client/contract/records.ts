@@ -127,7 +127,7 @@ export type ModelRetryNode = LlmRetryEventData & {
 
 /**
  * Durable terminal notice for a turn that ended with an error, a sign-out
- * cancellation, or an interruption by a DSH stop; the turn's settled retry
+ * cancellation, or an interruption by a VEGA stop; the turn's settled retry
  * chain renders separately and never replaces this node.
  */
 export interface TurnErrorNode {
@@ -143,7 +143,7 @@ export interface TurnErrorNode {
   /**
    * Stable provider failure code when recorded, or a Client display code:
    * `ACCOUNT_SIGNED_OUT` for a sign-out cancellation, `INTERRUPTED` for a
-   * turn closed after DSH stopped.
+   * turn closed after VEGA stopped.
    */
   code?: string
 }

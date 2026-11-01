@@ -226,7 +226,7 @@ describe('PluginInventoryGateway', () => {
       compositionInventory: async () => [
         {
           id: 'standard',
-          name: '标准模式',
+          name: 'Стандартный режим',
           isDefault: true,
           rows: [
             { entryId: 'alpha', moduleName: 'pkg-alpha', enabled: true, fiberState: FiberState.ACTIVE },
@@ -241,7 +241,7 @@ describe('PluginInventoryGateway', () => {
     expect(snapshot.agentPresets).toEqual([
       {
         id: 'standard',
-        name: '标准模式',
+        name: 'Стандартный режим',
         isDefault: true,
         rows: [
           { entryId: 'alpha', moduleName: 'pkg-alpha', enabled: true, fiberPhase: 'active' },

@@ -8,7 +8,7 @@ import type { ConfigFormSnapshot } from '@deepseek-ai/dsh-client-ui-settings/cli
 import { afterEach, expect, it, vi } from 'vitest'
 import { PermissionPanel, PermissionSetup, PermissionToast, type PermissionPanelProps } from '../src/client/PermissionPanel.tsx'
 import type { PermissionView } from '../src/client/controller.ts'
-import { en, zh } from '../src/client/locales.ts'
+import { en, ru } from '../src/client/locales.ts'
 
 afterEach(() => { cleanup(); vi.useRealTimers() })
 const value: CuaApplicationState & { system: CuaSystemPermissionState } = { system: { accessibility: false, screenRecording: true,
@@ -61,7 +61,7 @@ it('requests only a missing privilege and leaves OS attribution to the system pr
   expect(f.props.refresh).toHaveBeenCalledTimes(2)
 })
 
-it.each([en, zh])('changes the default from the detail page and retains a refused write for retry', async (dictionary) => {
+it.each([en, ru])('changes the default from the detail page and retains a refused write for retry', async (dictionary) => {
   const f = fixture()
   f.preset.set({ ...f.preset.getSnapshot(), value: { default: 'standard' } })
   f.publish({ ...observe(value) })
@@ -144,12 +144,12 @@ it('shows query failures as unknown while retaining previously displayed apps', 
 
 it('keeps unknown initial status distinct from a confirmed missing privilege in Chinese', () => {
   const f = fixture()
-  render(<PermissionPanel {...f.props} t={makeTranslate(zh)} />)
+  render(<PermissionPanel {...f.props} t={makeTranslate(ru)} />)
   f.publish({ system: { ...f.state.getSnapshot().system, busy: false, error: 'connection lost' }, busy: false })
-  expect(screen.queryByText(zh.granted)).toBeNull()
-  expect(screen.queryByRole('button', { name: zh.request })).toBeNull()
+  expect(screen.queryByText(ru.granted)).toBeNull()
+  expect(screen.queryByRole('button', { name: ru.request })).toBeNull()
   f.publish({ ...observe({ ...value, system: { ...value.system, accessibility: true, screenRecording: false } }) })
-  fireEvent.click(screen.getByRole('button', { name: zh.request }))
+  fireEvent.click(screen.getByRole('button', { name: ru.request }))
   expect(f.props.request).toHaveBeenCalledWith('screenRecording')
 })
 
@@ -223,7 +223,7 @@ it('shows application icons and names while keeping the executable path in the t
   expect(identity.querySelector('img')?.getAttribute('src')).toBe('data:image/png;base64,aWNvbg==')
 })
 
-it.each([en, zh])('shows four requirements with the target application beside each system permission', (dictionary) => {
+it.each([en, ru])('shows four requirements with the target application beside each system permission', (dictionary) => {
   const f = fixture()
   render(<PermissionPanel {...f.props} t={makeTranslate(dictionary)} />)
   const application = { name: 'Visual Studio Code.app', path: '/Applications/Visual Studio Code.app', icon: 'data:image/png;base64,aWNvbg==' }
@@ -368,7 +368,7 @@ it('finishes activation guidance without waiting for application icons', () => {
   expect(f.state.getSnapshot().icons.busy).toBe(true)
 })
 
-it.each([en, zh])('saves persistent PTC only from its own row and retains failures for retry', async (dictionary) => {
+it.each([en, ru])('saves persistent PTC only from its own row and retains failures for retry', async (dictionary) => {
   const f = fixture()
   render(<PermissionPanel {...f.props} t={makeTranslate(dictionary)} />)
   const row = screen.getByRole('group', { name: dictionary.persistentTitle })

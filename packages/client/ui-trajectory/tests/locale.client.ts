@@ -1,6 +1,6 @@
 import { en as commonEn } from '@deepseek-ai/dsh-client-locale/src/locales/en.ts'
-import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
-import { en, zh, type TrajectoryTranslate } from '../src/client/locales.ts'
+import { ru as commonRu } from '@deepseek-ai/dsh-client-locale/src/locales/ru.ts'
+import { en, ru, type TrajectoryTranslate } from '../src/client/locales.ts'
 
 function translator(dictionary: Record<string, string>): TrajectoryTranslate {
   return (key, params = {}) => {
@@ -17,5 +17,5 @@ function translator(dictionary: Record<string, string>): TrajectoryTranslate {
 /** English trajectory translator for component and pure-layout tests. */
 export const t = translator({ ...commonEn, ...en })
 
-/** Chinese trajectory translator for real-view fixtures that open in Chinese. */
-export const tZh = translator({ ...commonZh, ...zh })
+/** Russian trajectory translator for real-view fixtures that open in Russian. */
+export const tRu = translator({ ...commonRu, ...ru })

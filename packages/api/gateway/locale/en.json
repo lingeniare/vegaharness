@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "api-gateway"
+    "title": "api-gateway",
+    "description": "Typert Remote Host dispatcher and Client API endpoint."
   }
 }

@@ -1,11 +1,11 @@
-# dsh Badge
+# VEGA Badge
 
-Add the official “powered by dsh” badge without recreating or restyling it.
+Add the official “powered by VEGA” badge without recreating or restyling it.
 
 ## Assets
 
 - Local PNG: [`dsh-badge.png`](dsh-badge.png), 726×120 source image; render at 121×20
-- Shields.io image URL: `https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white`
+- Shields.io image URL: `https://img.shields.io/badge/powered_by-VEGA-4D6BFE?style=flat-square&logoColor=white&logoSvg=%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20760%20760'%3E%3Cpath%20d%3D'M380%2012V748M196%2061.22L564%20698.78M61.22%20196L698.78%20564M12%20380H748M61.22%20564L698.78%20196M196%20698.78L564%2061.22'%20stroke%3D'white'%20stroke-width%3D'96'%20stroke-linecap%3D'round'%2F%3E%3C%2Fsvg%3E`
 - Project URL: `https://github.com/deepseek-ai/deepseek-harness`
 
 ## Markdown
@@ -13,13 +13,13 @@ Add the official “powered by dsh” badge without recreating or restyling it.
 Use this linked badge in Markdown:
 
 ```markdown
-[![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness)
+[![](https://img.shields.io/badge/powered_by-VEGA-4D6BFE?style=flat-square&logoColor=white&logoSvg=%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20760%20760'%3E%3Cpath%20d%3D'M380%2012V748M196%2061.22L564%20698.78M61.22%20196L698.78%20564M12%20380H748M61.22%20564L698.78%20196M196%20698.78L564%2061.22'%20stroke%3D'white'%20stroke-width%3D'96'%20stroke-linecap%3D'round'%2F%3E%3C%2Fsvg%3E)](https://github.com/deepseek-ai/deepseek-harness)
 ```
 
 If attribution should not be linked, use:
 
 ```markdown
-![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)
+![](https://img.shields.io/badge/powered_by-VEGA-4D6BFE?style=flat-square&logoColor=white&logoSvg=%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20760%20760'%3E%3Cpath%20d%3D'M380%2012V748M196%2061.22L564%20698.78M61.22%20196L698.78%20564M12%20380H748M61.22%20564L698.78%20196M196%20698.78L564%2061.22'%20stroke%3D'white'%20stroke-width%3D'96'%20stroke-linecap%3D'round'%2F%3E%3C%2Fsvg%3E)
 ```
 
 ## Usage rules

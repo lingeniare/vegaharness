@@ -23,8 +23,8 @@ const MODE = webSnapshotMode()
 const SEED_ID = 'markdown-cjk-strong-web-e2e'
 const DONE = 'CJK_STRONG_DONE'
 const CASES = [
-  ['**注意：**内容', '注意：', '注意：内容'],
-  ['**Notice:**内容', 'Notice:', 'Notice:内容'],
+  ['**注意: **内容', '注意: ', '注意: 内容'],
+  ['**Notice:**Содержимое', 'Notice:', 'Notice:Содержимое'],
   ['**事件中间件（waterfall）**实现', '事件中间件（waterfall）', '事件中间件（waterfall）实现'],
   ['**事件中间件(waterfall)**实现', '事件中间件(waterfall)', '事件中间件(waterfall)实现'],
   ['**句号。**后续', '句号。', '句号。后续'],

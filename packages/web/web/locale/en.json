@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "web"
+    "title": "web",
+    "description": "Abstract web access capability seam (ctx.web) for the VEGA Harness — search/fetch provider registry, registration-order-independent selection, request/result vocabulary, and the WebError taxonomy."
   }
 }

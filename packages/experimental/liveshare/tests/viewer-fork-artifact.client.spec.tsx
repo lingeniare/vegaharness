@@ -178,7 +178,7 @@ describe('Assembled liveshare viewer page branching a share', () => {
     expect(owner.history('fx-alpha').some(event => event.type === 'user/message'
       && Reflect.get(event.data.source, 'rpcId') === request.requestId)).toBe(false)
     await act(async () => { owner?.completeReply(childId) })
-    const replyText = `回声：${userText}。这是 fixture 的流式回复，用于验证打字机增长与定稿切换。`
+    const replyText = `回声: ${userText}。这是 fixture 的流式回复，用于验证打字机增长与定稿切换。`
     await waitFor(() => { expect(document.body.textContent).toContain(replyText) }, { timeout: 15_000 })
 
     await act(async () => { fireEvent.click(sourceRow) })

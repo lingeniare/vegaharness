@@ -1,0 +1,458 @@
+{
+  "actionCards": {
+    "files": [
+      "packages\\experimental\\client-ui-action-cards\\src\\client\\mount.ts"
+    ],
+    "keys": 14
+  },
+  "agent-team": {
+    "files": [
+      "packages\\experimental\\client-ui-agent-team\\src\\client\\mount.ts"
+    ],
+    "keys": 25
+  },
+  "approval": {
+    "files": [
+      "packages\\client\\ui-approval\\src\\client\\index.ts"
+    ],
+    "keys": 7
+  },
+  "chat": {
+    "files": [
+      "packages\\client\\ui-chat\\src\\client\\apply.ts"
+    ],
+    "keys": 195
+  },
+  "claude-code-mods": {
+    "files": [
+      "packages\\experimental\\client-ui-claude-code-mods\\src\\client\\mount.ts"
+    ],
+    "keys": 4
+  },
+  "command": {
+    "files": [
+      "packages\\client\\ui-commands\\src\\client\\index.ts"
+    ],
+    "keys": 28
+  },
+  "common": {
+    "files": [
+      "packages\\client\\locale\\src\\client\\index.ts"
+    ],
+    "keys": 41
+  },
+  "contextMenu": {
+    "files": [
+      "packages\\client\\ui-context-menu\\src\\client\\index.ts"
+    ],
+    "keys": 1
+  },
+  "conversation": {
+    "files": [
+      "packages\\client\\ui-conversation\\src\\client\\apply.ts"
+    ],
+    "keys": 383
+  },
+  "cordis": {
+    "files": [
+      "packages\\extensions\\ui-cordis\\src\\client\\index.ts"
+    ],
+    "keys": 51
+  },
+  "cotTranslation": {
+    "files": [
+      "packages\\experimental\\client-ui-cot-translation\\src\\client\\mount.ts"
+    ],
+    "keys": 32
+  },
+  "creationRecommendations": {
+    "files": [
+      "packages\\experimental\\client-ui-creation-recommendations\\src\\client\\mount.ts"
+    ],
+    "keys": 55
+  },
+  "cuaPermissions": {
+    "files": [
+      "packages\\experimental\\cua\\src\\client\\mount.ts"
+    ],
+    "keys": 49
+  },
+  "deliverables": {
+    "files": [
+      "packages\\client\\ui-deliverables\\src\\client\\index.ts"
+    ],
+    "keys": 57
+  },
+  "directory-browser": {
+    "files": [
+      "packages\\client\\ui-directory-picker-browse\\src\\client\\index.ts"
+    ],
+    "keys": 13
+  },
+  "documentHtml": {
+    "files": [
+      "packages\\client\\ui-sidebar-documentpreview\\src\\client\\html\\index.ts"
+    ],
+    "keys": 4
+  },
+  "documentMarkdown": {
+    "files": [
+      "packages\\client\\ui-sidebar-documentpreview\\src\\client\\markdown\\index.ts"
+    ],
+    "keys": 4
+  },
+  "entryCustomization": {
+    "files": [
+      "packages\\client\\ui-entry-customization\\src\\client\\index.ts"
+    ],
+    "keys": 5
+  },
+  "feedback": {
+    "files": [
+      "packages\\client\\ui-message-feedback\\src\\client\\index.ts"
+    ],
+    "keys": 20
+  },
+  "fileActions": {
+    "files": [
+      "packages\\client\\ui-file-actions\\src\\client\\index.ts"
+    ],
+    "keys": 12
+  },
+  "fileDrag": {
+    "files": [
+      "packages\\client\\ui-file-drag\\src\\client\\index.ts"
+    ],
+    "keys": 1
+  },
+  "forgePanel": {
+    "files": [
+      "packages\\experimental\\client-ui-forge\\src\\client\\mount.ts"
+    ],
+    "keys": 253
+  },
+  "goal": {
+    "files": [
+      "packages\\client\\ui-goal\\src\\client\\index.ts"
+    ],
+    "keys": 12
+  },
+  "inspectorPanel": {
+    "files": [
+      "packages\\experimental\\inspector\\src\\client\\bottom\\page.tsx"
+    ],
+    "keys": 5
+  },
+  "job": {
+    "files": [
+      "packages\\client\\ui-jobs\\src\\client\\index.ts"
+    ],
+    "keys": 40
+  },
+  "liveshare": {
+    "files": [
+      "packages\\experimental\\liveshare\\src\\client\\index.ts"
+    ],
+    "keys": 225
+  },
+  "messageQuotes": {
+    "files": [
+      "packages\\session\\message-quotes\\src\\client\\index.ts"
+    ],
+    "keys": 1
+  },
+  "model": {
+    "files": [
+      "packages\\client\\ui-model-selection\\src\\client\\index.ts"
+    ],
+    "keys": 23
+  },
+  "open-in-app": {
+    "files": [
+      "packages\\client\\ui-open-in-app\\src\\client\\index.ts"
+    ],
+    "keys": 58
+  },
+  "permission.access": {
+    "files": [
+      "packages\\client\\ui-permission-presets\\src\\client\\index.ts"
+    ],
+    "keys": 17
+  },
+  "plan": {
+    "files": [
+      "packages\\client\\ui-plan\\src\\client\\index.ts"
+    ],
+    "keys": 16
+  },
+  "pluginManager": {
+    "files": [
+      "packages\\client\\ui-plugin-manager\\src\\client\\index.ts"
+    ],
+    "keys": 291
+  },
+  "pluginMarket": {
+    "files": [
+      "packages\\client\\ui-plugin-market\\src\\client\\index.ts"
+    ],
+    "keys": 87
+  },
+  "pluginRecommendations": {
+    "files": [
+      "packages\\experimental\\client-ui-plugin-recommendations\\src\\client\\mount.ts"
+    ],
+    "keys": 25
+  },
+  "question": {
+    "files": [
+      "packages\\client\\ui-user-questions\\src\\client\\index.ts"
+    ],
+    "keys": 31
+  },
+  "reference": {
+    "files": [
+      "packages\\client\\ui-reference\\src\\client\\index.ts"
+    ],
+    "keys": 15
+  },
+  "schedule.catalog": {
+    "files": [
+      "packages\\client\\ui-schedule\\src\\client\\index.ts"
+    ],
+    "keys": 76
+  },
+  "schedule.manager": {
+    "files": [
+      "packages\\client\\ui-schedule\\src\\client\\index.ts"
+    ],
+    "keys": 205
+  },
+  "secretMask": {
+    "files": [
+      "packages\\client\\ui-secret-mask\\src\\client\\index.ts"
+    ],
+    "keys": 2
+  },
+  "session-inspector": {
+    "files": [
+      "packages\\experimental\\session-inspector\\src\\client\\index.ts"
+    ],
+    "keys": 52
+  },
+  "session-log-download": {
+    "files": [
+      "packages\\session-query\\session-log-export\\src\\client\\index.ts"
+    ],
+    "keys": 14
+  },
+  "settings": {
+    "files": [
+      "packages\\client\\ui-settings-general\\src\\client\\index.ts"
+    ],
+    "keys": 42
+  },
+  "settings.account": {
+    "files": [
+      "packages\\client\\ui-settings-account\\src\\client\\index.ts"
+    ],
+    "keys": 94
+  },
+  "settings.agentLoop": {
+    "files": [
+      "packages\\client\\ui-settings-agent-loop\\src\\client\\index.ts"
+    ],
+    "keys": 12
+  },
+  "settings.agentPreset": {
+    "files": [
+      "packages\\client\\ui-agent-preset\\src\\client\\index.ts"
+    ],
+    "keys": 39
+  },
+  "settings.locale": {
+    "files": [
+      "packages\\client\\locale\\src\\client\\index.ts"
+    ],
+    "keys": 1
+  },
+  "settings.models": {
+    "files": [
+      "packages\\client\\ui-settings-models\\src\\client\\index.ts"
+    ],
+    "keys": 137
+  },
+  "settings.permission": {
+    "files": [
+      "packages\\client\\ui-permission-presets\\src\\client\\index.ts"
+    ],
+    "keys": 12
+  },
+  "settings.pluginInventory": {
+    "files": [
+      "packages\\client\\ui-settings-plugin-inventory\\src\\client\\index.ts"
+    ],
+    "keys": 37
+  },
+  "settings.plugins": {
+    "files": [
+      "packages\\client\\ui-settings-plugins\\src\\client\\index.ts"
+    ],
+    "keys": 5
+  },
+  "settings.sessionLog": {
+    "files": [
+      "packages\\client\\ui-settings-session-log\\src\\client\\index.ts"
+    ],
+    "keys": 4
+  },
+  "settings.shell": {
+    "files": [
+      "packages\\client\\ui-settings-shell\\src\\client\\index.ts"
+    ],
+    "keys": 14
+  },
+  "settings.subagent": {
+    "files": [
+      "packages\\client\\ui-settings-subagent\\src\\client\\index.ts"
+    ],
+    "keys": 35
+  },
+  "settings.theme": {
+    "files": [
+      "packages\\client\\ui-theme\\src\\client\\index.ts"
+    ],
+    "keys": 25
+  },
+  "settings.webSearch": {
+    "files": [
+      "packages\\client\\ui-settings-web-search\\src\\client\\index.ts"
+    ],
+    "keys": 27
+  },
+  "shortcuts": {
+    "files": [
+      "packages\\client\\ui-shortcuts\\src\\client\\index.ts"
+    ],
+    "keys": 56
+  },
+  "shortcuts.layout": {
+    "files": [
+      "packages\\client\\ui-layout\\src\\client\\index.ts"
+    ],
+    "keys": 1
+  },
+  "sidebar": {
+    "files": [
+      "packages\\client\\ui-sidebar\\src\\client\\index.ts"
+    ],
+    "keys": 8
+  },
+  "sidebarBrowser": {
+    "files": [
+      "packages\\client\\ui-sidebar-browser\\src\\client\\index.ts"
+    ],
+    "keys": 26
+  },
+  "sidebarCodePreview": {
+    "files": [
+      "packages\\client\\ui-sidebar-documentpreview\\src\\client\\code\\index.ts"
+    ],
+    "keys": 3
+  },
+  "sidebarDocumentPreview": {
+    "files": [
+      "packages\\client\\ui-sidebar-documentpreview\\src\\client\\index.ts"
+    ],
+    "keys": 22
+  },
+  "sidebarExcel": {
+    "files": [
+      "packages\\client\\ui-sidebar-documentpreview\\src\\client\\excel\\index.ts"
+    ],
+    "keys": 15
+  },
+  "sidebarFiles": {
+    "files": [
+      "packages\\client\\ui-sidebar-files\\src\\client\\index.ts"
+    ],
+    "keys": 21
+  },
+  "sidebarImage": {
+    "files": [
+      "packages\\client\\ui-sidebar-documentpreview\\src\\client\\image\\index.ts"
+    ],
+    "keys": 11
+  },
+  "sidebarOffice": {
+    "files": [
+      "packages\\client\\ui-sidebar-documentpreview\\src\\client\\office\\index.ts"
+    ],
+    "keys": 15
+  },
+  "sidebarPdf": {
+    "files": [
+      "packages\\client\\ui-sidebar-documentpreview\\src\\client\\pdf\\index.ts"
+    ],
+    "keys": 15
+  },
+  "sidebarRight": {
+    "files": [
+      "packages\\client\\ui-sidebar-right\\src\\client\\index.ts"
+    ],
+    "keys": 38
+  },
+  "sidebarTerminal": {
+    "files": [
+      "packages\\client\\ui-sidebar-terminal\\src\\client\\index.ts"
+    ],
+    "keys": 28
+  },
+  "skill": {
+    "files": [
+      "packages\\client\\ui-skill\\src\\client\\index.ts"
+    ],
+    "keys": 8
+  },
+  "slash.menu": {
+    "files": [
+      "packages\\client\\ui-input-trigger\\src\\client\\index.ts"
+    ],
+    "keys": 9
+  },
+  "stats": {
+    "files": [
+      "packages\\experimental\\client-ui-stats\\src\\client\\index.ts"
+    ],
+    "keys": 177
+  },
+  "subagent": {
+    "files": [
+      "packages\\client\\ui-subagent\\src\\client\\index.ts"
+    ],
+    "keys": 42
+  },
+  "trajectory": {
+    "files": [
+      "packages\\client\\ui-trajectory\\src\\client\\index.ts"
+    ],
+    "keys": 199
+  },
+  "voice-input": {
+    "files": [
+      "packages\\experimental\\client-ui-voice-input\\src\\client\\mount.ts"
+    ],
+    "keys": 114
+  },
+  "workflowRun": {
+    "files": [
+      "packages\\client\\ui-workflow-run\\src\\client\\index.ts"
+    ],
+    "keys": 18
+  },
+  "workspace": {
+    "files": [
+      "packages\\client\\ui-workspace\\src\\client\\index.ts"
+    ],
+    "keys": 119
+  }
+}

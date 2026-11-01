@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-approval"
+    "title": "ui-approval",
+    "description": "Approval composer takeover over the scoped Remote Event waterfall."
   }
 }

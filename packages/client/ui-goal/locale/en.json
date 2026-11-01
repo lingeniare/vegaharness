@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-goal"
+    "title": "ui-goal",
+    "description": "Session goal surface: GoalBar docked above the composer, read from the goal session projection."
   }
 }

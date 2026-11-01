@@ -6,7 +6,7 @@ import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import type { ShortcutCatalogEntry, ShortcutCommandId, ShortcutFixedCatalogEntry } from '@deepseek-ai/dsh-client-shortcuts/client'
 import { ShortcutReference, ShortcutsRow } from '../src/client/Reference.tsx'
 import { createShortcutsStore } from '../src/client/store.ts'
-import { en, zh } from '../src/client/locales.ts'
+import { en, ru } from '../src/client/locales.ts'
 import { initialShortcutConfig, bindingIssue, normalizeBinding, presentBinding } from '@deepseek-ai/dsh-client-shortcuts/protocol'
 import type { ShortcutConfigSnapshot } from '@deepseek-ai/dsh-client-shortcuts/protocol'
 import { ShortcutRegistry } from '../../shortcuts/src/client/registry.ts'
@@ -112,7 +112,7 @@ it.each(['macos', 'windows'] as const)('shows the reference, filters labels and 
   expect(screen.queryByRole('tooltip')).toBeNull()
   act(() => { catalog.set([]) })
   expect(opener.hasAttribute('aria-keyshortcuts')).toBe(false)
-  expect(makeTranslate(zh)('title')).toBe('快捷键')
+  expect(makeTranslate(ru)('title')).toBe('Сочетания клавиш')
 })
 
 
@@ -225,12 +225,12 @@ it('keeps core actions in product order across registration, remount and label c
   act(() => { catalog.set([...extensions, ...[...commands].reverse()]); fixedCatalog.set(fixed) })
   expect(labels(en.application)).toEqual(expected)
   act(() => {
-    catalog.set([...commands, ...extensions].map(row => ({ ...row, label: `操作：${row.label}` })))
-    fixedCatalog.set(fixed.map(row => ({ ...row, label: `操作：${row.label}` })))
+    catalog.set([...commands, ...extensions].map(row => ({ ...row, label: `操作: ${row.label}` })))
+    fixedCatalog.set(fixed.map(row => ({ ...row, label: `操作: ${row.label}` })))
     store.actions.search('操作')
   })
-  expect(labels(en.application)).toEqual(expected.map(label => `操作：${label}`))
-  expect(labels(en.input)).toEqual(['操作：Newline', '操作：Send', '操作：Stop reply'])
+  expect(labels(en.application)).toEqual(expected.map(label => `操作: ${label}`))
+  expect(labels(en.input)).toEqual(['操作: Newline', '操作: Send', '操作: Stop reply'])
 })
 
 it('keeps product order for tied searches while prioritizing stronger matches', () => {
@@ -250,7 +250,7 @@ it('keeps product order for tied searches while prioritizing stronger matches', 
 })
 
 it.each((['web', 'desktop'] as const).flatMap(runtime => (['invalid', 'future'] as const)
-  .flatMap(error => [{ runtime, error, dictionary: en }, { runtime, error, dictionary: zh }])))
+  .flatMap(error => [{ runtime, error, dictionary: en }, { runtime, error, dictionary: ru }])))
 ('identifies the $runtime document and preserves $error data in the selected locale', ({ runtime, error, dictionary }) => {
   const f = referenceFixture({ runtime, dictionary })
   act(() => { f.config.set({ ...f.config.getSnapshot(), status: 'unreadable', error, usingDefaults: false,
@@ -258,8 +258,8 @@ it.each((['web', 'desktop'] as const).flatMap(runtime => (['invalid', 'future'] 
   const text = screen.getByRole('alert').textContent
   expect(text).toContain(runtime === 'web' ? 'dsh.keybindings.v1' : 'userData/keybindings.json')
   expect(text).toContain(error === 'future'
-    ? dictionary === en ? 'Upgrade Harness' : '升级 Harness'
-    : dictionary === en ? 'Back up and repair' : '先备份并修复')
+    ? dictionary === en ? 'Upgrade Harness' : 'Обновите Harness'
+    : dictionary === en ? 'Back up and repair' : 'Сначала создайте резервную копию')
   expect(text).toContain(dictionary['using-accepted'])
   const reset = screen.getByRole('button', { name: dictionary['reset-all'] })
   expect(reset.hasAttribute('disabled')).toBe(true)

@@ -57,7 +57,7 @@ describe('packageAssetRevisionedPath', () => {
   it.each([
     ['photo.png', 'photo-a9993e364706.png'],
     ['icons/whale@2x.png', 'icons/whale@2x-a9993e364706.png'],
-    ['icons/badge.zh.svg', 'icons/badge.zh-a9993e364706.svg'],
+    ['icons/badge.v2.svg', 'icons/badge.v2-a9993e364706.svg'],
     ['icons.v2/photo', 'icons.v2/photo-a9993e364706'],
     ['icons/.png', 'icons/.png-a9993e364706'],
   ])('inserts the revision before the extension of %s', (assetPath, emitted) => {

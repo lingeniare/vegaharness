@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "resources"
+    "title": "resources",
+    "description": "Unified client resource model: protocol-registered providers turn URL addresses into live values, consumed through the useResource global standard hook."
   }
 }

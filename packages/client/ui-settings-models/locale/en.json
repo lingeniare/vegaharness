@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-settings-models"
+    "title": "ui-settings-models",
+    "description": "Models settings and shared product-onboarding dialogs over existing settings and credential joins."
   }
 }

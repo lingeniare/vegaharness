@@ -85,11 +85,11 @@ describe('Toast', () => {
       const filter = vi.fn()
       const view = render(
         <Toast
-          text="会话已归档，可"
+          text="Сессия архивирована. Вы можете "
           tone="success"
           actions={[
-            { label: '撤销', onClick: undo },
-            { prefix: '或', label: '筛选已归档会话', onClick: filter },
+            { label: 'Отменить', onClick: undo },
+            { prefix: ' или ', label: 'фильтровать архивные сессии', onClick: filter },
           ]}
           onDone={vi.fn()}
         />,
@@ -98,10 +98,10 @@ describe('Toast', () => {
       const glyph = view.getByRole('alert').querySelector('[aria-hidden]')
       expect(glyph?.className).toContain('success')
       expect(glyph?.querySelector('svg')).toBeTruthy()
-      expect(view.getByRole('alert').textContent).toBe('会话已归档，可撤销或筛选已归档会话')
-      fireEvent.click(view.getByRole('button', { name: '撤销' }))
+      expect(view.getByRole('alert').textContent).toBe('会话已归档, 可撤销或筛选已归档会话')
+      fireEvent.click(view.getByRole('button', { name: 'Отменить' }))
       expect(undo).toHaveBeenCalledTimes(1)
-      fireEvent.click(view.getByRole('button', { name: '筛选已归档会话' }))
+      fireEvent.click(view.getByRole('button', { name: 'фильтровать архивные сессии' }))
       expect(filter).toHaveBeenCalledTimes(1)
     } finally {
       vi.useRealTimers()

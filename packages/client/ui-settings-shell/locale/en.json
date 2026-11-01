@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-settings-shell"
+    "title": "ui-settings-shell",
+    "description": "Settings page of the shell executor on the dsh web client's Plugins page: the command timeout and the per-stream output cap of the shell namespace."
   }
 }

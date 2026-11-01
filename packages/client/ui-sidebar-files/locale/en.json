@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-sidebar-files"
+    "title": "ui-sidebar-files",
+    "description": "The workspace files page and one workspace directory tree per pane beside docked and floating file previews, listed lazily over the workspaceFiles Remote namespace."
   }
 }

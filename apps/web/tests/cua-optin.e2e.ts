@@ -11,7 +11,7 @@ import type {} from '@deepseek-ai/dsh-agent-preset-registry'
 import { load } from 'js-yaml'
 import { expect, it, vi } from 'vitest'
 import { captureStableAria, compareOrRefreshGolden, launchWebScaffold, webSnapshotMode, type WebScaffold } from './scaffold.ts'
-import { connectFreshWorkspaceZh, ZH_BROWSER_LOCALE } from './support.ts'
+import { connectFreshWorkspaceRu, RU_BROWSER_LOCALE } from './support.ts'
 
 // The shipped bundle admits only macOS Hosts; unsupported Hosts are exercised in bundle-platform.e2e.ts.
 it.skipIf(process.platform !== 'darwin').each([
@@ -45,31 +45,31 @@ it.skipIf(process.platform !== 'darwin').each([
     const settingsPath = join(harnessHome, 'profiles/scaffold/cordis.patch.yml')
     const beforeEnable = await readFile(settingsPath, 'utf8')
     browser = await chromium.launch()
-    const page = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: ZH_BROWSER_LOCALE })
+    const page = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: RU_BROWSER_LOCALE })
     await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
-    await connectFreshWorkspaceZh(page, scaffold.workspaceCwd)
-    await page.getByRole('navigation', { name: '全局面板' }).getByRole('button', { name: '插件', exact: true }).click()
+    await connectFreshWorkspaceRu(page, scaffold.workspaceCwd)
+    await page.getByRole('navigation', { name: 'Глобальные панели' }).getByRole('button', { name: 'Плагины', exact: true }).click()
     const plugins = page.locator('[data-plugin-panel]')
-    await plugins.getByRole('button', { name: '更多', exact: true }).waitFor()
+    await plugins.getByRole('button', { name: 'Ещё', exact: true }).waitFor()
     expect(await page.locator('[data-plugin-package="@deepseek-ai/dsh-cua-bundle"]').count()).toBe(0)
-    await plugins.getByRole('button', { name: '更多', exact: true }).click()
+    await plugins.getByRole('button', { name: 'Ещё', exact: true }).click()
     const card = page.locator('[data-plugin-package="@deepseek-ai/dsh-cua-bundle"]')
     expect(await card.count()).toBe(0)
     expect((await scaffold.ctx.pluginManager.listBundles()).find(bundle => bundle.name === '@deepseek-ai/dsh-cua-bundle'))
       .toMatchObject({ listedByDefault: false, enabled: false, installed: false })
-    await plugins.getByRole('button', { name: '返回插件', exact: true }).click()
+    await plugins.getByRole('button', { name: 'Назад к плагинам', exact: true }).click()
     const offerCua = async () => {
-      await plugins.getByRole('button', { name: '添加插件', exact: true }).click()
-      const dialog = page.getByRole('dialog', { name: '添加插件', exact: true })
-      await dialog.getByRole('textbox', { name: '包名或地址', exact: true }).fill('@deepseek-ai/dsh-cua-bundle')
-      await dialog.getByRole('button', { name: '安装', exact: true }).click()
-      const ready = page.getByRole('dialog', { name: '已安装', exact: true })
+      await plugins.getByRole('button', { name: 'Добавить плагин', exact: true }).click()
+      const dialog = page.getByRole('dialog', { name: 'Добавить плагин', exact: true })
+      await dialog.getByRole('textbox', { name: 'Имя пакета или адрес', exact: true }).fill('@deepseek-ai/dsh-cua-bundle')
+      await dialog.getByRole('button', { name: 'Установить', exact: true }).click()
+      const ready = page.getByRole('dialog', { name: 'Установленные', exact: true })
       await ready.waitFor()
-      expect(await ready.getByText('无需下载，启用即可使用', { exact: true }).count()).toBe(0)
-      return ready.getByRole('button', { name: '立即启用', exact: true })
+      expect(await ready.getByText('Включите его, не загружая другую копию.', { exact: true }).count()).toBe(0)
+      return ready.getByRole('button', { name: 'Включить сейчас', exact: true })
     }
     const enableNow = await offerCua()
-    let toggle = card.getByRole('switch', { name: '启用 Computer Use', exact: true })
+    let toggle = card.getByRole('switch', { name: 'Включить Computer Use', exact: true })
     const originalAgent = scaffold.ctx.agents.list()[0]!
     const ptcAgent = (await scaffold.ctx.agents.create({
       sessionId: SessionId('cua-existing-ptc'),
@@ -110,22 +110,22 @@ it.skipIf(process.platform !== 'darwin').each([
     }
     // Bundle transitions await native cleanup under the browser action deadline.
     await toggle.and(page.locator('[aria-checked="true"]')).waitFor({ state: 'visible' })
-    await card.getByRole('status').getByText('正在应用 Computer Use 的更改', { exact: true }).waitFor({ state: 'hidden' })
-    const setup = page.getByRole('dialog', { name: '使用 Computer Use 前需要设置', exact: true })
+    await card.getByRole('status').getByText('Применение изменений в Computer Use', { exact: true }).waitFor({ state: 'hidden' })
+    const setup = page.getByRole('dialog', { name: 'Настройте использование компьютера перед использованием', exact: true })
     await setup.waitFor()
-    expect(await setup.getByText('Computer Use 插件已开启，但暂时无法检测系统权限。请前往插件详情页查看原因并重试。', { exact: true }).count()).toBe(1)
+    expect(await setup.getByText('Использование компьютера разрешено, но системные разрешения проверить не удалось. Откройте сведения о плагине, чтобы увидеть ошибку, и повторите попытку.', { exact: true }).count()).toBe(1)
     await compareOrRefreshGolden(fileURLToPath(new URL('./expected/cua-permissions/setup.expected.md', import.meta.url)),
       await captureStableAria(page, '[role="dialog"]', scaffold.workspaceCwd), webSnapshotMode())
-    expect(await setup.getByRole('button', { name: '设为 PTC', exact: true }).count()).toBe(0)
+    expect(await setup.getByRole('button', { name: 'Установить на PTC', exact: true }).count()).toBe(0)
     expect(scaffold.ctx.agentPresets.defaultId).toBe(initialDefault)
     expect(selected()).toContain('@deepseek-ai/dsh-cua-bundle')
     expect(profileManifest().dependencies).toEqual(dependencies)
-    expect(await card.getByText('实验性', { exact: true }).count()).toBe(1)
-    expect(await card.textContent()).not.toContain('将 PTC 模式改为可持久化')
-    expect(await card.textContent()).toContain('请切换到 PTC 模式')
-    expect(await card.textContent()).toContain('Windows 支持正在开发中')
+    expect(await card.getByText('Экспериментальный', { exact: true }).count()).toBe(1)
+    expect(await card.textContent()).not.toContain('Использовать постоянный режим')
+    expect(await card.textContent()).toContain('переключитесь в режим PTC')
+    expect(await card.textContent()).toContain('Поддержка Windows находится в разработке')
     expect(await card.textContent()).not.toContain('Swift')
-    const description = await card.getByRole('button', { name: '查看 Computer Use', exact: true }).evaluate((button) => {
+    const description = await card.getByRole('button', { name: 'Проверить Computer Use', exact: true }).evaluate((button) => {
       const element = document.getElementById(button.getAttribute('aria-describedby')!)!
       const style = getComputedStyle(element)
       return { lines: style.webkitLineClamp, height: element.getBoundingClientRect().height,
@@ -155,8 +155,8 @@ it.skipIf(process.platform !== 'darwin').each([
     expect(runtimeFiber() === originalRuntimeFiber).toBe(true)
     expect(scaffold.ctx.ptcRuntime.programFormat).toBe(script ? 'script' : 'function-body')
     await setup.waitFor()
-    expect(await setup.getByText('Computer Use 插件已开启，但暂时无法检测系统权限。请前往插件详情页查看原因并重试。', { exact: true }).count()).toBe(1)
-    await setup.getByRole('button', { name: '稍后', exact: true }).click()
+    expect(await setup.getByText('Использование компьютера разрешено, но системные разрешения проверить не удалось. Откройте сведения о плагине, чтобы увидеть ошибку, и повторите попытку.', { exact: true }).count()).toBe(1)
+    await setup.getByRole('button', { name: 'Позже', exact: true }).click()
     await setup.waitFor({ state: 'hidden' })
     let saved = await readFile(settingsPath, 'utf8')
     expect(saved).toBe(beforeEnable)
@@ -181,12 +181,12 @@ it.skipIf(process.platform !== 'darwin').each([
     })).agent
     expect(scaffold.ctx.agentPresets.composedPreset(fresh.ctx)).toBe('ptc')
     expect(scaffold.ctx.tools.schemas(fresh).some(tool => tool.name === 'cua')).toBe(true)
-    await card.getByRole('button', { name: '查看 Computer Use', exact: true }).click()
-    toggle = page.locator('[data-plugin-panel]').getByRole('switch', { name: '启用 Computer Use', exact: true })
-    const persistent = page.getByRole('group', { name: 'PTC 执行方式', exact: true })
+    await card.getByRole('button', { name: 'Проверить Computer Use', exact: true }).click()
+    toggle = page.locator('[data-plugin-panel]').getByRole('switch', { name: 'Включить Computer Use', exact: true })
+    const persistent = page.getByRole('group', { name: 'Режим выполнения PTC', exact: true })
     const beforePersistent = scaffold.ctx.ptcRuntime
-    await persistent.getByRole('button', { name: '设为持久化', exact: true }).click()
-    await persistent.getByRole('button', { name: '已设为持久化', exact: true }).waitFor()
+    await persistent.getByRole('button', { name: 'Использовать постоянный режим', exact: true }).click()
+    await persistent.getByRole('button', { name: 'Постоянный режим включен', exact: true }).waitFor()
     expect(scaffold.ctx.ptcRuntime.programFormat).toBe(script ? 'script' : 'repl')
     expect(scaffold.ctx.ptcRuntime.retainsState).toBe(true)
     expect(scaffold.ctx.ptcRuntime === beforePersistent).toBe(false)
@@ -213,11 +213,11 @@ it.skipIf(process.platform !== 'darwin').each([
     await toggle.click()
     await toggle.and(page.locator('[aria-checked="true"]')).waitFor({ state: 'visible' })
     await setup.waitFor()
-    expect(await setup.getByText('Computer Use 插件已开启，但暂时无法检测系统权限。请前往插件详情页查看原因并重试。', { exact: true }).count()).toBe(1)
+    expect(await setup.getByText('Использование компьютера разрешено, но системные разрешения проверить не удалось. Откройте сведения о плагине, чтобы увидеть ошибку, и повторите попытку.', { exact: true }).count()).toBe(1)
     expect(scaffold.ctx.agentPresets.defaultId).toBe(initialDefault)
-    await setup.getByRole('button', { name: '前往设置', exact: true }).click()
+    await setup.getByRole('button', { name: 'Открыть настройки', exact: true }).click()
     await setup.waitFor({ state: 'hidden' })
-    await page.getByRole('region', { name: '给 Computer Use 授权', exact: true }).getByRole('alert').waitFor()
+    await page.getByRole('region', { name: 'Разрешить использование компьютера', exact: true }).getByRole('alert').waitFor()
     if (!codingTools) {
       expect(await readFile(settingsPath, 'utf8')).toBe(saved)
       expect(scaffold.ctx.settings.describe().find(row => row.ns === 'ui-settings')?.value).toMatchObject({ enabled: false })
@@ -226,11 +226,11 @@ it.skipIf(process.platform !== 'darwin').each([
       await runtime.release(owner)
       return
     }
-    const defaultSetting = page.getByRole('group', { name: '新会话默认模式', exact: true })
-    await expect.poll(() => defaultSetting.getByRole('button', { name: '设为 PTC', exact: true }).isEnabled()).toBe(true)
+    const defaultSetting = page.getByRole('group', { name: 'Режим по умолчанию для новых сеансов', exact: true })
+    await expect.poll(() => defaultSetting.getByRole('button', { name: 'Установить на PTC', exact: true }).isEnabled()).toBe(true)
     await compareOrRefreshGolden(fileURLToPath(new URL('./expected/cua-permissions/default-mode.expected.md', import.meta.url)),
-      await captureStableAria(page, '[role="group"][aria-label="新会话默认模式"]', scaffold.workspaceCwd), webSnapshotMode())
-    await defaultSetting.getByRole('button', { name: '设为 PTC', exact: true }).click()
+      await captureStableAria(page, '[role="group"][aria-label="Режим по умолчанию для новых сеансов"]', scaffold.workspaceCwd), webSnapshotMode())
+    await defaultSetting.getByRole('button', { name: 'Установить на PTC', exact: true }).click()
     await expect.poll(() => scaffold.ctx.agentPresets.defaultId).toBe('ptc')
     expect(scaffold.ctx.agentPresets.composedPreset(originalAgent.ctx)).toBe(initialDefault)
     expect(scaffold.ctx.agentPresets.composedPreset(freshDefault.ctx)).toBe(initialDefault)
@@ -252,8 +252,8 @@ it.skipIf(process.platform !== 'darwin').each([
     await toggle.click()
     await toggle.and(page.locator('[aria-checked="true"]')).waitFor({ state: 'visible' })
     await setup.waitFor()
-    expect(await setup.getByText('Computer Use 插件已开启，但暂时无法检测系统权限。请前往插件详情页查看原因并重试。', { exact: true }).count()).toBe(1)
-    expect(await setup.getByRole('button', { name: '设为 PTC', exact: true }).count()).toBe(0)
+    expect(await setup.getByText('Использование компьютера разрешено, но системные разрешения проверить не удалось. Откройте сведения о плагине, чтобы увидеть ошибку, и повторите попытку.', { exact: true }).count()).toBe(1)
+    expect(await setup.getByRole('button', { name: 'Установить на PTC', exact: true }).count()).toBe(0)
     expect(await readFile(settingsPath, 'utf8')).toBe(confirmedSettings)
     expect(scaffold.ctx.settings.describe().find(row => row.ns === 'ui-settings')?.value).toMatchObject({ enabled: codingTools })
     await runtime.release(owner)

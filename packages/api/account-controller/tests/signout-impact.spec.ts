@@ -11,12 +11,18 @@ it('reports running account requests and excludes idle or unbound tasks', async 
     status, session: { requestContext: () => provider === undefined ? undefined : { provider, model: 'model' } } as Agent['session'],
   })
   ctx.provide('agents', { list: () => active } as Context['agents'])
+  ctx.provide('llm', {
+    listConfigurableProviders: () => [
+      { provider: 'api-vega', accountManaged: true },
+      { provider: 'deepseek-official', accountManaged: false },
+    ],
+  } as Context['llm'])
   const controller = new AccountController(ctx)
   try {
     expect(controller.hasRunningAccountTasks()).toBe(false)
-    active.push(task('running'), task('running', 'deepseek-official'), task('idle', 'deepseek-account'))
+    active.push(task('running'), task('running', 'deepseek-official'), task('idle', 'api-vega'))
     expect(controller.hasRunningAccountTasks()).toBe(false)
-    active.push(task('running', 'deepseek-account'))
+    active.push(task('running', 'api-vega'))
     expect(controller.hasRunningAccountTasks()).toBe(true)
     active.pop()
     expect(controller.hasRunningAccountTasks()).toBe(false)

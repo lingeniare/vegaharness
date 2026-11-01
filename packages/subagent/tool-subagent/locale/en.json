@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "tool-subagent"
+    "title": "tool-subagent",
+    "description": "Model-facing subagent delegation tool over the ctx.subagents seam."
   }
 }

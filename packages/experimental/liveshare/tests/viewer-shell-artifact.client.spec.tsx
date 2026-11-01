@@ -107,7 +107,7 @@ describe('Assembled liveshare viewer page', () => {
     // Global settings belong to the owner's DSH, so the viewer page boots no settings surface at
     // all: the row that opens it comes from a module this roster never carries, and its label —
     // `settings.trigger` in ui-settings-general — is what a booted one would be named.
-    expect(screen.queryByRole('button', { name: /^(设置|Settings)$/u })).toBeNull()
+    expect(screen.queryByRole('button', { name: /^(Настройки|Settings)$/u })).toBeNull()
     // No write affordance reaches a viewer: the framework's own composer block makes the editor
     // non-editable and states why, and the session management verbs belong to the owner's DSH,
     // which refuses them server-side anyway.
@@ -115,13 +115,13 @@ describe('Assembled liveshare viewer page', () => {
     // This page never read an answer from the share, so it states that the share's state is
     // unconfirmed instead of presenting an access it was never told it holds.
     expect(document.body.textContent).toContain('could not be confirmed')
-    expect(document.body.textContent).not.toContain('仅可查看')
+    expect(document.body.textContent).not.toContain('Только чтение')
     // The fixture Session is running, and a viewer cannot interrupt the owner's generation: the
     // composer offers neither Stop nor Send.
     expect(screen.queryByRole('button', { name: 'Stop generating' })).toBeNull()
-    expect(screen.queryByRole('button', { name: /发送|Send/ })).toBeNull()
-    expect(screen.queryByRole('button', { name: /附件|Attach|上传|Upload/ })).toBeNull()
-    expect(screen.queryByRole('button', { name: /重命名|Rename|归档|Archive|删除|Delete|Fork/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /Отправить|Send/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /Прикрепить|Attach|Загрузить|Upload/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /Переименовать|Rename|Архивировать|Archive|Удалить|Delete|Fork/ })).toBeNull()
     // The model this Session runs on is stated where a DSH user looks for it, and it is a label: the
     // reader cannot change the owner's model, but nothing here hides which one the owner chose.
     await waitFor(() => { expect(document.querySelector('[data-liveshare-viewer-seat="model"]')).not.toBeNull() })
@@ -129,14 +129,14 @@ describe('Assembled liveshare viewer page', () => {
     expect(modelSeat?.tagName).toBe('SPAN')
     expect(modelSeat?.textContent).toMatch(/deepseek/iu)
     expect(modelSeat?.querySelector('button, select, [role="button"], [role="combobox"]')).toBeNull()
-    expect(screen.queryByRole('button', { name: /model|模型/iu })).toBeNull()
+    expect(screen.queryByRole('button', { name: /model|модель/iu })).toBeNull()
     // The turn tail is on screen, and it offers no branch action: this page cannot write, so the
     // Chat surface never registers one for the shared Session.
     expect(document.querySelector('[data-actions-reveal]')).not.toBeNull()
     expect(screen.queryByRole('button', { name: 'Branch into a new conversation' })).toBeNull()
     // The assembled conversation renders the fixture history through the real presentation plugins:
     // a user turn, an assistant turn whose Markdown became a highlighted code block, and a tool card.
-    expect(document.body.textContent).toContain('问题 51：fixture 历史消息')
+    expect(document.body.textContent).toContain('问题 51: fixture 历史消息')
     expect(document.body.textContent).toContain('Tool call')
     const codeBlock = document.querySelector('pre.shiki')
     expect(codeBlock).not.toBeNull()

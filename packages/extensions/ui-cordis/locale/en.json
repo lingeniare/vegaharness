@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-cordis"
+    "title": "ui-cordis",
+    "description": "Cordis dynamic-plugin definition card: the keyed cordis_define tool row with its run/stop switch."
   }
 }

@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "agent-instructions"
+    "title": "agent-instructions",
+    "description": "Workspace context loader for AGENTS.md/CLAUDE.md instruction files."
   }
 }

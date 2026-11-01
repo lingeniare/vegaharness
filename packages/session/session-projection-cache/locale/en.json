@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "session-projection-cache"
+    "title": "session-projection-cache",
+    "description": "Persisted projection cache (ctx.sessionProjectionCache): durable per-session checkpoint records on the session_projcache storage domain (per-record layout), throttled write-behind, and the cached listing read."
   }
 }

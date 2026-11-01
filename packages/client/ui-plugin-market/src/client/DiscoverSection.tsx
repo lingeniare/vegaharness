@@ -153,7 +153,7 @@ function VersionRow({ entry, version, title, t, language, onInstall }: {
   readonly onInstall: (version: MarketListingVersion) => void
 }): ReactNode {
   const current = entry.installation.installedVersion === version.version
-  // DSH ships a provided bundle; the market cannot replace it.
+  // VEGA ships a provided bundle; the market cannot replace it.
   const offered = !current && entry.installation.status !== 'provided' && installable(version.compatibility)
   const { compatibility } = version
   return (

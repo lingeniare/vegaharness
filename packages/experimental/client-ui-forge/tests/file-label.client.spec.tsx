@@ -48,7 +48,7 @@ describe('FileLabel', () => {
 
   it('keeps the end of a long name and a long directory whole while their starts can shorten', () => {
     const directory = '.agents/notes/implemented/feature'
-    const name = '2026-10-09-session-change-request-bindings.i18n.yaml'
+    const name = '2026-10-09-session-change-request-bindings.meta.yaml'
     const b = label(`${directory}/${name}`)
     expect(b.nameParts).toEqual([name.slice(0, -12), name.slice(-12)])
     expect(b.directoryParts).toEqual([directory.slice(0, -12), directory.slice(-12)])

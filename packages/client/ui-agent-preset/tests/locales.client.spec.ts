@@ -1,7 +1,7 @@
 /** Web-localized copy for the four shipped presets and declared copy for every other row. */
 
 import { describe, expect, it } from 'vitest'
-import { en, ja, presetDisplayText, zh } from '../src/client/locales.ts'
+import { en, presetDisplayText, ru } from '../src/client/locales.ts'
 
 const translate = (bundle: typeof en) => (key: keyof typeof en): string => bundle[key]
 
@@ -16,10 +16,8 @@ describe('preset display copy', () => {
 
     expect(presetDisplayText(preset, translate(en)))
       .toEqual({ name: en[nameKey], description: en[descriptionKey] })
-    expect(presetDisplayText(preset, translate(zh)))
-      .toEqual({ name: zh[nameKey], description: zh[descriptionKey] })
-    expect(presetDisplayText(preset, translate(ja)))
-      .toEqual({ name: ja[nameKey], description: ja[descriptionKey] })
+    expect(presetDisplayText(preset, translate(ru)))
+      .toEqual({ name: ru[nameKey], description: ru[descriptionKey] })
   })
 
   it('keeps declared metadata untranslated for named and unknown presets', () => {

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { TerminalFollower } from '../src/stream.ts'
 import type { TerminalFrame } from '../src/types.ts'
 
-const frame: TerminalFrame = { type: 'output', sequence: 1, data: '终端' }
+const frame: TerminalFrame = { type: 'output', sequence: 1, data: 'Терминал' }
 const signal = (): AbortSignal => new AbortController().signal
 
 describe('TerminalFollower', () => {

@@ -17,11 +17,12 @@ import { createSnapshotStore, type SnapshotStore } from '@deepseek-ai/dsh-client
 import { RemoteError, TestRemote } from '@deepseek-ai/dsh-client-test-runtime'
 import type { ModelSelection } from '@deepseek-ai/dsh-agent/types'
 import type { ModelSelectionProjection } from '@deepseek-ai/dsh-agent/types'
+import type { ModelProviderGroup } from '@deepseek-ai/dsh-api-session-controller/types'
 import { ReasoningEffortId } from '@deepseek-ai/dsh-llm/brand'
 import type { CommandContribution, PopupSelectSpec, SelectOption } from '@deepseek-ai/dsh-client-ui-commands/client'
 import type { ModelSelectInjected } from '../src/client/slots.ts'
 import { apply, inject } from '../src/client/index.ts'
-import { zh } from '../src/client/locales.ts'
+import { ru } from '../src/client/locales.ts'
 
 const sid = (k: string): SessionId => k as SessionId
 
@@ -67,7 +68,7 @@ const GROUPS = [{
 }]
 
 /** Boot the plugin over fake faces + a stateful fake host (current moves on selectModel). */
-async function bench(locale: 'zh' | 'en' = 'zh') {
+async function bench(locale: 'ru' | 'en' = 'ru') {
   const ctx = new Context()
   let defaultSelection: ModelSelection = { provider: 'deepseek-official', model: 'deepseek-v4-flash' }
   let selected = defaultSelection
@@ -76,7 +77,7 @@ async function bench(locale: 'zh' | 'en' = 'zh') {
   // Whether the Host advertises available models for the current route.
   let routable = true
   let catalogFailure = false
-  let groups = GROUPS
+  let groups: readonly ModelProviderGroup[] = GROUPS
   let selectionFailure: RemoteError<'session/writer-held'> | undefined
   const sessionRemote = {
     modelCatalog: () => {
@@ -196,7 +197,7 @@ async function bench(locale: 'zh' | 'en' = 'zh') {
     setHostCurrent: (selection: ModelSelection) => { defaultSelection = selection },
     setProjected: (id: SessionId, value: ModelSelectionProjection) => { projections.get(id)?.set(value) },
     address: (id: SessionId) => { addressed.add(id) },
-    setGroups: (next: typeof GROUPS) => { groups = next },
+    setGroups: (next: readonly ModelProviderGroup[]) => { groups = next },
     setCatalogFailure: (next: boolean) => { catalogFailure = next },
     setRoutable: (next: boolean) => { routable = next },
     blockOf: (key: string) => blocks.get(sid(key)),
@@ -212,7 +213,7 @@ describe('ui-model-selection dual entry', () => {
     const input = projection('owned')
     const options = await b.popup().options(input, new AbortController().signal)
     b.rejectSelection()
-    await expect(b.popup().onSelect(options[0]!, input)).rejects.toThrow(zh['error.sessionInUse'])
+    await expect(b.popup().onSelect(options[0]!, input)).rejects.toThrow(ru['error.sessionInUse'])
     expect(b.ctx.modelDirectories.directoryFor(sid('owned')).store.getSnapshot()).toMatchObject({
       status: 'error', pending: null, error: 'session/writer-held: writer held',
     })
@@ -227,15 +228,15 @@ describe('ui-model-selection dual entry', () => {
     expect(b.seat().locale).toBe('model')
   })
 
-  it.each([['zh', '新'], ['en', 'New']] as const)('resolves seat badge text for the active %s locale', async (locale, expected) => {
+  it.each([['ru', 'Новый'], ['en', 'New']] as const)('resolves seat badge text for the active %s locale', async (locale, expected) => {
     const b = await bench(locale)
     b.mint('s1')
     const face = b.seat().inject!(sid('s1'))
-    expect(face.resolveText({ en: 'New', zh: '新' })).toBe(expected)
+    expect(face.resolveText({ en: 'New', ru: 'Новый' })).toBe(expected)
     expect(face.resolveText('1017')).toBe('1017')
   })
 
-  it.each(['zh', 'en'] as const)('shows names and providers without catalog descriptions (%s)', async (locale) => {
+  it.each(['ru', 'en'] as const)('shows names and providers without catalog descriptions (%s)', async (locale) => {
     const b = await bench(locale)
     b.mint('s1')
     const options = await b.popup().options(projection('s1'), new AbortController().signal)
@@ -247,8 +248,8 @@ describe('ui-model-selection dual entry', () => {
     expect(b.popup().searchMode).toBe('fuzzy-label')
     expect(options[0]?.active).toBe(true)
     expect(options[1]?.active).toBeUndefined()
-    expect(b.popup().searchLabels?.()).toEqual(locale === 'zh'
-      ? { placeholder: '搜索模型…', empty: '暂无可用模型', noResults: '没有匹配的模型。' }
+    expect(b.popup().searchLabels?.()).toEqual(locale === 'ru'
+      ? { placeholder: 'Поиск моделей…', empty: 'Нет доступных моделей.', noResults: 'Подходящие модели не найдены.' }
       : { placeholder: 'Search models…', empty: 'No models available.', noResults: 'No matching models.' })
   })
 
@@ -256,7 +257,7 @@ describe('ui-model-selection dual entry', () => {
     const b = await bench()
     try {
       b.setGroups([
-        GROUPS[1]!, GROUPS[0]!, { ...GROUPS[0]!, id: 'deepseek-account', name: 'DeepSeek Account' },
+        GROUPS[1]!, GROUPS[0]!, { ...GROUPS[0]!, id: 'deepseek-account', name: 'DeepSeek Account', accountManaged: true },
         { ...GROUPS[1]!, id: 'last-provider', name: 'Last Provider' },
       ])
       b.remote.emit('llm/adapters-updated', [])
@@ -308,14 +309,14 @@ describe('ui-model-selection dual entry', () => {
     })
   })
 
-  it.each(['en', 'zh'] as const)('localizes account provider headings in the %s model popup', async (locale) => {
+  it.each(['en', 'ru'] as const)('localizes account provider headings in the %s model popup', async (locale) => {
     const b = await bench(locale)
     try {
-      b.setGroups([{ ...GROUPS[0]!, id: 'deepseek-account', name: 'DeepSeek Account' }])
+      b.setGroups([{ ...GROUPS[0]!, id: 'deepseek-account', name: 'DeepSeek Account', accountManaged: true }])
       b.remote.emit('llm/adapters-updated', [])
       b.mint('s1')
       const options = await b.popup().options(projection('s1'), new AbortController().signal)
-      expect(options[0]?.group?.label).toBe(locale === 'zh' ? 'DeepSeek 账号' : 'DeepSeek Account')
+      expect(options[0]?.group?.label).toBe(locale === 'ru' ? 'Аккаунт VEGA' : 'VEGA Account')
     } finally {
       await b.ctx.fiber.dispose()
     }
@@ -324,18 +325,18 @@ describe('ui-model-selection dual entry', () => {
   it('removes account models from the picker after sign-out', async () => {
     const b = await bench('en')
     try {
-      b.setGroups([{ ...GROUPS[0]!, id: 'deepseek-account', name: 'DeepSeek Account' }, ...GROUPS])
+      b.setGroups([{ ...GROUPS[0]!, id: 'deepseek-account', name: 'DeepSeek Account', accountManaged: true }, ...GROUPS])
       b.remote.emit('llm/adapters-updated', [])
       b.mint('s1')
       const before = await b.popup().options(projection('s1'), new AbortController().signal)
-      expect(before.some(option => option.group?.label === 'DeepSeek Account')).toBe(true)
+      expect(before.some(option => option.group?.label === 'VEGA Account')).toBe(true)
       b.setGroups(GROUPS)
       b.remote.emit('credentials/record-updated', ['deepseek-account-platform'])
       await vi.waitFor(() => {
         expect(b.ctx.modelDirectories.directoryFor(sid('s1')).store.getSnapshot().groups).toEqual(GROUPS)
       })
       const after = await b.popup().options(projection('s1'), new AbortController().signal)
-      expect(after.some(option => option.group?.label === 'DeepSeek Account')).toBe(false)
+      expect(after.some(option => option.group?.label === 'VEGA Account')).toBe(false)
       expect(after.length).toBeGreaterThan(0)
     } finally {
       await b.ctx.fiber.dispose()

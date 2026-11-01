@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-renderer"
+    "title": "ui-renderer",
+    "description": "Browser UI renderer: React slot bindings, ctx.uiRenderer, and the assembled application root."
   }
 }

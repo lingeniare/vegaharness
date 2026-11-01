@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-sidebar"
+    "title": "ui-sidebar",
+    "description": "Sidebar plugin: session multi-level tree, search, grouping, state dots."
   }
 }

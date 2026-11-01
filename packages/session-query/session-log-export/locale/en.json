@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "session-log-export"
+    "title": "session-log-export",
+    "description": "Web Session-log ZIP export and Session Markdown copy."
   }
 }

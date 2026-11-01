@@ -16,7 +16,7 @@ async function translator() {
 describe.skipIf(process.env.DSH_TRANSLATION_LIVE !== '1')('anonymous translation real endpoints', () => {
   it('uses default Bing with automatic source detection and a Simplified Chinese locale', async () => {
     const service = await translator()
-    const spec = service.resolve({ text: 'Hello world.', targetLanguage: 'zh-CN' })
+    const spec = service.resolve({ text: 'Hello world.', targetLanguage: 'ru-RU' })
     expect(spec.provider).toBe('bing')
     expect(spec.sourceLanguage).toBe('auto')
     expect(await service.translate(spec)).toContain('世界')
@@ -40,7 +40,7 @@ describe.skipIf(process.env.DSH_TRANSLATION_LIVE !== '1')('anonymous translation
     const service = await translator()
     const text = '你好世界。'.repeat(800)
     expect(text.length).toBe(service.maxTextChars)
-    const result = await service.translate(service.resolve({ text, targetLanguage: 'en', sourceLanguage: 'zh-CN', provider: 'google' }))
+    const result = await service.translate(service.resolve({ text, targetLanguage: 'en', sourceLanguage: 'ru-RU', provider: 'google' }))
     expect(result).toMatch(/world/i)
   })
 })

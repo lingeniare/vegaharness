@@ -109,7 +109,6 @@ body {
   font-weight: 300;
   line-height: 40px;
   text-align: center;
-  white-space: nowrap;
 }
 
 .tagline h1,
@@ -124,6 +123,7 @@ body {
   font-size: 26px;
   font-style: normal;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 :lang(en) .tagline em {

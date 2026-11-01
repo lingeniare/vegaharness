@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "system-prompt"
+    "title": "system-prompt",
+    "description": "System prompt assembly registry for the VEGA Harness."
   }
 }

@@ -10,17 +10,17 @@ it('keeps the automation title intact before moving New to another line', async 
     const browser = await chromium.launch()
     try {
       const facts: string[] = []
-      for (const language of ['en', 'zh'] as const) {
+      for (const language of ['en', 'ru'] as const) {
         const context = await browser.newContext({
           viewport: { width: 1680, height: 1000 },
-          locale: language === 'en' ? 'en-US' : 'zh-CN',
+          locale: language === 'en' ? 'en-US' : 'ru-CN',
           reducedMotion: 'reduce',
         })
         try {
           const page = await context.newPage()
           const consoleWatch = watchConsole(page)
           await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
-          const title = language === 'en' ? 'Automation tasks' : '自动化任务'
+          const title = language === 'en' ? 'Automation tasks' : 'Задача автоматизации'
           await page.getByRole('button', { name: title, exact: true }).click()
           const panel = page.getByTestId('task-manager-page')
           const heading = panel.getByRole('heading', { name: title, exact: true })

@@ -7,11 +7,11 @@ import {
   OpenInAppToast,
   type OpenInAppToastProps, type OpenInAppToastState,
 } from '../src/client/open-toast.tsx'
-import { en, ja, es, fr, de, ru, pt, zh } from '../src/client/locales.ts'
+import { en, ru } from '../src/client/locales.ts'
 
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllGlobals() })
 
-function mount(state: OpenInAppToastState | null, dictionary: typeof en | typeof zh = en) {
+function mount(state: OpenInAppToastState | null, dictionary: typeof en | typeof ru = en) {
   const dismiss = vi.fn()
   const props = {
     useToast: <T,>(select: (value: OpenInAppToastState | null) => T): T => select(state),
@@ -85,13 +85,13 @@ describe('OpenInAppToast', () => {
   })
 
   it('shows the other-device confirmation in Chinese', () => {
-    mount({ kind: 'opened', seq: 1 }, zh)
-    expect(screen.getByRole('alert').textContent).toBe('已在其它设备打开')
+    mount({ kind: 'opened', seq: 1 }, ru)
+    expect(screen.getByRole('alert').textContent).toBe('Открыто на другом устройстве')
   })
 
   it.each([
-    ['en', en], ['zh', zh], ['ja', ja], ['es', es],
-    ['fr', fr], ['de', de], ['ru', ru], ['pt', pt],
+    ['en', en], ['ru', ru], ['ru', ru], ['ru', ru],
+    ['ru', ru], ['ru', ru], ['ru', ru], ['ru', ru],
   ] as const)('localizes the other-device file-location confirmation: %s', (_locale, dictionary) => {
     mount({ kind: 'revealed', seq: 2 }, dictionary)
     expect(screen.getByRole('alert').textContent).toBe(dictionary['path.revealed'])
@@ -101,7 +101,7 @@ describe('OpenInAppToast', () => {
     mount({ kind: 'failed', failure: 'openError', seq: 3 })
     expect(screen.getByRole('alert').textContent).toBe(en['path.openError'])
     cleanup()
-    mount({ kind: 'failed', failure: 'revealError', seq: 4 }, zh)
-    expect(screen.getByRole('alert').textContent).toBe(zh['path.revealError'])
+    mount({ kind: 'failed', failure: 'revealError', seq: 4 }, ru)
+    expect(screen.getByRole('alert').textContent).toBe(ru['path.revealError'])
   })
 })

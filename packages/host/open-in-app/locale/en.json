@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "open-in-app"
+    "title": "open-in-app",
+    "description": "Host half of open-in-app: resolved application catalog, icons, and the launch endpoint as three webServer routes."
   }
 }

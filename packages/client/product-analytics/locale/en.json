@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "product-analytics"
+    "title": "product-analytics",
+    "description": "Desktop product event collection and authenticated Host reporting."
   }
 }

@@ -228,6 +228,6 @@ describe('the Relay address the dialog treats as in force', () => {
     })
     // The host's own diagnosis is printed unchanged; re-saving the address is what probes it again.
     expect(screen.getByText(error)).toBeDefined()
-    expect(screen.queryByRole('button', { name: 'Save and check' })).toBeNull()
+    expect(screen.queryByRole('button', { name: /^Создать сессию в рабочей области/u })).toBeNull()
   })
 })

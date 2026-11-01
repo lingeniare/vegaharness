@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "fs-observation-policy"
+    "title": "fs-observation-policy",
+    "description": "File-context policy plugin for the VEGA Harness — observed-state, read-before-edit, and version-guarded write/edit added over the ctx.fs provider seam through the fs/* event gate (no service API)."
   }
 }

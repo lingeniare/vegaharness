@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "compaction-basic"
+    "title": "compaction-basic",
+    "description": "Token-meter-driven compaction policy and LLM summarization backend for the VEGA Harness."
   }
 }

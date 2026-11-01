@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-plan"
+    "title": "ui-plan",
+    "description": "Plan mode controls, persistent transcript plan cards, and sidebar Markdown previews."
   }
 }

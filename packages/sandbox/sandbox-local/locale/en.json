@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "sandbox-local"
+    "title": "sandbox-local",
+    "description": "Local process-sandbox backends for the VEGA Harness sandbox seam: bwrap, the npm-distributed landlock-run launcher, macOS Seatbelt, or the Windows ACL restricted-token runner — functionally probed, fail-closed."
   }
 }

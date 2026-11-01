@@ -49,9 +49,9 @@ async function fixture(config: Config = {}) {
   bundle('core', { 'cordis.patch.yml': JSON.stringify([{ insert: [{ id: 'manager', name: 'cordis:manager', config }, { id: 'connection', name: 'cordis:connection' }] }]) })
   bundle('documented', {
     'locale/en.json': JSON.stringify({ meta: { detail: 'guide/DETAIL.md' } }),
-    'locale/zh.json': JSON.stringify({ meta: { detail: 'guide/DETAIL.zh.md' } }),
+    'locale/ru.json': JSON.stringify({ meta: { detail: 'guide/DETAIL.ru.md' } }),
+    'guide/DETAIL.ru.md': '# С описанием\n',
     'guide/DETAIL.md': '---\ntitle: x\n---\n# Documented\n\n![shot](img/shot.svg)\n',
-    'guide/DETAIL.zh.md': '# 有说明\n',
     'guide/img/shot.svg': '<svg xmlns="http://www.w3.org/2000/svg"/>',
   })
   bundle('plain', { 'readme.md': '# Plain' })
@@ -87,7 +87,7 @@ it('reads an installed bundle\'s localized meta.detail file or README from its d
   expect(await manager.readBundleDetail('documented', 'en-US')).toEqual({
     status: 'found', origin: 'locale', path: 'guide/DETAIL.md', markdown: '# Documented\n\n![shot](img/shot.svg)\n',
   })
-  expect(await manager.readBundleDetail('documented', 'zh-CN')).toMatchObject({ origin: 'locale', markdown: '# 有说明\n' })
+  expect(await manager.readBundleDetail('documented', 'ru-RU')).toMatchObject({ origin: 'locale', markdown: '# С описанием\n' })
   expect(await manager.readBundleDetail('plain', 'en')).toEqual({ status: 'found', origin: 'readme', path: 'readme.md', markdown: '# Plain' })
   expect(await manager.readBundleDetail('bare', 'en')).toEqual({ status: 'none' })
   expect(fetch).not.toHaveBeenCalled()

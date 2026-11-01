@@ -1,11 +1,9 @@
 ---
-description: "The stdio JSON-RPC serving plugin for deployments that let out-of-process SDK clients open sessions and drive agents in a DeepSeek Harness runtime."
+description: "The stdio JSON-RPC serving plugin for deployments that let out-of-process SDK clients open sessions and drive agents in a VEGA Harness runtime."
 kind: "package-reference"
 ---
 
 # @deepseek-ai/dsh-sdk-jsonrpc-server
-
-English | [中文](README.zh.md)
 
 ## Summary
 
@@ -209,7 +207,6 @@ Goal-round messages and tool results append to retained history under the native
 ## Known Limitations and Deferred Work
 
 <a id="known-limitations-and-deferred-work"></a>
-
 
 These limits define when the plugin needs special operational care. They are current package constraints, not a comparison with other serving approaches or a task backlog.
 

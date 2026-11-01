@@ -116,10 +116,10 @@ export const SCAFFOLD_DEFAULTS_BUNDLE = 'dsh-web-scaffold-defaults'
 export const WELCOME_NOTICE_ACK_FIELD = 'welcomeNoticeVersion'
 export const WELCOME_NOTICE_VERSION = '2026-09-28.1'
 export const WELCOME_NOTICE_COPY = {
-  zh: {
-    title: '预览版说明',
-    body: 'DeepSeek Harness 目前的 0.2 版本仍处于预览阶段，还有许多地方需要持续改进和打磨，希望听取广大开发者和用户的反馈建议。现在，新的桌面端面向广泛用户，开发者相关的进阶功能可在配置中开启使用。预计 DeepSeek Harness 的产品功能以及插件 API 都会继续快速迭代、持续演化，并逐渐趋于稳定。\n\n我们期待与全球用户和开发者一起，在开源、可复用、可组合的基础设施之上，共同探索智能上限。欢迎大家用 DeepSeek Harness 将想法变成现实，与社区一起丰富插件生态。',
-    continueLabel: '继续',
+  ru: {
+    title: 'Уведомление о предварительной версии',
+    body: 'VEGA Harness 0.2 всё ещё находится в предварительной версии, и многие аспекты требуют дальнейшего улучшения и доработки. Мы будем рады отзывам и предложениям от разработчиков и пользователей. Новое настольное приложение рассчитано на широкую аудиторию, а расширенные функции для разработчиков можно включить в настройках. Функции VEGA Harness и API плагинов будут и дальше быстро развиваться и регулярно обновляться, постепенно становясь более стабильными.\n\nМы надеемся вместе с пользователями и разработчиками со всего мира исследовать границы интеллектуальных возможностей, опираясь на открытую, многократно используемую и компонуемую инфраструктуру. Создавайте с VEGA Harness то, что задумали, и присоединяйтесь к сообществу, чтобы вместе развивать экосистему плагинов.',
+    continueLabel: 'Продолжить',
   },
 } as const
 
@@ -1597,8 +1597,8 @@ function normalizeAria(snapshot: string, workspaceCwd: string, age: boolean): st
     // Session summaries and Message IconActions clocks cross calendar
     // boundaries; collapse every shape so goldens stay stable across them.
     .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z/g, '{{timestamp}}')
-    .replace(/\d{4}年\d{1,2}月\d{1,2}日 \d{2}:\d{2}/g, '{{clock}}')
-    .replace(/\d{1,2}月\d{1,2}日 \d{2}:\d{2}/g, '{{clock}}')
+    .replace(/\d{4}年\d{1,2}Пн\d{1,2}Вс \d{2}:\d{2}/g, '{{clock}}')
+    .replace(/\d{1,2}Пн\d{1,2}Вс \d{2}:\d{2}/g, '{{clock}}')
     .replace(/(?<!\d)\d{1,2}:\d{2}:\d{2}(?:\.\d+)?(?:\s*[AP]M)?(?!\d)/gi, '{{clock}}')
     .replace(/(?<!\d)\d{2}:\d{2}(?!\d)/g, '{{clock}}')
 }

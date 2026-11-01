@@ -34,6 +34,12 @@
 # `dsh.client` rows are the browser roster the modules node half scans into
 # window.__DSH_BOOT__; the modules row is simultaneously a host row.
 - insert:
+    # Product analytics is disabled in this deployment: the exporter stays
+    # mounted only because the analytics plugin injects `productTelemetry`,
+    # while `enabled: false` reports a false policy to renderers and Electron
+    # and accepts no events, so nothing is collected or sent.
+    # DSH_PRODUCT_ANALYTICS_OTLP_URL would override the export destination for
+    # isolated collectors.
     - id: desktop-product-telemetry
       name: '@deepseek-ai/dsh-host-product-telemetry-otel'
       disabled: !!js "ctx.get('profileContext')?.name !== 'desktop'"
@@ -50,7 +56,7 @@
       name: '@deepseek-ai/dsh-client-product-analytics'
       disabled: !!js "ctx.get('profileContext')?.name !== 'desktop'"
       config:
-        enabled: true
+        enabled: false
         appVersion: !!js process.env.DSH_CLIENT_VERSION
 
     # Host-owned authorization sampled at Agent creation. The Plugins page

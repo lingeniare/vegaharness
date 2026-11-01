@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-session"
+    "title": "ui-session",
+    "description": "Session Controller adapter for React and session-scoped slots."
   }
 }

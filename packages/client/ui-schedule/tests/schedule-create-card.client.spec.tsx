@@ -11,7 +11,7 @@ import { PartialArguments } from '@deepseek-ai/dsh-util-values'
 import { ScheduleCreateCard, type ScheduleCreateCardProps } from '../src/client/ScheduleCreateCard.tsx'
 import { narrowScheduleRecord, scheduleCreateCardModel } from '../src/client/schedule-create-card.ts'
 import { zoneLabel } from '../src/client/schedule-format.ts'
-import { en, zh } from '../src/client/task-manager-locales.ts'
+import { en, ru } from '../src/client/task-manager-locales.ts'
 
 type ToolBlock = ToolCallViewProps['block']
 
@@ -250,14 +250,14 @@ describe('ScheduleCreateCard', () => {
   })
 
   it('opens the task in the active locale', () => {
-    render(<ScheduleCreateCard {...props(settled(dailyTask), vi.fn(), makeTranslate(zh))} />)
-    expect(screen.getByRole('button', { name: '打开任务详情：Check the deployment' })).toBeDefined()
-    expect(screen.getByRole('button', { name: '打开' })).toBeDefined()
+    render(<ScheduleCreateCard {...props(settled(dailyTask), vi.fn(), makeTranslate(ru))} />)
+    expect(screen.getByRole('button', { name: 'Открыть сведения о задаче: Check the deployment' })).toBeDefined()
+    expect(screen.getByRole('button', { name: 'Открыть' })).toBeDefined()
   })
 
   it('shows the weekly frequency in the active locale', () => {
-    render(<ScheduleCreateCard {...props(settled(weeklyTask), vi.fn(), makeTranslate(zh))} />)
-    expect(screen.getByText(`每周一、三 09:00（${zoneLabel('Asia/Shanghai', makeTranslate(zh))}）`)).toBeDefined()
+    render(<ScheduleCreateCard {...props(settled(weeklyTask), vi.fn(), makeTranslate(ru))} />)
+    expect(screen.getByText(`Еженедельно по Пн, Ср в 09:00 (${zoneLabel('Asia/Shanghai', makeTranslate(ru))})`)).toBeDefined()
   })
 
   it('keeps a pending call as a title row with no open action and no result body', () => {

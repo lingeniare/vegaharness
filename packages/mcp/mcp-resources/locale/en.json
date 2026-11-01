@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "mcp-resources"
+    "title": "mcp-resources",
+    "description": "Scoped MCP resource discovery and reading through shared model tools."
   }
 }

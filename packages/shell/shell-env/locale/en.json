@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "shell-env"
+    "title": "shell-env",
+    "description": "Tool-independent managed DSH_* shell environment registry."
   }
 }

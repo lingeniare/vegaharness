@@ -16,7 +16,7 @@ import { SlotTestRuntime, usePinnedBrowserLanguages } from '@deepseek-ai/dsh-cli
 import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
 import { apply, inject } from '@deepseek-ai/dsh-client-ui-workspace/client'
 
-usePinnedBrowserLanguages('zh-CN')
+usePinnedBrowserLanguages('ru')
 
 afterEach(cleanup)
 beforeEach(() => { localStorage.clear() })

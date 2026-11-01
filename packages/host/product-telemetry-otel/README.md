@@ -5,8 +5,6 @@ kind: "package-reference"
 
 # @deepseek-ai/dsh-host-product-telemetry-otel
 
-English | [中文](README.zh.md)
-
 ## Summary
 
 Send selected product usage events to an OTLP/HTTP collector. Events carry a name, string summary, occurrence time, and scalar or one-level object attributes. Mounting the plugin collects nothing automatically; applications explicitly submit each event. Delivery is best effort and does not confirm warehouse ingestion.
@@ -25,7 +23,7 @@ Send selected product usage events to an OTLP/HTTP collector. Events carry a nam
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount the plugin in a Cordis composition with the application identity; override the collector endpoint when needed. The Desktop composition mounts it when [product analytics](../../client/product-analytics/README.md) is enabled; ordinary Web does not. The standalone example below reads `DSH_APP_VERSION`; Desktop supplies `DSH_CLIENT_VERSION` through its native launcher. Both must name the running release; the schema rejects an absent version.
+Mount the plugin in a Cordis composition with the application identity; override the collector endpoint when needed. The Desktop composition mounts it beside [product analytics](../../client/product-analytics/README.md) as that plugin's declared injection; ordinary Web does not. The standalone example below reads `DSH_APP_VERSION`; Desktop supplies `DSH_CLIENT_VERSION` through its native launcher. Both must name the running release; the schema rejects an absent version.
 
 ```yaml
 - name: '@deepseek-ai/dsh-otel'

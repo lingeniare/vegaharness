@@ -6,7 +6,7 @@ import { DesktopQuitConfirmation, resolveDesktopQuitPrompt } from '../src/quit-c
 
 afterEach(() => { vi.restoreAllMocks() })
 
-function setup(platform: NodeJS.Platform, inspect: () => Promise<DesktopQuitInspection> | undefined, locale = 'zh') {
+function setup(platform: NodeJS.Platform, inspect: () => Promise<DesktopQuitInspection> | undefined, locale = 'ru') {
   const shown: MessageBoxOptions[] = []
   let answer: MessageBoxReturnValue = { response: 0, checkboxChecked: false }
   const focus = vi.fn()
@@ -43,9 +43,9 @@ describe('DesktopQuitConfirmation', () => {
     const f = setup('darwin', async () => ({ activeTasks: true, scheduledTasks: true }))
     expect(await f.confirmation.confirm()).toBe(true)
     expect(f.shown).toEqual([{
-      type: 'warning', title: 'DeepSeek Harness', message: '退出 DeepSeek Harness？',
-      detail: '当前正在运行的任务将会中断，且应用关闭期间，定时任务不会运行',
-      buttons: ['退出', '取消'], defaultId: 0, cancelId: 1, noLink: true,
+      type: 'warning', title: 'DeepSeek Harness', message: 'Выйти из VEGA Harness?',
+      detail: 'Выполнение задач будет прервано, а запланированные задачи не будут выполняться, пока приложение закрыто.',
+      buttons: ['Выйти', 'Отмена'], defaultId: 0, cancelId: 1, noLink: true,
     }])
   })
 
@@ -54,7 +54,7 @@ describe('DesktopQuitConfirmation', () => {
     f.answer(1)
     expect(await f.confirmation.confirm()).toBe(false)
     expect(f.shown).toEqual([{
-      type: 'none', icon: f.icon, title: 'DeepSeek Harness', message: 'Quit DeepSeek Harness?',
+      type: 'none', icon: f.icon, title: 'VEGA Harness', message: 'Quit VEGA Harness?',
       detail: 'Scheduled tasks will not run while the app is closed.',
       buttons: ['Quit', 'Cancel'], defaultId: 0, cancelId: 1, noLink: true,
     }])
@@ -65,7 +65,7 @@ describe('DesktopQuitConfirmation', () => {
     const f = setup('darwin', async () => { throw new Error('desktop quit: inspection timed out') })
     f.answer(1)
     expect(await f.confirmation.confirm()).toBe(false)
-    expect(f.shown.map(options => options.detail)).toEqual(['当前正在运行的任务将会中断'])
+    expect(f.shown.map(options => options.detail)).toEqual(['Выполнение задач будет прервано.'])
     expect(console.warn).toHaveBeenCalledWith('desktop quit: task inspection unavailable', expect.any(Error))
   })
 

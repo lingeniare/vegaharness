@@ -9,48 +9,48 @@ import type {
 } from '../src/index.ts'
 
 export const markdownLabels: MarkdownLabels = {
-  code: { copyLabel: '复制', copiedLabel: '复制成功' },
+  code: { copyLabel: 'Копировать', copiedLabel: 'Скопировано' },
   footnotes: 'Footnotes',
 }
 
 export const diffBlockLabels: DiffBlockLabels = {
-  codeLabel: '代码块', wrapLabel: '自动换行', unwrapLabel: '取消自动换行',
-  copy: '复制', copied: '复制成功', collapseAria: '收起差异',
-  expandAria: hidden => `展开其余 ${hidden} 行差异`,
-  collapse: '收起', expand: hidden => `… 其余 ${hidden} 行`,
+  codeLabel: 'Блок кода', wrapLabel: 'Перенос строк', unwrapLabel: 'Отключить перенос строк',
+  copy: 'Копировать', copied: 'Скопировано', collapseAria: 'Свернуть различия',
+  expandAria: hidden => `Показать ещё ${hidden} строк различий`,
+  collapse: 'Свернуть', expand: hidden => `… ещё ${hidden} строк`,
 }
 
 export const readBlockLabels: ReadBlockLabels = {
-  codeLabel: '代码块', wrapLabel: '自动换行', unwrapLabel: '取消自动换行',
-  window: (shown, total) => `显示 ${shown} / ${total} 行`,
-  copy: '复制', copied: '复制成功', collapseAria: '收起内容',
-  expandAria: hidden => `展开其余 ${hidden} 行`,
-  collapse: '收起', expand: hidden => `… 其余 ${hidden} 行`,
+  codeLabel: 'Блок кода', wrapLabel: 'Перенос строк', unwrapLabel: 'Отключить перенос строк',
+  window: (shown, total) => `Показано ${shown} из ${total} строк`,
+  copy: 'Копировать', copied: 'Скопировано', collapseAria: 'Свернуть содержимое',
+  expandAria: hidden => `Показать ещё ${hidden} строк`,
+  collapse: 'Свернуть', expand: hidden => `… ещё ${hidden} строк`,
 }
 
 export const searchBlockLabels: SearchBlockLabels = {
   pathsSummary: (shown, total, truncated) => truncated
-    ? `显示 ${shown} / 共 ${total} 个路径`
-    : `${shown} 个路径`,
+    ? `Показано ${shown} из ${total} путей`
+    : `${shown} путей`,
   matchesSummary: (shown, total, files, truncated) => truncated
-    ? `显示 ${shown} / 共 ${total} 处匹配 · ${files} 个文件`
-    : `${shown} 处匹配 · ${files} 个文件`,
-  copy: '复制', copied: '复制成功', noResults: '无结果',
-  collapseAria: '收起结果',
-  expandAria: hidden => `展开其余 ${hidden} 行结果`,
-  collapse: '收起', expand: hidden => `… 其余 ${hidden} 行`,
+    ? `Показано ${shown} из ${total} совпадений · файлов: ${files}`
+    : `Совпадений: ${shown} · файлов: ${files}`,
+  copy: 'Копировать', copied: 'Скопировано', noResults: 'Нет результатов',
+  collapseAria: 'Свернуть результаты',
+  expandAria: hidden => `Показать ещё ${hidden} строк результатов`,
+  collapse: 'Свернуть', expand: hidden => `… ещё ${hidden} строк`,
 }
 
 export const terminalBlockLabels: TerminalBlockLabels = {
-  commandLine: line => `命令第 ${line} 行`,
-  signal: signal => `信号 ${signal}`,
-  exitCode: code => `退出码 ${code}`,
-  noExitCode: '未正常退出',
-  running: '运行中', failed: '失败', done: '已完成',
-  copy: '复制', copied: '复制成功', noOutput: '无输出',
-  collapseAria: '收起输出', collapse: '收起',
-  expandAria: hidden => `展开其余 ${hidden} 行输出`,
-  expand: hidden => `… 其余 ${hidden} 行`,
+  commandLine: line => `Командная строка ${line}`,
+  signal: signal => `сигнал ${signal}`,
+  exitCode: code => `код выхода ${code}`,
+  noExitCode: 'код выхода отсутствует',
+  running: 'Выполняется', failed: 'Ошибка', done: 'Завершено',
+  copy: 'Копировать', copied: 'Скопировано', noOutput: 'Нет вывода',
+  collapseAria: 'Свернуть вывод', collapse: 'Свернуть',
+  expandAria: hidden => `Развернуть оставшиеся ${hidden} строк вывода`,
+  expand: hidden => `… ещё ${hidden} строк`,
 }
 
 export const jsonTreeLabels: JsonTreeLabels = {
@@ -62,6 +62,6 @@ export const jsonTreeLabels: JsonTreeLabels = {
 }
 
 export const webBlockLabels: WebBlockLabels = {
-  noResults: '未找到结果', sourcesTruncated: '来源列表已截断',
-  http: 'HTTP', contentTruncated: '内容已截断', markdown: markdownLabels,
+  noResults: 'Результаты не найдены', sourcesTruncated: 'Список источников обрезан',
+  http: 'HTTP', contentTruncated: 'Содержимое обрезано', markdown: markdownLabels,
 }

@@ -1,4 +1,4 @@
-import { es, fr, de, ru, pt } from '../src/client/locales.ts'
+import { en, ru } from '../src/client/locales.ts'
 /**
  * ui-skill browser half: source and keyed toolview registration +
  * locale dictionaries + source duplicate-name proof +
@@ -64,8 +64,8 @@ function providePresentation(ctx: Context): PresentationCapture {
       capture.dictionaries.push({ namespace, dictionaries })
       return () => { capture.localeDisposed = true }
     },
-    // Minimal bound-translate fake: zh dictionary lookup, key passthrough on miss.
-    bind: () => (key: string) => key === 'menu.userOnly' ? '仅用户' : key,
+    // Minimal bound-translate fake: ru dictionary lookup, key passthrough on miss.
+    bind: () => (key: string) => key === 'menu.userOnly' ? 'только для пользователя' : key,
   })
   return capture
 }
@@ -141,39 +141,7 @@ describe('apply', () => {
     expect(entry?.locale).toBe('skill')
     expect(entry?.component).toBe(SkillToolRow)
     expect(presentation.dictionaries).toEqual([{
-      namespace: 'skill', dictionaries: {
-        es, fr, de, ru, pt,
-        zh: {
-          'row.title': '加载技能',
-          'row.running': '正在加载 skill',
-          'row.preparing': '准备加载技能',
-          'row.failed': 'skill 加载失败',
-          'row.stopped': 'skill 加载已中止',
-          'row.instructions': '说明',
-          'row.inspect': '查看',
-          'menu.userOnly': '仅用户',
-        },
-        en: {
-          'row.title': 'Skill',
-          'row.running': 'Loading skill',
-          'row.preparing': 'Preparing to load a skill',
-          'row.failed': 'Skill load failed',
-          'row.stopped': 'Skill load stopped',
-          'row.instructions': 'Instructions',
-          'row.inspect': 'Inspect',
-          'menu.userOnly': 'user-only',
-        },
-        ja: {
-          'row.title': 'スキル',
-          'row.running': 'スキルを読み込み中',
-          'row.preparing': 'スキルの読み込みを準備中',
-          'row.failed': 'スキルの読み込みに失敗しました',
-          'row.stopped': 'スキルの読み込みが停止しました',
-          'row.instructions': '手順',
-          'row.inspect': '詳細を確認',
-          'menu.userOnly': 'ユーザー専用',
-        },
-      },
+      namespace: 'skill', dictionaries: { en, ru },
     }])
   })
 
@@ -271,8 +239,8 @@ describe('candidates: sessionId addressing', () => {
       { name: 'code-review', description: 'review flow' },
     ])
     const names = async (query: string) => (await source.candidates(proj('s1'), req(query))).map(c => c.name)
-    // 'de' prefixes deploy and is a subsequence of code-review: the prefix ranks first.
-    await expect(names('de')).resolves.toEqual(['deploy', 'code-review'])
+    // 'ru' prefixes deploy and is a subsequence of code-review: the prefix ranks first.
+    await expect(names('ru')).resolves.toEqual(['deploy', 'code-review'])
     await expect(names('REV')).resolves.toEqual(['code-review'])
     await expect(names('zzz')).resolves.toEqual([])
   })
@@ -485,7 +453,7 @@ describe('user-only marking', () => {
     const candidates = await source.candidates(proj('s1'), req(''))
     expect(candidates).toEqual([
       { name: 'shared-skill', description: 'both surfaces' },
-      { name: 'user-only-skill', description: '仅用户 · user surface only' },
+      { name: 'user-only-skill', description: 'только для пользователя · user surface only' },
     ])
   })
 })

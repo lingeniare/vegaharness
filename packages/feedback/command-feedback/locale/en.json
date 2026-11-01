@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "command-feedback"
+    "title": "command-feedback",
+    "description": "Log-only session feedback: the record event, the sessionFeedback Host Remote, and the human-facing slash command /feedback."
   }
 }

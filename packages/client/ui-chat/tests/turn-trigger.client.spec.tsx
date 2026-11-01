@@ -7,7 +7,7 @@ import type { ChatNode } from '../src/client/contract/chat-nodes.ts'
 import { TurnTriggerNodeView } from '../src/client/chat/TurnTriggerNodeView.tsx'
 import { turnTriggerDetails } from '../src/client/chat/turn-trigger.ts'
 import { contextForm, contextProducer } from '../src/client/conversation-nodes/event-projection.ts'
-import { en, zh } from '../src/client/locale.ts'
+import { ru, en } from '../src/client/locale.ts'
 
 afterEach(cleanup)
 
@@ -48,7 +48,7 @@ describe('Turn trigger notices', () => {
 
   it.each([
     [en, 'Task message received'],
-    [zh, '收到任务消息'],
+    [ru, 'Получено сообщение о задаче'],
   ])('presents Team relays as Agent messages while retaining the sender name', (locale, title) => {
     const node = trigger({ kind: 'agent-message', form: 'relay', senderSessionId: 'sender' })
     node.data.content = [{ type: 'text', text: 'Team message from reviewer-2:' }, { type: 'text', text: 'Ready.' }]
@@ -61,7 +61,7 @@ describe('Turn trigger notices', () => {
 
   it.each([
     { locale: en, title: 'Automation task' },
-    { locale: zh, title: '自动化任务' },
+    { locale: ru, title: 'Задача автоматизации' },
   ])('uses the automation task label $title and shared clock', ({ locale, title }) => {
     const node = trigger({ kind: 'schedule' })
     const view = render(<TurnTriggerNodeView node={node} t={makeTranslate(locale)} />)

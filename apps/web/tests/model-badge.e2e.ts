@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import {
   captureStableAria, compareOrRefreshGolden, launchWebScaffold, watchConsole, webSnapshotMode, type WebScaffold,
 } from './scaffold.ts'
-import { connectFreshWorkspaceZh, ZH_BROWSER_LOCALE } from './support.ts'
+import { connectFreshWorkspaceRu, RU_BROWSER_LOCALE } from './support.ts'
 
 const NAME = 'DeepSeek-V4.1-Flash'
 const LONG_NAME = 'DeepSeek model with a very long release and capability description that exceeds the selector width'
@@ -46,10 +46,10 @@ describe.skipIf(MODE === 'record')('web e2e: catalog model badges', () => {
       ],
     })
     browser = await chromium.launch()
-    page = await browser.newPage({ viewport: { width: 1440, height: 900 }, locale: ZH_BROWSER_LOCALE })
+    page = await browser.newPage({ viewport: { width: 1440, height: 900 }, locale: RU_BROWSER_LOCALE })
     tripwire = watchConsole(page)
     await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
-    await connectFreshWorkspaceZh(page, scaffold.workspaceCwd)
+    await connectFreshWorkspaceRu(page, scaffold.workspaceCwd)
   })
 
   afterAll(async () => {
@@ -58,22 +58,22 @@ describe.skipIf(MODE === 'record')('web e2e: catalog model badges', () => {
   })
 
   it('shows each catalog badge in all placements while preserving the chosen provider and model id', async () => {
-    const trigger = page.getByRole('button', { name: /^选择模型/ })
+    const trigger = page.getByRole('button', { name: /^Выберите модели для добавления/ })
     await trigger.getByText('新', { exact: true }).waitFor()
     expect(await trigger.textContent()).toContain(`新 ${NAME}`)
-    expect(await trigger.getAttribute('aria-label')).toBe(`选择模型，当前 ${NAME}`)
+    expect(await trigger.getAttribute('aria-label')).toBe(`Выбрать модель. Текущая: ${NAME}`)
     expect(await trigger.getByText('新', { exact: true }).getAttribute('data-tone')).toBe('success')
     try {
       await trigger.click()
-      const current = page.getByRole('menuitem', { name: /^模型/ })
+      const current = page.getByRole('menuitem', { name: /^Модель/ })
       expect(await current.getByText('新', { exact: true }).count()).toBe(1)
       await current.click()
-      const menu = page.getByRole('menu', { name: '模型', exact: true })
-      await compareOrRefreshGolden(EXPECTED, await captureStableAria(page, '[role="menu"][aria-label="模型"]', scaffold.workspaceCwd), MODE)
+      const menu = page.getByRole('menu', { name: 'Модель', exact: true })
+      await compareOrRefreshGolden(EXPECTED, await captureStableAria(page, '[role="menu"][aria-label="Модель"]', scaffold.workspaceCwd), MODE)
       expect(await menu.getByRole('group', { name: 'External', exact: true }).locator('[data-tone]').count()).toBe(0)
       expect(await menu.getByRole('menuitemradio', { name: 'Invalid badge model', exact: true }).locator('[data-tone]').count()).toBe(0)
       expect(await menu.getByRole('menuitemradio', { name: `${LONG_NAME} Preview`, exact: true }).locator('[data-tone]').getAttribute('data-tone')).toBe('neutral')
-      const account = menu.getByRole('group', { name: 'DeepSeek 账号', exact: true })
+      const account = menu.getByRole('group', { name: 'Аккаунт VEGA', exact: true })
       expect(await account.getByText('1017', { exact: true }).getAttribute('data-tone')).toBe('info')
       await account.getByRole('menuitemradio', { name: `${NAME} 1017`, exact: true }).click()
       await expect.poll(() => scaffold.ctx.agentDefaultModel.currentSelection()).toEqual({ provider: 'deepseek-account', model: 'deepseek-flash' })
@@ -97,14 +97,14 @@ describe.skipIf(MODE === 'record')('web e2e: catalog model badges', () => {
     }
     const adapter = new CatalogAdapter()
     const unregister = scaffold.ctx.llm.registerAdapter([provider], adapter)
-    const trigger = page.getByRole('button', { name: /^选择模型/ })
+    const trigger = page.getByRole('button', { name: /^Выберите модели для добавления/ })
     try {
       await trigger.click()
-      await page.getByRole('menuitem', { name: /^模型/ }).click()
+      await page.getByRole('menuitem', { name: /^Модель/ }).click()
       await page.getByRole('menuitemradio', { name: 'Live model New', exact: true }).click()
       await expect.poll(() => trigger.textContent()).toContain('New Live model')
       await trigger.click()
-      await page.getByRole('menuitem', { name: /^模型/ }).click()
+      await page.getByRole('menuitem', { name: /^Модель/ }).click()
       adapter.badge = { text: 'Updated', tone: 'success' }
       scaffold.ctx.emit('llm/models-updated', provider)
       await expect.poll(() => trigger.textContent()).toContain('Updated Live model')
@@ -121,17 +121,17 @@ describe.skipIf(MODE === 'record')('web e2e: catalog model badges', () => {
       await page.keyboard.press('Escape')
       await page.keyboard.press('Escape')
       await trigger.click()
-      await page.getByRole('menuitem', { name: /^模型/ }).click()
+      await page.getByRole('menuitem', { name: /^Модель/ }).click()
       await page.getByRole('menuitemradio', { name: `${NAME} 1017`, exact: true }).click()
       unregister()
     }
   })
 
   it('ellipsizes long names while keeping badges visible in every placement and both theme palettes', async () => {
-    const trigger = page.getByRole('button', { name: /^选择模型/ })
+    const trigger = page.getByRole('button', { name: /^Выберите модели для добавления/ })
     try {
       await trigger.click()
-      await page.getByRole('menuitem', { name: /^模型/ }).click()
+      await page.getByRole('menuitem', { name: /^Модель/ }).click()
       await page.getByRole('menuitemradio', { name: `${LONG_NAME} Preview`, exact: true }).click()
       await expect.poll(() => trigger.textContent()).toBe(`Preview ${LONG_NAME}`)
       const triggerBadge = trigger.getByText('Preview', { exact: true })
@@ -144,14 +144,14 @@ describe.skipIf(MODE === 'record')('web e2e: catalog model badges', () => {
 
       await page.setViewportSize({ width: 390, height: 844 })
       await trigger.click()
-      const current = page.getByRole('menuitem', { name: /^模型/ })
+      const current = page.getByRole('menuitem', { name: /^Модель/ })
       const rootBadgeBox = (await current.getByText('Preview', { exact: true }).boundingBox())!
       const rootBox = (await current.boundingBox())!
       expect(rootBadgeBox.x).toBeGreaterThanOrEqual(rootBox.x)
       expect(rootBadgeBox.x + rootBadgeBox.width).toBeLessThanOrEqual(rootBox.x + rootBox.width)
       expect(await current.getByText(LONG_NAME, { exact: true }).evaluate(node => node.scrollWidth > node.clientWidth)).toBe(true)
       await current.click()
-      const menu = page.getByRole('menu', { name: '模型', exact: true })
+      const menu = page.getByRole('menu', { name: 'Модель', exact: true })
       const option = menu.getByRole('menuitemradio', { name: `${LONG_NAME} Preview`, exact: true })
       const badge = option.getByText('Preview', { exact: true })
       const box = await badge.boundingBox()

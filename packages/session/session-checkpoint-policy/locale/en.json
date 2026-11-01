@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "session-checkpoint-policy"
+    "title": "session-checkpoint-policy",
+    "description": "Semantic session durability checkpoints before model requests and tool side effects."
   }
 }

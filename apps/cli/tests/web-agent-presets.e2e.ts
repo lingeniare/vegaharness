@@ -681,7 +681,7 @@ describe('the shipped Web composition', () => {
         agent: handle.agent,
       })
       expect(loaded.isError).toBe(false)
-      expect(JSON.stringify(loaded.content)).toContain('powered by dsh')
+      expect(JSON.stringify(loaded.content)).toContain('powered by VEGA')
     } finally {
       await handle.dispose()
     }

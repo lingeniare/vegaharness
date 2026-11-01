@@ -1,37 +1,37 @@
 {
   "darwin:en-US": {
     "menu": [
-      { "label": "About DeepSeek Harness", "role": "about" },
+      { "label": "About VEGA Harness", "role": "about" },
       { "type": "separator" }
     ],
     "options": {
-      "applicationName": "DeepSeek Harness",
+      "applicationName": "VEGA Harness",
       "applicationVersion": "1.0.0",
       "version": "",
       "copyright": "",
       "iconPath": "<app icon>"
     }
   },
-  "darwin:zh-CN": {
+  "darwin:ru-CN": {
     "menu": [
-      { "label": "关于 DeepSeek Harness", "role": "about" },
+      { "label": "О VEGA Harness", "role": "about" },
       { "type": "separator" }
     ],
     "options": {
-      "applicationName": "DeepSeek Harness",
+      "applicationName": "VEGA Harness",
       "applicationVersion": "1.0.0",
       "version": "",
       "copyright": "",
       "iconPath": "<app icon>"
     }
   },
-  "win32:zh-CN": {
+  "win32:ru-CN": {
     "menu": [
-      { "label": "关于 DeepSeek Harness" },
+      { "label": "О VEGA Harness" },
       { "type": "separator" }
     ],
     "options": {
-      "applicationName": "DeepSeek Harness",
+      "applicationName": "VEGA Harness",
       "applicationVersion": "1.0.0",
       "version": "",
       "copyright": "",
@@ -40,11 +40,11 @@
   },
   "win32:en-US": {
     "menu": [
-      { "label": "About DeepSeek Harness" },
+      { "label": "About VEGA Harness" },
       { "type": "separator" }
     ],
     "options": {
-      "applicationName": "DeepSeek Harness",
+      "applicationName": "VEGA Harness",
       "applicationVersion": "1.0.0",
       "version": "",
       "copyright": "",

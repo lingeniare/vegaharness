@@ -1,3 +1,4 @@
+import { ru } from '../src/client/locale.ts'
 // @vitest-environment jsdom
 /**
  * The official user renderer owns the source-decoration chain above its bubble.
@@ -9,19 +10,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render } from '@testing-library/react'
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import type { PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
-import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
+import { ru as commonRu } from '@deepseek-ai/dsh-client-locale/src/locales/ru.ts'
 import type {
   ChatConversationViewNode, SteeringMessageNode, UserMessageNode,
 } from '@deepseek-ai/dsh-client-ui-chat/client'
 import type { ChatNodeViewProps, UserContentInput } from '../src/client/contract/slots.ts'
 import { UserMessageNodeView } from '../src/client/chat/MessageItem.tsx'
-import { zh } from '../src/client/locale.ts'
 import { createUserContentFixture } from './user-content-component-fixture.tsx'
 import { unusedImageLoader } from './reasoning-component-fixture.tsx'
 
 afterEach(cleanup)
 
-const t: ChatNodeViewProps['t'] = makeTranslate(zh, commonZh)
+const t: ChatNodeViewProps['t'] = makeTranslate(ru, commonRu)
 type UserSlots = PropsRenderSlots<'conversation.chat.user.before'>
 const userSlots: UserSlots = {
   renderSlot: () => null,
@@ -102,7 +102,7 @@ describe('official user renderer origin seat', () => {
     const row = view.container.firstElementChild
     const bubble = view.container.querySelector('[data-message-bubble]')
     const text = view.getByText('hello').firstChild
-    const copy = view.getByRole('button', { name: '复制' })
+    const copy = view.getByRole('button', { name: 'Копировать' })
     const actions = copy.closest('[data-clock]')
     expect(bubble).not.toBeNull()
     expect(text?.nodeType).toBe(Node.TEXT_NODE)
@@ -114,7 +114,7 @@ describe('official user renderer origin seat', () => {
       expect(view.container.firstElementChild).toBe(row)
       expect(view.container.querySelector('[data-message-bubble]')).toBe(bubble)
       expect(view.getByText('hello').firstChild).toBe(text)
-      expect(view.getByRole('button', { name: '复制' })).toBe(copy)
+      expect(view.getByRole('button', { name: 'Копировать' })).toBe(copy)
       expect(copy.closest('[data-clock]')).toBe(actions)
       expect(view.container.querySelector('[data-test-origin]') !== null).toBe(renderSlotChain === occupied)
     }

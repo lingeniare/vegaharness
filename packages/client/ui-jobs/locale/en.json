@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-jobs"
+    "title": "ui-jobs",
+    "description": "Session-header background-job list with on-demand streaming record panels."
   }
 }

@@ -98,7 +98,7 @@ export function ModelSelect(
     ...group,
     provider: {
       id: group.id,
-      name: group.id === 'deepseek-account' ? accountProviderName : group.name,
+      name: group.accountManaged === true ? accountProviderName : group.name,
     },
   })), [state.groups, accountProviderName])
   const choices = useMemo(() => groups.flatMap(group =>
@@ -575,7 +575,7 @@ export function ModelSelect(
               )}
               {state.failures.map(failure => (
                 <div className={css.warning} key={failure.id}>
-                  <span>{t('warning.groupLoad', { name: failure.id === 'deepseek-account' ? t('provider.account') : failure.name, message: failure.message })}</span>
+                  <span>{t('warning.groupLoad', { name: failure.accountManaged === true ? t('provider.account') : failure.name, message: failure.message })}</span>
                   <button type="button" className={css.retry} onClick={reload}>{t('retry')}</button>
                 </div>
               ))}

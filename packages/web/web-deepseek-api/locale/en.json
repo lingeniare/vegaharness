@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "web-deepseek-api"
+    "title": "web-deepseek-api",
+    "description": "DeepSeek Search and Fetch API providers for the VEGA Harness web capability seam (ctx.web)."
   }
 }

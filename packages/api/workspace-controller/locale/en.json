@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "api-workspace-controller"
+    "title": "api-workspace-controller",
+    "description": "Workspace Remote commands and reconnect-safe state transport."
   }
 }

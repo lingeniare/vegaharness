@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "tool-web"
+    "title": "tool-web",
+    "description": "Model-facing web tools (web_search, web_fetch) over the VEGA Harness web capability seam (ctx.web)."
   }
 }

@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "directory-picker-browse"
+    "title": "directory-picker-browse",
+    "description": "In-app browsing backend of the directory-picker seam (listing/creation primitives over the host filesystem)."
   }
 }

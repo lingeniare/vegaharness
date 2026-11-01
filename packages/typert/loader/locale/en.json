@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "typert-loader"
+    "title": "typert-loader",
+    "description": "Loader integration for generated Typert package contributions."
   }
 }

@@ -4,8 +4,6 @@ description: "Generate, acknowledge, and verify Session persistence-type changes
 
 # Cookbook: reviewing persistence-type changes
 
-English | [中文](reviewing-persistence-type-changes.zh.md)
-
 ## Summary
 
 Use this tutorial after changing a declared Session persistence type in a contributor checkout with dependencies installed. Supply a bilingual compatibility explanation, then let one command classify the change and generate its records. The [record reference](../persistence-changes/README.md) explains the files and automatic rules. All comparison inputs live in the checkout; no base branch or network access is required.
@@ -56,16 +54,9 @@ Save the input as `.artifacts/persistence-change.prose.json`, creating the ignor
 
 ```json
 {
-  "en": {
-    "summary": "Makes the persisted hook audit decision optional.",
-    "compatibility": "Existing records remain valid. Hook execution consumes HookOutput instead of replaying this audit field. Producers still write decisions, and absence does not imply pass.",
-    "verification": "pnpm exec vitest run packages/experimental/hook-protocol/tests/events.spec.ts: 10 tests passed."
-  },
-  "zh": {
-    "summary": "将持久化的钩子审计决策改为可选。",
-    "compatibility": "已有记录仍然有效。钩子执行消费 HookOutput，不回放此审计字段。写入方仍然记录决策，缺失不代表 pass。",
-    "verification": "pnpm exec vitest run packages/experimental/hook-protocol/tests/events.spec.ts：10 个测试通过。"
-  }
+  "summary": "Makes the persisted hook audit decision optional.",
+  "compatibility": "Existing records remain valid. Hook execution consumes HookOutput instead of replaying this audit field. Producers still write decisions, and absence does not imply pass.",
+  "verification": "pnpm exec vitest run packages/experimental/hook-protocol/tests/events.spec.ts: 10 tests passed."
 }
 ```
 

@@ -3,13 +3,13 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import { NewSessionLimit } from '../src/client/NewSessionLimit.tsx'
-import { en, zh } from '../src/client/task-manager-locales.ts'
+import { ru, en } from '../src/client/task-manager-locales.ts'
 
 afterEach(cleanup)
 
 it.each([
   { dictionary: en, seconds: 7200, interval: '2 hours' },
-  { dictionary: zh, seconds: 3600, interval: '1小时' },
+  { dictionary: ru, seconds: 3600, interval: '1 час' },
   { dictionary: en, seconds: 5400, interval: '90 minutes' },
   { dictionary: en, seconds: 90, interval: '90 seconds' },
 ])('shows $seconds seconds using the configured limit and locale', async ({ dictionary, seconds, interval }) => {

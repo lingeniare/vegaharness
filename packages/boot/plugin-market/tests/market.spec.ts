@@ -355,12 +355,12 @@ const SEARCHABLE = {
   title: 'Market',
   metadata: {
     categories: { work: { title: { en: 'Productivity', zh: '效率' } }, fun: { title: 'Games' } },
-    labels: { official: { title: { en: 'Official', zh: '官方' } }, ui: { title: 'UI' } },
+    labels: { official: { title: { en: 'Official', zh: 'Официальный' } }, ui: { title: 'UI' } },
     sortKeys: { downloads: { title: 'Downloads', order: 'desc' } },
   },
   plugins: [
     entry('dsh-weather', {
-      description: { en: 'Shows the forecast without review', ja: '天気予報を表示' }, author: 'Kim',
+      description: { en: 'Shows the forecast without review', ja: 'Просмотреть 天気予報' }, author: 'Kim',
       metadata: { category: 'fun', labels: ['ui'], sortKeys: { downloads: 10 } },
     }, [release('1.0.0', { publishTimestamp: 30 })]),
     entry('dsh-auto-review', {
@@ -484,9 +484,9 @@ it('keeps index order among equal sort-key values and among plugins without one'
 })
 
 it.each([
-  ['CJK text after Latin text', '预览', ['p-md']],
+  ['CJK text after Latin text', 'Предпросмотр', ['p-md']],
   ['Latin text between CJK text', 'markdown', ['p-md']],
-  ['CJK text after a Latin word', '插件', ['p-vue']],
+  ['CJK text after a Latin word', 'Плагины', ['p-vue']],
   ['katakana with the prolonged sound mark', 'ヒー', ['p-coffee']],
   ['a later katakana word', 'サーバー', ['p-coffee']],
   ['the iteration mark', '々木', ['p-sasaki']],

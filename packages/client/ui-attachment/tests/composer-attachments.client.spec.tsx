@@ -22,37 +22,37 @@ afterEach(() => {
 
 const t = ((key: string, params?: Readonly<Record<string, unknown>>): string => {
   const messages: Record<string, string> = {
-    'attachment.pending': '待发送附件',
-    'attachment.scrollLeft': '向左滚动附件',
-    'attachment.scrollRight': '向右滚动附件',
-    'file.pending': '待发送文件',
-    'file.uploading': '上传中…',
-    'file.uploadFailed': '上传失败，点击重试',
-    'file.label': '文件',
-    'image.pending': '待发送图片',
-    'image.original': '原图',
-    'image.preview': '原图预览',
-    'image.closePreview': '关闭原图预览',
-    'image.openOriginal': '查看原图',
-    'attachment.dropBlocked': '当前无法添加文件或图片',
-    'attachment.dropTitle': '文件或图片拖动到此处即可添加',
+    'attachment.pending': 'Вложения в очереди',
+    'attachment.scrollLeft': 'Прокрутить вложения влево',
+    'attachment.scrollRight': 'Прокрутить вложения вправо',
+    'file.pending': 'Файлы в очереди',
+    'file.uploading': 'Загрузка…',
+    'file.uploadFailed': 'Не удалось загрузить; нажмите, чтобы повторить',
+    'file.label': 'Файлы',
+    'image.pending': 'Изображения в очереди',
+    'image.original': 'Оригинал изображения',
+    'image.preview': 'Предпросмотр оригинала изображения',
+    'image.closePreview': 'Закрыть предпросмотр оригинала изображения',
+    'image.openOriginal': 'Просмотреть оригинал',
+    'attachment.dropBlocked': 'Сейчас нельзя добавлять файлы и изображения',
+    'attachment.dropTitle': 'Перетащите сюда файлы или изображения, чтобы добавить их',
   }
   if (key === 'file.remove') {
     const name = params?.name
-    return `移除文件 ${typeof name === 'string' ? name : ''}`
+    return `Удалить файл ${typeof name === 'string' ? name : ''}`
   }
   if (key === 'file.retry') {
     const name = params?.name
-    return `重试上传 ${typeof name === 'string' ? name : ''}`
+    return `Повторить загрузку ${typeof name === 'string' ? name : ''}`
   }
   if (key === 'image.remove') {
     const name = params?.name
-    return `移除图片 ${typeof name === 'string' ? name : ''}`
+    return `Удалить изображение ${typeof name === 'string' ? name : ''}`
   }
   if (key === 'attachment.dropDesc') {
     const count = params?.count
     const size = params?.size
-    return `图片限制：最多 ${typeof count === 'number' ? String(count) : ''} 张，每张 ${typeof size === 'string' ? size : ''}`
+    return `Ограничение для изображений: не более ${typeof count === 'number' ? String(count) : ''} шт., размер каждого — ${typeof size === 'string' ? size : ''}`
   }
   return messages[key] ?? key
 }) as ComposerAttachmentsProps['t']
@@ -107,8 +107,8 @@ describe('ComposerAttachments', () => {
     const image = attachment('dropped').file
     const dataTransfer = { types: ['Files'], files: [image], items: [], dropEffect: 'none' }
     expect(fireEvent.dragEnter(document.body, { dataTransfer })).toBe(false)
-    expect(view.getByRole('status').textContent).toContain('文件或图片拖动到此处即可添加')
-    expect(view.getByRole('status').textContent).toContain('图片限制：最多 20 张，每张 5MB')
+    expect(view.getByRole('status').textContent).toContain('Перетащите сюда файлы или изображения, чтобы добавить их')
+    expect(view.getByRole('status').textContent).toContain('Ограничение для изображений: не более 20 шт., размер каждого — 5MB')
     expect(fireEvent.dragOver(document.body, { dataTransfer })).toBe(false)
     expect(dataTransfer.dropEffect).toBe('copy')
     expect(fireEvent.drop(document.body, { dataTransfer })).toBe(false)
@@ -177,7 +177,7 @@ describe('ComposerAttachments', () => {
     const image = attachment('blocked').file
     const dataTransfer = { types: ['Files'], files: [image], items: [], dropEffect: 'copy' }
     fireEvent.dragEnter(document.body, { dataTransfer })
-    expect(view.getByRole('status').textContent).toBe('当前无法添加文件或图片')
+    expect(view.getByRole('status').textContent).toBe('Сейчас нельзя добавлять файлы и изображения')
     fireEvent.dragOver(document.body, { dataTransfer })
     expect(dataTransfer.dropEffect).toBe('none')
     fireEvent.drop(document.body, { dataTransfer })
@@ -191,17 +191,17 @@ describe('ComposerAttachments', () => {
     const initial = props({ attachments: [image], onRemoveAttachment })
     const view = render(<ComposerAttachments {...initial} />)
 
-    fireEvent.click(view.getByRole('button', { name: '移除图片 pixel.png' }))
+    fireEvent.click(view.getByRole('button', { name: 'Удалить изображение pixel.png' }))
     expect(onRemoveAttachment).toHaveBeenCalledWith(image.id)
-    fireEvent.click(view.getByTitle('查看原图'))
-    expect(view.getByRole('dialog', { name: '原图预览' })).toBeTruthy()
+    fireEvent.click(view.getByTitle('Просмотреть оригинал'))
+    expect(view.getByRole('dialog', { name: 'Предпросмотр оригинала изображения' })).toBeTruthy()
     view.rerender(<ComposerAttachments {...props({ attachments: [], onRemoveAttachment })} />)
-    expect(view.queryByRole('dialog', { name: '原图预览' })).toBeNull()
+    expect(view.queryByRole('dialog', { name: 'Предпросмотр оригинала изображения' })).toBeNull()
 
     view.rerender(<ComposerAttachments {...initial} />)
-    fireEvent.click(view.getByTitle('查看原图'))
+    fireEvent.click(view.getByTitle('Просмотреть оригинал'))
     fireEvent.keyDown(window, { key: 'Escape' })
-    expect(view.queryByRole('dialog', { name: '原图预览' })).toBeNull()
+    expect(view.queryByRole('dialog', { name: 'Предпросмотр оригинала изображения' })).toBeNull()
   })
 
   it('keeps images and files in pick order inside one attachment rail', () => {
@@ -214,20 +214,20 @@ describe('ComposerAttachments', () => {
         },
       },
     })} />)
-    const rail = view.getByRole('group', { name: '待发送附件' })
+    const rail = view.getByRole('group', { name: 'Вложения в очереди' })
     expect([...rail.children].map((child) => {
       const image = child.querySelector('img')
       return image?.getAttribute('alt') ?? child.querySelector('[title]')?.getAttribute('title')
     })).toEqual(['first.png', 'middle.pdf', 'last.png'])
-    expect(view.queryByRole('group', { name: '待发送文件' })).toBeNull()
+    expect(view.queryByRole('group', { name: 'Файлы в очереди' })).toBeNull()
   })
 
   it('labels an unnamed attachment and its original-image preview', () => {
     const image = attachment('unnamed', '')
     const view = render(<ComposerAttachments {...props({ attachments: [image] })} />)
-    expect(view.getByAltText('待发送图片')).toBeTruthy()
-    fireEvent.click(view.getByTitle('查看原图'))
-    expect(view.getByAltText('原图')).toBeTruthy()
+    expect(view.getByAltText('Изображения в очереди')).toBeTruthy()
+    fireEvent.click(view.getByTitle('Просмотреть оригинал'))
+    expect(view.getByAltText('Оригинал изображения')).toBeTruthy()
   })
 })
 
@@ -248,16 +248,16 @@ describe('ComposerAttachments image uploads', () => {
       onRetryFile,
     })} />)
     expect(view.container.querySelector('[style="width: 50%;"]')).toBeTruthy()
-    expect(view.getAllByTitle('查看原图').map(button => button.getAttribute('aria-busy')))
+    expect(view.getAllByTitle('Просмотреть оригинал').map(button => button.getAttribute('aria-busy')))
       .toEqual(['true', 'true', 'false'])
-    fireEvent.click(view.getByRole('button', { name: '重试上传 failed.png' }))
+    fireEvent.click(view.getByRole('button', { name: 'Повторить загрузку failed.png' }))
     expect(onRetryFile).toHaveBeenCalledWith('failed')
     // A refusal names its reason and offers neither retry nor preview; removal stays available.
     fireEvent.click(view.getByRole('button', { name: 'refused:IMAGE_DIMENSION_TOO_LARGE' }))
     expect(onRetryFile).toHaveBeenCalledTimes(1)
-    expect(view.queryByRole('button', { name: '重试上传 refused.png' })).toBeNull()
-    expect(view.getByRole('button', { name: '移除图片 refused.png' })).toBeTruthy()
-    expect(view.queryByRole('dialog', { name: '原图预览' })).toBeNull()
+    expect(view.queryByRole('button', { name: 'Повторить загрузку refused.png' })).toBeNull()
+    expect(view.getByRole('button', { name: 'Удалить изображение refused.png' })).toBeTruthy()
+    expect(view.queryByRole('dialog', { name: 'Предпросмотр оригинала изображения' })).toBeNull()
   })
 
   it('explains a failed image on hover and pins a refusal on tap', () => {
@@ -272,11 +272,11 @@ describe('ComposerAttachments image uploads', () => {
       })} />)
       // The stubbed ResizeObserver never measures, so the bubble mounts unplaced and hidden.
       const bubble = () => view.queryByRole('tooltip', { hidden: true })
-      const retry = view.getByRole('button', { name: '重试上传 failed.png' })
+      const retry = view.getByRole('button', { name: 'Повторить загрузку failed.png' })
       fireEvent.pointerEnter(retry)
       expect(bubble()).toBeNull()
       act(() => { vi.advanceTimersByTime(300) })
-      expect(bubble()?.textContent).toBe('上传失败，点击重试')
+      expect(bubble()?.textContent).toBe('Не удалось загрузить; нажмите, чтобы повторить')
       fireEvent.pointerLeave(retry)
       expect(bubble()).toBeNull()
 
@@ -296,9 +296,9 @@ describe('ComposerAttachments image uploads', () => {
       attachments: [attachment('pasted', ''), attachment('shown', '')],
       uploads: { pasted: { status: 'error', message: 'boom' } },
     })} />)
-    expect(view.getByRole('button', { name: '重试上传 待发送图片' })).toBeTruthy()
-    expect(view.getAllByRole('button', { name: '移除图片 待发送图片' })).toHaveLength(2)
-    expect(view.getByAltText('待发送图片')).toBeTruthy()
+    expect(view.getByRole('button', { name: 'Повторить загрузку Изображения в очереди' })).toBeTruthy()
+    expect(view.getAllByRole('button', { name: 'Удалить изображение Изображения в очереди' })).toHaveLength(2)
+    expect(view.getByAltText('Изображения в очереди')).toBeTruthy()
   })
 })
 
@@ -319,15 +319,15 @@ describe('ComposerAttachments file drafts', () => {
       onRemoveAttachment,
       onRetryFile,
     })} />)
-    const group = view.getByRole('group', { name: '待发送附件' })
-    expect(group.textContent).toContain('上传中…')
+    const group = view.getByRole('group', { name: 'Вложения в очереди' })
+    expect(group.textContent).toContain('Загрузка…')
     expect(view.container.querySelector('[style="width: 25%;"]')).toBeTruthy()
     expect(group.textContent).toContain('ok.pdf')
     expect(group.textContent).toContain('PDF 3B')
-    expect(group.textContent).toContain('上传失败，点击重试')
-    fireEvent.click(view.getByRole('button', { name: '重试上传 bad.pdf' }))
+    expect(group.textContent).toContain('Не удалось загрузить; нажмите, чтобы повторить')
+    fireEvent.click(view.getByRole('button', { name: 'Повторить загрузку bad.pdf' }))
     expect(onRetryFile).toHaveBeenCalledWith('bad')
-    fireEvent.click(view.getByRole('button', { name: '移除文件 ok.pdf' }))
+    fireEvent.click(view.getByRole('button', { name: 'Удалить файл ok.pdf' }))
     expect(onRemoveAttachment).toHaveBeenCalledWith('ok')
   })
 
@@ -340,9 +340,9 @@ describe('ComposerAttachments file drafts', () => {
       onRetryFile,
       onRemoveAttachment,
     })} />)
-    expect(view.getByRole('group', { name: '待发送附件' }).textContent).toContain('上传中…')
-    const retry = view.getByRole('button', { name: '重试上传 bad.pdf' })
-    const remove = view.getByRole('button', { name: '移除文件 bad.pdf' })
+    expect(view.getByRole('group', { name: 'Вложения в очереди' }).textContent).toContain('Загрузка…')
+    const retry = view.getByRole('button', { name: 'Повторить загрузку bad.pdf' })
+    const remove = view.getByRole('button', { name: 'Удалить файл bad.pdf' })
     expect(retry.contains(remove)).toBe(false)
     fireEvent.click(remove)
     expect(onRemoveAttachment).toHaveBeenCalledWith('bad')
@@ -361,8 +361,8 @@ describe('ComposerAttachments file drafts', () => {
         },
       },
     })} />)
-    const group = view.getByRole('group', { name: '待发送附件' })
-    expect(group.textContent).toContain('文件')
+    const group = view.getByRole('group', { name: 'Вложения в очереди' })
+    expect(group.textContent).toContain('Файлы')
     expect(group.textContent).toContain('3B')
   })
 
@@ -397,7 +397,7 @@ it('accepts internal file tokens only inside the composer without the full-page 
   const target = view.getByTestId('composer')
   fireEvent.dragEnter(target, { dataTransfer: transfer })
   fireEvent.dragOver(target, { dataTransfer: transfer })
-  expect(view.queryByText('文件或图片拖动到此处即可添加')).toBeNull()
+  expect(view.queryByText('Перетащите сюда файлы или изображения, чтобы добавить их')).toBeNull()
   fireEvent.drop(target, { dataTransfer: transfer })
   expect(onAddFiles).toHaveBeenCalledExactlyOnceWith([file], new Set())
   data.set('application/x-dsh-file', 'foreign')

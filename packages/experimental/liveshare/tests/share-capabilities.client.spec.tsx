@@ -252,7 +252,7 @@ describe('owner share permission section', () => {
     // The create form owns the same fields as the stored-share editor; only the save action differs.
     expect(screen.getByText('Share permissions')).toBeDefined()
     expect(screen.getByRole('button', { name: 'Create share' })).toBeDefined()
-    expect(screen.queryByRole('button', { name: 'Save changes' })).toBeNull()
+    expect(screen.queryByRole('button', { name: /^Создать сессию в рабочей области/u })).toBeNull()
     // The retired Advanced disclosure is gone rather than left as an empty shell.
     expect(screen.queryByText('Advanced')).toBeNull()
   })

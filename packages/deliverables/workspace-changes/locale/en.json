@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "workspace-changes"
+    "title": "workspace-changes",
+    "description": "Per-turn workspace file changes recorded from git working-tree snapshots and whole-file captures, with per-file comparisons, for the VEGA Harness."
   }
 }

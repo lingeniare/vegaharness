@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "fs-sandbox"
+    "title": "fs-sandbox",
+    "description": "Sandbox-enforcing implementation of the VEGA Harness filesystem seam: fences write/edit by the per-call sandbox mode (read-only denies mutation, workspace-write contains it to the workspace + temp roots) while reads pass through."
   }
 }

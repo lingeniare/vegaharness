@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "subprocess-local"
+    "title": "subprocess-local",
+    "description": "Local-subprocess implementation of the VEGA Harness subprocess seam."
   }
 }

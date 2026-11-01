@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "session-title-first-prompt-llm"
+    "title": "session-title-first-prompt-llm",
+    "description": "First-message LLM provider plugin for VEGA Harness session titles."
   }
 }

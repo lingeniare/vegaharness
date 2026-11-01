@@ -14,12 +14,12 @@ import {
   fixtureUserPrompts, launchWebScaffold, recordFixture, watchConsole,
   webSnapshotMode, type WebScaffold,
 } from './scaffold.ts'
-import { connectFreshWorkspaceZh, ZH_BROWSER_LOCALE } from './support.ts'
+import { connectFreshWorkspaceRu, RU_BROWSER_LOCALE } from './support.ts'
 
 const DIR = fileURLToPath(new URL('../../../snapshots/web/present-svg', import.meta.url))
 const FIXTURE = join(DIR, 'session.v3.jsonl')
 const MODE = webSnapshotMode()
-const RECORD_PROMPT = '简单画一个 SVG 表示冯诺依曼架构，保存为 von-neumann.svg，并提供独立文件卡片，方便打开。'
+const RECORD_PROMPT = '简单画一个 SVG 表示冯诺依曼架构, 保存为 von-neumann.svg， и 提供独立文件卡片，方便打开。'
 const FILE = 'von-neumann.svg'
 
 /** Queue counters from the installed ws implementation; payload contents are never recorded. */
@@ -92,7 +92,7 @@ describe('web e2e: requested SVG is explicitly delivered', () => {
     })
     browser = await chromium.launch()
     page = await browser.newPage({
-      viewport: { width: 1680, height: 1000 }, locale: ZH_BROWSER_LOCALE, timezoneId: 'Asia/Shanghai',
+      viewport: { width: 1680, height: 1000 }, locale: RU_BROWSER_LOCALE, timezoneId: 'Asia/Shanghai',
     })
     tripwire = watchConsole(page)
     page.on('console', (message) => {
@@ -110,7 +110,7 @@ describe('web e2e: requested SVG is explicitly delivered', () => {
     })
     await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
     await page.waitForSelector('[class*="frame"]')
-    await connectFreshWorkspaceZh(page, scaffold.workspaceCwd)
+    await connectFreshWorkspaceRu(page, scaffold.workspaceCwd)
   })
 
   afterAll(async () => {
@@ -173,7 +173,7 @@ describe('web e2e: requested SVG is explicitly delivered', () => {
     // Changed-file cards wait for a separate summary request after the presentation events arrive.
     await changes.waitFor({ state: 'visible' })
     expect(await changes.count()).toBe(1)
-    expect(await changes.getByText(`已编辑 ${FILE}`, { exact: true }).count()).toBe(1)
+    expect(await changes.getByText(`Редактирование ${FILE}`, { exact: true }).count()).toBe(1)
     expect(await changes.getByRole('list').count()).toBe(0)
     expect(await changes.locator('svg').evaluate(icon => icon.innerHTML))
       .toBe(await card.locator('svg').evaluate(icon => icon.innerHTML))
@@ -218,10 +218,10 @@ describe('web e2e: requested SVG is explicitly delivered', () => {
   })
 
   it('opens the single edited file from its compact card', async () => {
-    await page.locator('[data-changed-files]').getByRole('button', { name: `查看 ${FILE} 的改动` }).click()
+    await page.locator('files].changed.[data').getByRole('button', { name: `Просмотреть ${FILE} 的改动` }).click()
     const review = page.locator('[data-changes-review]')
     await review.waitFor({ state: 'visible' })
-    expect(await review.getByRole('button', { name: '选择要查看的文件' }).innerText()).toContain(FILE)
+    expect(await review.getByRole('button', { name: 'Выберите файл для просмотра' }).innerText()).toContain(FILE)
     expect(tripwire.pageErrors).toEqual([])
   })
 })

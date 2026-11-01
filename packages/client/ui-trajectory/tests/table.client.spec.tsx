@@ -1,5 +1,5 @@
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import { es, pt } from '../src/client/locales.ts'
+import { ru } from '../src/client/locales.ts'
 // @vitest-environment jsdom
 /** Trajectory ledger selection, details, status, and fold behavior. */
 
@@ -15,7 +15,7 @@ import type { PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
 import { TrajectoryTable as LocalizedTrajectoryTable } from '../src/client/TrajectoryTable.tsx'
 import { deriveTrajectoryLayout, type TrajectoryTurnModel } from '../src/client/layout.ts'
 import { trajectoryRecordId, type TrajectoryCellProps } from '../src/client/trajectory-record.ts'
-import { t, tZh } from './locale.client.ts'
+import { t, tRu } from './locale.client.ts'
 
 const loadImage: MessageImageLoader = async () => 'blob:trajectory'
 const renderNoImages: PropsRenderSlots<'conversation.trajectory.images'>['renderSlot'] = () => null
@@ -205,7 +205,7 @@ describe('TrajectoryTable', () => {
     const assistant = TURNS[0]!.groups[0]!.cells[0]!
     render(
       <LocalizedTrajectoryTable
-        t={tZh}
+        t={tRu}
         renderSlot={renderNoImages} loadImage={loadImage}
         turns={TURNS}
         collapsedTurns={new Set<number>()}
@@ -217,7 +217,7 @@ describe('TrajectoryTable', () => {
       />,
     )
 
-    expect(screen.getByText('2 个工具调用 · bash')).toBeTruthy()
+    expect(screen.getByText('2 вызовов инструмента · bash')).toBeTruthy()
   })
 
   it('shows assistant timing facts after keyboard selection', () => {
@@ -532,7 +532,7 @@ describe('TrajectoryTable', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Request #1' }))
 
     view.rerender(
-      <TrajectoryTable turns={[turn('步骤 1')]} requestNumbers={request('步骤 1')} {...FOLD_PROPS} />,
+      <TrajectoryTable turns={[turn('Шаг 1')]} requestNumbers={request('Шаг 1')} {...FOLD_PROPS} />,
     )
 
     expect(screen.getByRole('button', { name: 'Request #1' })
@@ -1013,7 +1013,7 @@ describe('TrajectoryTable', () => {
 
   it.each([
     ['English', t, 'Pending', 'Completed', 'Failed', 'Last attempt error', 'Error'],
-    ['Chinese', tZh, '等待中', '已完成', '失败', '上次尝试错误', '错误'],
+    ['Chinese', tRu, 'В ожидании', 'Завершено', 'Ошибка', 'Ошибка последней попытки', 'Ошибка'],
   ] as const)('distinguishes retry history from the current request status in %s', (
     _locale, translate, pending, completed, failed, lastAttemptError, error,
   ) => {
@@ -1263,7 +1263,7 @@ describe('TrajectoryTable', () => {
   })
 
   it.each([['English', t, 'Attachments', 'Image 1', 'Summary', 'Preview', 'Raw'],
-    ['Chinese', tZh, '附件', '图片 1', '概述', '预览', '原始内容']] as const)(
+    ['Chinese', tRu, 'Вложения', 'Изображение 1', 'Сводка', 'Предпросмотр', 'Исходные данные']] as const)(
     'keeps mixed attachments ordered and raw fields complete in %s',
     async (_locale, translate, listLabel, imageLabel, summaryTab, previewTab, rawTab) => {
       const attachment = {
@@ -1614,6 +1614,6 @@ describe('TrajectoryTable', () => {
 })
 
 it('preserves seconds and token units in translated metric labels', () => {
-  expect(makeTranslate(es)('unit.seconds', { value: '1.25' })).toBe('1.25 s')
-  expect(makeTranslate(pt)('unit.tokens', { value: 42 })).toBe('42 tok')
+  expect(makeTranslate(ru)('unit.seconds', { value: '1.25' })).toBe('1.25 с')
+  expect(makeTranslate(ru)('unit.tokens', { value: 42 })).toBe('42 ток.')
 })

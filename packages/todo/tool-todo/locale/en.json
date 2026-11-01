@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "tool-todo"
+    "title": "tool-todo",
+    "description": "Model-facing todo_write tool over the VEGA Harness event-sourced session log."
   }
 }

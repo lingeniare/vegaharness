@@ -13,11 +13,11 @@ const BUILTINS = {
 /** Stable first-party capabilities, independent of their registered command names. */
 export type BuiltinCommandName = keyof typeof BUILTINS
 
-/** English and Simplified Chinese spellings recognized by command input. */
+/** English and Russian spellings recognized by command input. */
 export const builtinCommandTokens = {
   en: { goal: 'goal', plan: 'plan', feedback: 'feedback', compact: 'compact', permission: 'permission', export: 'export' },
-  zh: { goal: '目标', plan: '计划', feedback: '反馈', compact: '压缩', permission: '权限', export: '导出' },
-} as const satisfies Record<'en' | 'zh', Record<BuiltinCommandName, string>>
+  ru: { goal: 'цель', plan: 'план', feedback: 'отзыв', compact: 'сжать', permission: 'разрешение', export: 'экспорт' },
+} as const satisfies Record<'en' | 'ru', Record<BuiltinCommandName, string>>
 
 /**
  * Identify a first-party definition after scoped shadowing.
@@ -31,7 +31,7 @@ export function builtinCommandName(descriptor: CommandDescriptor): BuiltinComman
 
 const TOKEN_ALIASES = new Map<string, BuiltinCommandName>(
   (Object.keys(BUILTINS) as BuiltinCommandName[]).flatMap(name =>
-    [builtinCommandTokens.zh[name], builtinCommandTokens.en[name]].map(token => [token, name] as const)),
+    [builtinCommandTokens.ru[name], builtinCommandTokens.en[name]].map(token => [token, name] as const)),
 )
 
 /**

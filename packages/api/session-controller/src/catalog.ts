@@ -22,6 +22,12 @@ export async function buildModelCatalog(
   defaultSelection: ModelSelection = ctx.agentDefaultModel.currentSelection(),
 ): Promise<ModelCatalog> {
   const providers = ctx.llm.listProviders()
+  const managed = new Set(
+    ctx.llm.listConfigurableProviders()
+      .filter(entry => entry.accountManaged === true)
+      .map(entry => entry.provider),
+  )
+  const accountManaged = (id: string): { accountManaged: true } | {} => managed.has(id) ? { accountManaged: true } : {}
   const catalog = await Promise.all(providers.map(async (provider) => {
     try {
       const models = await ctx.llm.listModels(provider.id)
@@ -49,7 +55,7 @@ export async function buildModelCatalog(
       }))
       return {
         kind: 'group' as const,
-        group: { id: provider.id, name: provider.name, models: entries },
+        group: { id: provider.id, name: provider.name, ...accountManaged(provider.id), models: entries },
       }
     } catch (error) {
       return {
@@ -57,6 +63,7 @@ export async function buildModelCatalog(
         failure: {
           id: provider.id,
           name: provider.name,
+          ...accountManaged(provider.id),
           message: error instanceof Error ? error.message : String(error),
         },
       }
@@ -103,7 +110,7 @@ export async function hasProviderApiKey(ctx: Context): Promise<boolean> {
   }
   const namespaces = settings.describe({ redactSecrets: true })
   for (const provider of ctx.llm.listConfigurableProviders()) {
-    if (provider.provider === 'deepseek-account') continue
+    if (provider.accountManaged === true) continue
     let profile = namespaces.find(namespace => namespace.ns === provider.settingsNs)?.value
     for (const key of provider.settingsPath) {
       profile = typeof profile === 'object' && profile !== null ? Reflect.get(profile, key) : undefined

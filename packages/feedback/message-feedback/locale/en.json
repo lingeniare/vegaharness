@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "message-feedback"
+    "title": "message-feedback",
+    "description": "Canonical Session-log ratings and notes for finalized assistant messages."
   }
 }

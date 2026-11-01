@@ -120,7 +120,7 @@ process.send({ type: 'ready', url: 'http://127.0.0.1:3080/' }, () => { ${trigger
     const report = renderCrashReport({ source: 'host', phase: 'running', error: failure,
       rendererConsole: [], operationHistoryPlanned: true, time: new Date('2026-10-19T00:00:00Z'),
       app: { name: 'qualification', version: 'test', platform: process.platform, arch: process.arch,
-        electron: 'not-running', node: process.version, locale: 'zh-CN' },
+        electron: 'not-running', node: process.version, locale: 'ru' },
     })
     expect(report).toContain(`qualification-${kind}`)
     expect(report).toContain('phase: running')

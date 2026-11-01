@@ -24,7 +24,7 @@ function fixture() {
   const resources = join(application, ...platform === 'darwin' ? ['Contents', 'Resources'] : ['resources'])
   const cli = join(resources, 'runtime', 'cli')
   prepareDesktopCli(cli, platform)
-  const electron = join(application, ...platform === 'darwin' ? ['Contents', 'MacOS', 'DeepSeek Harness'] : ['DeepSeek Harness.exe'])
+  const electron = join(application, ...platform === 'darwin' ? ['Contents', 'MacOS', 'VEGA Harness'] : ['VEGA Harness.exe'])
   mkdirSync(dirname(electron), { recursive: true })
   if (platform === 'win32') copyFileSync(process.execPath, electron)
   else symlinkSync(process.execPath, electron)
@@ -64,7 +64,7 @@ function fixture() {
 
 it('preserves common arguments, cwd, environment, binary input, stderr and exit status', async () => {
   const f = fixture()
-  const args = ['plugin', '--profile', 'desktop', 'hello world', '中文 🚀', '']
+  const args = ['plugin', 'profile..', 'desktop', 'hello world', '中文 🚀', '']
   const run = f.start(args)
   const input = Buffer.from([0, 1, 10, 255])
   run.child.stdin.end(input)

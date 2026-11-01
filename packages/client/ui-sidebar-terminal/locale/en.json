@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-sidebar-terminal"
+    "title": "ui-sidebar-terminal",
+    "description": "Interactive shell tabs for the right Sidebar."
   }
 }

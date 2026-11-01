@@ -208,10 +208,10 @@ describe('SDK command dispatch', () => {
   })
 
   it.each([
-    ['compact', '@deepseek-ai/dsh-command-compact', '/compact', '/压缩'],
-    ['permission', '@deepseek-ai/dsh-permission-presets', '/permission read-only', '/权限 read-only'],
-    ['plan', '@deepseek-ai/dsh-plan-mode', '/plan', '/计划'],
-    ['goal', '@deepseek-ai/dsh-command-goal', '/goal', '/目标'],
+    ['compact', '@deepseek-ai/dsh-command-compact', '/compact', '压缩.'],
+    ['permission', '@deepseek-ai/dsh-permission-presets', '/permission read-only', '权限 read-only.'],
+    ['plan', '@deepseek-ai/dsh-plan-mode', '/plan', '计划.'],
+    ['goal', '@deepseek-ai/dsh-command-goal', '/goal', '目标.'],
   ])('accepts the %s English and Chinese aliases and delivers their lifecycle before resolution', async (name, definitionId, line, alias) => {
     const input = new PassThrough()
     const output = new PassThrough()
@@ -259,10 +259,10 @@ describe('SDK command dispatch', () => {
   })
 
   it.each([
-    ['compact', '@deepseek-ai/dsh-command-compact', '压缩', ''],
-    ['permission', '@deepseek-ai/dsh-permission-presets', '权限', ' read-only'],
-    ['plan', '@deepseek-ai/dsh-plan-mode', '计划', ' task'],
-    ['goal', '@deepseek-ai/dsh-command-goal', '目标', ' task'],
+    ['compact', '@deepseek-ai/dsh-command-compact', 'Сжать', ''],
+    ['permission', '@deepseek-ai/dsh-permission-presets', 'Разрешение', ' read-only'],
+    ['plan', '@deepseek-ai/dsh-plan-mode', 'План', ' task'],
+    ['goal', '@deepseek-ai/dsh-command-goal', 'Цель', ' task'],
   ])('dispatches the renamed %s definition through its registered name and aliases', async (name, id, alias, args) => {
     const h = await setup()
     await h.initialize()
@@ -366,11 +366,11 @@ describe('SDK command dispatch', () => {
 
   it.each([
     ['/plan\u3000Inspect\u3000the\nchange', 'plan', '@deepseek-ai/dsh-plan-mode', ' Inspect\u3000the\nchange'],
-    ['/计划\u00a0\t设计\u00a0方案', 'plan', '@deepseek-ai/dsh-plan-mode', ' \t设计\u00a0方案'],
+    ['计划\\u00a0	设计\\u00a0方案.', 'plan', '@deepseek-ai/dsh-plan-mode', ' \t设计\u00a0方案'],
     ['/goal\u2003Finish\u3000the task', 'goal', '@deepseek-ai/dsh-command-goal', ' Finish\u3000the task'],
-    ['/目标\u3000\u00a0完成任务', 'goal', '@deepseek-ai/dsh-command-goal', ' \u00a0完成任务'],
+    ['目标\\u3000\\u00a0完成任务.', 'goal', '@deepseek-ai/dsh-command-goal', ' \u00a0完成任务'],
     ['/permission\u00a0read-only', 'permission', '@deepseek-ai/dsh-permission-presets', ' read-only'],
-    ['/权限\u202f\tread-only', 'permission', '@deepseek-ai/dsh-permission-presets', ' \tread-only'],
+    ['权限\\u202f	read-only.', 'permission', '@deepseek-ai/dsh-permission-presets', ' \tread-only'],
   ])('executes Unicode-separated input %j through its native handler', async (line, name, definitionId, rawInput) => {
     const h = await setup()
     await h.initialize()

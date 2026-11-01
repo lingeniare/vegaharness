@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "goal-round-driver"
+    "title": "goal-round-driver",
+    "description": "Race-fenced same-session goal-round driver."
   }
 }

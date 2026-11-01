@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "session-persistence-jsonl"
+    "title": "session-persistence-jsonl",
+    "description": "JSONL durable session persistence backend for the VEGA Harness."
   }
 }

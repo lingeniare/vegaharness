@@ -11,7 +11,7 @@ import {
   launchWebScaffold, watchConsole, webSnapshotMode, WELCOME_NOTICE_COPY,
   type WebScaffold,
 } from './scaffold.ts'
-import { openSettings, ZH_BROWSER_LOCALE } from './support.ts'
+import { openSettings, RU_BROWSER_LOCALE } from './support.ts'
 
 const MODE = webSnapshotMode()
 
@@ -23,12 +23,12 @@ const MODE = webSnapshotMode()
  */
 async function expectOnboardingSettled(page: Page): Promise<Locator> {
   await page.waitForSelector('#root', { timeout: 30_000 })
-  await page.getByRole('textbox', { name: '选择工作区' }).waitFor({ timeout: 30_000 })
-  await openSettings(page, 'zh')
-  const dialog = page.getByRole('dialog', { name: '设置' })
-  await dialog.getByRole('button', { name: '模型', exact: true }).click()
-  await dialog.getByRole('button', { name: '添加模型提供商', exact: true }).waitFor({ timeout: 15_000 })
-  expect(await page.getByRole('dialog', { name: WELCOME_NOTICE_COPY.zh.title }).count()).toBe(0)
+  await page.getByRole('textbox', { name: 'Выбрать рабочую область' }).waitFor({ timeout: 30_000 })
+  await openSettings(page, 'ru')
+  const dialog = page.getByRole('dialog', { name: 'Настройки' })
+  await dialog.getByRole('button', { name: 'Модель', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Добавить поставщика моделей', exact: true }).waitFor({ timeout: 15_000 })
+  expect(await page.getByRole('dialog', { name: WELCOME_NOTICE_COPY.ru.title }).count()).toBe(0)
   return dialog
 }
 
@@ -46,7 +46,7 @@ describe.skipIf(MODE === 'record')('web e2e: trusted remote host preferences', (
     browser = await chromium.launch()
     page = await browser.newPage({
       viewport: { width: 1440, height: 960 },
-      locale: ZH_BROWSER_LOCALE,
+      locale: RU_BROWSER_LOCALE,
     })
     tripwire = watchConsole(page)
     await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
@@ -66,11 +66,11 @@ describe.skipIf(MODE === 'record')('web e2e: trusted remote host preferences', (
   }
 
   it('persists welcome acknowledgement, model configuration, and appearance across reloads and browser contexts', async () => {
-    const welcome = page.getByRole('dialog', { name: WELCOME_NOTICE_COPY.zh.title })
+    const welcome = page.getByRole('dialog', { name: WELCOME_NOTICE_COPY.ru.title })
     await welcome.waitFor({ timeout: 15_000 })
     expect(await page.locator('#root').evaluate(root => (root as HTMLElement).inert)).toBe(true)
 
-    await welcome.getByRole('button', { name: WELCOME_NOTICE_COPY.zh.continueLabel }).click()
+    await welcome.getByRole('button', { name: WELCOME_NOTICE_COPY.ru.continueLabel }).click()
     await welcome.waitFor({ state: 'detached', timeout: 15_000 })
     await expect.poll(
       () => page.locator('#root').evaluate(root => (root as HTMLElement).inert),
@@ -85,29 +85,29 @@ describe.skipIf(MODE === 'record')('web e2e: trusted remote host preferences', (
     const dialog = await expectOnboardingSettled(page)
 
     await page.emulateMedia({ colorScheme: 'light' })
-    await dialog.getByRole('button', { name: '添加模型提供商', exact: true }).click()
-    await dialog.getByLabel('提供商', { exact: true }).selectOption('minimax-cn')
-    await dialog.getByRole('button', { name: '保存', exact: true }).click()
-    await dialog.getByText('已保存 minimax-cn。', { exact: true }).waitFor({ timeout: 15_000 })
+    await dialog.getByRole('button', { name: 'Добавить поставщика моделей', exact: true }).click()
+    await dialog.getByLabel('Поставщик', { exact: true }).selectOption('minimax-cn')
+    await dialog.getByRole('button', { name: 'Сохранить', exact: true }).click()
+    await dialog.getByText('Сохранено minimax-cn。', { exact: true }).waitFor({ timeout: 15_000 })
     await expect.poll(() => readFile(settingsPath, 'utf8'), { timeout: 10_000 })
       .toContain('minimax-cn: {}')
 
-    await dialog.getByRole('button', { name: '通用设置', exact: true }).click()
-    await dialog.getByRole('button', { name: '深色', exact: true }).click()
+    await dialog.getByRole('button', { name: 'Общие', exact: true }).click()
+    await dialog.getByRole('button', { name: 'Тёмная', exact: true }).click()
     await expect.poll(() => page.locator('body').getAttribute('data-ds-dark-theme')).toBe('')
     await expect.poll(() => readFile(settingsPath, 'utf8'), { timeout: 10_000 })
       .toContain('preference: dark')
 
     await reloadPage()
     await expectOnboardingSettled(page)
-    await dialog.getByRole('button', { name: '编辑 minimax-cn', exact: true }).waitFor({ timeout: 15_000 })
+    await dialog.getByRole('button', { name: 'Редактирование minimax-cn', exact: true }).waitFor({ timeout: 15_000 })
     await expect.poll(() => page.locator('body').getAttribute('data-ds-dark-theme'), { timeout: 15_000 }).toBe('')
     expect(tripwire.warnings).toEqual([])
     expect(tripwire.pageErrors).toEqual([])
 
     const context = await browser.newContext({
       viewport: { width: 1440, height: 960 },
-      locale: ZH_BROWSER_LOCALE,
+      locale: RU_BROWSER_LOCALE,
       colorScheme: 'light',
     })
     try {
@@ -115,7 +115,7 @@ describe.skipIf(MODE === 'record')('web e2e: trusted remote host preferences', (
       const freshTripwire = watchConsole(freshPage)
       await freshPage.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
       const freshDialog = await expectOnboardingSettled(freshPage)
-      await freshDialog.getByRole('button', { name: '编辑 minimax-cn', exact: true }).waitFor({ timeout: 15_000 })
+      await freshDialog.getByRole('button', { name: 'Редактирование minimax-cn', exact: true }).waitFor({ timeout: 15_000 })
       await expect.poll(
         () => freshPage.locator('body').getAttribute('data-ds-dark-theme'),
         { timeout: 15_000 },

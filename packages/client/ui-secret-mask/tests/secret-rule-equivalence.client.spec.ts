@@ -26,7 +26,7 @@ const FRAGMENTS = [
   join('LT', 'AI'), join('AK', 'ID'), join('xo', 'xb-'), join('wh', 'sec_'), join('ey', 'J'), '.', join('.ey', 'J'),
   join('-----BEGIN', ' '), join('-----END', ' '), ' PRIVATE KEY-----', 'PRIVATE KEY-----', 'RSA ',
   '://', 'https', 'postgres', ':', '@', '/', '?', '#', ' ', '\n', '\r\n', '\t', '-', '_', '+',
-  'a', 'Z', '0', '7', 'abcdefgh', 'ABCDEFGH', '01234567', 'a1B2c3D4e5F6g7H8i9J0', '用', '：', '🙂',
+  'a', 'Z', '0', '7', 'abcdefgh', 'ABCDEFGH', '01234567', 'a1B2c3D4e5F6g7H8i9J0', '用', ': ', '🙂',
 ] as const
 
 /** Deterministic generator so every run checks the same inputs. */

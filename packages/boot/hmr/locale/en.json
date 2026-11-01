@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "hmr"
+    "title": "hmr",
+    "description": "Coordinated module and profile configuration hot reload."
   }
 }

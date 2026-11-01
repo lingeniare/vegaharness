@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "session-reference"
+    "title": "session-reference",
+    "description": "Cross-session snapshot references and durable untrusted model context (ctx.sessionReferenceResolver)."
   }
 }

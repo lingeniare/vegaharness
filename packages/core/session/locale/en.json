@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "session"
+    "title": "session",
+    "description": "Event-sourced session store for the VEGA Harness."
   }
 }

@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "agent-preset-registry"
+    "title": "agent-preset-registry",
+    "description": "Declarative Agent preset registry and profile-backed editing."
   }
 }

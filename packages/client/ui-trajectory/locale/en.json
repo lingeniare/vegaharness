@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-trajectory"
+    "title": "ui-trajectory",
+    "description": "Trajectory event ledger and timing overview with live tool-result inspection."
   }
 }

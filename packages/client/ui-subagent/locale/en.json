@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-subagent"
+    "title": "ui-subagent",
+    "description": "Subagent conversation catalog, continuation routing UI, and '@' reference source."
   }
 }

@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-sidebar-browser"
+    "title": "ui-sidebar-browser",
+    "description": "Sandboxed Web browser tabs for the right Sidebar."
   }
 }

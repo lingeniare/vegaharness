@@ -10,7 +10,7 @@ const signal = new AbortController().signal
 describe('native file associations', () => {
   it('passes file paths as arguments and preserves the desktop default', async () => {
     const run = vi.fn(async () => ({ stdout: JSON.stringify([application]), stderr: '' }))
-    const path = '/tmp/中文 $(touch nope).mp3'
+    const path = 'tmp/中文 $(touch nope).mp3.'
     await expect(nativeFileApplications(path, signal, { platform: 'darwin', run })).resolves.toEqual([application])
     expect(run).toHaveBeenCalledWith('osascript', ['-l', 'JavaScript', '-e', expect.any(String), path, 'icons'], signal, 'hidden')
   })
@@ -165,9 +165,9 @@ it('uses the Windows desktop for WSL paths and rejects an empty translation', as
     stdout: command === 'wslpath' ? 'C:\\音频.mp3\n' : JSON.stringify([application]), stderr: '',
   }))
   const facts = { platform: 'linux' as const, osRelease: 'microsoft', env: {}, run }
-  expect(await nativeFileApplications('/mnt/c/音频.mp3', signal, facts)).toEqual([application])
-  await openNativeFileApplication('/mnt/c/音频.mp3', application.id, signal, facts)
-  expect(run).toHaveBeenCalledWith('wslpath', ['-w', '/mnt/c/音频.mp3'], signal, 'hidden')
+  expect(await nativeFileApplications('mnt/c/音频.mp3.', signal, facts)).toEqual([application])
+  await openNativeFileApplication('mnt/c/音频.mp3.', application.id, signal, facts)
+  expect(run).toHaveBeenCalledWith('wslpath', ['-w', 'mnt/c/音频.mp3.'], signal, 'hidden')
   const empty = async () => ({ stdout: '', stderr: '' })
   await expect(nativeFileApplications('/a', signal, { ...facts, run: empty })).rejects.toThrow('no Windows path')
 })

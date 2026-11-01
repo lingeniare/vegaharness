@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "repeat-tool-reminder"
+    "title": "repeat-tool-reminder",
+    "description": "Repeat-tool-call guard plugin: advisory reminders when an agent loops on identical tool calls."
   }
 }

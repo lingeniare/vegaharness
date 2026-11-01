@@ -1,20 +1,19 @@
 import { SHIPPED_LOCALE_IDS } from '../../../scripts/shipped-locales.ts'
 import { describe, expect, it } from 'vitest'
-import { en, formatDesktopMessage, resolveDesktopLocale, resolveDesktopStartupLocale, ja, zh, es, fr, de, ru, pt } from '../src/locale.ts'
+import { en, formatDesktopMessage, resolveDesktopLocale, resolveDesktopStartupLocale, ru } from '../src/locale.ts'
 
 describe('desktop locale dictionaries', () => {
-  it('ships baseline and Japanese keys and falls back for unsupported languages', () => {
-    expect(Object.keys(zh)).toEqual(Object.keys(en))
-    expect(Object.keys(ja)).toEqual(Object.keys(en))
-    expect(resolveDesktopLocale('JA-jp')).toEqual({ id: 'ja', messages: ja })
-    expect(resolveDesktopLocale('zh-Hans-CN').messages).toEqual(zh)
+  it('ships baseline and Russian keys and falls back for unsupported languages', () => {
+    expect(Object.keys(ru)).toEqual(Object.keys(en))
+    expect(resolveDesktopLocale('ru-RU')).toEqual({ id: 'ru', messages: ru })
+    expect(resolveDesktopLocale('ru-RU').messages).toEqual(ru)
     expect(resolveDesktopLocale('en-US').messages).toEqual(en)
     expect(resolveDesktopLocale('it-IT').messages).toEqual(en)
+    expect(resolveDesktopLocale('zh-CN').messages).toEqual(en)
   })
 
   it.each([
-    ['es', 'es-MX', es], ['fr', 'fr-CA', fr], ['de', 'de-DE', de],
-    ['ru', 'ru-RU', ru], ['pt', 'pt-BR', pt],
+    ['en', 'en-US', en], ['ru', 'ru-RU', ru], ['ru', 'ru', ru],
   ] as const)('resolves %s, preserves placeholders, and honors saved preferences', (id, tag, messages) => {
     expect(resolveDesktopLocale(tag.toUpperCase())).toEqual({ id, messages })
     expect(resolveDesktopStartupLocale(id, ['zh-CN']).id).toBe(id)
@@ -27,8 +26,8 @@ describe('desktop locale dictionaries', () => {
   })
 
   it.each(SHIPPED_LOCALE_IDS)('resolves every shipped language %s without fallback', (id) => {
-    expect(resolveDesktopLocale(id).id).toBe(id === 'zh' ? 'zh-CN' : id)
-    expect(resolveDesktopStartupLocale(null, [id]).id).toBe(id === 'zh' ? 'zh-CN' : id)
+    expect(resolveDesktopLocale(id).id).toBe(id)
+    expect(resolveDesktopStartupLocale(null, [id]).id).toBe(id)
   })
 
   it('formats named values without consuming unknown placeholders', () => {
@@ -37,13 +36,13 @@ describe('desktop locale dictionaries', () => {
   })
 
   it('prefers an explicit supported choice, then the first supported system language', () => {
-    expect(resolveDesktopStartupLocale('zh', ['en-US']).id).toBe('zh-CN')
-    expect(resolveDesktopStartupLocale('EN', ['zh-CN']).id).toBe('en')
-    expect(resolveDesktopStartupLocale(null, ['ja-JP', 'zh-Hant', 'en-US']).id).toBe('ja')
-    expect(resolveDesktopStartupLocale(null, ['en-US', 'zh-CN']).id).toBe('en')
-    expect(resolveDesktopStartupLocale(null, ['ja-JP']).id).toBe('ja')
+    expect(resolveDesktopStartupLocale('ru', ['en-US']).id).toBe('ru')
+    expect(resolveDesktopStartupLocale('EN', ['ru-RU']).id).toBe('en')
+    expect(resolveDesktopStartupLocale(null, ['ru', 'ru-RU', 'en-US']).id).toBe('ru')
+    expect(resolveDesktopStartupLocale(null, ['en-US', 'ru-RU']).id).toBe('en')
+    expect(resolveDesktopStartupLocale(null, ['ru']).id).toBe('ru')
     expect(resolveDesktopStartupLocale(null, []).id).toBe('en')
-    expect(resolveDesktopStartupLocale('ja', ['zh-CN']).id).toBe('ja')
+    expect(resolveDesktopStartupLocale('zh', ['ru-RU']).id).toBe('ru')
   })
 
 })

@@ -1,11 +1,9 @@
 ---
-description: "The model-facing todo_write tool over the DeepSeek Harness session log: whole-list replacement, per-session ownership, and the todos projection, for users and maintainers choosing, configuring, or debugging the tool."
+description: "The model-facing todo_write tool over the VEGA Harness session log: whole-list replacement, per-session ownership, and the todos projection, for users and maintainers choosing, configuring, or debugging the tool."
 kind: "package-reference"
 ---
 
 # @deepseek-ai/dsh-tool-todo
-
-English | [中文](README.zh.md)
 
 ## Summary
 
@@ -148,7 +146,6 @@ Append-only; newly visible content follows the reusable request prefix and does 
 ## Known Limitations and Deferred Work
 
 <a id="known-limitations-and-deferred-work"></a>
-
 
 These limits define when the tool is a poor fit. They are current package constraints, not a task backlog.
 

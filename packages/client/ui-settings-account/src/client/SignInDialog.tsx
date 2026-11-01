@@ -73,6 +73,7 @@ export function SignInDialog({ account, colorScheme, start, cancel, close, useAp
           onClick={authorizeUrl ? () => { void copyLink(authorizeUrl) } : undefined}>
           {t(copyResult?.messageKey ?? 'copyLink')}
         </button>{t('browserDescription')}
+        {attempt?.userCode !== undefined && <span className={css.userCode}>{t('deviceCode')}: {attempt.userCode}</span>}
       </p> : <p className={css.description}>
         {error ? t(failureKey) : expired ? t('timeoutDescription') : t('loginDescription')}
       </p>}

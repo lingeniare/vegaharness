@@ -1,5 +1,6 @@
 {
   "meta": {
-    "title": "ui-settings-session-log"
+    "title": "ui-settings-session-log",
+    "description": "General settings control for Session-log upload with DeepSeek API requests."
   }
 }

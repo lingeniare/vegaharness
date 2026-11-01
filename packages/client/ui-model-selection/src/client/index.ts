@@ -27,7 +27,7 @@ import type { ModelDirectoryState } from './directory.ts'
 import { ModelDirectoryResolver } from './service.ts'
 import type { ModelSelectInjected } from './slots.ts'
 import { ModelSelect } from './ModelSelect.tsx'
-import { en, ja, es, fr, de, ru, pt, zh, type ModelKey } from './locales.ts'
+import { en, ru, type ModelKey } from './locales.ts'
 import { orderModelProviders } from './provider-order.ts'
 
 export { ModelDirectory } from './directory.ts'
@@ -52,7 +52,7 @@ function rowId(providerId: string, modelId: string): string {
 function optionsOf(directory: ModelDirectoryState, t: TranslateNS<'model'>): SelectOption[] {
   const rows: SelectOption[] = []
   for (const group of orderModelProviders(directory.groups)) {
-    const name = group.id === 'deepseek-account' ? t('provider.account') : group.name
+    const name = group.accountManaged === true ? t('provider.account') : group.name
     for (const model of group.models) {
       rows.push({
         id: rowId(group.id, model.id),
@@ -68,7 +68,7 @@ function optionsOf(directory: ModelDirectoryState, t: TranslateNS<'model'>): Sel
   for (const failure of directory.failures) {
     rows.push({
       id: `failure/${failure.id}`,
-      label: failure.id === 'deepseek-account' ? t('provider.account') : failure.name,
+      label: failure.accountManaged === true ? t('provider.account') : failure.name,
       detail: t('option.loadError', { message: failure.message }),
     })
   }
@@ -113,7 +113,7 @@ export const inject = ['commandUi', 'locale', 'sessions', 'slots', 'remote', 're
  * @param ctx - client root context.
  */
 export function apply(ctx: ClientContext): void {
-  ctx.effect(() => ctx.locale.register(NS, { zh, en, ja, es, fr, de, ru, pt }), 'ui-model-selection: dictionaries')
+  ctx.effect(() => ctx.locale.register(NS, { en, ru }), 'ui-model-selection: dictionaries')
 
   // Non-slot faces (the command description, the popup option builder) read
   // through the bound translate; the seat component reads the standard seat.

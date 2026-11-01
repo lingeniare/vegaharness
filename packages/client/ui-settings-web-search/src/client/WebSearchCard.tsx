@@ -36,6 +36,16 @@ export function WebSearchCard(props: WebSearchCardProps) {
       {state.apiSwitchAvailable && (
         <div className={styles.feature}>
           <label className={styles.toggleRow}>
+            <span>{t('useVega')}</span>
+            <Switch checked={state.useVega} label={t('useVega')} disabled={disabled || state.apiSwitchBlocked}
+              onChange={(checked) => { props.setVega(checked) }} />
+          </label>
+          <p className={styles.hint}>{t('useVegaHint')}</p>
+        </div>
+      )}
+      {state.apiSwitchAvailable && !state.useVega && (
+        <div className={styles.feature}>
+          <label className={styles.toggleRow}>
             <span>{t('useSearchApi')}</span>
             <Switch checked={searchApi} label={t('useSearchApi')} disabled={disabled || state.apiSwitchBlocked}
               onChange={(checked) => { props.setSearchApi(checked) }} />
@@ -46,7 +56,7 @@ export function WebSearchCard(props: WebSearchCardProps) {
           </p>
         </div>
       )}
-      <SettingsSecretField
+      {!state.useVega && <SettingsSecretField
         id="plugin-config-web-search-key"
         label={t('apiKey')}
         hint={t('apiKeyHint')}
@@ -59,8 +69,8 @@ export function WebSearchCard(props: WebSearchCardProps) {
         configured={state.apiKeyConfigured}
         stateLabel={state.apiKeyConfigured ? t('apiKeySet') : t('apiKeyUnset')}
         onEdit={(text) => { props.edit('apiKey', text) }}
-      />
-      <SettingsValueField
+      />}
+      {!state.useVega && <SettingsValueField
         id="plugin-config-web-search-endpoint"
         label={t(searchApi ? 'searchApiBaseUrl' : 'baseUrl')}
         hint={t(searchApi ? 'searchApiBaseUrlHint' : 'baseUrlHint')}
@@ -71,8 +81,8 @@ export function WebSearchCard(props: WebSearchCardProps) {
         {...state.baseURL}
         onEdit={(text) => { props.edit('baseURL', text) }}
         onReset={() => { props.resetField('baseURL') }}
-      />
-      <SettingsValueField
+      />}
+      {!state.useVega && <SettingsValueField
         id={searchApi ? 'plugin-config-web-search-count' : 'plugin-config-web-search-max-uses'}
         label={t(limitField)}
         hint={t(searchApi ? 'countHint' : 'maxUsesHint')}
@@ -84,7 +94,7 @@ export function WebSearchCard(props: WebSearchCardProps) {
         {...state[limitField]}
         onEdit={(text) => { props.edit(limitField, text) }}
         onReset={() => { props.resetField(limitField) }}
-      />
+      />}
     </SettingsForm>
   )
 }
