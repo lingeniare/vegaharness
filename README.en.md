@@ -1,62 +1,103 @@
 <div align="center">
 
-![VEGA Harness](cover.webp)
+![VEGA Harness — an open environment for AI agents](cover.webp)
 
-**An AI agent that gets things done, not just answers — no VPN, no subscription, no privacy trade-offs.**
+# From task to result.
+
+### Your project. Your models. An agent that takes action.
+
+Files, terminal, browser, and search — in one working session.
 
 [ `🇷🇺 Русский` ](README.md) ・ **`🇬🇧 English`**
+
+[![MIT license](https://img.shields.io/badge/license-MIT-60A5FA?style=flat-square)](LICENSE) [![Open source](https://img.shields.io/badge/open_source-VEGA_Harness-A78BFA?style=flat-square)](https://github.com/lingeniare/vegaharness) [![Status: developer preview](https://img.shields.io/badge/status-developer_preview-FBBF24?style=flat-square)](SAFETY.md)
+
+**[Quick start ↓](#run)** · **[Capabilities ↓](#capabilities)** · **[For developers ↓](#developers)**
 
 </div>
 
 ---
 
-**VEGA Harness** is an open-source (MIT) agent runtime — a fork of [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) built for users who need privacy, reach, and zero friction. The formula is simple: **Agent = Model + Harness**. The model reasons; the harness gives it hands — files, terminal, browser, search. A web chat is for *asking*. A harness is for *doing*.
+**VEGA Harness** is an open-source environment for AI agents, built on [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). Give an agent a task and a working directory: it can explore materials, edit files, execute commands, and search the web. Follow its progress, tool calls, and results in one session.
 
-## Pain points — and how we solve them
+<a id="capabilities"></a>
 
-| Pain | Solution in VEGA Harness |
+## One session. From research to finished files.
+
+| | What your task gets |
 |---|---|
-| DeepSeek API doesn't work from Russia without a VPN; paying with a foreign card is a lottery | **Works in Russia without a VPN.** One-click VEGA account sign-in, balance in RUB |
-| Raw prompts and documents go to the provider — a compliance risk under 152-FZ | **Prompt & document depersonalization** before sending: personal data never leaves your trusted boundary |
-| One model, one era; rewiring an agent for every new LLM is painful | **400+ AI models** through a single `api.vega.chat` key — switch in one click |
-| The agent is blind to the live internet — it answers with yesterday's knowledge | **Built-in web search and web fetch** on the Parallel engine: it finds and reads pages itself, no copy-pasting |
-| An image or a video means a separate service and a separate chat | **Photo & video generation** right inside the session via the VEGA Studio skill |
-| A subscription bills you even when you don't use it; your data fuels someone else's analytics | **No subscription** — pay per token only. **No analytics, no ads** at all |
+| 🛠️ **Project tools** | File reading and editing, terminal commands, and test runs. The agent works with the contents of your working directory. |
+| 🔎 **Search with sources** | Web search and page retrieval through VEGA. Ask for links, comparisons, and fact checks. |
+| 🧠 **Model choice** | VEGA account sign-in and a catalog of models available to your account. Choose a model for the task through the interface. |
+| 🛡️ **PII shield** | Optional request anonymization on VEGA's side. Enable it separately; it is off by default. [How it works](packages/llm/llm-vega-account/README.md). |
+| ⏰ **Scheduled tasks** | Recurring assignments and scheduled follow-ups. [Capabilities and conditions](packages/schedule/README.md). |
+| 🧩 **Extensions** | Connect tools, MCP servers, and skills, including VEGA Studio for image and video generation. Availability depends on installed extensions and their configuration. |
 
-## What you can do
+### Start with the task you have been putting off
 
-- **Work on a project.** The agent explores a repo or a folder of documents itself, writes and edits files, runs tests, assembles reports and presentations.
-- **Research with facts.** Built-in Parallel search finds sources, reads them, and verifies claims — no memory-based hallucinations.
-- **Content & media.** Ask for an article illustration or a video clip — the agent generates it via VEGA Studio without leaving the task.
-- **Scheduled automation.** "Every Friday at 17:00, collect the project notes and build a weekly report" — set it once, it runs by itself.
-- **Corporate perimeter.** Input-side data depersonalization makes the "agent reads internal documents" scenario compatible with 152-FZ requirements.
+Example prompts for your selected working directory:
 
-## Under the hood
+**Code → changes and verification**
 
-An everything-is-a-plugin architecture on the Cordis framework: model adapter, tools, sessions, sandbox, agent loop — every layer is replaceable via configuration, no runtime fork needed. Sessions are persistent: they survive restarts, compact, and journal every tool call for audit.
+> “Explore this project, find the cause of the bug, propose a fix, and run the relevant tests.”
 
-## Run from source
+**Sources → an informed decision**
+
+> “Compare three solutions for our project. Find current documentation, include source links, and save your findings in Markdown.”
+
+**Documents → a finished report**
+
+> “Read the materials in this folder and prepare a brief report: key points, open questions, and next steps.”
+
+**Idea → media** · with a configured VEGA Studio skill
+
+> “Create an illustration and a short video for this article. Save the results in the project folder.”
+
+---
+
+<a id="run"></a><a id="run-from-source"></a>
+
+## Your first task
+
+Running from source requires **Node.js ≥ 24.9** and **pnpm**; the pnpm version is pinned in [package.json](package.json). Download this repository and open a terminal in its root:
 
 ```sh
-git clone <this repository>
-cd deepseek-harness
 pnpm install
 pnpm run build
 pnpm dsh web
 ```
 
-The Web UI opens at `http://127.0.0.1:3080`. Sign in with a VEGA account — the `sk-apivega-…` key and the model list are pulled automatically, no manual key entry.
+1. **Open the Web UI** at the address printed by the command; the default is `http://127.0.0.1:3080`.
+2. **Sign in with a VEGA account.** The app obtains a managed API key and loads available models; you do not need to copy a key manually.
+3. **Choose a working directory and a model.** Create a session and send your first task.
 
-> **Developer preview.** The project is evolving fast; breaking changes are possible. See the [safety notice](SAFETY.md).
+> **Developer preview.** Breaking changes are possible. Read the [safety notice](SAFETY.md) before running; the active permission policy controls access to files and commands.
 
 ---
 
-<p align="center">
-  <a href="mailto:mail@vega.chat"><img src="https://img.shields.io/badge/✉️_Email-mail%40vega.chat-EA4335?style=for-the-badge" alt="Email: mail@vega.chat"></a>
-  <a href="https://t.me/ingeniare"><img src="https://img.shields.io/badge/Telegram-t.me%2Fingeniare-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram: t.me/ingeniare"></a>
-  <a href="https://vega.codes"><img src="https://img.shields.io/badge/🌐_Web-vega.codes-7B61FF?style=for-the-badge" alt="Web: vega.codes"></a>
-</p>
+<a id="developers"></a>
 
-<p align="center">
-  <sub>License: <a href="LICENSE">MIT</a> · Built on <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a> · Powered by <a href="https://api.vega.chat">api.vega.chat</a></sub>
-</p>
+## Build an agent around your workflow
+
+The architecture is **everything is a plugin**, powered by Cordis. Model adapters, tools, session storage, sandboxing, and the agent loop are composed through configuration. Change the agent's components and develop your own extensions.
+
+Sessions preserve work history and tool calls, support resuming after a restart, and compact context. See the [architecture guide](docs/architecture.md) for details.
+
+| I want to… | Start here |
+|---|---|
+| Learn the interface | [Web UI guide](docs/user/guide/index.md) |
+| Connect another provider | [Model configuration](docs/user/guide/providers.md) |
+| Create a plugin | [Plugin development](docs/user/develop/basic/index.md) |
+| Contribute | [Getting started](CONTRIBUTING.md) · [Development guide](docs/development.md) |
+
+---
+
+<div align="center">
+
+### Have a task, an idea, or feedback?
+
+[![Email: mail@vega.chat](https://img.shields.io/badge/Email-mail%40vega.chat-60A5FA?style=for-the-badge)](mailto:mail@vega.chat) [![Telegram: ingeniare](https://img.shields.io/badge/Telegram-ingeniare-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/ingeniare) [![Website: vega.codes](https://img.shields.io/badge/Web-vega.codes-A78BFA?style=for-the-badge)](https://vega.codes)
+
+<sub>License: <a href="LICENSE">MIT</a> · Built on <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a> · Powered by <a href="https://getmya.io">getmya.io</a></sub>
+
+</div>
