@@ -464,6 +464,10 @@
     - id: ui-plan
       name: '@deepseek-ai/dsh-client-ui-plan'
 
+    # PII-shield control: the composer shield indicator writing the VEGA anonymize field.
+    - id: ui-pii-shield
+      name: '@deepseek-ai/dsh-client-ui-pii-shield'
+
     - id: ui-user-questions
       name: '@deepseek-ai/dsh-client-ui-user-questions'
 

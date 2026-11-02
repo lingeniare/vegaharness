@@ -72,6 +72,7 @@ if (process.argv[1] !== undefined && resolve(process.argv[1]) === import.meta.fi
       process.stdout.write(`desktop publish: verified ${plan.target} ${plan.version}; no credentials read or COS requests made\n`)
     } else {
       if (plan.environment === 'production' && !env.DESKTOP_TAG_TOKEN) throw new Error('desktop publish: GitHub App token is required before production upload')
+      if (plan.provider !== 'generic') throw new Error('desktop publish: this pipeline supports the generic destination only')
       phase = 'upload credential loading'
       const credentials = await readDesktopUploadCredentials(config)
       const destination = `${plan.bucket}/${plan.publicUrl}${manifest.source.channel}`

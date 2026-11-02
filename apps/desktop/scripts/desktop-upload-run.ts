@@ -5,7 +5,7 @@ import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { Readable } from 'node:stream'
 import type COS from 'cos-nodejs-sdk-v5'
-import type { DesktopUploadArtifact, DesktopUploadPlan } from './desktop-upload-plan.ts'
+import type { DesktopGenericUploadPlan, DesktopUploadArtifact } from './desktop-upload-plan.ts'
 import { DESKTOP_COS_REGION } from './desktop-cos.ts'
 import { recordPackagingEvent } from './packaging-run.mjs'
 
@@ -58,12 +58,12 @@ function streamedBody(artifact: DesktopUploadArtifact): Readable {
  * what keeps the COS SDK's internal retry path unreachable: it repeats a request only when the
  * body is not a stream. This function never retries either, so every confirmed PUT is the only
  * write for its key.
- * @param plan Validated release metadata; credential values must not be included.
+ * @param plan Validated release metadata for the generic destination; credential values must not be included.
  * @param cos Caller-owned client from the Desktop COS factory in `desktop-cos.ts`.
  * @param recordsRoot Local retained evidence parent, outside disposable artifact directories.
  * @returns Fresh record directory after all PUTs succeed; errors retain partial evidence and stop later PUTs.
  */
-export async function uploadDesktopRelease(plan: DesktopUploadPlan, cos: COS, recordsRoot: string): Promise<string> {
+export async function uploadDesktopRelease(plan: DesktopGenericUploadPlan, cos: COS, recordsRoot: string): Promise<string> {
   await mkdir(recordsRoot, { recursive: true })
   const directory = await mkdtemp(join(recordsRoot, `${plan.environment}-${plan.target}-`))
   process.stdout.write(`desktop upload: record ${directory}\n`)

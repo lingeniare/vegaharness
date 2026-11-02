@@ -35,7 +35,7 @@ describe('desktop upload command', () => {
     vi.spyOn(process.stdout, 'write').mockReturnValue(true)
     const credentials = { ...productionEnvironment, DSH_DESKTOP_AUTO_UPDATE_ENV: environment, DOWNLOAD_TEST_COS_SECRET_ID: 'fixture-id', DOWNLOAD_TEST_COS_SECRET_KEY: 'fixture-key' }
     const plan: DesktopUploadPlan = {
-      environment, target: 'win-x64', version: '1.2.3-alpha.4',
+      provider: 'generic', environment, channel: 'nightly', target: 'win-x64', version: '1.2.3-alpha.4',
       publicUrl: 'https://desktop-updates.example.com/desktop/dsh-latest-windows-x64.exe',
       bucket: 'fixture-bucket', secretIdEnvName: 'DOWNLOAD_TEST_COS_SECRET_ID',
       secretKeyEnvName: 'DOWNLOAD_TEST_COS_SECRET_KEY', artifacts: [], commit: '0'.repeat(40), dirty: false,
@@ -99,7 +99,8 @@ describe('cache-only submission command', () => {
   it('reports a completed upload when refresh fails, without tagging or repeating the upload', async () => {
     const output = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
     vi.mocked(createDesktopUploadPlan).mockResolvedValue({
-      environment: 'production', target: 'mac-arm64', version: '1.2.3', publicUrl: 'https://example.com/new-prefix/installer.dmg',
+      provider: 'generic', environment: 'production', channel: 'nightly', target: 'mac-arm64', version: '1.2.3',
+      publicUrl: 'https://example.com/new-prefix/installer.dmg',
       bucket: 'fixture-bucket', secretIdEnvName: 'DOWNLOAD_PROD_COS_SECRET_ID', secretKeyEnvName: 'DOWNLOAD_PROD_COS_SECRET_KEY', artifacts: [],
     })
     vi.mocked(purgeDesktopInstaller).mockRejectedValue(new DesktopPurgeError('desktop purge: submission not confirmed'))

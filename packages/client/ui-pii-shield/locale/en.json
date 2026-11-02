@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "ui-pii-shield",
+    "description": "Composer PII-shield toggle for the VEGA route: shield indicator left of the model selector writing the anonymize settings field."
+  }
+}

@@ -103,7 +103,7 @@ export function apply(ctx: Context, config: Config): void {
     profiles,
     account,
     baseURL,
-    anonymize: resolved.anonymize,
+    anonymize: () => resolved.anonymize.get(),
     catalogView: signal => cache.view(settings(), signal).then(() => undefined),
     auth: { credentials: credentialStoreFrom(ctx), authContext: authContextFrom(ctx) },
     resolveAttachments: () => ctx.get('attachments'),

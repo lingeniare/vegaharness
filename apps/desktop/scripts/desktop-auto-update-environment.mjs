@@ -1,9 +1,42 @@
-/** Resolve the Desktop auto-update channel and its Tencent COS destination. */
+/** Resolve the Desktop auto-update channel and its release destination. */
 
 import { valid } from 'semver'
 
 /** Environment variable that selects the Desktop update deployment. */
 export const DESKTOP_AUTO_UPDATE_ENV = 'DSH_DESKTOP_AUTO_UPDATE_ENV'
+/** Environment variable that selects the updater backend: generic object storage or GitHub Releases. */
+export const DESKTOP_UPDATE_PROVIDER_ENV = 'DSH_DESKTOP_UPDATE_PROVIDER'
+/** Environment variable naming the GitHub Releases repository as owner/repo. */
+export const DESKTOP_UPDATE_GITHUB_REPO_ENV = 'DSH_DESKTOP_UPDATE_GITHUB_REPO'
+/** Credential environment consumed by GitHub Releases uploads. */
+export const DESKTOP_GITHUB_TOKEN_ENV = 'DESKTOP_GITHUB_TOKEN'
+
+/**
+ * Resolve the updater backend; omitted local settings retain the generic object-storage provider.
+ * @param {NodeJS.ProcessEnv} env Packaging or upload settings.
+ * @returns {'generic' | 'github'} Validated provider.
+ */
+export function resolveDesktopUpdateProvider(env) {
+  const provider = env[DESKTOP_UPDATE_PROVIDER_ENV]?.trim() || 'generic'
+  if (provider !== 'generic' && provider !== 'github') {
+    throw new Error(`desktop auto-update: ${DESKTOP_UPDATE_PROVIDER_ENV} must be "generic" or "github"`)
+  }
+  return provider
+}
+
+/**
+ * Resolve the GitHub Releases repository that owns update feeds and binaries.
+ * @param {NodeJS.ProcessEnv} env Packaging or upload settings.
+ * @returns {{ owner: string, repo: string }} Validated repository coordinates.
+ */
+export function resolveDesktopGithubRepository(env) {
+  const repository = requiredEnvironmentValue(env, DESKTOP_UPDATE_GITHUB_REPO_ENV)
+  if (!/^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\/[A-Za-z0-9_.-]+$/u.test(repository)) {
+    throw new Error(`desktop auto-update: ${DESKTOP_UPDATE_GITHUB_REPO_ENV} must name a GitHub repository as owner/repo`)
+  }
+  const [owner, repo] = repository.split('/')
+  return { owner, repo }
+}
 
 /**
  * Resolve the channel embedded in the installer; omitted local settings retain nightly.
@@ -44,6 +77,17 @@ export function desktopLatestInstallerFilename(target) {
   if (!UPDATE_TARGETS.has(target)) throw new Error(`desktop upload: unsupported target ${target}`)
   const windows = target === 'win-x64'
   return `dsh-latest-${windows ? 'windows' : 'macos'}-${target === 'mac-arm64' ? 'arm64' : 'x64'}.${windows ? 'exe' : 'dmg'}`
+}
+
+/**
+ * Name the fixed installer asset inside a GitHub release; /releases/latest/download resolves it.
+ * @param {'mac-arm64' | 'mac-x64' | 'win-x64'} target Supported Desktop target.
+ * @returns {string} Fixed release asset name.
+ */
+export function desktopGithubInstallerFilename(target) {
+  if (!UPDATE_TARGETS.has(target)) throw new Error(`desktop upload: unsupported target ${target}`)
+  const windows = target === 'win-x64'
+  return `vega-harness-latest-${windows ? 'windows' : 'macos'}-${target === 'mac-arm64' ? 'arm64' : 'x64'}.${windows ? 'exe' : 'dmg'}`
 }
 
 /**
@@ -155,6 +199,19 @@ export function resolveDesktopAutoUpdateConfig(env, platform, arch) {
   const channel = resolveDesktopUpdateChannel(env)
   const environment = resolveDesktopAutoUpdateEnvironment(env)
   const target = resolveDesktopAutoUpdateTarget(platform, arch)
+  if (resolveDesktopUpdateProvider(env) === 'github') {
+    const { owner, repo } = resolveDesktopGithubRepository(env)
+    return {
+      provider: 'github',
+      environment,
+      channel,
+      target,
+      owner,
+      repo,
+      origin: 'https://github.com',
+      publicUrl: `https://github.com/${owner}/${repo}/releases`,
+    }
+  }
   const deployment = UPDATE_ENVIRONMENTS[environment]
   let origin = deployment.fixedOrigin
   if (origin === undefined) {
@@ -172,6 +229,7 @@ export function resolveDesktopAutoUpdateConfig(env, platform, arch) {
   }
   const keyPrefix = `${releasePrefix}/feeds/${target}`
   return {
+    provider: 'generic',
     environment,
     channel,
     target,
@@ -192,6 +250,7 @@ export function resolveDesktopAutoUpdateConfig(env, platform, arch) {
  */
 export function resolveDesktopUploadConfig(env, platform, arch) {
   const update = resolveDesktopAutoUpdateConfig(env, platform, arch)
+  if (update.provider === 'github') return { ...update, tokenEnvName: DESKTOP_GITHUB_TOKEN_ENV }
   const deployment = UPDATE_ENVIRONMENTS[update.environment]
   return {
     ...update,

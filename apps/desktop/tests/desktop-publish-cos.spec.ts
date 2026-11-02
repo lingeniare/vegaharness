@@ -23,7 +23,8 @@ it('uses overwrite prevention, streams verified bytes, and hashes remote readbac
   try {
     const artifact = { path: '', filename: 'file.exe', key: 'bin/file.exe', contents: 'fixture bytes', contentType: 'application/octet-stream', channelMetadata: false }
     const plan: DesktopUploadPlan = {
-      environment: 'test', target: 'win-x64', version: '1.0.0', bucket: 'fixture-1250000000', publicUrl: 'https://example.com/',
+      provider: 'generic', environment: 'test', channel: 'nightly', target: 'win-x64', version: '1.0.0',
+      bucket: 'fixture-1250000000', publicUrl: 'https://example.com/',
       secretIdEnvName: 'ID', secretKeyEnvName: 'KEY', artifacts: [artifact],
     }
     const transport = desktopPublishCos(plan, { secretId: 'fixture-id', secretKey: 'fixture-secret' }, (credentials) => {
@@ -46,7 +47,8 @@ it('propagates an oversized channel stream error through the SDK and closes the 
   const server = await startCosLoopback((_request, response) => { answer(response, 200, Buffer.alloc(1024 * 1024 + 1, 65)) })
   try {
     const artifact = { path: '', filename: 'nightly.yml', key: 'feed/nightly.yml', contents: 'version: 1.0.0\n', contentType: 'application/yaml', channelMetadata: true }
-    const plan: DesktopUploadPlan = { environment: 'test', target: 'win-x64', version: '1.0.0', bucket: 'fixture-1250000000',
+    const plan: DesktopUploadPlan = { provider: 'generic', environment: 'test', channel: 'nightly', target: 'win-x64',
+      version: '1.0.0', bucket: 'fixture-1250000000',
       publicUrl: 'https://example.com/', secretIdEnvName: 'ID', secretKeyEnvName: 'KEY', artifacts: [artifact] }
     const transport = desktopPublishCos(plan, { secretId: 'fixture-id', secretKey: 'fixture-secret' }, (credentials) => {
       const client = createDesktopCos(credentials)
@@ -64,7 +66,8 @@ it.each(['GetObject', 'PutObject'] as const)('reports %s denial with a safe COS 
   })
   try {
     const artifact = { path: '', filename: 'file.exe', key: 'bin/file.exe', contents: 'fixture bytes', contentType: 'application/octet-stream', channelMetadata: false }
-    const plan: DesktopUploadPlan = { environment: 'test', target: 'win-x64', version: '1.0.0', bucket: 'fixture-1250000000',
+    const plan: DesktopUploadPlan = { provider: 'generic', environment: 'test', channel: 'nightly', target: 'win-x64',
+      version: '1.0.0', bucket: 'fixture-1250000000',
       publicUrl: 'https://example.com/', secretIdEnvName: 'ID', secretKeyEnvName: 'KEY', artifacts: [artifact] }
     const transport = desktopPublishCos(plan, { secretId: 'fixture-id', secretKey: 'fixture-secret' }, (credentials) => {
       const client = createDesktopCos(credentials)

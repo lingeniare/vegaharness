@@ -24,7 +24,9 @@ export async function desktopPublicationSummary(
   source: DesktopRetainedSource, plan: DesktopUploadPlan, approval: string,
 ): Promise<string> {
   const origin = new URL(plan.publicUrl).origin
-  const url = (key: string) => `${origin}/${key.split('/').map(encodeURIComponent).join('/')}`
+  const url = (key: string) => plan.provider === 'github'
+    ? `${plan.publicUrl}/download/v${plan.version}/${encodeURIComponent(key)}`
+    : `${origin}/${key.split('/').map(encodeURIComponent).join('/')}`
   const files = []
   for (const file of plan.artifacts) {
     const hash = createHash('sha256')
@@ -59,7 +61,7 @@ export async function desktopPublicationSummary(
     ...(plan.environment === 'production' ? ['4. 为实际打包提交创建上述 Git tag；若 tag 创建失败，记录“已发布，待补 tag”。'] : []), '',
     ...(plan.environment === 'test' ? ['**本次只发布 test，不修改 production。**', ''] : []),
     '<details>', '<summary>技术详情与文件清单</summary>', '',
-    `COS 存储桶：${code(plan.bucket)}`, '',
+    plan.provider === 'generic' ? `COS 存储桶：${code(plan.bucket)}` : `GitHub 仓库：${code(`${plan.owner}/${plan.repo}`)}`, '',
     ...(plan.environment === 'test' ? [
       'release ID 取自原打包产物清单。打包时优先使用表单 `test_release_id`；留空则使用机器 `presets/test.env` 中的 `DOWNLOAD_TEST_RELEASE_ID`。发布时不重新选择。', '',
     ] : []),

@@ -13,6 +13,7 @@ import type {} from '@deepseek-ai/dsh-deepseek-account'
 import type {} from '@deepseek-ai/dsh-session'
 import type {} from '@deepseek-ai/dsh-web'
 import {
+  resolveVegaAnonymize,
   VegaFetchProvider,
   VegaSearchProvider,
   VEGA_DEFAULT_BASE_URL,
@@ -75,7 +76,7 @@ function resolveOptions(
     baseURL: config.baseURL ?? VEGA_DEFAULT_BASE_URL,
     model: config.model,
     maxTokens: config.maxTokens,
-    anonymize: true,
+    anonymize: resolveVegaAnonymize(ctx),
     resolveModel: () => {
       const session = ctx.get('agents')?.currentInitiator()?.session
       if (session === undefined) return undefined

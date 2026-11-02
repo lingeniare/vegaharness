@@ -90,10 +90,40 @@ describe('Windows update publisher', () => {
         DSH_DESKTOP_AUTO_UPDATE_ENV: 'production',
       }, 'win32', 'x64')
       expect(config.win.forceCodeSigning).toBe(true)
-      expect(config.artifactName).toBe('deepseek-harness-${version}-${os}-${arch}.${ext}')
+      expect(config.artifactName).toBe('vega-harness-${version}-${os}-${arch}.${ext}')
       expect(typeof config.win.signtoolOptions.sign).toBe('function')
       const manager = new WindowsSignToolManager({ platformSpecificBuildOptions: config.win, getCscLink: () => undefined })
       expect(await manager.computedPublisherName.value).toEqual(['CN=Publisher,O=Company,C=CN'])
     })
+  })
+
+  it('publishes a github channel for unsigned Windows builds', async () => {
+    const { createElectronBuilderConfig } = await import('../electron-builder.config.mjs')
+    const config = createElectronBuilderConfig({
+      DSH_DESKTOP_APP_ID: 'com.example.publisher-test',
+      DSH_DESKTOP_AUTO_UPDATE_ENV: 'production',
+      DSH_DESKTOP_MANDATORY_UPDATE_PROD_ORIGIN: 'https://policy.example.com',
+      DSH_DESKTOP_UNSIGNED: '1',
+      DSH_DESKTOP_UPDATE_PROVIDER: 'github',
+      DSH_DESKTOP_UPDATE_GITHUB_REPO: 'lingeniare/vegaharness',
+    }, 'win32', 'x64')
+    expect(config.publish).toEqual([{
+      provider: 'github',
+      owner: 'lingeniare',
+      repo: 'vegaharness',
+      vPrefixedTagName: true,
+      channel: 'nightly',
+    }])
+  })
+
+  it('still omits update configuration for unsigned Windows without the github provider', async () => {
+    const { createElectronBuilderConfig } = await import('../electron-builder.config.mjs')
+    const config = createElectronBuilderConfig({
+      DSH_DESKTOP_APP_ID: 'com.example.publisher-test',
+      DSH_DESKTOP_AUTO_UPDATE_ENV: 'production',
+      DSH_DESKTOP_MANDATORY_UPDATE_PROD_ORIGIN: 'https://policy.example.com',
+      DSH_DESKTOP_UNSIGNED: '1',
+    }, 'win32', 'x64')
+    expect(config.publish).toBeNull()
   })
 })

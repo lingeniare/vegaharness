@@ -4,10 +4,11 @@ import { resolve } from 'node:path'
 import { parseArgs } from 'node:util'
 import type { DesktopPackageTargetName } from './package-target.ts'
 import { createDesktopCos } from './desktop-cos.ts'
-import { requiredEnvironmentValue, resolveDesktopAutoUpdateEnvironment, resolveDesktopUploadConfig } from './desktop-auto-update-environment.mjs'
+import { requiredEnvironmentValue, resolveDesktopAutoUpdateEnvironment, resolveDesktopUpdateProvider, resolveDesktopUploadConfig } from './desktop-auto-update-environment.mjs'
 import { desktopTargetPlatform } from './desktop-build-paths.mjs'
 import { loadDesktopPackageEnvironment } from './desktop-package-environment.mjs'
 import { createDesktopUploadPlan, type DesktopUploadPlan } from './desktop-upload-plan.ts'
+import { uploadDesktopGithubRelease } from './desktop-upload-github.ts'
 import { desktopReleaseTag, tagDesktopRelease } from './desktop-release-tag.ts'
 import { uploadDesktopRelease } from './desktop-upload-run.ts'
 import { DesktopPurgeError, purgeDesktopInstaller, resolveDesktopPurgeConfig } from './desktop-edgeone.ts'
@@ -40,6 +41,9 @@ export function resolveCredentialUploadEnvironment(
 ): NodeJS.ProcessEnv {
   const { platform, arch } = desktopTargetPlatform(target)
   const destination = resolveDesktopUploadConfig(fileEnvironment, platform, arch)
+  if (destination.provider !== 'generic') {
+    throw new DesktopUploadUsageError('desktop upload: the credential launcher supports object-storage destinations only')
+  }
   if (destination.environment !== selected || destination.bucket !== bucket) {
     throw new DesktopUploadUsageError('desktop upload: credential launcher deployment or bucket differs from the packaged release destination')
   }
@@ -72,6 +76,7 @@ function purgeConfig(environment: NodeJS.ProcessEnv, target: DesktopPackageTarge
 export async function uploadDesktopTarget(args: string[]): Promise<void> {
   const { positionals, values } = parseArgs({ args, allowPositionals: true, options: {
     latest: { type: 'boolean' },
+    unsigned: { type: 'boolean' },
     'purge-only': { type: 'boolean' },
     'credential-launcher': { type: 'boolean' }, environment: { type: 'string' }, bucket: { type: 'string' },
   } })
@@ -106,11 +111,27 @@ export async function uploadDesktopTarget(args: string[]): Promise<void> {
     throw new DesktopUploadUsageError('DSH_DESKTOP_AUTO_UPDATE_ENV must be "test" or "production".')
   }
   const recordsRoot = resolve(import.meta.dirname, '../.desktop-build/upload-records')
+  if (resolveDesktopUpdateProvider(environment) === 'github') {
+    if (values['purge-only'] || values['credential-launcher']) {
+      throw new DesktopUploadUsageError('desktop upload: github destinations do not use the credential launcher or cache purge')
+    }
+    const plan = await createDesktopUploadPlan(name, {
+      environment, latest: values.latest === true, unsigned: values.unsigned === true,
+    })
+    process.stdout.write(`desktop upload: ${plan.target} ${plan.version} -> ${plan.publicUrl}\n`)
+    if (plan.provider !== 'github') throw new DesktopUploadUsageError('desktop upload: inconsistent destination')
+    await uploadDesktopGithubRelease(plan, { token: requiredEnvironmentValue(environment, plan.tokenEnvName) }, recordsRoot)
+    return
+  }
+  if (values.unsigned) {
+    throw new DesktopUploadUsageError('desktop upload: --unsigned requires the github provider')
+  }
   if (values['purge-only']) {
     await purgeDesktopInstaller(purgeConfig(environment, name))
     return
   }
   const plan = await createDesktopUploadPlan(name, { environment, latest: values.latest === true })
+  if (plan.provider !== 'generic') throw new DesktopUploadUsageError('desktop upload: inconsistent destination')
   const purge = plan.environment === 'production' && values.latest ? purgeConfig(environment, name, plan.publicUrl) : undefined
   const cos = createDesktopCos({
     secretId: requiredEnvironmentValue(environment, plan.secretIdEnvName),

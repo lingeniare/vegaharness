@@ -7,6 +7,10 @@ export interface BrandWordmarkProps extends IconProps {
   includeMark?: boolean | undefined
 }
 
+/** Brand lettering baked into the wordmark artwork — a mark, not localizable copy. */
+const BRAND_NAME = 'VEGA'
+const BRAND_BADGE = 'HARNESS'
+
 /**
  * Render the full brand wordmark: the star, the VEGA name, and the
  * HARNESS badge.
@@ -45,7 +49,7 @@ export function BrandWordmark({ size = 24, className, includeMark = true }: Bran
         fill="currentColor"
         textLength="52"
         lengthAdjust="spacing"
-      >VEGA</text>
+      >{BRAND_NAME}</text>
       <rect x="92" y="5" width="52" height="14" rx="2" fill="currentColor" />
       <text
         x="118"
@@ -58,7 +62,7 @@ export function BrandWordmark({ size = 24, className, includeMark = true }: Bran
         fill="var(--dsw-alias-label-primary-inverted)"
         textLength="44"
         lengthAdjust="spacing"
-      >HARNESS</text>
+      >{BRAND_BADGE}</text>
     </svg>
   )
 }

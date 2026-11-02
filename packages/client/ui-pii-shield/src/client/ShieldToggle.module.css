@@ -1,0 +1,58 @@
+/* Shield anchor keeps the tooltip alive while the inner button is disabled
+   (disabled controls suppress pointer events). */
+.anchor {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* 28px square chip, matching the sibling composer controls' tool row. */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: var(--dsw-radius-sm);
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .toggle:hover:not(:disabled) {
+    background: var(--dsw-alias-interactive-bg-hover);
+  }
+}
+
+.toggle:focus-visible {
+  box-shadow: 0 0 0 2px var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+}
+
+/* Protected: the shield glyph takes the accent color. */
+.toggleOn {
+  color: var(--dsw-alias-state-business-primary);
+}
+
+/* Unprotected: muted glyph on the disabled control. */
+.toggleOff {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.toggle:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Transient write-failure line kept off the compact row's layout. */
+.status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

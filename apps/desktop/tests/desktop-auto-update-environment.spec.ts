@@ -40,6 +40,7 @@ describe('desktop auto-update environment', () => {
       DOWNLOAD_TEST_ORIGIN: 'https://desktop-updates.example.com/',
       DOWNLOAD_TEST_RELEASE_ID: RELEASE_ID,
     }, 'darwin', 'arm64')).toEqual({
+      provider: 'generic',
       environment: 'test', channel: 'nightly',
       target: 'mac-arm64',
       origin: 'https://desktop-updates.example.com',
@@ -117,5 +118,55 @@ describe('desktop auto-update environment', () => {
     expect(desktopUpdateMetadataFilename('1.2.3-beta.2', 'win32')).toBe('nightly.yml')
     expect(() => desktopUpdateMetadataFilename('not-semver', 'darwin')).toThrow(/invalid Desktop version/u)
     expect(() => desktopUpdateMetadataFilename('1.2.3', 'linux')).toThrow(/unsupported metadata platform/u)
+  })
+
+  describe('github update provider', () => {
+    const github = {
+      DSH_DESKTOP_UPDATE_PROVIDER: 'github',
+      DSH_DESKTOP_UPDATE_GITHUB_REPO: 'lingeniare/vegaharness',
+    }
+
+    it('resolves repository coordinates without object-storage settings', () => {
+      expect(resolveDesktopAutoUpdateConfig({
+        ...github, DSH_DESKTOP_UPDATE_CHANNEL: 'latest', DSH_DESKTOP_AUTO_UPDATE_ENV: 'production',
+      }, 'win32', 'x64')).toEqual({
+        provider: 'github',
+        environment: 'production',
+        channel: 'latest',
+        target: 'win-x64',
+        owner: 'lingeniare',
+        repo: 'vegaharness',
+        origin: 'https://github.com',
+        publicUrl: 'https://github.com/lingeniare/vegaharness/releases',
+      })
+    })
+
+    it('names a token credential instead of a COS destination', () => {
+      expect(resolveDesktopUploadConfig(github, 'darwin', 'arm64')).toMatchObject({
+        provider: 'github',
+        owner: 'lingeniare',
+        repo: 'vegaharness',
+        tokenEnvName: 'DESKTOP_GITHUB_TOKEN',
+      })
+    })
+
+    it('requires the repository before resolving any github destination', () => {
+      expect(() => resolveDesktopAutoUpdateConfig({ DSH_DESKTOP_UPDATE_PROVIDER: 'github' }, 'win32', 'x64'))
+        .toThrow(/UPDATE_GITHUB_REPO/u)
+      expect(() => resolveDesktopUploadConfig({ DSH_DESKTOP_UPDATE_PROVIDER: 'github' }, 'win32', 'x64'))
+        .toThrow(/UPDATE_GITHUB_REPO/u)
+    })
+
+    it.each(['cos', 'spaces', 'GitHub'])('rejects unknown update provider %j', (provider) => {
+      expect(() => resolveDesktopAutoUpdateConfig({ DSH_DESKTOP_UPDATE_PROVIDER: provider }, 'win32', 'x64'))
+        .toThrow(/UPDATE_PROVIDER/u)
+    })
+
+    it.each(['', 'owner', 'owner/', '/repo', 'owner/repo/extra', 'a b/c', 'https://github.com/a/b', 'owner//repo'])
+    ('rejects invalid github repository %j', (repository) => {
+      expect(() => resolveDesktopAutoUpdateConfig({
+        DSH_DESKTOP_UPDATE_PROVIDER: 'github', DSH_DESKTOP_UPDATE_GITHUB_REPO: repository,
+      }, 'win32', 'x64')).toThrow(/UPDATE_GITHUB_REPO/u)
+    })
   })
 })

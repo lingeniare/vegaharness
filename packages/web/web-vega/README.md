@@ -32,7 +32,7 @@ Mount the provider next to the web service and pin the selection, alongside the 
 - name: '@deepseek-ai/dsh-web-vega'
 ```
 
-`anonymize` forwards the PII-shield header; `model`/`maxTokens` bound the auxiliary turn.
+Auxiliary requests follow the `llm-vega-account` route's volatile `anonymize` field — the same flag the composer PII-shield control writes — so the `X-Vega-Anonymize` header matches the chat path; `model`/`maxTokens` bound the auxiliary turn.
 
 <a id="model-experience"></a>
 ## Model Experience

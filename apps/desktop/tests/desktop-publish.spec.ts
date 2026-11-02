@@ -12,7 +12,8 @@ function fixture(environment: 'test' | 'production' = 'test') {
   const events: DesktopPublishEvent[] = []
   let tags = 0
   const plan: DesktopUploadPlan = {
-    environment, target: 'win-x64', version: '1.0.0', bucket: 'fixture', publicUrl: 'https://example.com/feed/',
+    provider: 'generic', environment, channel: 'nightly', target: 'win-x64', version: '1.0.0', bucket: 'fixture',
+    publicUrl: 'https://example.com/feed/',
     secretIdEnvName: 'ID', secretKeyEnvName: 'KEY', commit: 'a'.repeat(40), dirty: false,
     artifacts: [
       { path: '', filename: 'installer.exe', key: 'bin/installer.exe', contentType: 'application/octet-stream', channelMetadata: false, contents: 'installer' },

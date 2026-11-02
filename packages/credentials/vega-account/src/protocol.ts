@@ -126,7 +126,7 @@ export async function requestJson(url: string, init: RequestInit, signal: AbortS
       if (size > 65_536) throw new VegaAuthError('protocol')
       chunks.push(next.value)
     }
-    return JSON.parse(Buffer.concat(chunks).toString('utf8')) as unknown
+    return JSON.parse(Buffer.concat(chunks).toString('utf8'))
   } catch (error) {
     if (!callerCancelled(signal)) console.error('[vega-account] response rejected', {
       path, status: response.status, errorCode: error instanceof VegaAuthError ? error.code : 'protocol',
@@ -187,7 +187,7 @@ export async function requestDeviceToken(origin: string, clientId: string, code:
   if (response.body === null) throw new VegaAuthError('protocol')
   const text = await response.text()
   if (text.length > 65_536) throw new VegaAuthError('protocol')
-  try { return JSON.parse(text) as unknown }
+  try { return JSON.parse(text) }
   catch { throw new VegaAuthError('protocol') }
 }
 

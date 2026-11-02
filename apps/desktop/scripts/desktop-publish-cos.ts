@@ -5,7 +5,7 @@ import { Readable, Writable } from 'node:stream'
 import type COS from 'cos-nodejs-sdk-v5'
 import { createDesktopCos, DESKTOP_COS_REGION, type DesktopCosCredentials } from './desktop-cos.ts'
 import { cosOperation } from './cos-operation.ts'
-import type { DesktopUploadPlan } from './desktop-upload-plan.ts'
+import type { DesktopGenericUploadPlan } from './desktop-upload-plan.ts'
 import { desktopArtifactDigest, type DesktopPublishTransport } from './desktop-publish.ts'
 import { DesktopCosOperationError } from './desktop-publication-failure.ts'
 
@@ -22,7 +22,7 @@ function missing(error: unknown): boolean {
  * @returns Streaming reads and single-attempt writes; transport construction performs no requests.
  */
 export function desktopPublishCos(
-  plan: DesktopUploadPlan, credentials: DesktopCosCredentials,
+  plan: DesktopGenericUploadPlan, credentials: DesktopCosCredentials,
   createClient: (credentials: DesktopCosCredentials) => COS = createDesktopCos,
 ): DesktopPublishTransport {
   const keys = new Map(plan.artifacts.map(artifact => [artifact.key, artifact.channelMetadata]))

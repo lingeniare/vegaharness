@@ -16,8 +16,8 @@ export interface VegaAccountBinding {
 export interface VegaAdapterOptions extends Omit<PiAiAdapterOptions, 'resolveApiKey' | 'prepareHeaders'> {
   /** Endpoint every route model shares; the listing lives at `<baseURL>/models`. */
   readonly baseURL: string
-  /** Send `X-Vega-Anonymize: true` (PII shield opt-in) on every request. */
-  readonly anonymize: boolean
+  /** Resolve per request whether to send `X-Vega-Anonymize: true` (PII shield opt-in). */
+  readonly anonymize: () => boolean
   /** Wait for the listing's first load so first-use requests see the live catalog. */
   readonly catalogView: (signal?: AbortSignal) => Promise<void>
   /** Account credential source and rejection sink. */
@@ -83,7 +83,7 @@ export class VegaAdapter extends PiAiAdapter {
 
   /** Request headers every VEGA call carries: session scope, shield opt-in, attribution. */
   private vegaHeaders(request: PiAiRequestHeaderContext, headers: Headers): Headers {
-    if (this.vega.anonymize) headers.set('x-vega-anonymize', 'true')
+    if (this.vega.anonymize()) headers.set('x-vega-anonymize', 'true')
     if (request.sessionId !== undefined) headers.set('x-vega-session', String(request.sessionId).slice(0, 200))
     headers.set('x-title', APP_IDENTITY.product)
     return headers

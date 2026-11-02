@@ -8,8 +8,12 @@ import { modelListingConfigFields } from '@deepseek-ai/dsh-llm-deepseek'
 export interface Config {
   /** VEGA Messages-compatible endpoint; the listing is `<baseURL>/models`. */
   baseURL: string
-  /** Send `X-Vega-Anonymize: true` on every request (PII shield opt-in). */
-  anonymize: boolean
+  /**
+   * Send `X-Vega-Anonymize: true` on every request (PII shield opt-in); the
+   * user-facing toggle writes this volatile field through the settings
+   * document.
+   */
+  anonymize: Volatile<boolean>
   /**
    * Whether the deployed key name is registered for shielding, which is a
    * server-side list the client cannot observe. When true the directory entry
@@ -31,7 +35,7 @@ export interface Config {
 /** Validated deployment choices. */
 export const Config = Schema.object({
   baseURL: Schema.string().default('https://api.vega.chat/api/v1'),
-  anonymize: Schema.boolean().default(true),
+  anonymize: Schema.boolean().default(false).volatile(),
   piiShield: Schema.boolean().default(false),
   retryPolicy: RetryPolicySchema.volatile(),
   defaultContextWindow: Schema.number().min(1).max(Number.MAX_SAFE_INTEGER).default(1_000_000).volatile(),

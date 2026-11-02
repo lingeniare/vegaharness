@@ -33,7 +33,7 @@
     "files": [
       "packages\\client\\ui-commands\\src\\client\\index.ts"
     ],
-    "keys": 28
+    "keys": 22
   },
   "common": {
     "files": [
@@ -179,6 +179,12 @@
     ],
     "keys": 17
   },
+  "piiShield": {
+    "files": [
+      "packages\\client\\ui-pii-shield\\src\\client\\index.ts"
+    ],
+    "keys": 3
+  },
   "plan": {
     "files": [
       "packages\\client\\ui-plan\\src\\client\\index.ts"
@@ -219,13 +225,13 @@
     "files": [
       "packages\\client\\ui-schedule\\src\\client\\index.ts"
     ],
-    "keys": 76
+    "keys": 84
   },
   "schedule.manager": {
     "files": [
       "packages\\client\\ui-schedule\\src\\client\\index.ts"
     ],
-    "keys": 205
+    "keys": 213
   },
   "secretMask": {
     "files": [
@@ -255,7 +261,7 @@
     "files": [
       "packages\\client\\ui-settings-account\\src\\client\\index.ts"
     ],
-    "keys": 94
+    "keys": 95
   },
   "settings.agentLoop": {
     "files": [
@@ -327,7 +333,7 @@
     "files": [
       "packages\\client\\ui-settings-web-search\\src\\client\\index.ts"
     ],
-    "keys": 27
+    "keys": 29
   },
   "shortcuts": {
     "files": [

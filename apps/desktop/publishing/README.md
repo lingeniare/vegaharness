@@ -13,6 +13,7 @@ Publish completed Desktop installers and update feeds to the selected download s
 - [Publication prerequisites](#prerequisites)
 - [Deployment and test release identity](#upload-updates)
 - [Publish installers and update feeds](#publish-feeds)
+- [GitHub Releases destination](#github-releases)
 - [Fixed installer downloads](#fixed-downloads)
 - [Upload credentials](#credentials)
 - [Upload audit and recovery](#audit-and-recovery)
@@ -62,6 +63,16 @@ The target dotenv file for internal-test packaging explicitly sets `DSH_DESKTOP_
 Early internal-test packages use the `test` deployment. Select `production` explicitly only for a production release; changing upload credentials does not retarget an existing package. Packaging requires no COS credentials, disables electron-builder publishing, strips COS credentials from child processes, and records completion only after signing and notarization succeed. Upload validates this record, deployment, target, shared version, filenames, sizes, and SHA-512 before reading credentials. Packages and blockmaps upload before YAML; historical objects are retained. Every release publishes `nightly.yml` or `nightly-mac.yml`; stable releases also publish `latest.yml` or `latest-mac.yml` pointing at the same artifacts. Published YAML uses absolute binary URLs. The uploader leaves Cache-Control unset, including the empty header the COS SDK would otherwise add: deployment infrastructure owns cache policy, with uncached feeds and separately configurable binary caching. Serialize publication per target and verify public artifacts and feed contents before release qualification.
 
 Windows NSIS uploads require the generated, nonempty `.exe.blockmap` beside the installer. The blockmap is uploaded before channel YAML; NSIS installer metadata does not require the embedded `blockMapSize` used by the separate web-installer format. File-plan tests use the pinned builder's blockmap generator, not a hand-authored embedded-map field.
+
+<a id="github-releases"></a>
+
+## GitHub Releases destination
+
+`DSH_DESKTOP_UPDATE_PROVIDER=github` replaces the COS/generic destination with GitHub Releases for both the packaged updater feed and upload. `DSH_DESKTOP_UPDATE_GITHUB_REPO` names the release repository as `<owner>/<repo>`. Packaging writes a GitHub `publish` entry and `app-update.yml` with `owner`, `repo`, `vPrefixedTagName`, and the selected channel; the client resolves feed YAML and binaries as release assets, so published YAML keeps relative filenames instead of absolute COS URLs. The `latest` channel publishes a normal release; `nightly` publishes a prerelease, both under tag `v<version>`.
+
+Upload uses the same `upload:<target>` commands and completed-package validation, then reconciles the release's assets: it creates a draft release when none exists, uploads binaries before feed YAML, replaces changed channel metadata, refuses to overwrite differing binary bytes, and publishes the draft last so clients never see a partial release. `DESKTOP_GITHUB_TOKEN` supplies a token with `contents: write` on the repository; it is read only by the upload command, stripped from packaged environments and audit records, and never required for packaging. `--latest` uploads the fixed-name installer asset (`vega-harness-latest-windows-x64.exe` and the macOS equivalents), which the repository serves permanently under `releases/latest/download/`. The CI publisher remains generic-only and rejects GitHub plans explicitly; GitHub publication is a local, operator-authorized command.
+
+The mandatory-update policy is independent of the updater destination and still requires its own HTTPS origin; for GitHub deployments point `DSH_DESKTOP_MANDATORY_UPDATE_PROD_ORIGIN` at a static service such as `https://vega.codes` answering `/api/v0/check_client_update` with `{"code":0,"data":{"biz_code":0,"biz_data":null}}`. COS buckets, EdgeOne purges, and the installed-update qualification tooling apply only to the generic destination.
 
 <a id="fixed-downloads"></a>
 

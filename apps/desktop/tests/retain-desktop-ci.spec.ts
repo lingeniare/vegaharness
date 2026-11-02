@@ -22,10 +22,10 @@ it.each([
   await mkdir(join(config, 'presets'), { recursive: true })
   await writeFile(join(appRoot, 'package.json'), '{"version":"1.0.0"}')
   await writeFile(join(config, 'presets/test.env'), `DSH_DESKTOP_AUTO_UPDATE_ENV=test\nDOWNLOAD_TEST_RELEASE_ID=${'a'.repeat(32)}\n`)
-  const names = debug ? (target === 'win-x64' ? [`deepseek-harness-1.0.0-win-x64-${qualification}.exe`]
-    : [`deepseek-harness-1.0.0-${target}-${qualification}.dmg`, `deepseek-harness-1.0.0-${target}-${qualification}.zip`]) : target === 'win-x64'
-    ? ['deepseek-harness-1.0.0-win-x64.exe', 'deepseek-harness-1.0.0-win-x64.exe.blockmap', 'win-x64-release.json', 'nightly.yml']
-    : [`deepseek-harness-1.0.0-${target}.dmg`, `deepseek-harness-1.0.0-${target}.zip`, `deepseek-harness-1.0.0-${target}.zip.blockmap`, `${target}-release.json`, 'nightly-mac.yml']
+  const names = debug ? (target === 'win-x64' ? [`vega-harness-1.0.0-win-x64-${qualification}.exe`]
+    : [`vega-harness-1.0.0-${target}-${qualification}.dmg`, `vega-harness-1.0.0-${target}-${qualification}.zip`]) : target === 'win-x64'
+    ? ['vega-harness-1.0.0-win-x64.exe', 'vega-harness-1.0.0-win-x64.exe.blockmap', 'win-x64-release.json', 'nightly.yml']
+    : [`vega-harness-1.0.0-${target}.dmg`, `vega-harness-1.0.0-${target}.zip`, `vega-harness-1.0.0-${target}.zip.blockmap`, `${target}-release.json`, 'nightly-mac.yml']
   await Promise.all(names.map(name => writeFile(join(artifacts, name), 'fixture')))
   const env = {
     DSH_PACKAGING_CONFIG_DIR: config, DSH_PACKAGING_PRESET: 'test', DSH_DESKTOP_TARGET_PLATFORM: target === 'win-x64' ? 'win32' : 'darwin',
@@ -41,7 +41,7 @@ it.each([
   expect(manifest.source.publishRequested).toBeUndefined()
   const summary = await readFile(env.GITHUB_STEP_SUMMARY, 'utf8')
   if (debug) {
-    expect(summary).toContain('不能发布到 test  или  production')
+    expect(summary).toContain('不能发布到 test 或 production')
     expect(summary).not.toContain('Publish separately')
     await expect(prepareDesktopPublication({ ...env, DESKTOP_PUBLISH_ROUTE: JSON.stringify({
       runId: '123', attempt: '2', commit: env.GITHUB_SHA, runnerName: env.RUNNER_NAME, target, preset: 'test', sourceRef: 'master', channel: 'nightly',

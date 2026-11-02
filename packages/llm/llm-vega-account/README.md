@@ -29,7 +29,7 @@ Mount the provider alongside the VEGA account service; the route activates as so
   name: '@deepseek-ai/dsh-llm-vega-account'
 ```
 
-`anonymize` sends the PII-shield header; listing timing and retry policy fields mirror the DeepSeek account provider.
+`anonymize` sends the PII-shield header; it defaults to off, so anonymization is opt-in. It is volatile, so the settings document publishes it to the Web GUI: the composer shield control (`dsh-client-ui-pii-shield`) and the provider settings section both write it, and the adapter re-reads it per request. `dsh-web-vega` auxiliary calls follow the same field through the running entry's effective config. Listing timing and retry policy fields mirror the DeepSeek account provider.
 
 <a id="model-experience"></a>
 ## Model Experience

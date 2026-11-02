@@ -1,11 +1,20 @@
 /** Environment variable that selects the Desktop update deployment. */
 export const DESKTOP_AUTO_UPDATE_ENV: 'DSH_DESKTOP_AUTO_UPDATE_ENV'
+/** Environment variable that selects the updater backend. */
+export const DESKTOP_UPDATE_PROVIDER_ENV: 'DSH_DESKTOP_UPDATE_PROVIDER'
+/** Environment variable naming the GitHub Releases repository as owner/repo. */
+export const DESKTOP_UPDATE_GITHUB_REPO_ENV: 'DSH_DESKTOP_UPDATE_GITHUB_REPO'
+/** Credential environment consumed by GitHub Releases uploads. */
+export const DESKTOP_GITHUB_TOKEN_ENV: 'DESKTOP_GITHUB_TOKEN'
 
 /** Supported Desktop update deployment. */
 export type DesktopAutoUpdateEnvironment = 'test' | 'production'
 
 /** Directory name of one supported Desktop release target. */
 export type DesktopAutoUpdateTarget = 'mac-arm64' | 'mac-x64' | 'win-x64'
+
+/** Updater backend selected by the packaging environment. */
+export type DesktopUpdateProvider = 'generic' | 'github'
 
 /**
  * Name the fixed installer object shared by uploading and cache refresh.
@@ -14,8 +23,16 @@ export type DesktopAutoUpdateTarget = 'mac-arm64' | 'mac-x64' | 'win-x64'
  */
 export function desktopLatestInstallerFilename(target: DesktopAutoUpdateTarget): string
 
-/** Public updater URL and object prefixes for one release target. */
-export interface DesktopAutoUpdateConfig {
+/**
+ * Name the fixed installer asset inside a GitHub release; /releases/latest/download resolves it.
+ * @param target Supported Desktop target.
+ * @returns Fixed release asset name.
+ */
+export function desktopGithubInstallerFilename(target: DesktopAutoUpdateTarget): string
+
+/** Public updater URL and object prefixes for one generic release target. */
+export interface DesktopGenericUpdateConfig {
+  readonly provider: 'generic'
   readonly environment: DesktopAutoUpdateEnvironment
   readonly channel: 'nightly' | 'latest'
   readonly target: DesktopAutoUpdateTarget
@@ -25,12 +42,51 @@ export interface DesktopAutoUpdateConfig {
   readonly binaryKeyPrefix: string
 }
 
+/** GitHub Releases coordinates for one release target. */
+export interface DesktopGithubUpdateConfig {
+  readonly provider: 'github'
+  readonly environment: DesktopAutoUpdateEnvironment
+  readonly channel: 'nightly' | 'latest'
+  readonly target: DesktopAutoUpdateTarget
+  readonly owner: string
+  readonly repo: string
+  readonly origin: 'https://github.com'
+  readonly publicUrl: string
+}
+
+/** Public updater destination for one release target. */
+export type DesktopAutoUpdateConfig = DesktopGenericUpdateConfig | DesktopGithubUpdateConfig
+
 /** Public updater URL and private COS destination for one upload target. */
-export interface DesktopUploadConfig extends DesktopAutoUpdateConfig {
+export interface DesktopGenericUploadConfig extends DesktopGenericUpdateConfig {
   readonly bucket: string
   readonly secretIdEnvName: string
   readonly secretKeyEnvName: string
 }
+
+/** GitHub Releases destination and credential environment for one upload target. */
+export interface DesktopGithubUploadConfig extends DesktopGithubUpdateConfig {
+  readonly tokenEnvName: 'DESKTOP_GITHUB_TOKEN'
+}
+
+/** Private destination for one upload target. */
+export type DesktopUploadConfig = DesktopGenericUploadConfig | DesktopGithubUploadConfig
+
+/**
+ * Resolve the updater backend, defaulting omitted settings to generic object storage.
+ * @param env Packaging or upload settings.
+ * @returns Validated provider.
+ */
+export function resolveDesktopUpdateProvider(env: NodeJS.ProcessEnv): DesktopUpdateProvider
+
+/**
+ * Resolve the GitHub Releases repository that owns update feeds and binaries.
+ * @param env Packaging or upload settings.
+ * @returns Validated repository coordinates.
+ */
+export function resolveDesktopGithubRepository(
+  env: NodeJS.ProcessEnv,
+): { readonly owner: string; readonly repo: string }
 
 /**
  * Resolve the update deployment, defaulting local release work to test.

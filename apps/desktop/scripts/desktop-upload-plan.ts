@@ -8,6 +8,7 @@ import { dump, load } from 'js-yaml'
 import type { DesktopPackageTargetName } from './package-target.ts'
 import {
   desktopBuildRecordFilename,
+  desktopGithubInstallerFilename,
   desktopLatestInstallerFilename,
   desktopUpdateMetadataFilename,
   resolveDesktopUploadConfig,
@@ -38,22 +39,39 @@ export interface DesktopUploadArtifact {
   readonly contents?: string
 }
 
-/** A validated installer or update upload, with any channel metadata ordered last. */
-export interface DesktopUploadPlan {
+/** Shared shape of a validated installer or update upload, channel metadata ordered last. */
+interface DesktopUploadPlanBase {
   readonly environment: 'test' | 'production'
+  readonly channel: 'nightly' | 'latest'
   readonly target: DesktopPackageTargetName
   readonly version: string
   /** Update feed directory URL, or the single installer URL for a fixed download. */
   readonly publicUrl: string
-  readonly bucket: string
-  readonly secretIdEnvName: string
-  readonly secretKeyEnvName: string
   readonly artifacts: readonly DesktopUploadArtifact[]
   /** Commit the artifacts were packaged from, absent for a package built before builds recorded it. */
   readonly commit?: string
   /** Whether that checkout carried uncommitted changes. */
   readonly dirty?: boolean
 }
+
+/** A validated upload bound for the generic object-storage destination. */
+export interface DesktopGenericUploadPlan extends DesktopUploadPlanBase {
+  readonly provider: 'generic'
+  readonly bucket: string
+  readonly secretIdEnvName: string
+  readonly secretKeyEnvName: string
+}
+
+/** A validated upload bound for a GitHub Releases destination. */
+export interface DesktopGithubUploadPlan extends DesktopUploadPlanBase {
+  readonly provider: 'github'
+  readonly owner: string
+  readonly repo: string
+  readonly tokenEnvName: string
+}
+
+/** A validated installer or update upload, with any channel metadata ordered last. */
+export type DesktopUploadPlan = DesktopGenericUploadPlan | DesktopGithubUploadPlan
 
 /** Filesystem and environment inputs used to validate one upload. */
 export interface DesktopUploadPlanOptions {
@@ -63,6 +81,8 @@ export interface DesktopUploadPlanOptions {
   readonly repositoryRoot?: string
   readonly appRoot?: string
   readonly artifactsRoot?: string
+  /** Upload an unsigned Windows package; requires the github provider. */
+  readonly unsigned?: boolean
   /** Original product version from a verified retained build; absent reads the checkout manifests. */
   readonly packagedProductVersion?: string
 }
@@ -166,7 +186,7 @@ function uploadArtifact(
   return {
     path,
     filename,
-    key: `${keyPrefix}/${filename}`,
+    key: keyPrefix === '' ? filename : `${keyPrefix}/${filename}`,
     contentType,
     channelMetadata,
   }
@@ -189,14 +209,22 @@ export async function createDesktopUploadPlan(
   const environment = options.environment ?? process.env
   const repositoryRoot = options.repositoryRoot ?? REPOSITORY_ROOT
   const appRoot = options.appRoot ?? APP_ROOT
-  const artifactsRoot = options.artifactsRoot ?? desktopTargetBuildPaths(targetName).artifacts
+  const update = resolveDesktopUploadConfig(environment, target.platform, target.arch)
+  const github = update.provider === 'github'
+  const unsigned = options.unsigned === true
+  if (unsigned && (!github || target.platform !== 'win32')) {
+    throw new Error('desktop upload: --unsigned requires the github provider and the Windows target')
+  }
+  const suffix = unsigned ? '-unsigned' : ''
+  const artifactsRoot = options.artifactsRoot ?? (unsigned
+    ? desktopTargetBuildPaths(targetName).unsignedArtifacts
+    : desktopTargetBuildPaths(targetName).artifacts)
   const dshVersion = options.packagedProductVersion ?? await manifestVersion(join(repositoryRoot, 'package.json'), 'dsh package')
   const desktopVersion = options.packagedProductVersion ?? await manifestVersion(join(appRoot, 'package.json'), 'desktop package')
   if (dshVersion !== desktopVersion) {
     throw new Error(`desktop upload: desktop version ${desktopVersion} does not match current dsh version ${dshVersion}`)
   }
 
-  const update = resolveDesktopUploadConfig(environment, target.platform, target.arch)
   const buildRecord = await jsonFile(
     join(artifactsRoot, desktopBuildRecordFilename(targetName)),
     `${targetName} package completion record`,
@@ -222,9 +250,11 @@ export async function createDesktopUploadPlan(
   if (update.channel === 'latest' && buildVersion.includes('-')) throw new Error('desktop upload: latest requires a stable version')
   const metadataFilename = desktopUpdateMetadataFilename(buildVersion, target.platform, update.channel)
   const metadataPath = join(artifactsRoot, metadataFilename)
+  let metadataText: string
   let metadataValue: unknown
   try {
-    metadataValue = load(await readFile(metadataPath, 'utf8'))
+    metadataText = await readFile(metadataPath, 'utf8')
+    metadataValue = load(metadataText)
   }
   catch (error) {
     throw new Error(`desktop upload: cannot read update metadata at ${metadataPath}: ${error instanceof Error ? error.message : String(error)}`)
@@ -238,12 +268,12 @@ export async function createDesktopUploadPlan(
     throw new Error(`desktop upload: ${metadataFilename}.files must contain exactly one target update file`)
   }
 
-  const base = `deepseek-harness-${buildVersion}-${target.os}-${target.arch}`
+  const base = `vega-harness-${buildVersion}-${target.os}-${target.arch}${suffix}`
   const updaterExtension = target.platform === 'darwin' ? 'zip' : 'exe'
   const updaterInfo = updateFileInfo(metadata.files[0], `${metadataFilename}.files[0]`, `${base}.${updaterExtension}`)
   const updaterPath = await verifyChecksummedArtifact(artifactsRoot, updaterInfo)
   const artifacts: DesktopUploadArtifact[] = []
-  const binaryPrefix = update.binaryKeyPrefix
+  const binaryPrefix = github ? '' : update.binaryKeyPrefix
   let installerArtifact: DesktopUploadArtifact
 
   if (target.platform === 'darwin') {
@@ -267,21 +297,44 @@ export async function createDesktopUploadPlan(
     artifacts.push(uploadArtifact(blockmapPath, binaryPrefix, 'application/octet-stream'))
   }
 
-  const payloadUrl = `${update.origin}/${binaryPrefix}/${updaterInfo.filename}`
-  const published = {
+  // GitHub resolves feed URLs against the release download path, so its YAML keeps relative filenames.
+  const payloadUrl = github ? updaterInfo.filename : `${update.origin}/${binaryPrefix}/${updaterInfo.filename}`
+  const published = github ? metadata : {
     ...metadata,
     files: [{ ...object(metadata.files[0], `${metadataFilename}.files[0]`), url: payloadUrl }],
     ...(metadata.path === undefined ? {} : { path: payloadUrl }),
   }
   const channelArtifact = {
-    ...uploadArtifact(metadataPath, update.keyPrefix, 'application/yaml', true),
-    contents: dump(published),
+    ...uploadArtifact(metadataPath, github ? '' : update.keyPrefix, 'application/yaml', true),
+    contents: github ? metadataText : dump(published),
   }
   artifacts.push(channelArtifact)
+  const packaged = {
+    ...typeof buildRecord.commit === 'string' ? { commit: buildRecord.commit } : {},
+    ...typeof buildRecord.dirty === 'boolean' ? { dirty: buildRecord.dirty } : {},
+  }
+  if (github) {
+    const latestFilename = desktopGithubInstallerFilename(targetName)
+    return {
+      provider: 'github',
+      environment: update.environment,
+      channel: update.channel,
+      target: targetName,
+      version: buildVersion,
+      publicUrl: options.latest ? `${update.publicUrl}/latest/download/${latestFilename}` : update.publicUrl,
+      owner: update.owner,
+      repo: update.repo,
+      tokenEnvName: update.tokenEnvName,
+      artifacts: options.latest ? [{ ...installerArtifact, filename: latestFilename, key: latestFilename }] : artifacts,
+      ...packaged,
+    }
+  }
   const latestFilename = desktopLatestInstallerFilename(targetName)
   const latestKey = `desktop/${latestFilename}`
   return {
+    provider: 'generic',
     environment: update.environment,
+    channel: update.channel,
     target: targetName,
     version: buildVersion,
     publicUrl: options.latest ? `${update.origin}/${latestKey}` : update.publicUrl,
@@ -289,7 +342,6 @@ export async function createDesktopUploadPlan(
     secretIdEnvName: update.secretIdEnvName,
     secretKeyEnvName: update.secretKeyEnvName,
     artifacts: options.latest ? [{ ...installerArtifact, filename: latestFilename, key: latestKey }] : artifacts,
-    ...typeof buildRecord.commit === 'string' ? { commit: buildRecord.commit } : {},
-    ...typeof buildRecord.dirty === 'boolean' ? { dirty: buildRecord.dirty } : {},
+    ...packaged,
   }
 }

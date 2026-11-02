@@ -28,6 +28,7 @@ export function resolveDesktopPurgeConfig(
   if (resolveDesktopAutoUpdateEnvironment(env) !== 'production') throw new DesktopPurgeError('desktop purge: production is required')
   const { platform, arch } = desktopTargetPlatform(target)
   const update = resolveDesktopUploadConfig(env, platform, arch)
+  if (update.provider !== 'generic') throw new DesktopPurgeError('desktop purge: cache purge requires the generic destination')
   const zoneId = requiredEnvironmentValue(env, 'DOWNLOAD_PROD_EO_ZONE_ID')
   if (!/^zone-[a-z0-9]+$/u.test(zoneId)) throw new DesktopPurgeError('desktop purge: DOWNLOAD_PROD_EO_ZONE_ID must name one EO zone')
   return {

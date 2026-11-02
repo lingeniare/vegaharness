@@ -68,6 +68,7 @@ The kernel packages boot and serve the page; the UI feature packages present it.
 | [`ui-model-selection/`](ui-model-selection/README.md) | Provides model selection in conversation surfaces | — |
 | [`ui-permission-presets/`](ui-permission-presets/README.md) | Configures default permissions and switches the current session's access | — |
 | [`ui-plan/`](ui-plan/README.md) | Presents active plan-mode status and its exit control | — |
+| [`ui-pii-shield/`](ui-pii-shield/README.md) | Shows the VEGA personal-data shield state left of the model selector and drops it on click | — |
 | [`ui-settings-plugins/`](ui-settings-plugins/README.md) | Owns the Built-in plugins settings section shell and its tab extension point | — |
 | [`ui-user-questions/`](ui-user-questions/README.md) | Presents interactive questions requested by the agent | — |
 | [`ui-agent-preset/`](ui-agent-preset/README.md) | Selects a session's agent preset and authors preset compositions | — |

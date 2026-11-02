@@ -7,6 +7,8 @@
  * @module @deepseek-ai/dsh-web-vega/provider
  */
 
+import type { Context, Volatile } from '@deepseek-ai/cordis'
+import type {} from '@deepseek-ai/cordis-plugin-loader'
 import { WebError } from '@deepseek-ai/dsh-web'
 import type {
   WebFetchProvider,
@@ -105,6 +107,21 @@ declare module '@deepseek-ai/dsh-session/types' {
     /** Secret-free auxiliary VEGA fetch request recorded before dispatch. */
     'web/vega-fetch-llm-request': VegaFetchLlmRequest
   }
+}
+
+/**
+ * Read the `llm-vega-account` route's volatile `anonymize` field from its
+ * running entry's effective config: the user-facing PII-shield toggle writes
+ * there, and auxiliary requests follow the same shield as the chat path.
+ * Absent the route the flag reads as off — the header is opt-in.
+ * @param ctx - plugin context reaching the Loader's entry table.
+ * @returns whether auxiliary requests carry `X-Vega-Anonymize: true`.
+ */
+export function resolveVegaAnonymize(ctx: Context): boolean {
+  const entry = [...(ctx.get('loader')?.entries() ?? [])]
+    .find(row => row.options.id === 'llm-vega-account' && row.options.name === '@deepseek-ai/dsh-llm-vega-account')
+  const field = (entry?.fiber?.effectiveConfig as { anonymize?: Volatile<boolean> } | undefined)?.anonymize
+  return field?.get() ?? false
 }
 
 /** Resolved provider options (the plugin's `apply` supplies credential and constant defaults). */

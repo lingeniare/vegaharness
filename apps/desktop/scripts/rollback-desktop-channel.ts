@@ -26,6 +26,7 @@ if (process.argv[1] !== undefined && resolve(process.argv[1]) === import.meta.fi
     z.object({ status: z.enum(['complete', 'published-tag-pending']) })
       .parse(JSON.parse(await readFile(join(values.record, 'result.json'), 'utf8')))
     const { plan, config, root, manifest } = await prepareDesktopPublication(process.env)
+    if (plan.provider !== 'generic') throw new Error('desktop rollback: this pipeline supports the generic destination only')
     const route = z.object({ runId: z.string(), attempt: z.string() }).parse(JSON.parse(process.env.DESKTOP_PUBLISH_ROUTE || '{}'))
     const destination = `${plan.bucket}/${plan.publicUrl}${manifest.source.channel}`
     if (operation.runId !== route.runId || operation.attempt !== route.attempt

@@ -7,6 +7,7 @@ import { join, resolve } from 'node:path'
 import {
   desktopBuildRecordFilename,
   resolveDesktopAutoUpdateConfig,
+  resolveDesktopUpdateProvider,
 } from './desktop-auto-update-environment.mjs'
 import { desktopArtifactOutput, desktopTargetBuildPaths } from './desktop-build-paths.mjs'
 import { packageMacOSArtifacts, type DesktopPrepackagedArtifact } from './package-macos.ts'
@@ -42,6 +43,7 @@ const DESKTOP_UPLOAD_CREDENTIAL_ENV_NAMES = new Set([
   'DOWNLOAD_TEST_COS_SECRET_KEY',
   'DOWNLOAD_PROD_COS_SECRET_ID',
   'DOWNLOAD_PROD_COS_SECRET_KEY',
+  'DESKTOP_GITHUB_TOKEN',
 ])
 
 /** `--build-version` value that numbers a build after the ones already taken. */
@@ -402,7 +404,7 @@ async function main(): Promise<void> {
   if (success && target.platform === 'darwin' && !invocation.directory && !invocation.prepareOnly) {
     const paths = desktopTargetBuildPaths(target.name, environment)
     const output = desktopArtifactOutput(paths, invocation)
-    const filename = `deepseek-harness-${buildVersion}-mac-${target.arch}${output.suffix}.dmg`
+    const filename = `vega-harness-${buildVersion}-mac-${target.arch}${output.suffix}.dmg`
     console.log(`DMG: ${join(output.directory, filename)}`)
   }
 }
@@ -427,8 +429,12 @@ export async function packageTarget(
   const packConcurrency = mac?.packConcurrency ?? resolveWindowsPackageSettings(environment).packConcurrency
   const packArguments = ['--concurrency', String(packConcurrency)]
   const buildPaths = desktopTargetBuildPaths(target.name, environment)
-  const releaseRecordPath = join(buildPaths.artifacts, desktopBuildRecordFilename(target.name))
-  if (!invocation.prepareOnly && !invocation.unsigned && !invocation.skipNotarization) {
+  // Unsigned Windows packages bound for GitHub Releases still record their completion beside their artifacts.
+  const unsignedGithub = invocation.unsigned && target.platform === 'win32'
+    && resolveDesktopUpdateProvider(environment) === 'github'
+  const recordRoot = unsignedGithub ? buildPaths.unsignedArtifacts : buildPaths.artifacts
+  const releaseRecordPath = join(recordRoot, desktopBuildRecordFilename(target.name))
+  if (!invocation.prepareOnly && !invocation.skipNotarization && (!invocation.unsigned || unsignedGithub)) {
     rmSync(releaseRecordPath, { force: true })
     rmSync(`${releaseRecordPath}.tmp`, { force: true })
   }
@@ -561,8 +567,8 @@ export async function packageTarget(
     await execute(['exec', 'tsx', 'scripts/smoke-packaged-runtime.ts',
       ...(invocation.unsigned ? ['--unsigned'] : []), ...(invocation.skipNotarization ? ['--skip-notarization'] : [])], targetEnv)
   }
-  if (!invocation.directory && !invocation.unsigned && !invocation.skipNotarization) {
-    writeReleaseRecord(target, electronBuilderEnv, buildPaths.artifacts)
+  if (!invocation.directory && !invocation.skipNotarization && (!invocation.unsigned || unsignedGithub)) {
+    writeReleaseRecord(target, electronBuilderEnv, recordRoot)
   }
   if (journal) recordPackagingEvent(journal, { type: 'artifacts', directory: artifactsRoot })
 }
