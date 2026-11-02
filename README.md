@@ -1,22 +1,18 @@
 <div align="center">
 
-![VEGA Harness](.github/assets/vega-harness-cover.png)
-
-# VEGA Harness
+![VEGA Harness](cover.webp)
 
 **ИИ-агент, который делает, а не только отвечает — без VPN, без подписки, без компромиссов по приватности.**
 
-[Русский](#по-русски) · [English](#english)
+**`🇷🇺 Русский`** ・ [ `🇬🇧 English` ](README.en.md)
 
 </div>
 
 ---
 
-## По-русски
-
 **VEGA Harness** — это агентская среда выполнения: открытый (MIT) форк [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), адаптированный под реальность русскоязычного пользователя. Формула проста: **Агент = Модель + Harness**. Модель рассуждает, а harness даёт ей руки — файлы, терминал, браузер, поиск. Веб-чат нужен, чтобы *спросить*. Harness — чтобы *сделать*.
 
-### Знакомые боли — и как мы их закрыли
+## Знакомые боли — и как мы их закрыли
 
 | Боль | Решение в VEGA Harness |
 |---|---|
@@ -27,7 +23,7 @@
 | Для картинки или видео нужен отдельный сервис и отдельный диалог | **Генерация фото и видео** прямо в сессии через VEGA Studio skill |
 | Подписка списывается даже когда не пользуешься; твои данные — топливо чужой аналитики | **Без подписки** — платите только за токены. **Без аналитики и рекламы** вообще |
 
-### Что можно делать
+## Что можно делать
 
 - **Работа с проектом.** Агент сам изучает репозиторий или папку с документами, пишет и правит файлы, гоняет тесты, собирает отчёты и презентации.
 - **Исследования с фактами.** Встроенный поиск Parallel находит источники, читает их и проверяет утверждения — без галлюцинаций «из памяти».
@@ -35,11 +31,11 @@
 - **Автоматизация по расписанию.** «Каждую пятницу в 17:00 собери записи проекта и сделай недельный отчёт» — один раз настроили, дальше работает само.
 - **Корпоративный контур.** Обезличивание данных на входе делает сценарий «агент читает внутренние документы» совместимым с требованиями 152-ФЗ.
 
-### Под капотом
+## Под капотом
 
 Архитектура «всё — плагин» на фреймворке Cordis: адаптер модели, инструменты, сессии, песочница, agent loop — каждый слой заменяем конфигурацией, без форка рантайма. Сессии персистентны: переживают перезапуск, сжимаются, журналируют каждый вызов инструмента для аудита.
 
-### Запуск из исходников
+## Запуск из исходников
 
 ```sh
 git clone <этот репозиторий>
@@ -52,23 +48,6 @@ pnpm dsh web
 Web UI откроется на `http://127.0.0.1:3080`. Войдите через аккаунт VEGA — ключ `sk-apivega-…` и список моделей подтянутся автоматически, без ручного ввода.
 
 > **Developer preview.** Проект активно развивается, возможны ломающие изменения. См. [уведомление о безопасности](SAFETY.md).
-
----
-
-## English
-
-**VEGA Harness** is an open-source (MIT) agent runtime — a fork of [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) built for users who need privacy, reach, and zero friction: **Agent = Model + Harness**. The model reasons; the harness acts — on files, shell, browser, and the live web.
-
-### Why VEGA Harness over stock DeepSeek Harness
-
-- **Works in Russia without a VPN** — sign in with a VEGA account, balance in RUB, no foreign cards.
-- **Prompt & document depersonalization** — personal data is stripped before leaving your trusted boundary (152-FZ friendly).
-- **400+ AI models** through a single `api.vega.chat` key — OpenRouter-compatible, one-click switching.
-- **Integrated web search + web fetch** powered by Parallel — the agent reads the live internet itself.
-- **Image & video generation** in-session via the VEGA Studio skill API.
-- **No subscription** — pay per token only. **No analytics, no ads** — your usage is yours.
-
-Everything else you love stays: the everything-is-a-plugin Cordis architecture, persistent auditable sessions, headless/PTC/SDK modes, and MIT licensing.
 
 ---
 

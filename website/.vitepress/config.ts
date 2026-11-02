@@ -232,6 +232,12 @@ export default withMermaid({
   head: [
     // VitePress leaves head hrefs untouched, so the base belongs here explicitly.
     ['link', { rel: 'icon', type: 'image/svg+xml', href: `${base}favicon.svg` }],
+    // Link-preview card (og:image): the cover is served from public/cover.webp.
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:title', content: siteIdentity.title }],
+    ['meta', { property: 'og:description', content: siteIdentity.description }],
+    ['meta', { property: 'og:image', content: `${base}cover.webp` }],
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
     ['style', {}, siteStyle],
     ['script', {}, scrollbarScript],
   ],
