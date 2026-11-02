@@ -1,6 +1,6 @@
 /* Onboarding palette and themed materials; card geometry and animation belong to the feature. */
 body {
-  --dsw-alias-onboarding-accent: rgb(57, 100, 254);
+  --dsw-alias-onboarding-accent: rgb(5, 150, 105);
   --dsw-gradient-onboarding-violet-stops: #2a2fb6 33.102%, #8b76f6 50.954%, #c5c0ff 85.326%, #2a2fb6;
   --dsw-gradient-onboarding-blue-stops: #3964fe 18.75%, #398efe 51.78%, #6dccff 86.252%, #3964fe;
   --dsw-gradient-onboarding-cyan-stops: #0293b4 21.154%, #2dc8eb 50.954%, #aff0ff 85.326%, #0293b4;

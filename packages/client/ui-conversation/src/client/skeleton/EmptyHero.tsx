@@ -64,8 +64,6 @@ export function WorkspaceChip({ buttonRef, label, menuOpen = false, onClick, t }
 
 /** Hero chrome props. The workspace row rides the InputBar accessory hole, not here. */
 export interface HeroShellProps {
-  /** The owner's locale seat, passed down as a plain prop. */
-  t: HeroTranslate
   /** Authorized renderer for the hero brand-mark slot. */
   renderSlot: ConversationContentProps['renderSlot']
   /** Overlay content after the stack (modals). */
@@ -112,38 +110,32 @@ function HeroStar({ hovering }: { hovering: boolean }) {
 }
 
 /**
- * Render the hero chrome (headline only; no composer, no workspace row).
+ * Render the hero chrome (the centered mark only; no composer, no workspace
+ * row).
  * @param props - see {@link HeroShellProps}.
  * @returns the centered hero element tree.
  */
-export function HeroShell({ t, renderSlot, children }: HeroShellProps) {
+export function HeroShell({ renderSlot, children }: HeroShellProps) {
   const [hovering, setHovering] = useState(false)
   return (
     <div className={css.root}>
       <div className={css.stack}>
-        <div className={css.headline}>
-          {/* figma 34:10412: mark 34×34 leading the headline, gap 10. */}
-          <span
-            className={css.markHitbox}
-            onPointerEnter={(event) => {
-              if (event.pointerType !== 'touch'
-                && window.matchMedia('(hover: hover) and (prefers-reduced-motion: no-preference)').matches) {
-                setHovering(true)
-              }
-            }}
-            onPointerLeave={() => { setHovering(false) }}
-          >
-            {renderSlot('conversation.hero.brand.mark', { size: 34, className: css.mark }, {
-              fallback: <HeroStar hovering={hovering} />,
-            })}
-          </span>
-          <span className={css.titleGroup}>
-            <span>{t('hero.headline')}</span>
-          </span>
-        </div>
-        <div className={css.body}>
-          {/* The composer remains mounted outside this component. */}
-        </div>
+        {/* figma 34:10412: the 34×34 mark alone, centered. */}
+        <span
+          className={css.markHitbox}
+          data-testid="hero-mark"
+          onPointerEnter={(event) => {
+            if (event.pointerType !== 'touch'
+              && window.matchMedia('(hover: hover) and (prefers-reduced-motion: no-preference)').matches) {
+              setHovering(true)
+            }
+          }}
+          onPointerLeave={() => { setHovering(false) }}
+        >
+          {renderSlot('conversation.hero.brand.mark', { size: 34, className: css.mark }, {
+            fallback: <HeroStar hovering={hovering} />,
+          })}
+        </span>
       </div>
       {children}
     </div>

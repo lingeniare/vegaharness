@@ -1,5 +1,5 @@
-/* NEW SESSION hero (figma Input_Bottom 75:8208): mark + title, workspace chip
-   above the shared InputBar card. The input itself is InputBar — only stack
+/* NEW SESSION hero (figma Input_Bottom 75:8208): mark, workspace chip above
+   the shared InputBar card. The input itself is InputBar — only stack
    geometry and the chip live here. */
 
 .root {
@@ -16,39 +16,11 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  /* figma 75:8208: 12 between title block / workspace / card. */
+  /* figma 75:8208: 12 between the mark / workspace row / card. */
   gap: 12px;
   width: 100%;
   max-width: var(--dsh-composer-card-max-width);
   overflow: visible;
-}
-
-/* figma 34:10411: mark + title, gap 10, centered; 26/32 wt500. */
-.headline {
-  display: flex;
-  /* Overflow-driven: the mark and the title group are two wrap units sharing
-     one centered line while they fit; squeezed, the mark takes its own line
-     above the group. No breakpoint. */
-  flex-wrap: wrap;
-  column-gap: 10px;
-  /* Wrapped, the mark sits on its own line; more air than the 10px side gap
-     keeps it reading as a mark above the title, not a squeezed inline glyph. */
-  row-gap: 12px;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  line-height: 32px;
-  font-weight: 500;
-  color: var(--dsw-alias-label-primary);
-}
-
-/* Title as one wrap unit so it never breaks mid-text. */
-.titleGroup {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  min-width: 0;
 }
 
 /* Keep hover detection on a stationary box while the mark moves within it;
@@ -56,11 +28,12 @@
 .markHitbox {
   display: inline-flex;
   flex: none;
+  align-self: center;
   align-items: center;
   justify-content: center;
 }
 
-/* The hero mark stays in the same primary ink as its headline. */
+/* The hero mark keeps the primary ink. */
 .mark {
   display: block;
   overflow: visible;
@@ -89,32 +62,6 @@
   .markHitbox:hover .mark {
     animation: hero-mark-twirl 1.6s ease-in-out infinite;
   }
-}
-
-/* Workspace row sits 12px above the input card (figma y80 → y112). */
-.body {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-width: 0;
-  overflow: visible;
-}
-
-.body > * {
-  position: relative;
-  z-index: 1;
-}
-
-/* Must beat `.body > :not(.glow)` specificity so the open Menu (and its
-   right-hand submenu) paints above the InputBar card. */
-.body > .workspaceRow {
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  /* figma 75:8208 workspace row: px 8 above the card. */
-  padding-left: 8px;
 }
 
 /* Folder + label + chevron — transparent at rest; fill only on hover / open.
@@ -169,41 +116,4 @@
 .chevron {
   flex: none;
   color: var(--dsw-alias-label-caption);
-}
-
-/* Dialog field: 44 tall on the modal's 332 content column, hairline
-   border, pad 14/7, 14/22 wt400 primary text, caption placeholder. Focus
-   keeps the resting border (design shows no focus ring). */
-.modalInput {
-  box-sizing: border-box;
-  width: 100%;
-  height: 44px;
-  padding: 7px 14px;
-  border: 0.5px solid var(--dsw-alias-border-l4);
-  border-radius: var(--dsw-radius-lg);
-  outline: none;
-  background: transparent;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 22px;
-  color: var(--dsw-alias-label-primary);
-}
-
-.modalInput::placeholder {
-  color: var(--dsw-alias-label-caption);
-}
-
-.modalInput:disabled {
-  color: var(--dsw-alias-label-dimmed);
-}
-
-.modalAction {
-  min-width: 72px;
-}
-
-.modalError {
-  margin-top: 8px;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dsw-alias-state-error-primary);
 }

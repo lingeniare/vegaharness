@@ -392,7 +392,6 @@
     "settings.enter.description": "Что делают клавиша Enter и кнопка отправки, пока агент работает; Cmd/Ctrl+Enter использует другое поведение",
     "settings.enter.queue": "Добавлять в очередь",
     "settings.enter.steer": "Направлять",
-    "hero.headline": "Навстречу неизведанному",
     "hero.chooseWorkspace": "Выбрать рабочую область",
     "session.hierarchy": "Иерархия сессий",
     "session.moreViews": "Больше представлений диалога",

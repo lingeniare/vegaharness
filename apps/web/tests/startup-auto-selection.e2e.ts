@@ -41,13 +41,13 @@ describe('web e2e: startup auto-selection', () => {
   it('keeps the resident Hero and composer nodes when the first Workspace session appears', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-first-workspace-stable-tree'))
     await page.locator(`${ROOT_PHASE}[data-phase="hero"]`).waitFor({ timeout: 15_000 })
-    const headline = page.getByText('Into the Unknown', { exact: true })
-    // The headline text sits in its own span inside the title group; the mark
-    // hitbox precedes the group, not the text span.
-    const markHitbox = headline.locator('xpath=../preceding-sibling::span[1]')
+    // The mark keeps the hero's primary ink; the workspace chip carries the
+    // same token, so its label is the comparison anchor.
+    const markHitbox = page.getByTestId('hero-mark')
     const mark = markHitbox.locator('svg')
+    const workspaceChip = page.locator('[aria-label="Choose workspace"]')
     expect(await mark.evaluate(node => getComputedStyle(node).color))
-      .toBe(await headline.evaluate(node => getComputedStyle(node).color))
+      .toBe(await workspaceChip.evaluate(node => getComputedStyle(node).color))
     await markHitbox.hover()
     expect(await mark.evaluate(node => getComputedStyle(node).animationName)).not.toBe('none')
     await page.evaluate(() => {
@@ -124,11 +124,11 @@ describe('web e2e: startup auto-selection', () => {
       await openingInFlight
 
       // The frame a user sees while the session is still opening: hero phase, the
-      // hero title, and a composer that is actually painted (`settling` hides the
+      // hero mark, and a composer that is actually painted (`settling` hides the
       // seat with `visibility:hidden`, which Playwright reports as not visible).
       await page.waitForSelector(ROOT_PHASE, { timeout: 15_000 })
       expect(await page.locator(ROOT_PHASE).first().getAttribute('data-phase')).toBe('hero')
-      expect(await page.getByText('Into the Unknown').isVisible()).toBe(true)
+      expect(await page.getByTestId('hero-mark').isVisible()).toBe(true)
       expect(await page.locator('[data-composer-input]').first().isVisible()).toBe(true)
 
       releaseOpening()
