@@ -54,10 +54,10 @@ describe('DocumentTitle', () => {
   it('uses the localized product title supplied by the frame', () => {
     const { sessionId, sessions, props } = titleSources()
     sessions.update((state) => { state.byId[sessionId]!.title = 'First title' })
-    const mounted = render(<DocumentTitle {...props} productTitle="VEGA Local Build" />)
-    expect(document.title).toBe('First title — VEGA Local Build')
+    const mounted = render(<DocumentTitle {...props} productTitle="VEGA Harness" />)
+    expect(document.title).toBe('First title — VEGA Harness')
     mounted.unmount()
-    expect(document.title).toBe('VEGA Local Build')
+    expect(document.title).toBe('VEGA Harness')
   })
 
   it('keeps the product title across global panels and restores the latest Session title on return', () => {

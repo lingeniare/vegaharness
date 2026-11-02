@@ -12,7 +12,6 @@ export const en = {
   'panels.label': 'Global panels',
   'navigation.label': 'Navigation',
   'panels.more': 'More',
-  'version.copied': 'Version copied',
 } satisfies Record<string, string>
 
 /** Russian dictionary, checked against the English keys. */
@@ -24,5 +23,4 @@ export const ru = {
   'panels.label': 'Глобальные панели',
   'navigation.label': 'Навигация',
   'panels.more': 'Ещё',
-  'version.copied': 'Версия скопирована',
 } satisfies Record<keyof typeof en, string>

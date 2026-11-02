@@ -51,7 +51,7 @@
     "files": [
       "packages\\client\\ui-conversation\\src\\client\\apply.ts"
     ],
-    "keys": 383
+    "keys": 382
   },
   "cordis": {
     "files": [
@@ -351,7 +351,7 @@
     "files": [
       "packages\\client\\ui-sidebar\\src\\client\\index.ts"
     ],
-    "keys": 8
+    "keys": 7
   },
   "sidebarBrowser": {
     "files": [

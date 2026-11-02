@@ -4,7 +4,7 @@
 <rect rx="230" width="1024" height="1024" transform="translate(40 32)" fill="url(#tileSheen)" fill-opacity="0.4"/>
 <rect rx="230" width="1024" height="1024" transform="translate(40 32)" fill="url(#tileGlow)" fill-opacity="0.8"/>
 <g id="tray-glyph" filter="url(#glyphShadow)">
-<path d="M380 12V748M196 61.22L564 698.78M61.22 196L698.78 564M12 380H748M61.22 564L698.78 196M196 698.78L564 61.22" transform="translate(202 194) scale(0.921053)" stroke="url(#glyphInk)" stroke-width="96" stroke-linecap="round"/>
+<path d="M380 60V700M196 61.22L564 698.78M61.22 196L698.78 564M60 380H700M61.22 564L698.78 196M196 698.78L564 61.22" transform="translate(202 194) scale(0.921053)" stroke="url(#glyphInk)" stroke-width="96" stroke-linecap="round"/>
 </g>
 </g></g>
 <defs>

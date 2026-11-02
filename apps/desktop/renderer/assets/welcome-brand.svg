@@ -9,8 +9,8 @@
     .i { fill: #353638 }
   }
 </style>
-<path class="s" d="M380 12V748M196 61.22L564 698.78M61.22 196L698.78 564M12 380H748M61.22 564L698.78 196M196 698.78L564 61.22" transform="translate(2.4 2.4) scale(0.0466)" stroke-width="64" stroke-linecap="round"/>
-<text class="p" x="48" y="30.5" font-family="Montserrat, 'Segoe UI', system-ui, sans-serif" font-size="27" font-weight="500" letter-spacing="2.5" textLength="85" lengthAdjust="spacing">VEGA</text>
+<path class="s" d="M380 44V716M196 61.22L564 698.78M61.22 196L698.78 564M44 380H716M61.22 564L698.78 196M196 698.78L564 61.22" transform="translate(2.4 2.4) scale(0.0466)" stroke-width="64" stroke-linecap="round"/>
+<text class="p" x="48" y="30.5" font-family="'Google Sans', Montserrat, 'Segoe UI', system-ui, sans-serif" font-size="27" font-weight="500" letter-spacing="2.5" textLength="85" lengthAdjust="spacing">VEGA</text>
 <rect class="p" x="145" y="9" width="84" height="22" rx="3"/>
-<text class="i" x="187" y="24.8" text-anchor="middle" font-family="Montserrat, 'Segoe UI', system-ui, sans-serif" font-size="12.5" font-weight="500" letter-spacing="1.2" textLength="70" lengthAdjust="spacing">HARNESS</text>
+<text class="i" x="187" y="24.8" text-anchor="middle" font-family="'Google Sans', Montserrat, 'Segoe UI', system-ui, sans-serif" font-size="12.5" font-weight="500" letter-spacing="1.2" textLength="70" lengthAdjust="spacing">HARNESS</text>
 </svg>

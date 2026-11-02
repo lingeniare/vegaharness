@@ -62,7 +62,7 @@ export default defineConfig([
         plugins: [{
           name: 'desktop-shell-assets',
           async generateBundle() {
-            for (const name of ['design-platform.css', 'brand-font.css', 'montserrat-regular.woff2', 'montserrat-light.woff2', 'montserrat-medium.woff2', 'Montserrat-OFL.txt']) {
+            for (const name of ['design-platform.css', 'brand-font.css', 'fonts.css', 'montserrat-regular.woff2', 'montserrat-light.woff2', 'montserrat-medium.woff2', 'Montserrat-OFL.txt', 'google-sans-latin.woff2', 'google-sans-latin-italic.woff2', 'google-sans-cyrillic.woff2', 'google-sans-cyrillic-italic.woff2', 'google-sans-code-latin.woff2', 'google-sans-code-latin-italic.woff2', 'GoogleSans-OFL.txt', 'GoogleSansCode-OFL.txt']) {
               this.emitFile({
                 type: 'asset',
                 fileName: name,

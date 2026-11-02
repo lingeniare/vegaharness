@@ -84,7 +84,7 @@ describe('dsh badge assembled snapshot', () => {
       ## Assets
 
       - Local PNG: [\`dsh-badge.png\`](dsh-badge.png), 726×120 source image; render at 121×20
-      - Shields.io image URL: \`https://img.shields.io/badge/powered_by-VEGA-4D6BFE?style=flat-square&logoColor=white&logoSvg=%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20760%20760%27%3E%3Cpath%20d%3D%27M380%2012V748M196%2061.22L564%20698.78M61.22%20196L698.78%20564M12%20380H748M61.22%20564L698.78%20196M196%20698.78L564%2061.22%27%20stroke%3D%27white%27%20stroke-width%3D%2796%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E\`
+      - Shields.io image URL: \`https://img.shields.io/badge/powered_by-VEGA-4D6BFE?style=flat-square&logoColor=white&logoSvg=%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20760%20760%27%3E%3Cpath%20d%3D%27M380%2060V700M196%2061.22L564%20698.78M61.22%20196L698.78%20564M60%20380H700M61.22%20564L698.78%20196M196%20698.78L564%2061.22%27%20stroke%3D%27white%27%20stroke-width%3D%2796%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E\`
       - Project URL: \`https://github.com/deepseek-ai/deepseek-harness\`
 
       ## Markdown
@@ -92,13 +92,13 @@ describe('dsh badge assembled snapshot', () => {
       Use this linked badge in Markdown:
 
       \`\`\`markdown
-      [![](https://img.shields.io/badge/powered_by-VEGA-4D6BFE?style=flat-square&logoColor=white&logoSvg=%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20760%20760%27%3E%3Cpath%20d%3D%27M380%2012V748M196%2061.22L564%20698.78M61.22%20196L698.78%20564M12%20380H748M61.22%20564L698.78%20196M196%20698.78L564%2061.22%27%20stroke%3D%27white%27%20stroke-width%3D%2796%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E)](https://github.com/deepseek-ai/deepseek-harness)
+      [![](https://img.shields.io/badge/powered_by-VEGA-4D6BFE?style=flat-square&logoColor=white&logoSvg=%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20760%20760%27%3E%3Cpath%20d%3D%27M380%2060V700M196%2061.22L564%20698.78M61.22%20196L698.78%20564M60%20380H700M61.22%20564L698.78%20196M196%20698.78L564%2061.22%27%20stroke%3D%27white%27%20stroke-width%3D%2796%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E)](https://github.com/deepseek-ai/deepseek-harness)
       \`\`\`
 
       If attribution should not be linked, use:
 
       \`\`\`markdown
-      ![](https://img.shields.io/badge/powered_by-VEGA-4D6BFE?style=flat-square&logoColor=white&logoSvg=%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20760%20760%27%3E%3Cpath%20d%3D%27M380%2012V748M196%2061.22L564%20698.78M61.22%20196L698.78%20564M12%20380H748M61.22%20564L698.78%20196M196%20698.78L564%2061.22%27%20stroke%3D%27white%27%20stroke-width%3D%2796%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E)
+      ![](https://img.shields.io/badge/powered_by-VEGA-4D6BFE?style=flat-square&logoColor=white&logoSvg=%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20760%20760%27%3E%3Cpath%20d%3D%27M380%2060V700M196%2061.22L564%20698.78M61.22%20196L698.78%20564M60%20380H700M61.22%20564L698.78%20196M196%20698.78L564%2061.22%27%20stroke%3D%27white%27%20stroke-width%3D%2796%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E)
       \`\`\`
 
       ## Usage rules
@@ -123,7 +123,7 @@ describe('dsh badge assembled snapshot', () => {
       ## Assets
 
       - Local PNG: [\`dsh-badge.png\`](dsh-badge.png), 726×120 source image; render at 121×20
-      - Shields.io image URL: \`https://img.shields.io/badge/powered_by-VEGA-4D6BFE?style=flat-square&logoColor=white&logoSvg=%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20760%20760%27%3E%3Cpath%20d%3D%27M380%2012V748M196%2061.22L564%20698.78M61.22%20196L698.78%20564M12%20380H748M61.22%20564L698.78%20196M196%20698.78L564%2061.22%27%20stroke%3D%27white%27%20stroke-width%3D%2796%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E\`
+      - Shields.io image URL: \`https://img.shields.io/badge/powered_by-VEGA-4D6BFE?style=flat-square&logoColor=white&logoSvg=%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20760%20760%27%3E%3Cpath%20d%3D%27M380%2060V700M196%2061.22L564%20698.78M61.22%20196L698.78%20564M60%20380H700M61.22%20564L698.78%20196M196%20698.78L564%2061.22%27%20stroke%3D%27white%27%20stroke-width%3D%2796%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E\`
       - Project URL: \`https://github.com/deepseek-ai/deepseek-harness\`
 
       ## Markdown
@@ -131,13 +131,13 @@ describe('dsh badge assembled snapshot', () => {
       Use this linked badge in Markdown:
 
       \`\`\`markdown
-      [![](https://img.shields.io/badge/powered_by-VEGA-4D6BFE?style=flat-square&logoColor=white&logoSvg=%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20760%20760%27%3E%3Cpath%20d%3D%27M380%2012V748M196%2061.22L564%20698.78M61.22%20196L698.78%20564M12%20380H748M61.22%20564L698.78%20196M196%20698.78L564%2061.22%27%20stroke%3D%27white%27%20stroke-width%3D%2796%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E)](https://github.com/deepseek-ai/deepseek-harness)
+      [![](https://img.shields.io/badge/powered_by-VEGA-4D6BFE?style=flat-square&logoColor=white&logoSvg=%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20760%20760%27%3E%3Cpath%20d%3D%27M380%2060V700M196%2061.22L564%20698.78M61.22%20196L698.78%20564M60%20380H700M61.22%20564L698.78%20196M196%20698.78L564%2061.22%27%20stroke%3D%27white%27%20stroke-width%3D%2796%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E)](https://github.com/deepseek-ai/deepseek-harness)
       \`\`\`
 
       If attribution should not be linked, use:
 
       \`\`\`markdown
-      ![](https://img.shields.io/badge/powered_by-VEGA-4D6BFE?style=flat-square&logoColor=white&logoSvg=%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20760%20760%27%3E%3Cpath%20d%3D%27M380%2012V748M196%2061.22L564%20698.78M61.22%20196L698.78%20564M12%20380H748M61.22%20564L698.78%20196M196%20698.78L564%2061.22%27%20stroke%3D%27white%27%20stroke-width%3D%2796%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E)
+      ![](https://img.shields.io/badge/powered_by-VEGA-4D6BFE?style=flat-square&logoColor=white&logoSvg=%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20760%20760%27%3E%3Cpath%20d%3D%27M380%2060V700M196%2061.22L564%20698.78M61.22%20196L698.78%20564M60%20380H700M61.22%20564L698.78%20196M196%20698.78L564%2061.22%27%20stroke%3D%27white%27%20stroke-width%3D%2796%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E)
       \`\`\`
 
       ## Usage rules

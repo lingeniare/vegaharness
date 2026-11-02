@@ -9,10 +9,12 @@ export const BRAND_MARK_STROKE_WIDTH = 64
 /**
  * The six-spoke star silhouette path data, exported for consumers that compose
  * their own svg (entrance effects, rotations) around the same geometry. Stroke it
- * with `currentColor`.
+ * with `currentColor`. Axis spokes are inset by half the stroke width so the round
+ * caps land on the authored 12-unit tile margin instead of clipping at the viewBox
+ * edge.
  */
 export const BRAND_MARK_PATH =
-  'M380 12V748M196 61.22L564 698.78M61.22 196L698.78 564M12 380H748M61.22 564L698.78 196M196 698.78L564 61.22'
+  'M380 44V716M196 61.22L564 698.78M61.22 196L698.78 564M44 380H716M61.22 564L698.78 196M196 698.78L564 61.22'
 
 /** Props for {@link BrandMark}: square icon sizing plus the brand's stroke weight. */
 export interface BrandMarkProps extends IconProps {

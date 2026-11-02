@@ -166,7 +166,7 @@ function TerminalScreen({ state, model, visible, label, theme }: {
 /* oxlint-enable typescript/no-non-null-assertion */
 
 /** Built-in terminal stack placed after the user's normalized list. */
-const TERMINAL_FONT_STACK = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'
+const TERMINAL_FONT_STACK = '"Google Sans Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'
 
 function terminalFontFamily(list: string): string {
   return list === '' ? TERMINAL_FONT_STACK : `${list}, ${TERMINAL_FONT_STACK}`

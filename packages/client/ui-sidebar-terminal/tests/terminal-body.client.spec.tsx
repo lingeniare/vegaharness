@@ -218,7 +218,7 @@ it('applies the terminal font list and size and refits without replacing the ter
   const state: TerminalViewState = { ...idle, info, phase: 'connected', writable: true }
   const h = mount(state)
   const terminal = fake.terminals[0]!
-  const stack = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'
+  const stack = '"Google Sans Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'
   expect(terminal.options.fontFamily).toBe(stack)
   h.model.resize.mockClear()
   h.changeTheme({ fontFamilies: { text: '"Inter"', code: '', terminal: '' } })

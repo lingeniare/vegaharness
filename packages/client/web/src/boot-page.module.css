@@ -86,6 +86,7 @@
 .failedItem {
   font-family: var(
     --ds-font-family-code,
+    'Google Sans Code',
     'SF Mono',
     'JetBrains Mono',
     'Fira Code',
