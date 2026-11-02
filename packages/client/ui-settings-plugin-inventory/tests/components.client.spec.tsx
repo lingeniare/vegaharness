@@ -55,13 +55,13 @@ function localizedProps(list: PluginInventorySettingsTabInjected['list']) {
 /** A deployment with a roster: one failed global row, two preset-provided rows. */
 const SNAPSHOT = {
   entries: [
-    { entryId: 'telemetry', moduleName: '@fixture/telemetry', enabled: true, fiberPhase: 'failed' },
-    { entryId: 'timer', moduleName: 'cordis:timer', enabled: true, fiberPhase: 'active' },
-    { entryId: '8a1b2c3d', moduleName: '@deepseek-ai/cordis-plugin-hmr', enabled: true, fiberPhase: 'active' },
-    { entryId: 'unobserved', moduleName: '@fixture/unobserved-name', enabled: true, fiberPhase: null },
-    { entryId: 'bash-host', moduleName: '@deepseek-ai/dsh-tool-bash', enabled: false, fiberPhase: null },
-    { entryId: 'fs-host', moduleName: '@deepseek-ai/dsh-tool-fs', enabled: false, fiberPhase: null },
-    { entryId: 'dormant', moduleName: '@fixture/dormant', enabled: false, fiberPhase: null },
+    { entryId: 'telemetry' as PluginEntryId, moduleName: '@fixture/telemetry', enabled: true, fiberPhase: 'failed' },
+    { entryId: 'timer' as PluginEntryId, moduleName: 'cordis:timer', enabled: true, fiberPhase: 'active' },
+    { entryId: '8a1b2c3d' as PluginEntryId, moduleName: '@deepseek-ai/cordis-plugin-hmr', enabled: true, fiberPhase: 'active' },
+    { entryId: 'unobserved' as PluginEntryId, moduleName: '@fixture/unobserved-name', enabled: true, fiberPhase: null },
+    { entryId: 'bash-host' as PluginEntryId, moduleName: '@deepseek-ai/dsh-tool-bash', enabled: false, fiberPhase: null },
+    { entryId: 'fs-host' as PluginEntryId, moduleName: '@deepseek-ai/dsh-tool-fs', enabled: false, fiberPhase: null },
+    { entryId: 'dormant' as PluginEntryId, moduleName: '@fixture/dormant', enabled: false, fiberPhase: null },
   ],
   agentPresets: [
     {
@@ -69,17 +69,17 @@ const SNAPSHOT = {
       name: 'Стандартный режим',
       isDefault: true,
       rows: [
-        { entryId: 'bash', moduleName: '@deepseek-ai/dsh-tool-bash', enabled: true, fiberPhase: 'active' },
-        { entryId: 'fs', moduleName: '@deepseek-ai/dsh-tool-fs', enabled: true, fiberPhase: null },
+        { entryId: 'bash' as PluginEntryId, moduleName: '@deepseek-ai/dsh-tool-bash', enabled: true, fiberPhase: 'active' },
+        { entryId: 'fs' as PluginEntryId, moduleName: '@deepseek-ai/dsh-tool-fs', enabled: true, fiberPhase: null },
         {
-          entryId: 'pwsh',
+          entryId: 'pwsh' as PluginEntryId,
           moduleName: '@fixture/pwsh',
           enabled: 'conditional',
           condition: 'process.platform === \'win32\'',
           fiberPhase: null,
         },
-        { entryId: 'codex', moduleName: '@fixture/codex', enabled: false, fiberPhase: null },
-        { entryId: 'crashy', moduleName: '@fixture/crashy', enabled: true, fiberPhase: 'failed' },
+        { entryId: 'codex' as PluginEntryId, moduleName: '@fixture/codex', enabled: false, fiberPhase: null },
+        { entryId: 'crashy' as PluginEntryId, moduleName: '@fixture/crashy', enabled: true, fiberPhase: 'failed' },
         { entryId: null, moduleName: '@fixture/anonymous', enabled: true, fiberPhase: null },
       ],
     },
@@ -87,9 +87,9 @@ const SNAPSHOT = {
       id: 'ptc',
       isDefault: false,
       rows: [
-        { entryId: 'bash', moduleName: '@deepseek-ai/dsh-tool-bash', enabled: true, fiberPhase: null },
-        { entryId: 'bash-fork', moduleName: '@deepseek-ai/dsh-tool-bash', enabled: true, fiberPhase: null },
-        { entryId: 'fs', moduleName: '@deepseek-ai/dsh-tool-fs', enabled: 'conditional', fiberPhase: null },
+        { entryId: 'bash' as PluginEntryId, moduleName: '@deepseek-ai/dsh-tool-bash', enabled: true, fiberPhase: null },
+        { entryId: 'bash-fork' as PluginEntryId, moduleName: '@deepseek-ai/dsh-tool-bash', enabled: true, fiberPhase: null },
+        { entryId: 'fs' as PluginEntryId, moduleName: '@deepseek-ai/dsh-tool-fs', enabled: 'conditional', fiberPhase: null },
       ],
     },
     { id: 'shattered', name: '坏预设', isDefault: false, broken: 'the composition file is missing', rows: [] },

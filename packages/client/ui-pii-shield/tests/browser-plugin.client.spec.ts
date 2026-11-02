@@ -81,7 +81,7 @@ describe('ui-pii-shield browser apply', () => {
     await fiber.await()
     const entry = slots.entries('conversation.input.right')[0]!
     expect(entry.component).toBe(ShieldToggle)
-    const injected = (entry.inject! as (id: SessionId) => ShieldToggleInjected)(SID)
+    const injected = Reflect.apply(entry.inject!, undefined, [SID]) as ShieldToggleInjected
     expect(injected.hooks.piiShield).toBe(form)
     await expect(injected.toggle(false)).resolves.toBe(true)
     expect(set).toHaveBeenCalledExactlyOnceWith('anonymize', false)
@@ -95,7 +95,7 @@ describe('ui-pii-shield browser apply', () => {
     const fiber = ctx.plugin({ inject: [...inject], apply })
     await fiber.await()
     const entry = slots.entries('conversation.input.right')[0]!
-    const injected = (entry.inject! as (id: SessionId) => ShieldToggleInjected)(SID)
+    const injected = Reflect.apply(entry.inject!, undefined, [SID]) as ShieldToggleInjected
     await expect(injected.toggle(true)).resolves.toBe(false)
     await fiber.dispose()
   })

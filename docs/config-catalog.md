@@ -2339,8 +2339,12 @@ export type Config = Readonly<Record<string, never>>
 export interface Config {
   /** VEGA Messages-compatible endpoint; the listing is `<baseURL>/models`. */
   baseURL: string
-  /** Send `X-Vega-Anonymize: true` on every request (PII shield opt-in). */
-  anonymize: boolean
+  /**
+   * Send `X-Vega-Anonymize: true` on every request (PII shield opt-in); the
+   * user-facing toggle writes this volatile field through the settings
+   * document.
+   */
+  anonymize: Volatile<boolean>
   /**
    * Whether the deployed key name is registered for shielding, which is a
    * server-side list the client cannot observe. When true the directory entry
@@ -4806,7 +4810,7 @@ export interface Config {
 
 - `inject`: `web`
 - `refs`: `Volatile` (`@deepseek-ai/cordis`)
-- `source`: [`packages/web/web-vega/src/index.ts:47`](../packages/web/web-vega/src/index.ts)
+- `source`: [`packages/web/web-vega/src/index.ts:48`](../packages/web/web-vega/src/index.ts)
 
 ```ts config-catalog
 /** Plugin config (all optional — `apply` fills constant defaults). */
@@ -4957,6 +4961,7 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 | `@deepseek-ai/dsh-client-ui-model-selection` | — | [`packages/client/ui-model-selection/src/index.ts`](../packages/client/ui-model-selection/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-open-in-app` | — | [`packages/client/ui-open-in-app/src/index.ts`](../packages/client/ui-open-in-app/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-permission-presets` | — | [`packages/client/ui-permission-presets/src/index.ts`](../packages/client/ui-permission-presets/src/index.ts) |
+| `@deepseek-ai/dsh-client-ui-pii-shield` | — | [`packages/client/ui-pii-shield/src/index.ts`](../packages/client/ui-pii-shield/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-plan` | — | [`packages/client/ui-plan/src/index.ts`](../packages/client/ui-plan/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-plugin-market` | — | [`packages/client/ui-plugin-market/src/index.ts`](../packages/client/ui-plugin-market/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-plugin-recommendations` | — | [`packages/experimental/client-ui-plugin-recommendations/src/index.ts`](../packages/experimental/client-ui-plugin-recommendations/src/index.ts) |

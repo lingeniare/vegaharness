@@ -123,6 +123,7 @@ describe('desktop upload plan', () => {
       for (const target of ['mac-arm64', 'mac-x64', 'win-x64'] as const) {
         const paths = await fixture(target, '1.2.3', environment)
         const plan = await createDesktopUploadPlan(target, { ...paths, latest: true })
+        if (plan.provider !== 'generic') throw new Error('expected a generic upload plan')
         const loopback = await startCosLoopback()
         try {
           const cos = createDesktopCos({ secretId: 'fixture-id', secretKey: 'fixture-secret' })

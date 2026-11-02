@@ -55,7 +55,7 @@ function client(options: DesktopGithubClientOptions) {
         'User-Agent': USER_AGENT,
         ...init.headers,
       },
-      body: init.body,
+      body: init.body ?? null,
     })
     if (!response.ok) {
       throw new DesktopGithubApiError(response.status, `github api: ${method} ${url} returned ${response.status}`)
