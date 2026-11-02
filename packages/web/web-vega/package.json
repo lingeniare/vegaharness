@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-web-vega",
   "description": "VEGA account-managed web search and fetch through openrouter server tools for the ctx.web capability seam",
-  "version": "0.2.2-alpha.2",
+  "version": "0.2.2",
   "publishConfig": {
     "access": "public"
   },
