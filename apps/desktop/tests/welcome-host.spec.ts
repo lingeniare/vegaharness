@@ -9,15 +9,22 @@ function transport(preference?: string) {
     { ns: 'llm-pi-ai', value: { profiles: { example: { apiKeyEnv: 'EXAMPLE_API_KEY' } } } },
     { ns: 'locale', value: preference === undefined ? {} : { preference } },
   ]
+  const updates: { ns: string; patch: Record<string, unknown> }[] = []
   const send = vi.fn<NonNullable<Parameters<typeof connectDesktopWelcome>[2]>>(async (_input, init) => {
     const { rpcId, method, payload } = JSON.parse(init!.body as string) as {
       rpcId: string
       method: string
-      payload: { args: { ref: string; value: string; refs: string[] } }
+      payload: { args: { ref: string; value: string; refs: string[]; ns: string; patch: Record<string, unknown> } }
     }
     let value: unknown
     if (method === 'account/getState') value = { links: { usageUrl: 'http://localhost/usage', topUpUrl: 'http://localhost/top_up' }, status: 'signed-out', attempt: null }
     else if (method === 'settings/describe') value = { namespaces }
+    else if (method === 'settings/update') {
+      updates.push({ ns: payload.args.ns, patch: payload.args.patch })
+      const namespace = namespaces.find(item => item.ns === payload.args.ns)
+      Object.assign(namespace!.value, payload.args.patch)
+      value = { ns: payload.args.ns, value: namespace!.value }
+    }
     else if (method === 'llm/listConfigurableProviders') value = [{ settingsNs: 'llm-pi-ai', settingsPath: ['profiles', 'example'] }]
     else if (method === 'productAnalytics/enabled') value = true
     else if (method === 'productAnalytics/report') value = undefined
@@ -25,7 +32,7 @@ function transport(preference?: string) {
     else value = Object.fromEntries(payload.args.refs.map(ref => [ref, { configured: keys.has(ref), writable: true }]))
     return Response.json({ type: 'server-response', rpcId, result: { ok: true, value } })
   })
-  return { send, keys, namespaces }
+  return { send, keys, namespaces, updates }
 }
 
 const url = 'http://127.0.0.1:19387/'
@@ -63,6 +70,16 @@ describe('desktop welcome Web operations', () => {
     expect(await backend.readLocalePreference()).toBe('ru')
     expect(host.send).toHaveBeenCalledOnce()
     expect(host.send.mock.calls[0]![0]).toContain('/api/settings/describe')
+  })
+
+  it('writes the installer-selected language into the shared locale namespace', async () => {
+    const host = transport()
+    const backend = connectDesktopWelcome(url, cookie, host.send)
+    await backend.writeLocalePreference('ru')
+    expect(host.updates).toEqual([{ ns: 'locale', patch: { preference: 'ru' } }])
+    expect(await backend.readLocalePreference()).toBe('ru')
+    const [input] = host.send.mock.calls[0]!
+    expect(input).toBe('http://127.0.0.1:19387/api/settings/update')
   })
 
   it('allows profiles without the official provider and retains custom key detection', async () => {

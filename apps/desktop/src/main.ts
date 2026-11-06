@@ -9,7 +9,7 @@ import type { ProductEventMap, ProductEvent } from '@deepseek-ai/dsh-client-prod
 import { WINDOWS_TITLEBAR_HEIGHT } from './windows-layout.ts'
 import { existsSync, renameSync } from 'node:fs'
 import { access, readFile, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   app,
@@ -64,6 +64,7 @@ import { DesktopMandatoryUpdateWindow } from './mandatory-update-window.ts'
 import { DesktopPolicyTestAuth } from './policy-test-auth.ts'
 import { readDesktopSettings } from './settings.ts'
 import { readDesktopLocaleCache, writeDesktopLocaleCache } from './locale-cache.ts'
+import { clearDesktopInstallerLocale, readDesktopInstallerLocale } from './installer-locale.ts'
 import { DesktopUpdateDialog, type UpdateDialogOptions } from './update-dialog.ts'
 import { readDesktopRuntime } from './runtime-tree.ts'
 import { DesktopBrowserGuests } from './browser-guests.ts'
@@ -91,6 +92,11 @@ if (app.isPackaged) {
   }
 }
 let windowsLanguage: string | undefined = readDesktopLocaleCache(app.getPath('userData'))
+// The NSIS installer seeds its language selection beside the executable; the locale
+// cache and an explicit Host preference both outrank it, so it fills only an empty slot.
+const installerDirectory = process.platform === 'win32' && app.isPackaged ? dirname(process.execPath) : undefined
+const installerLanguage = installerDirectory === undefined ? undefined : readDesktopInstallerLocale(installerDirectory)
+windowsLanguage ??= installerLanguage
 /**
  * Whether the backend has reached ready: false until the first ready, back to
  * false when a restart returns it to starting, frozen during shutdown so a
@@ -1438,7 +1444,24 @@ async function main(): Promise<void> {
     if (quitting || recovery.active) return
     const state = await readWelcomeState()
     if (isQuitting() || backend.state.phase !== 'ready') return
-    locale = resolveDesktopStartupLocale(state.localePreference, systemLanguages)
+    let preference = state.localePreference
+    if (installerDirectory !== undefined) {
+      if (preference === null && installerLanguage !== undefined && welcomeBackend !== undefined) {
+        // The installer choice becomes durable only through the Host write; on a
+        // failed write the seed stays on disk and the next launch retries it.
+        preference = installerLanguage
+        try {
+          await welcomeBackend.writeLocalePreference(installerLanguage)
+          clearDesktopInstallerLocale(installerDirectory)
+        } catch (error) {
+          console.warn('desktop installer locale: preference could not be saved', error)
+        }
+      } else {
+        // An explicit preference, or a foreign seed, discards the installer choice.
+        clearDesktopInstallerLocale(installerDirectory)
+      }
+    }
+    locale = resolveDesktopStartupLocale(preference, systemLanguages)
     writeDesktopLocaleCache(app.getPath('userData'), locale.id)
     windowsLanguage = locale.id
     refreshApplicationMenu()

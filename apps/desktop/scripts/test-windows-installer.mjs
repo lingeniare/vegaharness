@@ -108,8 +108,12 @@ SectionEnd
   const compiler = await getMakeNsisPath()
   await execute(compiler.path, ['/V2', payloadSource], { ...childOptions, env: { ...childOptions.env, ...compiler.env } })
   if (sign) await sign({ path: join(payload, `${productName}.exe`), hash: 'sha256', isNest: false })
-  for (const locale of readInstallerLocales()) {
-    const language = locale.id
+  const locales = readInstallerLocales()
+  const runs = locales.map(locale => ({ id: locale.id, locales: [locale], secondary: undefined }))
+  // A production-shaped multi-language build exercises the welcome flag selector.
+  if (!uninstallOnly && locales.length > 1) runs.push({ id: 'all', locales, secondary: locales.at(-1).id })
+  for (const run of runs) {
+    const language = run.id
     const config = createElectronBuilderConfig()
     if (sign) {
       config.win.forceCodeSigning = true
@@ -118,20 +122,23 @@ SectionEnd
     const languageOutput = join(output, language)
     await mkdir(languageOutput)
     const strings = join(languageOutput, 'strings.nsh')
-    await writeFile(strings, renderInstallerStrings([locale]), 'utf8')
+    await writeFile(strings, renderInstallerStrings(run.locales), 'utf8')
     const include = join(languageOutput, 'include.nsh')
     await writeFile(include, `!define INSTALLER_BUILD_DIR "${join(output, 'ui')}"\n!define INSTALLER_STRINGS_FILE "${strings}"\n!include "${join(appRoot, 'scripts', 'installer.nsh')}"\n`)
     await build({ projectDir: appRoot, prepackaged: payload, targets: Platform.WINDOWS.createTarget(['nsis'], Arch.x64), publish: 'never',
       config: { ...config, productName, extraMetadata: { ...config.extraMetadata, name: packageName },
         artifactName: 'installer-test.exe', directories: { output: languageOutput },
-        nsis: { ...config.nsis, guid, include, installerLanguages: [language] }, beforeBuild: undefined, afterPack: undefined, afterSign: undefined, artifactBuildCompleted: undefined },
+        nsis: { ...config.nsis, guid, include, installerLanguages: run.locales.map(locale => locale.id) },
+        beforeBuild: undefined, afterPack: undefined, afterSign: undefined, artifactBuildCompleted: undefined },
     })
     if (process.argv.includes('--compile-only')) continue
     const result = await execute('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File',
       join(appRoot, 'tests', uninstallOnly ? 'windows-uninstall-smoke.ps1' : 'windows-installer-smoke.ps1'),
       '-Installer', join(languageOutput, 'installer-test.exe'),
       '-ProductName', productName, '-RegistryKey', guid, '-OutputDirectory', languageOutput,
-      '-Language', language, ...uninstallOnly ? ['-PackageName', packageName] : []], childOptions)
+      '-Language', run.locales[0].id,
+      ...run.secondary === undefined ? [] : ['-SecondaryLanguage', run.secondary],
+      ...uninstallOnly ? ['-PackageName', packageName] : []], childOptions)
     process.stdout.write(`${language}\n${result.stdout}`)
   }
   succeeded = true

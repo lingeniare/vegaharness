@@ -24,6 +24,12 @@ export interface DesktopWelcomeBackend {
   /** @returns The saved UI language without account or provider requests. */
   readLocalePreference(): Promise<string | null>
   /**
+   * Merge the language into the shared `locale` settings namespace.
+   * @param preference - canonical UI language id, e.g. `en` or `ru`.
+   * @returns after the Host commits the write.
+   */
+  writeLocalePreference(preference: string): Promise<void>
+  /**
    * @param apiKey - User-entered official provider key.
    * @returns A safe write outcome without provider diagnostics.
    */
@@ -131,6 +137,9 @@ export function connectDesktopWelcome(
       const settings = await invoke({ namespace: 'settings', method: 'describe', args: {} })
       if (!record(settings) || !Array.isArray(settings.namespaces)) throw new Error('desktop welcome: missing settings namespaces')
       return localePreference(settings.namespaces)
+    },
+    async writeLocalePreference(preference) {
+      await invoke({ namespace: 'settings', method: 'update', args: { ns: 'locale', patch: { preference } } })
     },
     async save(apiKey) {
       if (!/^[\x21-\x7e]+$/.test(apiKey)) return { ok: false }

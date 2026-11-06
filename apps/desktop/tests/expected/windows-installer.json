@@ -17,6 +17,11 @@
     "app-started-on-welcome-rejected-before-extraction",
     "silent-update-retains-directory-and-ignores-unrelated-process",
     "invalid-destination-rejection",
+    "installer-locale-seed-records-installer-language",
+    "language-argument-selects-installer-copy",
+    "silent-language-argument-records-seed",
+    "invalid-language-rejection",
+    "uncompiled-language-rejection",
     "uninstall"
   ]
 }

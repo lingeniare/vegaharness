@@ -125,19 +125,17 @@ describe.skipIf(MODE === 'record')('web e2e: App-only desktop onboarding', () =>
 
   async function snapshot(name: string): Promise<void> {
     await expect.poll(() => page.locator('[data-desktop-onboarding]').getAttribute('aria-busy')).toBe('false')
-    const hasIllustration = name.startsWith('welcome') || name.startsWith('credit')
-    // Illustrations and card icons are package assets fetched after the step renders.
+    // Card icons are package assets fetched after the step renders.
     const images = await page.locator('[data-desktop-onboarding] img').evaluateAll(async elements =>
       Promise.all(elements.map(async (element) => {
         const image = element as HTMLImageElement
         await image.decode()
         return {
-          source: image.currentSrc, illustration: image.matches('[class*="illustration"] > img'),
+          source: image.currentSrc,
           loaded: image.naturalWidth > 0 && image.naturalHeight > 0,
         }
       })))
     expect(images.filter(image => !image.loaded || !ACCOUNT_ASSET.test(image.source)), `${name}: images outside loaded package assets`).toEqual([])
-    expect(images.filter(image => image.illustration), `${name}: illustration images`).toHaveLength(hasIllustration ? 2 : 0)
     const aria = await captureStableAria(page, '[data-desktop-onboarding]', scaffold.workspaceCwd)
     await mkdir(EXPECTED, { recursive: true })
     await compareOrRefreshGolden(join(EXPECTED, `${name}.expected.md`), aria, MODE)
@@ -208,23 +206,6 @@ describe.skipIf(MODE === 'record')('web e2e: App-only desktop onboarding', () =>
         expect(card?.height).toBeCloseTo(187, 0)
         expect(action?.width).toBeCloseTo(240, 0)
         expect(action!.y - (card!.y + card!.height)).toBeCloseTo(40, 0)
-      }
-      if (hasIllustration) {
-        const illustrations = await page.locator('[class*="illustration"] > img:visible').evaluateAll(elements => elements.map((element) => {
-          const image = element as HTMLImageElement
-          const box = image.getBoundingClientRect()
-          return {
-            width: box.width, ratio: box.width / box.height, exportedRatio: image.naturalWidth / image.naturalHeight,
-            loaded: image.complete && image.naturalWidth > 0,
-          }
-        }))
-        expect(illustrations).toHaveLength(1)
-        for (const illustration of illustrations) {
-          expect(illustration.loaded).toBe(true)
-          expect(illustration.width).toBeGreaterThan(0)
-          expect(illustration.ratio).toBeCloseTo(illustration.exportedRatio, 2)
-        }
-
       }
       if (screenshots !== undefined) await page.screenshot({ path: join(screenshots, `${name}-${viewport.width}x${viewport.height}.png`) })
     }

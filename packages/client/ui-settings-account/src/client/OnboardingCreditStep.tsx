@@ -2,9 +2,6 @@
 import type { RefObject } from 'react'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { DesktopOnboardingProps } from './onboarding-contract.ts'
-import { OnboardingIllustration } from './OnboardingIllustration.tsx'
-import art from './assets/onboarding-recharge.webp'
-import artDark from './assets/onboarding-recharge-dark.webp'
 import css from './DesktopOnboarding.module.css'
 
 /** @param props - credit facts, localized content and recharge/navigation actions. @returns the credit step. */
@@ -18,8 +15,7 @@ export function OnboardingCreditStep({ t, heading, busy, funded, canRecharge, on
     onRecharge: () => void
     onLater: () => void
   }) {
-  return <div className={`${css.content} ${css.credit}`}>
-    <OnboardingIllustration className={css.creditIllustration} src={art} darkSrc={artDark} />
+  return <div className={`${css.content} ${css.intro}`}>
     <div className={css.copy}>
       <h1 id="desktop-onboarding-title" ref={heading} tabIndex={-1}>{t('onboardingCredit')}</h1>
       <p className={css.heroDescription}>{t('onboardingCreditDescription')}</p>

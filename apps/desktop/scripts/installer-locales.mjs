@@ -61,14 +61,26 @@ export function readInstallerLocales(directory = defaultDirectory) {
 
 /**
  * Generate guarded NSIS LangString declarations from validated JSON resources.
+ * The welcome language selector needs every string in every compiled language,
+ * so each key also emits a `<key>_<locale>` alias that resolves to the same
+ * text under any language table (`$(...)` lookups freeze after `.onInit`).
  * @param {ReturnType<typeof readInstallerLocales>} locales - Resources for all languages or one isolated native-test build.
  * @returns {string} UTF-8 NSIS source, with literal dollar signs, quotes and line breaks escaped.
  */
 export function renderInstallerStrings(locales) {
   const escape = (/** @type {string} */ text) => text.replace(/\$|"|\r|\n/gu, character => ({ '$': '$$', '"': '$\\"', '\r': '$\\r', '\n': '$\\n' })[character])
-  return '; Generated from installer/locales/*.json.\n' + locales.map(locale =>
-    `!ifdef LANG_${locale.nsisLanguage}\n` + Object.entries(locale.strings).map(([key, text]) =>
-      `LangString ${key} \${LANG_${locale.nsisLanguage}} "${escape(text)}"\n`).join('') + '!endif\n').join('')
+  let output = '; Generated from installer/locales/*.json.\n'
+  for (const locale of locales) {
+    output += `!ifdef LANG_${locale.nsisLanguage}\n` + Object.entries(locale.strings).map(([key, text]) =>
+      `LangString ${key} \${LANG_${locale.nsisLanguage}} "${escape(text)}"\n`).join('') + '!endif\n'
+  }
+  for (const locale of locales) {
+    for (const table of locales) {
+      output += `!ifdef LANG_${table.nsisLanguage}\n` + Object.entries(locale.strings).map(([key, text]) =>
+        `LangString ${key}_${locale.id} \${LANG_${table.nsisLanguage}} "${escape(text)}"\n`).join('') + '!endif\n'
+    }
+  }
+  return output
 }
 
 if (import.meta.main) {

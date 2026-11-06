@@ -6,6 +6,39 @@
 ManifestDPIAware true
 !ifndef BUILD_UNINSTALLER
   !define MUI_CUSTOMFUNCTION_GUIINIT InstallerGuiInit
+  ; Localized strings painted after the welcome page need runtime vars: $(...)
+  ; lookups freeze on the language table once .onInit ends. InstallerAssignLocale
+  ; (pages.nsh) reloads them from the generated per-locale aliases, so the welcome
+  ; language selector can repaint every later label in the chosen language.
+  Var InstallerTextBrowse
+  Var InstallerTextChoosePath
+  Var InstallerTextDirectoryFailed
+  Var InstallerTextDirectoryHint
+  Var InstallerTextDirectoryRestoreHint
+  Var InstallerTextDiskSpace
+  Var InstallerTextExtractCollapse
+  Var InstallerTextExtractCopied
+  Var InstallerTextExtractCopy
+  Var InstallerTextExtractExpand
+  Var InstallerTextExtractFailed
+  Var InstallerTextExtractHint
+  Var InstallerTextExtractSaved
+  Var InstallerTextExtractUnsaved
+  Var InstallerTextFailed
+  Var InstallerTextFinish
+  Var InstallerTextInstall
+  Var InstallerTextLaunch
+  Var InstallerTextLaunchFailed
+  Var InstallerTextNativeProgress
+  Var InstallerTextPathInvalid
+  Var InstallerTextPathOwnership
+  Var InstallerTextPathWritable
+  Var InstallerTextProgressClean
+  Var InstallerTextProgressCopy
+  Var InstallerTextProgressExtract
+  Var InstallerTextProgressRegister
+  Var InstallerTextRunning
+  Var InstallerTextUiError
 !endif
 
 !macro customHeader
@@ -59,6 +92,44 @@ ManifestDPIAware true
       Quit
     ${EndIf}
   ${EndIf}
+  ; The welcome selector starts from the OS UI language when it is compiled in.
+  !ifdef LANG_RUSSIAN
+    System::Call 'kernel32::GetUserDefaultUILanguage() i .r1'
+    IntOp $1 $1 & 0x3FF
+    ${If} $1 == 0x19
+      StrCpy $LANGUAGE ${LANG_RUSSIAN}
+    ${EndIf}
+  !endif
+  ClearErrors
+  ${GetOptions} $0 "/LANG=" $1
+  ${IfNot} ${Errors}
+    ${If} $1 == "en_US"
+      !ifdef LANG_ENGLISH
+        StrCpy $LANGUAGE ${LANG_ENGLISH}
+      !else
+        MessageBox MB_OK|MB_ICONEXCLAMATION "$(INSTALLER_LANGUAGE_ERROR)" /SD IDOK
+        SetErrorLevel 2
+        Quit
+      !endif
+    ${ElseIf} $1 == "ru_RU"
+      !ifdef LANG_RUSSIAN
+        StrCpy $LANGUAGE ${LANG_RUSSIAN}
+      !else
+        MessageBox MB_OK|MB_ICONEXCLAMATION "$(INSTALLER_LANGUAGE_ERROR)" /SD IDOK
+        SetErrorLevel 2
+        Quit
+      !endif
+    ${Else}
+      MessageBox MB_OK|MB_ICONEXCLAMATION "$(INSTALLER_LANGUAGE_ERROR)" /SD IDOK
+      SetErrorLevel 2
+      Quit
+    ${EndIf}
+  ${EndIf}
+  ; Preload runtime locale vars so silent installs and .onInit checks can
+  ; report path/running errors in the resolved language.
+  !ifndef BUILD_UNINSTALLER
+    !insertmacro InstallerAssignLocaleCurrent
+  !endif
   Call InstallerResolveTheme
   InitPluginsDir
   File "/oname=$PLUGINSDIR\brand.bmp" "${INSTALLER_BUILD_DIR}\brand.bmp"
@@ -151,7 +222,7 @@ ManifestDPIAware true
   ${If} ${Silent}
     StrCpy $1 0
   ${EndIf}
-  System::Call '$PLUGINSDIR\window-frame.dll::InstallerReportExtractFailure(p $HWNDPARENT, i R0, w "${Archive}", w "$dshNewDirectory", w "$PLUGINSDIR\extract.log", w r0, i r1, w "$(^SetupCaption)", w "$(INSTALLER_EXTRACT_FAILED)", w "$(INSTALLER_EXTRACT_HINT)", w "$(INSTALLER_EXTRACT_COPY)", w "$(INSTALLER_EXTRACT_EXPAND)", w "$(INSTALLER_EXTRACT_COLLAPSE)", w "$(INSTALLER_EXTRACT_SAVED)", w "$(INSTALLER_EXTRACT_UNSAVED)", w "$(INSTALLER_EXTRACT_COPIED)") i.r2 ?c'
+  System::Call '$PLUGINSDIR\window-frame.dll::InstallerReportExtractFailure(p $HWNDPARENT, i R0, w "${Archive}", w "$dshNewDirectory", w "$PLUGINSDIR\extract.log", w r0, i r1, w "$(^SetupCaption)", w "$InstallerTextExtractFailed", w "$InstallerTextExtractHint", w "$InstallerTextExtractCopy", w "$InstallerTextExtractExpand", w "$InstallerTextExtractCollapse", w "$InstallerTextExtractSaved", w "$InstallerTextExtractUnsaved", w "$InstallerTextExtractCopied") i.r2 ?c'
   ${If} $2 == 1
     DetailPrint $0
   ${EndIf}
@@ -183,13 +254,21 @@ ManifestDPIAware true
       ${Loop}
     ${EndIf}
     ${If} $R0 == 0
-      MessageBox MB_OK|MB_ICONINFORMATION "$(INSTALLER_RUNNING)" /SD IDOK
+      !ifdef BUILD_UNINSTALLER
+        MessageBox MB_OK|MB_ICONINFORMATION "$(INSTALLER_RUNNING)" /SD IDOK
+      !else
+        MessageBox MB_OK|MB_ICONINFORMATION "$InstallerTextRunning" /SD IDOK
+      !endif
       SetErrorLevel 2
       Quit
     ${EndIf}
   ${EndIf}
   ${If} $R0 < 0
-    MessageBox MB_OK|MB_ICONEXCLAMATION "$(INSTALLER_UI_ERROR)" /SD IDOK
+    !ifdef BUILD_UNINSTALLER
+      MessageBox MB_OK|MB_ICONEXCLAMATION "$(INSTALLER_UI_ERROR)" /SD IDOK
+    !else
+      MessageBox MB_OK|MB_ICONEXCLAMATION "$InstallerTextUiError" /SD IDOK
+    !endif
     SetErrorLevel 2
     Quit
   ${EndIf}
@@ -209,11 +288,11 @@ ManifestDPIAware true
   ${If} ${Silent}
     StrCpy $1 0
   ${EndIf}
-  StrCpy $3 "$(INSTALLER_DIRECTORY_HINT)"
+  StrCpy $3 "$InstallerTextDirectoryHint"
   ${If} $dshRestoreError != 0
-    StrCpy $3 "$(INSTALLER_DIRECTORY_RESTORE_HINT)"
+    StrCpy $3 "$InstallerTextDirectoryRestoreHint"
   ${EndIf}
-  System::Call '$PLUGINSDIR\window-frame.dll::InstallerReportDirectoryFailure(p $HWNDPARENT, i $dshDirectoryError, w "$dshDirectorySource", w "$dshDirectoryDestination", i $dshRestoreError, w "$dshOldDirectory", w "$PLUGINSDIR\directory-operations.log", w r0, i r1, w "$(^SetupCaption)", w "$(INSTALLER_DIRECTORY_FAILED)", w r3, w "$(INSTALLER_EXTRACT_COPY)", w "$(INSTALLER_EXTRACT_EXPAND)", w "$(INSTALLER_EXTRACT_COLLAPSE)", w "$(INSTALLER_EXTRACT_SAVED)", w "$(INSTALLER_EXTRACT_UNSAVED)", w "$(INSTALLER_EXTRACT_COPIED)") i.r2 ?c'
+  System::Call '$PLUGINSDIR\window-frame.dll::InstallerReportDirectoryFailure(p $HWNDPARENT, i $dshDirectoryError, w "$dshDirectorySource", w "$dshDirectoryDestination", i $dshRestoreError, w "$dshOldDirectory", w "$PLUGINSDIR\directory-operations.log", w r0, i r1, w "$(^SetupCaption)", w "$InstallerTextDirectoryFailed", w r3, w "$InstallerTextExtractCopy", w "$InstallerTextExtractExpand", w "$InstallerTextExtractCollapse", w "$InstallerTextExtractSaved", w "$InstallerTextExtractUnsaved", w "$InstallerTextExtractCopied") i.r2 ?c'
   ${If} $2 == 1
     DetailPrint $0
   ${EndIf}
@@ -232,11 +311,23 @@ ManifestDPIAware true
 
 !macro customInstall
   Push $0
+  Push $1
+  Push $R0
   StrCpy $0 0
   ${If} ${Errors}
     StrCpy $0 1
   ${EndIf}
   !insertmacro InstallerPublishStage 4
+  ; The desktop adopts this one-shot seed as its locale.preference on first launch.
+  StrCpy $1 "en"
+  !ifdef LANG_RUSSIAN
+    ${If} $LANGUAGE == ${LANG_RUSSIAN}
+      StrCpy $1 "ru"
+    ${EndIf}
+  !endif
+  FileOpen $R0 "$INSTDIR\installer-locale" w
+  FileWrite $R0 "$1"
+  FileClose $R0
   !insertmacro dshFinishDirectories
   ; Standard uninstall-entry metadata read by inventory tools; the upstream template records it only under its private key.
   WriteRegStr SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" InstallLocation "$INSTDIR"
@@ -245,5 +336,7 @@ ManifestDPIAware true
   ${Else}
     ClearErrors
   ${EndIf}
+  Pop $R0
+  Pop $1
   Pop $0
 !macroend

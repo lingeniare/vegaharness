@@ -128,6 +128,7 @@ vi.mock('../src/welcome-backend.ts', () => ({
   connectDesktopWelcome: () => ({
     analyticsEnabled: async () => false,
     readLocalePreference: async () => state.preference,
+    writeLocalePreference: async () => {},
     read: async () => {
       await state.beforeRead()
       return { loggedIn: false, hasApiKey: state.hasApiKey, writable: true, localePreference: state.preference }

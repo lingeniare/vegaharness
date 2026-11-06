@@ -3,7 +3,7 @@ Var InstallerError
 ; Reject reparse points along the selected path before any write or cleanup.
 !macro InstallerValidatePathFunction PREFIX
 Function ${PREFIX}InstallerValidatePath
-    StrCpy $InstallerError "$(INSTALLER_PATH_INVALID)"
+    StrCpy $InstallerError "$InstallerTextPathInvalid"
     StrLen $0 $InstallerPath
     ${If} $0 < 4
     ${OrIf} $0 > 180
@@ -132,7 +132,7 @@ Function InstallerPreflight
             ${If} $1 != "."
             ${AndIf} $1 != ".."
                 FindClose $0
-                StrCpy $InstallerError "$(INSTALLER_PATH_OWNERSHIP)"
+                StrCpy $InstallerError "$InstallerTextPathOwnership"
                 Return
             ${EndIf}
             FindNext $0 $1
@@ -149,13 +149,13 @@ Function InstallerPreflight
     ${Loop}
     System::Call 'kernel32::GetTempFileNameW(w r2, w "HIL", i 0, w .r3) i.r0'
     ${If} $0 == 0
-        StrCpy $InstallerError "$(INSTALLER_PATH_WRITABLE)"
+        StrCpy $InstallerError "$InstallerTextPathWritable"
         Return
     ${EndIf}
     System::Call 'kernel32::DeleteFileW(w r3)'
     System::Call 'kernel32::GetDiskFreeSpaceExW(w r2, *l .r0, p 0, p 0) i.r1'
     ${If} $1 == 0
-        StrCpy $InstallerError "$(INSTALLER_PATH_WRITABLE)"
+        StrCpy $InstallerError "$InstallerTextPathWritable"
         Return
     ${EndIf}
     IntOp $2 ${APP_64_UNPACKED_SIZE} + 65536
@@ -164,6 +164,6 @@ Function InstallerPreflight
     System::Int64Op $0 < $2
     Pop $0
     ${If} $0 != 0
-        StrCpy $InstallerError "$(INSTALLER_DISK_SPACE)"
+        StrCpy $InstallerError "$InstallerTextDiskSpace"
     ${EndIf}
 FunctionEnd

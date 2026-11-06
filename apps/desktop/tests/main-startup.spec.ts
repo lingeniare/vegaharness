@@ -219,6 +219,7 @@ const harness = await vi.hoisted(async () => {
     windows, views, hosts, handlers, app, FakeWindow, FakeView, FakeHost, powerMonitor, nativeTheme, analytics,
     trays, FakeTray, backgroundNotice, shellDialog,
     menu, popup, socketHeaders: vi.fn(), connectWelcome: vi.fn(), removeLegacyHostCookies: vi.fn(async () => {}), hostCookies: {},
+    writeLocalePreference: vi.fn(async (_preference: string) => {}),
     loginShell, readLoginShell, updateCheck, updateDownload, updateInstall,
     platformDispose,
     platformCloseAndWait,
@@ -289,6 +290,10 @@ const harness = await vi.hoisted(async () => {
       embeddedPolicy = undefined
       fileDrag.install.mockReset()
       fileDrag.dispose.mockReset().mockResolvedValue(undefined)
+      installerSeed.language = undefined
+      installerSeed.read.mockClear()
+      installerSeed.clear.mockClear()
+      harness.writeLocalePreference.mockReset().mockImplementation(async () => {})
       platformDisposeDeferred = undefined
       platformCloseDeferred = undefined
     },
@@ -417,11 +422,22 @@ vi.mock('../src/welcome-backend.ts', () => ({
       analyticsEnabled: async () => harness.analyticsEnabled,
       report: harness.analytics,
       readLocalePreference: async () => null,
+      writeLocalePreference: harness.writeLocalePreference,
       read: async (): Promise<unknown> => (await harness.hosts.at(-1)!.fetch()).json() as Promise<unknown>,
       save: async () => ({ ok: true }),
       account: { watch: harness.watchAccount, state: async () => ({ status: 'signed-out', attempt: null }) },
     }
   },
+}))
+
+const installerSeed = vi.hoisted(() => ({
+  language: undefined as string | undefined,
+  read: vi.fn((_directory: string) => installerSeed.language),
+  clear: vi.fn((_directory: string) => {}),
+}))
+vi.mock('../src/installer-locale.ts', () => ({
+  readDesktopInstallerLocale: installerSeed.read,
+  clearDesktopInstallerLocale: installerSeed.clear,
 }))
 
 function configureTestAuthPopup(allow: boolean): void {
@@ -1267,11 +1283,11 @@ describe('desktop main startup', () => {
     expect(harness.menu.setApplicationMenu).toHaveBeenCalledTimes(3)
   })
 
-  it('retains cached Chinese for a Host startup crash after the loading page reports English', async () => {
+  it('retains cached Russian for a Host startup crash after the loading page reports English', async () => {
     vi.spyOn(process, 'platform', 'get').mockReturnValue('win32')
     const directory = join(harness.app.getPath('userData'), 'desktop')
     mkdirSync(directory, { recursive: true })
-    writeFileSync(join(directory, 'locale-cache'), 'ru-CN\n')
+    writeFileSync(join(directory, 'locale-cache'), 'ru\n')
     await import('../src/main.ts')
     await harness.preparing.promise
     const window = harness.windows[0]!
@@ -1286,7 +1302,7 @@ describe('desktop main startup', () => {
     await host.stopping.promise
     host.exited.resolve()
     await harness.dialogShown.promise
-    expect(vi.mocked(writeCrashReport).mock.calls[0]![1].app.locale).toBe('en')
+    expect(vi.mocked(writeCrashReport).mock.calls[0]![1].app.locale).toBe('ru')
     expect((harness.dialog.showMessageBox.mock.calls[0]![0] as MessageBoxOptions).message).toBe(ru.fatalSummary)
   })
 
@@ -1306,7 +1322,7 @@ describe('desktop main startup', () => {
     expect(() => handler(event, 'application', NaN, 34)).toThrow('invalid popup request')
     const application = handler(event, 'application', 48, 34)
     expect(harness.menu.buildFromTemplate.mock.lastCall![0].map(item => item.label ?? item.type)).toEqual([
-      'О VEGA Harness', 'separator', 'Проверить наличие обновлений…', 'Управление командой dsh…', 'separator', ru.toggleDevToolsMenu, 'separator', 'Выйти',
+      'О VEGA Harness', 'separator', 'Проверить наличие обновлений…', 'Управление командой dsh…', 'separator', ru.toggleDevToolsMenu, 'separator', 'Выход',
     ])
     expect(harness.popup.mock.lastCall![0]).toMatchObject({ window, x: 48, y: 34 })
     expect(harness.popup.mock.lastCall![0].callback).toBeTypeOf('function')
@@ -1314,7 +1330,7 @@ describe('desktop main startup', () => {
     await application
     const edit = handler(event, 'edit', 104, 34)
     expect(harness.menu.buildFromTemplate.mock.lastCall![0].map(item => item.label ?? item.type)).toEqual([
-      'отменить', 'Повторить', 'separator', 'Вырезать', 'Копировать', 'Вставить', 'Удалить', 'separator', 'Выбрать все',
+      'Отменить', 'Повторить', 'separator', 'Вырезать', 'Копировать', 'Вставить', 'Удалить', 'separator', 'Выбрать все',
     ])
     const commands = harness.menu.buildFromTemplate.mock.lastCall![0].filter(item => item.type !== 'separator')
     for (const [index, keyCode] of ['Z', 'Y', 'X', 'C', 'V', 'Delete', 'A'].entries()) {
@@ -1539,6 +1555,45 @@ describe('desktop main startup', () => {
     await harness.navigated.promise
     return harness.hosts[0]!
   }
+
+  it('adopts the installer language seed into the shared preference on first launch', async () => {
+    vi.spyOn(process, 'platform', 'get').mockReturnValue('win32')
+    installerSeed.language = 'ru'
+    await readyForUpdate()
+    expect(installerSeed.read).toHaveBeenCalled()
+    await vi.waitFor(() => { expect(installerSeed.clear).toHaveBeenCalled() })
+    expect(harness.writeLocalePreference).toHaveBeenCalledWith('ru')
+    const cache = join(harness.app.getPath('userData'), 'desktop', 'locale-cache')
+    expect(readFileSync(cache, 'utf8').trim()).toBe('ru')
+  })
+
+  it('lets an existing locale preference win over the installer seed', async () => {
+    vi.spyOn(process, 'platform', 'get').mockReturnValue('win32')
+    installerSeed.language = 'ru'
+    await import('../src/main.ts')
+    await harness.preparing.promise
+    harness.prepared.resolve()
+    await harness.hostStarted.promise
+    const host = harness.hosts[0]!
+    host.fetch.mockResolvedValue(Response.json({ hasApiKey: true, writable: true, localePreference: 'en' }))
+    host.ready.resolve()
+    await harness.navigated.promise
+    await vi.waitFor(() => { expect(installerSeed.clear).toHaveBeenCalled() })
+    expect(harness.writeLocalePreference).not.toHaveBeenCalled()
+    const cache = join(harness.app.getPath('userData'), 'desktop', 'locale-cache')
+    expect(readFileSync(cache, 'utf8').trim()).toBe('en')
+  })
+
+  it('keeps the installer seed when the preference write fails so the next launch retries', async () => {
+    vi.spyOn(process, 'platform', 'get').mockReturnValue('win32')
+    installerSeed.language = 'ru'
+    harness.writeLocalePreference.mockRejectedValue(new Error('settings offline'))
+    await readyForUpdate()
+    await vi.waitFor(() => { expect(harness.writeLocalePreference).toHaveBeenCalledWith('ru') })
+    expect(installerSeed.clear).not.toHaveBeenCalled()
+    const cache = join(harness.app.getPath('userData'), 'desktop', 'locale-cache')
+    expect(readFileSync(cache, 'utf8').trim()).toBe('ru')
+  })
 
   it.each([
     ['win32', ['--updated'], true],

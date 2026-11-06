@@ -2,7 +2,8 @@
 [CmdletBinding()]
 param([Parameter(Mandatory)][string]$Installer, [Parameter(Mandatory)][string]$ProductName,
     [Parameter(Mandatory)][string]$RegistryKey,
-    [Parameter(Mandatory)][string]$OutputDirectory, [Parameter(Mandatory)][string]$Language)
+    [Parameter(Mandatory)][string]$OutputDirectory, [Parameter(Mandatory)][string]$Language,
+    [string]$SecondaryLanguage = '')
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'windows-installer-ui.ps1')
 Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes
@@ -13,9 +14,21 @@ $appPath = Join-Path $installPath ($ProductName + '.exe')
 $uninstaller = Join-Path $installPath ('Uninstall ' + $ProductName + '.exe')
 $processes = [Collections.Generic.List[Diagnostics.Process]]::new()
 $results = [Collections.Generic.List[string]]::new()
-$expected = Get-Content (Join-Path $PSScriptRoot 'expected/windows-installer.json') -Raw | ConvertFrom-Json
-$resource = Get-Content (Join-Path $PSScriptRoot "../installer/locales/$Language.json") -Encoding UTF8 -Raw | ConvertFrom-Json
-$localizedCopy = @{ $Language = $resource.strings }
+$expectedFile = 'windows-installer.json'
+if ($SecondaryLanguage -ne '') { $expectedFile = 'windows-installer-multilang.json' }
+$expected = Get-Content (Join-Path $PSScriptRoot "expected/$expectedFile") -Raw | ConvertFrom-Json
+$localizedCopy = @{}
+foreach ($id in (@($Language) + @($SecondaryLanguage) | Where-Object { $_ })) {
+    $resource = Get-Content (Join-Path $PSScriptRoot "../installer/locales/$id.json") -Encoding UTF8 -Raw | ConvertFrom-Json
+    $localizedCopy[$id] = $resource.strings
+}
+$script:copy = $null
+$script:activeLanguage = $null
+function Assert-Seed([string]$Dir, [string]$Id) {
+    $seed = Join-Path $Dir 'installer-locale'
+    if (-not (Test-Path -LiteralPath $seed)) { throw "Installer locale seed is missing: $seed" }
+    if ((Get-Content -LiteralPath $seed -Raw).Trim() -ne $Id) { throw "Installer locale seed is not '$Id'" }
+}
 function Wait-Control([Diagnostics.Process]$Process, [string]$Text, [switch]$Dialog) {
     $timer = [Diagnostics.Stopwatch]::StartNew()
     do {
@@ -26,8 +39,9 @@ function Wait-Control([Diagnostics.Process]$Process, [string]$Text, [switch]$Dia
     } while ($timer.Elapsed.TotalSeconds -lt 30)
     throw "Missing '$Text': $([InstallerCapture]::VisibleText($Process.Id))"
 }
-function Start-Setup([string]$Theme, [string]$Path = $installPath) {
+function Start-Setup([string]$Theme, [string]$Path = $installPath, [string]$Extra = '') {
     $arguments = '/THEME=' + $Theme
+    if ($Extra) { $arguments += ' ' + $Extra }
     if ($Path) { $arguments += ' /D=' + $Path }
     $process = Start-Process -FilePath $Installer -ArgumentList $arguments -PassThru -WindowStyle Normal
     $processes.Add($process)
@@ -51,6 +65,7 @@ function Start-Setup([string]$Theme, [string]$Path = $installPath) {
     })
     if ($languages.Count -ne 1) { throw "Cannot identify installer language: $([InstallerCapture]::VisibleText($process.Id))" }
     $script:copy = $localizedCopy[$languages[0]]
+    $script:activeLanguage = $languages[0]
     [void](Wait-Control $process $copy.INSTALLER_INSTALL)
     return $process
 }
@@ -133,6 +148,24 @@ try {
     $results.Add('welcome-presented-on-first-show')
     $window = [InstallerCapture]::Find($process.Id)
     [void][InstallerCapture]::Save($window, (Join-Path $OutputDirectory 'light-welcome.png'))
+    if ($SecondaryLanguage) {
+        $nextId = $SecondaryLanguage
+        if ($activeLanguage -eq $SecondaryLanguage) { $nextId = $Language }
+        $next = $localizedCopy[$nextId]
+        $flag = $copy.INSTALLER_LANGUAGE_EN
+        if ($nextId -eq 'ru_RU') { $flag = $copy.INSTALLER_LANGUAGE_RU }
+        [InstallerCapture]::Click((Wait-Control $process $flag))
+        [void](Wait-Control $process $next.INSTALLER_INSTALL)
+        [void](Wait-Control $process $next.INSTALLER_CHOOSE_PATH)
+        if ($next.INSTALLER_INSTALL -ne $copy.INSTALLER_INSTALL -and
+            [InstallerCapture]::FindButton($process.Id, $copy.INSTALLER_INSTALL) -ne [IntPtr]::Zero) {
+            throw 'Previous language caption remained after switching'
+        }
+        $script:copy = $next
+        $script:activeLanguage = $nextId
+        [void][InstallerCapture]::Save($window, (Join-Path $OutputDirectory 'light-welcome-switched.png'))
+        $results.Add('language-selector-switches-installer-copy')
+    }
     Click-Control $process $copy.INSTALLER_CHOOSE_PATH
     $edit = Wait-Control $process $installPath
     [void][InstallerCapture]::Save($window, (Join-Path $OutputDirectory 'light-path.png'))
@@ -152,6 +185,8 @@ try {
     Click-Control $process $copy.INSTALLER_INSTALL
     Finish-Setup $process $false light $bounds
     if (-not (Test-Path -LiteralPath $appPath) -or (Test-Path -LiteralPath (Join-Path $installPath 'launched.txt'))) { throw 'Unchecked launch behavior failed' }
+    Assert-Seed $installPath $activeLanguage.Substring(0, 2)
+    $results.Add('installer-locale-seed-records-installer-language')
     $results.Add('enter-validates-current-path-and-unchecked-launch')
     $results.Add('completion-preserves-window-position')
     $results.Add('welcome-ready-before-first-show')
@@ -177,7 +212,8 @@ try {
     }
     $results.Add('locked-directory-shows-error-and-copy-control-and-preserves-installation')
 
-    $process = Start-Setup dark ''
+    $process = Start-Setup dark '' ('/LANG=' + $Language)
+    $results.Add('language-argument-selects-installer-copy')
     Click-Control $process $copy.INSTALLER_CHOOSE_PATH
     $edit = Wait-Control $process $installPath
     [void][InstallerCapture]::SendMessage($edit, 0xC, [IntPtr]::Zero, ($installPath + '\\'))
@@ -185,6 +221,7 @@ try {
     $bounds = [InstallerCapture]::Bounds([InstallerCapture]::Find($process.Id))
     Click-Control $process $copy.INSTALLER_INSTALL
     Finish-Setup $process $true dark $bounds
+    Assert-Seed $installPath $Language.Substring(0, 2)
     $registration = Get-ItemProperty ('HKCU:\Software\' + $RegistryKey)
     if ($registration.InstallLocation.TrimEnd('\') -ne $installPath -or -not (Test-Path -LiteralPath $appPath)) {
         throw 'Trailing separators changed the registered installation directory'
@@ -245,6 +282,17 @@ try {
     $registration = Get-ItemProperty ('HKCU:\Software\' + $RegistryKey)
     if ($registration.InstallLocation.TrimEnd('\') -ne $installPath) { throw 'Silent update changed InstallLocation' }
     $results.Add('silent-update-retains-directory-and-ignores-unrelated-process')
+    Run-Silent ('/S /LANG=' + $Language + ' /D=' + $installPath) 0
+    Assert-Seed $installPath $Language.Substring(0, 2)
+    $results.Add('silent-language-argument-records-seed')
+    Run-Silent ('/S /LANG=fr_FR /D=' + $installPath) 2
+    $results.Add('invalid-language-rejection')
+    if (-not $SecondaryLanguage) {
+        $uncompiled = 'en_US'
+        if ($Language -eq 'en_US') { $uncompiled = 'ru_RU' }
+        Run-Silent ('/S /LANG=' + $uncompiled + ' /D=' + $installPath) 2
+        $results.Add('uncompiled-language-rejection')
+    }
     Run-Silent ('/S /allusers /D=' + $installPath) 2
     $foreign = Join-Path $OutputDirectory 'Foreign App'
     New-Item -ItemType Directory -Path $foreign | Out-Null
