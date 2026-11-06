@@ -41,7 +41,7 @@ export async function createArtifactUpdateServer(files) {
     const record = { path, artifact: selected, corrupt: damage, range: request.headers.range, bytes: 0 }
     requests.push(record)
     response.setHeader('Cache-Control', 'no-store')
-    if (path === '/nightly.yml') {
+    if (path === '/stable.yml') {
       response.setHeader('Content-Type', 'application/yaml')
       response.end(dump({ version: '1.0.1-nightly.1', files: [{
         url: `${origin}/payload-1.0.1-nightly.1.exe`, size: artifact.size, sha512: artifact.sha512,

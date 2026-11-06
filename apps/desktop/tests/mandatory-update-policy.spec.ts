@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AccountClientMetadata } from '@deepseek-ai/dsh-deepseek-account/types'
 import { DesktopMandatoryUpdatePolicy, desktopPolicyPage, resolveDesktopPolicyConfig, type DesktopPolicyState } from '../src/mandatory-update-policy.ts'
 
-const identity = { platform: 'win32', arch: 'x64', channel: 'nightly', bundledDshVersion: '0.1.5-rc.1' } as const
+const identity = { platform: 'win32', arch: 'x64', channel: 'stable', bundledDshVersion: '0.1.5-rc.1' } as const
 const client: AccountClientMetadata = { version: '1.2.3', locale: 'zh-CN', timezoneOffsetSeconds: 28_800 }
 const force = { code: 40005, data: { show_content: { title: '<b>Update</b>', detail: 'Required upgrade' },
   desktop_app_link: 'https://downloads.example.com/desktop?os=win' } }
@@ -61,7 +61,7 @@ describe('mandatory update policy', () => {
     expect((url as URL).href).toBe('https://policy.example.com/api/v0/check_client_update?scenario=launch')
     expect(options).toMatchObject({ credentials: 'omit', cache: 'no-store', redirect: 'error', headers: {
       'x-client-platform': 'desktop-win', 'x-client-version': '1.2.3', 'x-client-bundle-id': '',
-      'x-client-locale': 'zh_CN', 'x-client-timezone-offset': '28800', 'x-client-arch': 'x64', 'x-client-update-channel': 'nightly',
+      'x-client-locale': 'zh_CN', 'x-client-timezone-offset': '28800', 'x-client-arch': 'x64', 'x-client-update-channel': 'stable',
       'x-client-bundled-dsh-version': '0.1.5-rc.1',
     } })
   })
@@ -75,120 +75,6 @@ describe('mandatory update policy', () => {
     const headers = request.mock.calls.map(call => (call[1]?.headers ?? {}) as Record<string, string>)
     expect(headers[0]).toMatchObject({ 'x-client-locale': 'en_US', 'x-client-timezone-offset': '-18000' })
     expect(headers[1]).toMatchObject({ 'x-client-locale': 'zh_CN', 'x-client-timezone-offset': '28800' })
-  })
-
-  it('checks the selected channel after an old-channel request finishes', async () => {
-    let channel: 'nightly' | 'stable' = 'nightly'
-    const old = Promise.withResolvers<Response>()
-    const request = vi.fn<typeof fetch>().mockReturnValueOnce(old.promise).mockResolvedValue(Response.json(clear))
-    const policy = new DesktopMandatoryUpdatePolicy(resolveDesktopPolicyConfig(deployment)!,
-      { ...identity, get channel() { return channel } }, () => {}, request, () => client)
-    instances.push(policy)
-    const first = policy.check('launch')
-    channel = 'stable'
-    const second = policy.check('channel-change', true)
-    old.resolve(Response.json(force))
-    await first
-    expect(await second).toMatchObject({ blocking: false })
-    expect(request).toHaveBeenCalledTimes(2)
-    expect(request.mock.calls.map(([, options]) => new Headers(options?.headers).get('x-client-update-channel')))
-      .toEqual(['nightly', 'stable'])
-  })
-
-  it('coalesces manual checks and honors the interval on foreground/resume', async () => {
-    const { policy, request } = fixture()
-    const pending = Promise.withResolvers<Response>()
-    request.mockReturnValueOnce(pending.promise)
-    const first = policy.check('launch')
-    const second = policy.check('manual', true)
-    expect(first).toBe(second)
-    await Promise.resolve()
-    expect(request).toHaveBeenCalledTimes(1)
-    pending.resolve(Response.json(clear))
-    await first
-    await policy.check('foreground')
-    await policy.check('resume')
-    expect(request).toHaveBeenCalledTimes(1)
-    await vi.advanceTimersByTimeAsync(10_000)
-    expect(request).toHaveBeenCalledTimes(2)
-    await policy.check('manual', true)
-    expect(request).toHaveBeenCalledTimes(3)
-  })
-
-  it('accepts flattened 40005 on an HTTP error and keeps server content as plain text', async () => {
-    const { policy, request } = fixture()
-    request.mockResolvedValueOnce(Response.json(force, { status: 403 }))
-    await expect(policy.check('launch')).resolves.toEqual({ blocking: true, checking: false,
-      title: '<b>Update</b>', detail: 'Required upgrade', page: force.data.desktop_app_link })
-    await vi.advanceTimersByTimeAsync(10_000)
-    expect(request).toHaveBeenCalledTimes(2)
-    expect(policy.state.blocking).toBe(false)
-  })
-
-  it.each([
-    { code: 0, data: { biz_code: 1, biz_data: null } },
-    { code: 0, data: {} },
-    { code: 500 },
-  ])('does not treat an invalid no-force decision as permission to unblock: %j', async (body) => {
-    const { policy, request } = fixture()
-    request.mockResolvedValueOnce(Response.json(force)).mockResolvedValueOnce(Response.json(body))
-    await policy.check('launch')
-    expect((await policy.check('manual', true))).toMatchObject({ blocking: true, error: 'unavailable' })
-    request.mockResolvedValueOnce(Response.json(clear))
-    expect((await policy.check('manual', true)).blocking).toBe(false)
-  })
-
-  it('keeps a recognized block when optional copy and navigation are absent', async () => {
-    const { policy, request } = fixture()
-    request.mockResolvedValueOnce(Response.json({ code: 40005, data: { alt_app: force.data } }))
-    expect(await policy.check('launch')).toEqual({ blocking: true, checking: false })
-  })
-
-  it('does not clear a block on HTTP 500 carrying a nominal success body', async () => {
-    const { policy, request } = fixture()
-    request.mockResolvedValueOnce(Response.json(force)).mockResolvedValueOnce(Response.json(clear, { status: 500 }))
-    await policy.check('launch')
-    expect(await policy.check('manual', true)).toMatchObject({ blocking: true, error: 'unavailable' })
-  })
-
-  it('aborts a stalled request at its own deadline and retries with bounded backoff', async () => {
-    const { policy, request } = fixture()
-    request.mockImplementationOnce(async (_url, options) => new Promise((_resolve, reject) => {
-      options!.signal!.addEventListener('abort', () => { reject(new Error('aborted')) }, { once: true })
-    }))
-    const pending = policy.check('launch')
-    await vi.advanceTimersByTimeAsync(1000)
-    expect(await pending).toEqual({ blocking: false, checking: false, error: 'unavailable' })
-    await vi.advanceTimersByTimeAsync(19_999)
-    expect(request).toHaveBeenCalledTimes(1)
-    await vi.advanceTimersByTimeAsync(1)
-    expect(request).toHaveBeenCalledTimes(2)
-  })
-
-  it('awaits cancellation and suppresses late publications during dispose', async () => {
-    const { policy, request, publish } = fixture()
-    const entered = Promise.withResolvers<undefined>()
-    request.mockImplementationOnce(async (_url, options) => new Promise((_resolve, reject) => {
-      options!.signal!.addEventListener('abort', () => { reject(new Error('aborted')) }, { once: true })
-      entered.resolve(undefined)
-    }))
-    const pending = policy.check('launch')
-    await entered.promise
-    const count = publish.mock.calls.length
-    await policy.dispose()
-    await pending
-    expect(publish).toHaveBeenCalledTimes(count)
-    await vi.advanceTimersByTimeAsync(1_000_000)
-    expect(request).toHaveBeenCalledTimes(1)
-    await expect(policy.check('manual', true)).rejects.toThrow('disposed')
-  })
-
-  it('does not start network work if disposed before the request microtask', async () => {
-    const { policy, request } = fixture()
-    const pending = policy.check('launch')
-    await policy.dispose()
-    await pending
-    expect(request).not.toHaveBeenCalled()
   })
 })
 

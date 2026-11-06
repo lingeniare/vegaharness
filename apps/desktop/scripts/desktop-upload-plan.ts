@@ -44,7 +44,7 @@ export interface DesktopUploadArtifact {
 /** Shared shape of a validated installer or update upload, channel metadata ordered last. */
 interface DesktopUploadPlanBase {
   readonly environment: 'test' | 'production'
-  readonly channel: 'nightly' | 'stable'
+  readonly channel: 'stable'
   readonly target: DesktopPackageTargetName
   readonly version: string
   /** Update feed directory URL, or the single installer URL for a fixed download. */
@@ -245,13 +245,13 @@ export async function createDesktopUploadPlan(
   }
   if (buildRecord.schemaVersion !== 1
     || buildRecord.target !== targetName
-    || (buildRecord.channel ?? 'nightly') !== update.channel
+    || (buildRecord.channel ?? 'stable') !== update.channel
     || buildRecord.environment !== update.environment
     || buildRecord.publicUrl !== update.publicUrl) {
     throw new Error(`desktop upload: ${targetName} package completion record for ${buildVersion} does not match the ${update.environment} update destination`)
   }
 
-  const metadataFilename = desktopUpdateMetadataFilename(buildVersion, target.platform, update.channel)
+  const metadataFilename = desktopUpdateMetadataFilename(buildVersion, target.platform)
   const metadataPath = join(artifactsRoot, metadataFilename)
   let metadataText: string
   let metadataValue: unknown

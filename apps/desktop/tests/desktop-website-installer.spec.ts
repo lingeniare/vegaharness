@@ -17,7 +17,7 @@ async function fixture(target: DesktopPublishRoute['target'] = 'mac-arm64') {
   roots.push(directory)
   const bytes = Buffer.from('final installer bytes')
   const route: DesktopPublishRoute = { runId: '12', attempt: '1', commit: 'a'.repeat(40), sourceRef: 'master',
-    channel: 'nightly', runnerName: 'mini', runnerLabel: 'dsh-mini', target, preset: 'production' }
+    channel: 'stable', runnerName: 'mini', runnerLabel: 'dsh-mini', target, preset: 'production' }
   const filename = `deepseek-harness-0.2.1-rc.5-${target}.${target === 'win-x64' ? 'exe' : 'dmg'}`
   await writeFile(join(directory, filename), bytes)
   const manifest: DesktopRetainedManifest = { schemaVersion: 1, source: {
@@ -31,7 +31,7 @@ async function fixture(target: DesktopPublishRoute['target'] = 'mac-arm64') {
 it.each(['mac-arm64', 'mac-x64', 'win-x64'] as const)('accepts only the final %s installer without any update files or current checkout version', async (target) => {
   const f = await fixture(target)
   f.manifest = { ...f.manifest, files: [...f.manifest.files,
-    { name: 'missing-update.zip', size: 1, sha512: 'unused' }, { name: 'nightly.yml', size: 1, sha512: 'unused' }] }
+    { name: 'missing-update.zip', size: 1, sha512: 'unused' }, { name: 'stable.yml', size: 1, sha512: 'unused' }] }
   const installer = await prepareWebsiteInstaller(f.directory, f.manifest, f.route, 'owner/repo', 'production-123')
   try {
     expect(installer.plan.version).toBe('0.2.1-rc.5')

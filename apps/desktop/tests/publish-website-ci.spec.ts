@@ -25,7 +25,7 @@ it.each(['accepted', 'unconfirmed', 'incomplete', 'wrong-journal', 'upload', 'pu
       bucket: 'production-123', origin: 'https://download.deepseek.com', credentialsFile,
       githubApp: { clientId: 'app', privateKeyFile: join(root, 'app.pem') },
     }))
-    const route = { runId: '12', attempt: '1', commit: 'a'.repeat(40), sourceRef: 'master', channel: scenario === 'stable' ? 'stable' : 'nightly',
+    const route = { runId: '12', attempt: '1', commit: 'a'.repeat(40), sourceRef: 'master', channel: 'stable',
       runnerName: 'mini', runnerLabel: 'dsh-mini', target: 'mac-arm64', preset: 'production' }
     const manifest = { schemaVersion: 1, source: { repository: 'owner/repo', runId: '12', attempt: '1', commit: route.commit,
       workflowCommit: route.commit, sourceRef: 'master', channel: route.channel, runnerName: 'mini', target: 'mac-arm64',

@@ -36,7 +36,7 @@ export async function createUpdateServer() {
         } : { code: 0, data: { biz_code: 0, biz_data: null } }))
         return
       }
-      if (path === '/nightly.yml') {
+      if (path === '/stable.yml') {
         if (selectedMode === 'feed-stall') return
         if (selectedMode === 'feed-404') { response.writeHead(404).end(); return }
         if (selectedMode === 'feed-408') { response.writeHead(408).end(); return }

@@ -81,8 +81,8 @@ export async function verifyInstalledUpdatePackageContent(manifest: string, vers
     dependencies.push({ name, version: actual.version })
   }
   const update = object(load(await readFile(join(payload, 'resources/app-update.yml'), 'utf8')))
-  const url = `${run.origin}/${run.feedKey.slice(0, -'nightly.yml'.length)}`
-  if (update.provider !== 'generic' || update.url !== url || update.channel !== 'nightly'
+  const url = `${run.origin}/${run.feedKey.slice(0, -'stable.yml'.length)}`
+  if (update.provider !== 'generic' || update.url !== url || update.channel !== 'stable'
     || update.updaterCacheDirName !== `dsh-update-test-${run.id}-updater`
     || !Array.isArray(update.publisherName) || update.publisherName.length !== 1 || update.publisherName[0] !== publisher) {
     throw new Error('installed update: packaged feed, cache identity, channel, or publisher differs')

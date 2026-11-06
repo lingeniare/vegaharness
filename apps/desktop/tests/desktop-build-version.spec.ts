@@ -30,7 +30,7 @@ describe('desktop build version', () => {
     expect(validateDesktopBuildVersion(productVersion, productVersion)).toBe(productVersion)
   })
 
-  it.each(['', 'nightly', '0.1.6-alpha.2.'])(
+  it.each(['', 'stable', '0.1.6-alpha.2.'])(
     'rejects %j as a version', (buildVersion) => {
       expect(() => validateDesktopBuildVersion(buildVersion, PRERELEASE)).toThrow(/is not a version/u)
     })

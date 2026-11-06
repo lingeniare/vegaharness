@@ -44,7 +44,7 @@ try {
     signingManager: { value: Promise.resolve(manager) },
     isForceCodeSigningVerification: true,
     info: {},
-    config: { publish: [{ provider: 'generic', url: 'https://unused.invalid/', channel: 'nightly' }] },
+    config: { publish: [{ provider: 'generic', url: 'https://unused.invalid/', channel: 'stable' }] },
     expandMacro: value => value,
   }, null, 1, true)
   assert.deepEqual(metadata.publisherName, [publisherName])

@@ -6,7 +6,6 @@ import { z } from 'zod'
 
 const preferencesSchema = z.object({
   allowTestAuthPopupWindow: z.boolean(),
-  channel: z.enum(['nightly', 'stable']),
 })
 const documentSchema = z.looseObject({ updates: z.looseObject({}).optional() })
 
@@ -57,16 +56,7 @@ function field<T>(schema: z.ZodType<T>, value: unknown, name: keyof DesktopUpdat
 }
 
 /**
- * Validate a channel at the IPC boundary using the same schema as file loading.
- * @param value - Untrusted input.
- * @returns Whether the input is a supported channel.
- */
-export function isDesktopUpdateChannel(value: unknown): value is DesktopUpdatePreferences['channel'] {
-  return preferencesSchema.shape.channel.safeParse(value).success
-}
-
-/**
- * Resolve the document shared by shell preferences and update channels.
+ * Resolve the document shared by shell update preferences.
  * @param userData - Electron userData, independent of Host and DSH_HOME.
  * @returns Settings file path without filesystem changes.
  */
@@ -103,7 +93,6 @@ export class DesktopSettingsFile {
     return { kind: 'ready', document, fields: {
       allowTestAuthPopupWindow: field(preferencesSchema.shape.allowTestAuthPopupWindow,
         document.updates?.allowTestAuthPopupWindow, 'allowTestAuthPopupWindow', this.path),
-      channel: field(preferencesSchema.shape.channel, document.updates?.channel, 'channel', this.path),
     } }
   }
 

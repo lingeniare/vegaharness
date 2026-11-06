@@ -64,7 +64,7 @@ The verifier checks actual archived application identity, entry, frozen applicat
 
 Follow the separate [upload and publication procedure](publication/README.md). Leave the fixed feed absent for the 404 case, then publish version 1 for the same-version case. Keep version 2 metadata local until both cases finish in the installed version 1 application. Retain publication records and remote objects for diagnosis; do not delete a published feed to recreate an earlier case.
 
-The local `files` command accepts `<run.json>` and one exact run version. It reads that version's `installer/nightly.yml`, verifies the expected installer name, size, SHA-512, and nonempty external blockmap, and prints separate binary destinations and a fixed-feed body. Missing installers fail validation. It writes nothing and reads no credentials. Its `file-integrity-only` result cannot authorize upload or replace verification of signed package contents and application identity; those remain required before publication.
+The local `files` command accepts `<run.json>` and one exact run version. It reads that version's `installer/stable.yml`, verifies the expected installer name, size, SHA-512, and nonempty external blockmap, and prints separate binary destinations and a fixed-feed body. Missing installers fail validation. It writes nothing and reads no credentials. Its `file-integrity-only` result cannot authorize upload or replace verification of signed package contents and application identity; those remain required before publication.
 
 <a id="sequence"></a>
 

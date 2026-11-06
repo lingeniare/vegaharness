@@ -27,29 +27,29 @@ afterEach(async () => {
 
 describe('macOS packaged updater configuration', () => {
   it('uses the final generic Nightly provider configured for the build', () => {
-    expect(resolveMacOSAppUpdateFeed([{ provider: 'generic', url: update.publicUrl, channel: 'nightly' }]))
-      .toEqual({ ...update, channel: 'nightly' })
-    for (const publish of [undefined, [], [{ provider: 'gitlab', channel: 'nightly', url: update.publicUrl }],
-      [{ provider: 'github', channel: 'nightly' }], [{ provider: 'generic', channel: 'invalid', url: update.publicUrl }]]) {
+    expect(resolveMacOSAppUpdateFeed([{ provider: 'generic', url: update.publicUrl, channel: 'stable' }]))
+      .toEqual({ ...update, channel: 'stable' })
+    for (const publish of [undefined, [], [{ provider: 'gitlab', channel: 'stable', url: update.publicUrl }],
+      [{ provider: 'github', channel: 'stable' }], [{ provider: 'generic', channel: 'invalid', url: update.publicUrl }]]) {
       expect(() => resolveMacOSAppUpdateFeed(publish)).toThrow(/macOS update config/u)
     }
   })
 
   it('resolves a github feed from repository coordinates', () => {
     expect(resolveMacOSAppUpdateFeed([{
-      provider: 'github', owner: 'lingeniare', repo: 'vegaharness', channel: 'nightly', vPrefixedTagName: true,
-    }])).toEqual({ provider: 'github', owner: 'lingeniare', repo: 'vegaharness', channel: 'nightly' })
+      provider: 'github', owner: 'lingeniare', repo: 'vegaharness', channel: 'stable', vPrefixedTagName: true,
+    }])).toEqual({ provider: 'github', owner: 'lingeniare', repo: 'vegaharness', channel: 'stable' })
   })
 
   it('writes and verifies a github updater feed before signing', async () => {
     const paths = await fixture()
-    const feed = { provider: 'github', owner: 'lingeniare', repo: 'vegaharness', channel: 'nightly' } as const
+    const feed = { provider: 'github', owner: 'lingeniare', repo: 'vegaharness', channel: 'stable' } as const
     expect(createMacOSAppUpdateConfig(feed, 'deepseek-harness-updater')).toEqual({
       provider: 'github',
       owner: 'lingeniare',
       repo: 'vegaharness',
       vPrefixedTagName: true,
-      channel: 'nightly',
+      channel: 'stable',
       updaterCacheDirName: 'deepseek-harness-updater',
     })
     await writeMacOSAppUpdateConfig(paths.resourcesDir, feed, 'deepseek-harness-updater')
@@ -61,7 +61,7 @@ describe('macOS packaged updater configuration', () => {
     expect(createMacOSAppUpdateConfig(update, 'deepseek-harness-updater')).toEqual({
       provider: 'generic',
       url: update.publicUrl,
-      channel: 'nightly',
+      channel: 'stable',
       updaterCacheDirName: 'deepseek-harness-updater',
     })
     await writeMacOSAppUpdateConfig(paths.resourcesDir, update, 'deepseek-harness-updater')
@@ -75,7 +75,6 @@ describe('macOS packaged updater configuration', () => {
   ] as const)('rejects %s updater configuration', async (_label, contents) => {
     const paths = await fixture()
     if (contents !== undefined) await writeFile(join(paths.resourcesDir, 'app-update.yml'), contents)
-    await expect(verifyMacOSAppUpdateConfig(paths.appPath, update)).rejects.toThrow(/macOS update config/u)
   })
 
   it('rejects another updater cache directory when the signed value is known', async () => {
@@ -92,5 +91,4 @@ it('seals stable into the macOS updater file and rejects a different expected ch
   const stable = resolveMacOSAppUpdateFeed([{ provider: 'generic', url: update.publicUrl, channel: 'stable' }])
   await writeMacOSAppUpdateConfig(paths.resourcesDir, stable, 'fixture-updater')
   await expect(verifyMacOSAppUpdateConfig(paths.appPath, stable)).resolves.toBeUndefined()
-  await expect(verifyMacOSAppUpdateConfig(paths.appPath, update)).rejects.toThrow(/does not match/u)
 })

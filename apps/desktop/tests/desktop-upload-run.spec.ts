@@ -28,11 +28,11 @@ async function fixture(environment: 'test' | 'production' = 'test') {
   await writeFile(binary, BINARY_BYTES)
   const bucket = `${environment}-fixture-1250000000`
   const plan: DesktopUploadPlan = {
-    provider: 'generic', environment, channel: 'nightly', target: 'win-x64', version: '1.2.3', bucket,
+    provider: 'generic', environment, channel: 'stable', target: 'win-x64', version: '1.2.3', bucket,
     publicUrl: `https://${environment}.invalid/feed/`, secretIdEnvName: 'UNREAD_ID', secretKeyEnvName: 'UNREAD_KEY',
     artifacts: [
       { path: binary, filename: 'package.exe', key: 'bin/package.exe', contentType: 'application/octet-stream', channelMetadata: false },
-      { path: join(root, 'nightly.yml'), filename: 'nightly.yml', key: 'feeds/nightly.yml', contentType: 'application/yaml', channelMetadata: true,
+      { path: join(root, 'stable.yml'), filename: 'stable.yml', key: 'feeds/stable.yml', contentType: 'application/yaml', channelMetadata: true,
         contents: FEED_BYTES },
     ],
   }
@@ -95,7 +95,7 @@ describe('release upload audit with the real COS SDK and an isolated loopback or
     expectExactObject(loopback.requests[0]!, BINARY_BYTES, 'application/octet-stream', f.bucket)
     expectExactObject(loopback.requests[1]!, FEED_BYTES, 'application/yaml', f.bucket)
     expect(loopback.requests[0]!.path).toBe('/bin/package.exe')
-    expect(loopback.requests[1]!.path).toBe('/feeds/nightly.yml')
+    expect(loopback.requests[1]!.path).toBe('/feeds/stable.yml')
     for (const request of loopback.requests) {
       const authorization = String(request.headers.authorization)
       expect(authorization).toContain('q-sign-algorithm=sha1')

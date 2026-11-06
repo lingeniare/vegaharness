@@ -20,7 +20,7 @@ async function fixture<T>(body: (manifest: string) => Promise<T>): Promise<T> {
       const body = Buffer.from(`inert fixture ${version}`)
       await writeFile(join(output, filename), body)
       await writeFile(join(output, `${filename}.blockmap`), 'inert map')
-      await writeFile(join(output, 'nightly.yml'), JSON.stringify({ version,
+      await writeFile(join(output, 'stable.yml'), JSON.stringify({ version,
         files: [{ url: filename, size: body.length, sha512: createHash('sha512').update(body).digest('base64') }] }))
     }
     return await body(join(run.root, 'run.json'))
@@ -36,7 +36,7 @@ describe('qualification distribution file planning', () => {
       expect(old!.binaries.map(file => file.key)).not.toEqual(next!.binaries.map(file => file.key))
       expect(next!.binaries).toHaveLength(2)
       expect(next!.binaries.every(file => file.key.startsWith('dsh-desk/bin/qualification/'))).toBe(true)
-      expect(next!.feed.key).toMatch(/^dsh-desk\/feeds\/qualification\/[a-f0-9]{24}\/win-x64\/nightly.yml$/u)
+      expect(next!.feed.key).toMatch(/^dsh-desk\/feeds\/qualification\/[a-f0-9]{24}\/win-x64\/stable.yml$/u)
       expect(next!.publicationAuthorized).toBe(false)
       expect(next!.verified).toBe('file-integrity-only')
       expect(load(next!.feed.contents)).toMatchObject({ version: versions[1],
@@ -49,7 +49,7 @@ describe('qualification distribution file planning', () => {
       await fixture(async (manifest) => {
         const plan = await planInstalledUpdateDistribution(manifest, versions[0])
         const installer = plan.binaries[0]!.path
-        const metadataPath = join(installer, '..', 'nightly.yml')
+        const metadataPath = join(installer, '..', 'stable.yml')
         const metadata = JSON.parse(await readFile(metadataPath, 'utf8')) as { version: string; files: { url: string }[]; sha512?: string }
         if (failure === 'changed-bytes') await writeFile(installer, 'changed')
         if (failure === 'missing-map') await rm(plan.binaries[1]!.path)

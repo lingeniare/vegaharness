@@ -55,7 +55,7 @@ async function main() {
     updater.httpExecutor = new DesktopUpdateHttpExecutor(timeoutMs)
     updater.disableDifferentialDownload = true
     updater.disableWebInstaller = true
-    updater.setFeedURL({ provider: 'generic', url: server.url, channel: 'nightly' })
+    updater.setFeedURL({ provider: 'generic', url: server.url, channel: 'stable' })
     const installations = []
     const states = []
     let restart = async () => true

@@ -2099,7 +2099,7 @@ it('refuses to list versions of a package not installed from a registry', async 
   aliased.dependencies = { ...aliased.dependencies, linked: 'npm:other-plugin@1.0.0' }
   writeFileSync(join(dir, 'package.json'), JSON.stringify(aliased))
   expect(await manager.listVersions('linked')).toEqual(refusal('linked is not installed from a registry under its own name'))
-  writeFileSync(join(dir, 'node_modules', 'extra', 'package.json'), JSON.stringify({ name: 'extra', version: 'nightly', dsh: BUNDLE }))
+  writeFileSync(join(dir, 'node_modules', 'extra', 'package.json'), JSON.stringify({ name: 'extra', version: 'stable', dsh: BUNDLE }))
   expect(await manager.listVersions('extra')).toEqual(refusal('extra declares no semver version'))
   // A bundle carrying plugin management cannot be removed, so it is not offered for an update.
   writeFileSync(join(dir, 'node_modules', 'extra', 'cordis.patch.yml'), JSON.stringify([{ insert: [{ id: 'pm', name: '@deepseek-ai/dsh-plugin-manager' }] }]))

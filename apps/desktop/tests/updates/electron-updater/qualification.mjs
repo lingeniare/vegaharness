@@ -53,9 +53,9 @@ async function main() {
     target.setFeedURL({ provider: 'generic', url: origin })
     target.quitAndInstall = forbidden
     target.on('error', () => {}) // Awaited check/download promises report failures.
-    selectUpdateChannel(target, 'nightly')
+    selectUpdateChannel(target, 'stable')
     assert.ok((await target.checkForUpdates()).updateInfo)
-    assert.equal(requests.at(-1), `/nightly${process.platform === 'darwin' ? '-mac' : ''}.yml`)
+    assert.equal(requests.at(-1), `/stable${process.platform === 'darwin' ? '-mac' : ''}.yml`)
     selectUpdateChannel(target, 'stable')
     await target.checkForUpdates()
     assert.equal(requests.at(-1), `/stable${process.platform === 'darwin' ? '-mac' : ''}.yml`)
@@ -79,7 +79,7 @@ async function main() {
     await target.checkForUpdates()
     assert.equal(target.updateInfoAndProvider, null)
     percentage = 100
-    selectUpdateChannel(target, 'nightly')
+    selectUpdateChannel(target, 'stable')
     await target.checkForUpdates()
     assert.ok(target.updateInfoAndProvider)
     assert.equal(target.allowDowngrade, false)

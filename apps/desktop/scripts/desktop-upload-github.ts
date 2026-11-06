@@ -102,7 +102,7 @@ export async function resolveGithubRelease(
     tag_name: tag,
     name: `VEGA Harness ${plan.version}`,
     draft: true,
-    prerelease: plan.channel === 'nightly',
+    prerelease: false,
     ...plan.commit === undefined ? {} : { target_commitish: plan.commit },
   })
   return { id: created.id, uploadUrl: releaseUploadUrl(created) }
@@ -117,7 +117,7 @@ export async function publishGithubRelease(
   const api = client(options)
   await api.json('PATCH', `/repos/${plan.owner}/${plan.repo}/releases/${releaseId}`, {
     draft: false,
-    make_latest: plan.channel === 'stable' ? 'legacy' : 'false',
+    make_latest: 'legacy',
   })
 }
 

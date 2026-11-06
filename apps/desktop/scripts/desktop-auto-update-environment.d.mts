@@ -41,7 +41,7 @@ export function desktopGithubInstallerFilename(target: DesktopAutoUpdateTarget):
 export interface DesktopGenericUpdateConfig {
   readonly provider: 'generic'
   readonly environment: DesktopAutoUpdateEnvironment
-  readonly channel: 'nightly' | 'stable'
+  readonly channel: 'stable'
   readonly target: DesktopAutoUpdateTarget
   readonly origin: string
   readonly publicUrl: string
@@ -53,7 +53,7 @@ export interface DesktopGenericUpdateConfig {
 export interface DesktopGithubUpdateConfig {
   readonly provider: 'github'
   readonly environment: DesktopAutoUpdateEnvironment
-  readonly channel: 'nightly' | 'stable'
+  readonly channel: 'stable'
   readonly target: DesktopAutoUpdateTarget
   readonly owner: string
   readonly repo: string
@@ -131,7 +131,6 @@ export function desktopBuildRecordFilename(target: DesktopAutoUpdateTarget): str
 export function desktopUpdateMetadataFilename(
   version: string,
   platform: NodeJS.Platform,
-  channel?: 'nightly' | 'stable',
 ): string
 
 /**
@@ -163,11 +162,10 @@ export function resolveDesktopUploadConfig(
 ): DesktopUploadConfig
 
 /**
- * Resolve the packaged update channel, defaulting omitted local settings to nightly.
- * @param env Packaging settings.
- * @returns Validated channel.
+ * The only supported Desktop update channel; installers always carry stable.
+ * @returns Fixed channel.
  */
-export function resolveDesktopUpdateChannel(env: NodeJS.ProcessEnv): 'nightly' | 'stable'
+export function resolveDesktopUpdateChannel(): 'stable'
 
 /**
  * Read a required nonempty deployment setting.

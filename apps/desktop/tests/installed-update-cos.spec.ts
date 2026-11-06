@@ -182,7 +182,7 @@ describe('qualification COS transport with real SDK serialization over a loopbac
     expect(fetch).toHaveBeenCalledWith(url, expect.objectContaining({ redirect: 'error', cache: 'no-store' }))
     await expect(cos.publicRead(`${url}?fresh=1`)).rejects.toThrow('exact test public URL')
     await expect(cos.publicRead(url.replace('download-test', 'download'))).rejects.toThrow('exact test public URL')
-    await expect(cos.read('dsh-desk/feeds/nightly.yml')).rejects.toThrow('qualification namespace')
+    await expect(cos.read('dsh-desk/feeds/stable.yml')).rejects.toThrow('qualification namespace')
   })
 
   it('refuses production settings without creating a request', async () => {

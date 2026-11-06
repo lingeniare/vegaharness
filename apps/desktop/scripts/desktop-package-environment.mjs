@@ -95,7 +95,6 @@ export function loadDesktopPackageEnvironment(platform, environment = process.en
   return {
     ...Object.fromEntries(Object.entries(environment).filter(([name]) => !AMBIENT_RELEASE_SETTING.test(name))),
     ...settings,
-    ...(environment.DSH_DESKTOP_UPDATE_CHANNEL === undefined ? {} : { DSH_DESKTOP_UPDATE_CHANNEL: environment.DSH_DESKTOP_UPDATE_CHANNEL }),
     ...(preset === undefined ? {} : { DSH_PACKAGING_PRESET: preset }),
   }
 }

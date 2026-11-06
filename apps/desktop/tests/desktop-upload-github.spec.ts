@@ -148,7 +148,7 @@ async function artifactDir(files: Record<string, string>): Promise<string> {
 
 function plan(directory: string, feedName: string, extra: Partial<DesktopGithubUploadPlan> = {}): DesktopGithubUploadPlan {
   return {
-    provider: 'github', environment: 'test', channel: 'nightly', target: 'win-x64', version: '1.2.3',
+    provider: 'github', environment: 'test', channel: 'stable', target: 'win-x64', version: '1.2.3',
     publicUrl: 'https://github.com/lingeniare/vegaharness/releases',
     owner: 'lingeniare', repo: 'vegaharness', tokenEnvName: 'DESKTOP_GITHUB_TOKEN',
     artifacts: [
@@ -170,7 +170,7 @@ describe('github releases publication', () => {
     loopbacks.push(github)
     const directory = await artifactDir({})
     const options = { token: 'test-token', apiBase: github.base }
-    const selected = plan(directory, 'nightly.yml')
+    const selected = plan(directory, 'stable.yml')
     const first = await resolveGithubRelease(selected, options)
     const second = await resolveGithubRelease(selected, options)
     expect(second).toEqual(first)
@@ -183,7 +183,7 @@ describe('github releases publication', () => {
     const github = await startGithubLoopback()
     loopbacks.push(github)
     const directory = await artifactDir({ 'vega-harness-1.2.3-win-x64.exe': 'installer-bytes' })
-    const selected = plan(directory, 'nightly.yml')
+    const selected = plan(directory, 'stable.yml')
     const options = { token: 'test-token', apiBase: github.base }
     const release = await resolveGithubRelease(selected, options)
     const transport = desktopPublishGithub(selected, release, options)
@@ -194,11 +194,11 @@ describe('github releases publication', () => {
     await expect(transport.put(selected.artifacts[0]!, digest, true)).rejects.toThrow(/asset exists/u)
     const feed = selected.artifacts.at(-1)!
     await transport.put(feed, { size: Buffer.byteLength(feed.contents!), sha512: createHash('sha512').update(feed.contents!).digest('base64') }, false)
-    const remote = await transport.read('nightly.yml', true)
+    const remote = await transport.read('stable.yml', true)
     expect(remote?.contents).toBe(feed.contents)
     await transport.put(feed, { size: Buffer.byteLength(feed.contents!), sha512: createHash('sha512').update(feed.contents!).digest('base64') }, false)
     expect(github.calls.some(call => call.startsWith('DELETE '))).toBe(true)
-    expect(github.releases.get(release.id)!.assets.filter(asset => asset.name === 'nightly.yml')).toHaveLength(1)
+    expect(github.releases.get(release.id)!.assets.filter(asset => asset.name === 'stable.yml')).toHaveLength(1)
   })
 
   it('publishes a draft only after every asset verifies', async () => {
@@ -207,16 +207,16 @@ describe('github releases publication', () => {
     const directory = await artifactDir({
       'vega-harness-1.2.3-win-x64.exe': 'installer-bytes',
       'vega-harness-1.2.3-win-x64.exe.blockmap': 'blockmap-bytes',
-      'nightly.yml': 'unused',
+      'stable.yml': 'unused',
     })
-    const selected = plan(directory, 'nightly.yml')
+    const selected = plan(directory, 'stable.yml')
     const records = join(directory, 'records')
     const record = await uploadDesktopGithubRelease(selected, { token: 'test-token' }, records, { apiBase: github.base })
     const release = [...github.releases.values()][0]!
     expect(release.draft).toBe(false)
     expect(release.assets.map(asset => asset.name).sort()).toEqual([
-      'nightly.yml', 'vega-harness-1.2.3-win-x64.exe', 'vega-harness-1.2.3-win-x64.exe.blockmap'])
-    expect(release.assets.find(asset => asset.name === 'nightly.yml')!.bytes.toString('utf8')).toBe(selected.artifacts.at(-1)!.contents)
+      'stable.yml', 'vega-harness-1.2.3-win-x64.exe', 'vega-harness-1.2.3-win-x64.exe.blockmap'])
+    expect(release.assets.find(asset => asset.name === 'stable.yml')!.bytes.toString('utf8')).toBe(selected.artifacts.at(-1)!.contents)
     expect(github.calls.at(-1)).toMatch(/^PATCH \/repos/u)
     const result = JSON.parse(await readFile(join(record, 'result.json'), 'utf8')) as { success: boolean }
     expect(result.success).toBe(true)
@@ -228,9 +228,9 @@ describe('github releases publication', () => {
     const directory = await artifactDir({
       'vega-harness-1.2.3-win-x64.exe': 'installer-bytes',
       'vega-harness-1.2.3-win-x64.exe.blockmap': 'blockmap-bytes',
-      'nightly.yml': 'unused',
+      'stable.yml': 'unused',
     })
-    const selected = plan(directory, 'nightly.yml', { environment: 'production', channel: 'stable',
+    const selected = plan(directory, 'stable.yml', { environment: 'production', channel: 'stable',
       commit: 'f'.repeat(40), dirty: false })
     const records = join(directory, 'records')
     const failing = {

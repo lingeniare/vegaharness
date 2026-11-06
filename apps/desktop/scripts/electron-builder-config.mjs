@@ -114,7 +114,6 @@ export function createElectronBuilderConfig(
     protocols: [{ name: 'VEGA Harness', schemes: ['dsh'] }],
     extraMetadata: {
       dshDesktopAppId: appId,
-      dshDesktopUpdateChannel: update?.channel ?? 'nightly',
       ...(policy === undefined ? {} : { dshMandatoryUpdatePolicy: policy }),
       ...buildVersion === productVersion ? {} : { version: buildVersion },
       ...packaged === undefined ? {} : { dshBuildCommit: packaged.commit, dshBuildDirty: packaged.dirty },

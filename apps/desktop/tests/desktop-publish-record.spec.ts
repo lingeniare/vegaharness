@@ -44,7 +44,7 @@ it('persists intent, before/after bytes and terminal state outside the checkout'
   try {
     const record = await createDesktopPublicationRecord(root, { repository: 'owner/repo', runId: '1', attempt: '2',
       actor: 'operator', destination: 'bucket/feed/mac', operation: 'rollback', reason: 'restore previous release' })
-    await record.record({ type: 'put-intent', key: 'feed/mac/nightly.yml', before: 'version: 2.0.0', after: 'version: 1.0.0' })
+    await record.record({ type: 'put-intent', key: 'feed/mac/stable.yml', before: 'version: 2.0.0', after: 'version: 1.0.0' })
     await record.finish('complete')
     expect(JSON.parse(await readFile(join(record.directory, 'operation.json'), 'utf8'))).toMatchObject({ actor: 'operator', operation: 'rollback' })
     expect(JSON.parse((await readFile(join(record.directory, 'events.jsonl'), 'utf8')).trim())).toMatchObject({ before: 'version: 2.0.0', after: 'version: 1.0.0' })

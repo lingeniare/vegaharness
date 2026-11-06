@@ -47,7 +47,7 @@ export async function planInstalledUpdateDistribution(manifest: string, version:
   const run = await readInstalledUpdateRun(manifest)
   if (!run.versions.includes(version)) throw new Error('installed update: version is outside the qualification run')
   const directory = join(run.root, version, 'installer')
-  const metadata = record(load(await readFile(join(directory, 'nightly.yml'), 'utf8')))
+  const metadata = record(load(await readFile(join(directory, 'stable.yml'), 'utf8')))
   if (metadata.version !== version || !Array.isArray(metadata.files) || metadata.files.length !== 1) {
     throw new Error('installed update: feed must describe exactly the selected version and installer')
   }

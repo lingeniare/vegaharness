@@ -18,7 +18,7 @@ import { websiteApproval } from './publish-website-ci.ts'
 import { desktopPublishQualificationError } from './desktop-publish-qualification.mjs'
 
 const routeSchema = z.object({ runId: z.string(), attempt: z.string(), commit: z.string(), runnerName: z.string(),
-  sourceRef: z.string(), channel: z.enum(['nightly', 'stable']),
+  sourceRef: z.string(), channel: z.literal('stable'),
   target: z.enum(['mac-arm64', 'mac-x64', 'win-x64']), preset: z.enum(['test', 'production']) })
 
 /**
@@ -54,7 +54,7 @@ export async function prepareDesktopPublication(env: NodeJS.ProcessEnv, verifySi
     : { DSH_DESKTOP_AUTO_UPDATE_ENV: 'production', DOWNLOAD_PROD_COS_BUCKET: config.bucket }
   const plan = await createDesktopUploadPlan(source.target, { artifactsRoot: directory,
     stagingPercentage,
-    packagedProductVersion: source.productVersion, environment: { ...environment, DSH_DESKTOP_UPDATE_CHANNEL: source.channel } })
+    packagedProductVersion: source.productVersion, environment })
   if (plan.version !== source.version || plan.commit !== source.commit || plan.dirty !== false) throw new Error('desktop publish: completion record differs from retained source or has uncommitted changes')
   await verifySignatures(directory, manifest, config)
   const approval = createHash('sha256').update(JSON.stringify({ manifest, plan })).digest('hex')

@@ -56,7 +56,7 @@ async function fixture(body: (context: {
       const bytes = Buffer.from(`inert installer ${version}`)
       await writeFile(join(directory, name), bytes)
       await writeFile(join(directory, `${name}.blockmap`), 'inert map')
-      await writeFile(join(directory, 'nightly.yml'), JSON.stringify({ version, files: [{ url: name, ...digest(bytes) }] }))
+      await writeFile(join(directory, 'stable.yml'), JSON.stringify({ version, files: [{ url: name, ...digest(bytes) }] }))
       const check = join(run.root, version, 'verification/check-fixture')
       await mkdir(check, { recursive: true })
       const receipt = join(check, 'result.json')
@@ -84,7 +84,7 @@ describe('qualification publication sequencing', () => {
       }
       expect(store.writes).toHaveLength(4)
       expect(store.writes.every(write => write.immutable && write.key.includes('/bin/'))).toBe(true)
-      expect([...store.objects.keys()].some(key => key.endsWith('nightly.yml'))).toBe(false)
+      expect([...store.objects.keys()].some(key => key.endsWith('stable.yml'))).toBe(false)
       const reads = vi.spyOn(store, 'read')
       const publicReads = vi.spyOn(store, 'publicRead')
       const versioning = vi.spyOn(store, 'versioningDisabled')
@@ -96,8 +96,8 @@ describe('qualification publication sequencing', () => {
       const reconciled = await executeInstalledUpdatePublication(manifest, versions[1], receipts[1]!, 'publish-feed', store, journals)
       expect(store.writes).toHaveLength(6)
       expect(JSON.parse(await readFile(reconciled, 'utf8'))).toMatchObject({ success: true, alreadyPublished: true })
-      expect(reads.mock.calls.every(([key]) => key.endsWith('nightly.yml'))).toBe(true)
-      expect(publicReads.mock.calls.every(([url]) => url.endsWith('nightly.yml'))).toBe(true)
+      expect(reads.mock.calls.every(([key]) => key.endsWith('stable.yml'))).toBe(true)
+      expect(publicReads.mock.calls.every(([url]) => url.endsWith('stable.yml'))).toBe(true)
       expect(versioning).not.toHaveBeenCalled()
       const publication = JSON.parse(await readFile(result, 'utf8')) as { binaryUploadReceipt: { sha512: string } }
       expect(publication.binaryUploadReceipt.sha512).toBeTypeOf('string')

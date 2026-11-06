@@ -112,7 +112,7 @@ describe('Windows update publisher', () => {
       owner: 'lingeniare',
       repo: 'vegaharness',
       vPrefixedTagName: true,
-      channel: 'nightly',
+      channel: 'stable',
     }])
   })
 

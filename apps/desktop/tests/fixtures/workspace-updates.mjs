@@ -44,7 +44,7 @@ updater.logger = null
 updater.httpExecutor = new DesktopUpdateHttpExecutor(interactive ? 600_000 : 10_000)
 updater.disableDifferentialDownload = true
 updater.disableWebInstaller = true
-updater.setFeedURL({ provider: 'generic', url: server.url, channel: 'nightly' })
+updater.setFeedURL({ provider: 'generic', url: server.url, channel: 'stable' })
 updater.quitAndInstall = (...args) => { fixture.installations.push(args) }
 fixture.updater = updater
 

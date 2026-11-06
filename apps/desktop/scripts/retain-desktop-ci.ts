@@ -67,7 +67,7 @@ export async function retainDesktopCi(env: NodeJS.ProcessEnv, appRoot = resolve(
     repository: required(env, 'GITHUB_REPOSITORY'), runId: required(env, 'GITHUB_RUN_ID'),
     attempt: required(env, 'GITHUB_RUN_ATTEMPT'), commit: required(env, 'PACKAGE_SOURCE_SHA'),
     workflowCommit: required(env, 'GITHUB_SHA'), sourceRef: required(env, 'PACKAGE_SOURCE_REF'),
-    channel: resolveDesktopUpdateChannel(settings),
+    channel: 'stable',
     runnerName: required(env, 'RUNNER_NAME'), target, preset, productVersion: product.version, version,
     testReleaseId: preset === 'test' ? (settings.DOWNLOAD_TEST_RELEASE_ID || null) : null,
     qualification,
@@ -81,7 +81,7 @@ export async function retainDesktopCi(env: NodeJS.ProcessEnv, appRoot = resolve(
   const debugSuffix = qualification === 'unnotarized' ? '-unnotarized' : qualification === 'unsigned' ? '-unsigned' : ''
   const names = windows ? [`${base}${debugSuffix}.exe`] : [`${base}${debugSuffix}.dmg`, `${base}${debugSuffix}.zip`]
   if (qualification === 'signed' || qualification === 'notarized') {
-    names.push(`${base}.${windows ? 'exe' : 'zip'}.blockmap`, desktopBuildRecordFilename(target), desktopUpdateMetadataFilename(version, platform, source.channel))
+    names.push(`${base}.${windows ? 'exe' : 'zip'}.blockmap`, desktopBuildRecordFilename(target), desktopUpdateMetadataFilename(version, platform))
   }
   const retained = await retainDesktopRelease(desktopReleasesRoot(env), source, names.map(name => join(artifacts, name)))
   if (env.GITHUB_OUTPUT) await appendFile(env.GITHUB_OUTPUT, `directory=${retained}\nrunner=${runnerLabel}\nrunner-name=${source.runnerName}\nattempt=${source.attempt}\n`)

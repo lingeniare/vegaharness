@@ -82,8 +82,8 @@ async function fixture(body: (context: {
     await cp(dsh, join(source, 'dsh'), { recursive: true })
     const payload = join(root, 'payload')
     await mkdir(join(payload, 'resources'), { recursive: true })
-    await writeFile(join(payload, 'resources/app-update.yml'), JSON.stringify({ provider: 'generic', channel: 'nightly',
-      url: `${run.origin}/${run.feedKey.slice(0, -'nightly.yml'.length)}`, publisherName: [publisher],
+    await writeFile(join(payload, 'resources/app-update.yml'), JSON.stringify({ provider: 'generic', channel: 'stable',
+      url: `${run.origin}/${run.feedKey.slice(0, -'stable.yml'.length)}`, publisherName: [publisher],
       updaterCacheDirName: `dsh-update-test-${run.id}-updater` }))
     const seal = async () => {
       // ASAR 3 returns the output stream after end(), before its writes finish.
@@ -230,7 +230,7 @@ describe('installed update verification records', () => {
         const installer = join(output, name)
         await writeFile(installer, bytes)
         await writeFile(join(output, `${name}.blockmap`), 'inert blockmap')
-        await writeFile(join(output, 'nightly.yml'), JSON.stringify({ version,
+        await writeFile(join(output, 'stable.yml'), JSON.stringify({ version,
           files: [{ url: name, size: bytes.length, sha512: createHash('sha512').update(bytes).digest('base64') }] }))
         const certificate = join(root, 'public.cer')
         const tool = join(root, 'reviewed-archive.exe')

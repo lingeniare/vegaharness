@@ -1,7 +1,7 @@
 /** Startup policy for optional Electron shell preferences, independent of the Host. */
 import { DesktopSettingsFile, type DesktopUpdatePreferences } from './settings-file.ts'
 
-/** Resolved popup preference; channel failures do not disable a valid popup preference. */
+/** Resolved popup preference; unrelated field failures do not disable a valid preference. */
 export interface DesktopSettings {
   readonly updates: Pick<DesktopUpdatePreferences, 'allowTestAuthPopupWindow'>
 }
