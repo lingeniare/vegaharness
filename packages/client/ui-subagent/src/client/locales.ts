@@ -42,6 +42,12 @@ export const en = {
   'readonly.title': 'This subagent is read-only for now',
   'readonly.oneShot.body': 'One-shot tasks do not accept follow-ups; review the full execution record here.',
   'readonly.body': 'The parent session is offline; reopen it to continue sending messages.',
+  'section.title': 'Subagents',
+  'section.empty': 'No subagents',
+  'progress.completed': '{count} completed',
+  'progress.active': '{count} in progress',
+  'progress.inactive': '{count} not running',
+  'progress.external': '{count} external',
 } satisfies Record<string, string>
 
 /** `subagent` namespace dictionaries. */
@@ -96,4 +102,10 @@ export const ru = {
   'readonly.title': 'Этот субагент пока доступен только для чтения',
   'readonly.oneShot.body': 'Для одноразовых задач нельзя отправлять последующие сообщения; здесь можно просмотреть полную запись выполнения.',
   'readonly.body': 'Родительская сессия не в сети; откройте её снова, чтобы продолжить отправку сообщений.',
+  'section.title': 'Субагенты',
+  'section.empty': 'Нет субагентов',
+  'progress.completed': '{count} завершено',
+  'progress.active': '{count} в процессе',
+  'progress.inactive': '{count} не выполняются',
+  'progress.external': '{count} внешних',
 } satisfies Record<keyof typeof en, string>

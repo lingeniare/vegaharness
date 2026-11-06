@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   desktopBuildRecordFilename,
+  desktopWebsiteInstallerUrl,
   desktopUpdateMetadataFilename,
   resolveDesktopAutoUpdateConfig,
   resolveDesktopAutoUpdateEnvironment,
@@ -128,11 +129,11 @@ describe('desktop auto-update environment', () => {
 
     it('resolves repository coordinates without object-storage settings', () => {
       expect(resolveDesktopAutoUpdateConfig({
-        ...github, DSH_DESKTOP_UPDATE_CHANNEL: 'latest', DSH_DESKTOP_AUTO_UPDATE_ENV: 'production',
+        ...github, DSH_DESKTOP_UPDATE_CHANNEL: 'stable', DSH_DESKTOP_AUTO_UPDATE_ENV: 'production',
       }, 'win32', 'x64')).toEqual({
         provider: 'github',
         environment: 'production',
-        channel: 'latest',
+        channel: 'stable',
         target: 'win-x64',
         owner: 'lingeniare',
         repo: 'vegaharness',
@@ -169,4 +170,23 @@ describe('desktop auto-update environment', () => {
       }, 'win32', 'x64')).toThrow(/UPDATE_GITHUB_REPO/u)
     })
   })
+})
+
+it.each([
+  ['mac-arm64', 'dsh-latest-macos-arm64.dmg'],
+  ['mac-x64', 'dsh-latest-macos-x64.dmg'],
+  ['win-x64', 'dsh-latest-windows-x64.exe'],
+] as const)('uses the production origin for website target %s', (target, filename) => {
+  expect(desktopWebsiteInstallerUrl(target)).toBe(`https://download.deepseek.com/desktop/${filename}`)
+})
+
+it.each([['darwin', 'arm64', 'mac-arm64', 'stable-mac.yml'], ['darwin', 'x64', 'mac-x64', 'stable-mac.yml'], ['win32', 'x64', 'win-x64', 'stable.yml']] as const)
+('routes stable metadata and binaries separately for %s %s', (platform, arch, target, filename) => {
+  const config = resolveDesktopAutoUpdateConfig({ DSH_DESKTOP_AUTO_UPDATE_ENV: 'production', DSH_DESKTOP_UPDATE_CHANNEL: 'stable' }, platform, arch)
+  expect(config.channel).toBe('stable')
+  if (config.provider !== 'generic') throw new Error('expected the generic destination')
+  expect(config.keyPrefix).toBe(`dsh-desk/feeds/${target}`)
+  expect(config.binaryKeyPrefix).toBe(`dsh-desk/bin/${target}/stable`)
+  expect(desktopUpdateMetadataFilename('1.0.0', platform, config.channel)).toBe(filename)
+  expect(() => resolveDesktopAutoUpdateConfig({ DSH_DESKTOP_UPDATE_CHANNEL: 'latest' }, platform, arch)).toThrow(/channel/u)
 })

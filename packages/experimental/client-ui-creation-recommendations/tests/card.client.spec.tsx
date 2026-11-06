@@ -151,7 +151,7 @@ it.each([true, false])('explains cost and background creation without starting w
   expect(value.act).not.toHaveBeenCalled()
 })
 
-it('offers cancellation during generation, then waits for cleanup before retrying', async () => {
+it('offers cancellation beside the location during generation, then waits for cleanup before retrying', async () => {
   const value = props({ phase: 'creating', data: { slot: 'page', bundleName: '@dsh-local/view-fixture' } })
   const pending = Promise.withResolvers<ActionCardResult | undefined>()
   value.act.mockImplementation(() => pending.promise)
@@ -178,7 +178,7 @@ it.each(['failed', 'interrupted', 'cancelled', 'unconfirmed'] as const)('offers 
   await waitFor(() => { expect(value.act).toHaveBeenCalledWith('create', { slot: 'page' }) })
 })
 
-it('retains installed and kept plugins with an Undo action and the actual application outcome', async () => {
+it('offers only Undo, beside the location, on installed and earlier kept plugins, with the actual application outcome', async () => {
   const value = props({ phase: 'installed', data: { slot: 'page', application: 'applied' } })
   const { rerender } = render(<PageCardBody {...value} />)
   expect(screen.getAllByRole('status')).toHaveLength(1)

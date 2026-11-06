@@ -93,7 +93,7 @@ it.each([
   expect(question).toMatchObject({
     id: 'cua-app-access',
     question: 'Allow computer use to launch if needed, read, capture, and control Test application?',
-    detail: 'Allowing or denying applies to every version and copy sharing the same application identity. Session access and denial apply only to this conversation.',
+    detail: 'Manage app permissions for all sessions on the plugin page.',
     intent: { kind: 'approval', approve: 'Allow for this session', reject: 'Deny',
       subject: { name: 'Test application' }, display: {
         question: { en: 'Allow computer use to launch, read, capture and control this application?',

@@ -38,7 +38,7 @@ async function fixture(
   target: DesktopPackageTargetName,
   version = '1.2.3',
   environment: 'test' | 'production' = 'test',
-  channel: 'nightly' | 'latest' = 'nightly',
+  channel: 'nightly' | 'stable' = 'nightly',
 ): Promise<Fixture> {
   const root = await mkdtemp(join(tmpdir(), 'dsh-desktop-upload-'))
   temporaryDirectories.push(root)
@@ -136,6 +136,7 @@ describe('desktop upload plan', () => {
           expect(request.method).toBe('PUT')
           expect(request.path).toBe(`/${artifact.key}`)
           expect(request.body).toEqual(await readFile(artifact.path))
+          expect(request.headers['content-disposition']).toBe(`attachment; filename="deepseek-harness-1.2.3-${target}.${target === 'win-x64' ? 'exe' : 'dmg'}"`)
           expect(JSON.parse(await readFile(join(directory, 'result.json'), 'utf8'))).toMatchObject({
             success: true, confirmedPuts: 1, publicReadback: 'not-performed',
           })
@@ -158,6 +159,7 @@ describe('desktop upload plan', () => {
     expect(plan.artifacts[0]).toMatchObject({
       path: join(paths.artifactsRoot, 'vega-harness-1.2.3-alpha.4-win-x64.exe'),
       key: 'desktop/dsh-latest-windows-x64.exe', channelMetadata: false,
+      contentDisposition: 'attachment; filename="deepseek-harness-1.2.3-alpha.4-win-x64.exe"',
     })
   })
 
@@ -176,14 +178,34 @@ describe('desktop upload plan', () => {
       .rejects.toThrow(failure === 'checksum' ? /SHA-512/u : /completion record/u)
   })
 
-  it.each(['test', 'production'] as const)('isolates stable latest packages from nightly in %s', async (environment) => {
-    const nightly = await createDesktopUploadPlan('win-x64', await fixture('win-x64', '1.2.3', environment, 'nightly'))
-    const latest = await createDesktopUploadPlan('win-x64', await fixture('win-x64', '1.2.3', environment, 'latest'))
-    expect(latest.artifacts.filter(file => file.channelMetadata).map(file => file.filename)).toEqual(['latest.yml'])
+  it.each(['test', 'production'] as const)('isolates stable-channel packages from nightly in %s', async (environment) => {
+    const nightly = await createDesktopUploadPlan('win-x64', { ...await fixture('win-x64', '1.2.3', environment, 'nightly'), stagingPercentage: 10 })
+    const stable = await createDesktopUploadPlan('win-x64', { ...await fixture('win-x64', '1.2.3', environment, 'stable'), stagingPercentage: 10 })
+    expect(stable.artifacts.filter(file => file.channelMetadata).map(file => file.filename)).toEqual(['stable.yml'])
     expect(nightly.artifacts.filter(file => file.channelMetadata).map(file => file.filename)).toEqual(['nightly.yml'])
-    expect(latest.artifacts.every(file => !nightly.artifacts.some(other => other.key === file.key))).toBe(true)
-    const prerelease = await fixture('win-x64', '1.2.3-alpha.1', environment, 'latest')
-    await expect(createDesktopUploadPlan('win-x64', prerelease)).rejects.toThrow(/latest requires a stable version/u)
+    expect(stable.artifacts.every(file => !nightly.artifacts.some(other => other.key === file.key))).toBe(true)
+    for (const plan of [nightly, stable]) {
+      expect(plan.artifacts.find(file => file.channelMetadata)!.contents).toContain('stagingPercentage: 10')
+    }
+  })
+
+  it.each(['mac-arm64', 'mac-x64', 'win-x64'] as const)('publishes manually selected prereleases on stable for %s', async (target) => {
+    const summaries: { environment: string; version: string; keys: string[] }[] = []
+    for (const environment of ['test', 'production'] as const) {
+      for (const version of ['1.2.3-alpha.1', '1.2.3-rc.1']) {
+        const plan = await createDesktopUploadPlan(target, await fixture(target, version, environment, 'stable'))
+        expect(plan.version).toBe(version)
+        const feed = plan.artifacts.find(file => file.channelMetadata)!
+        expect(feed.filename).toBe(target === 'win-x64' ? 'stable.yml' : 'stable-mac.yml')
+        const payload = plan.artifacts.find(file => file.filename.endsWith(target === 'win-x64' ? '.exe' : '.zip'))!
+        expect(payload.key).toContain(`/bin/${target}/stable/`)
+        expect(load(feed.contents!)).toMatchObject({ version, files: [{
+          url: `${environment === 'test' ? TEST_ORIGIN : 'https://download.deepseek.com'}/${payload.key}`,
+        }] })
+        summaries.push({ environment, version, keys: plan.artifacts.map(file => file.key) })
+      }
+    }
+    await expect(`${JSON.stringify(summaries, null, 2)}\n`).toMatchFileSnapshot(`./expected/stable-prerelease-${target}.json`)
   })
 
   it('publishes fixed feeds referencing versioned binaries without overriding CDN cache policy', async () => {
@@ -225,9 +247,9 @@ describe('desktop upload plan', () => {
   })
 
   it('publishes github release assets without rewriting feed urls', async () => {
-    const paths = await fixture('win-x64', '1.2.3', 'production', 'latest')
+    const paths = await fixture('win-x64', '1.2.3', 'production', 'stable')
     await writeFile(join(paths.artifactsRoot, 'win-x64-release.json'), `${JSON.stringify({
-      schemaVersion: 1, target: 'win-x64', version: '1.2.3', environment: 'production', channel: 'latest',
+      schemaVersion: 1, target: 'win-x64', version: '1.2.3', environment: 'production', channel: 'stable',
       publicUrl: 'https://github.com/lingeniare/vegaharness/releases',
     })}\n`)
     const plan = await createDesktopUploadPlan('win-x64', {
@@ -237,7 +259,7 @@ describe('desktop upload plan', () => {
         DSH_DESKTOP_AUTO_UPDATE_ENV: 'production',
         DSH_DESKTOP_UPDATE_PROVIDER: 'github',
         DSH_DESKTOP_UPDATE_GITHUB_REPO: 'lingeniare/vegaharness',
-        DSH_DESKTOP_UPDATE_CHANNEL: 'latest',
+        DSH_DESKTOP_UPDATE_CHANNEL: 'stable',
       },
     })
     expect(plan).toMatchObject({
@@ -246,7 +268,7 @@ describe('desktop upload plan', () => {
       repo: 'vegaharness',
       tokenEnvName: 'DESKTOP_GITHUB_TOKEN',
       publicUrl: 'https://github.com/lingeniare/vegaharness/releases/latest/download/vega-harness-latest-windows-x64.exe',
-      channel: 'latest',
+      channel: 'stable',
     })
     expect(plan.artifacts).toEqual([expect.objectContaining({
       key: 'vega-harness-latest-windows-x64.exe',
@@ -257,9 +279,9 @@ describe('desktop upload plan', () => {
   })
 
   it('keeps github feed urls relative to the release download path', async () => {
-    const paths = await fixture('win-x64', '1.2.3', 'production', 'latest')
+    const paths = await fixture('win-x64', '1.2.3', 'production', 'stable')
     await writeFile(join(paths.artifactsRoot, 'win-x64-release.json'), `${JSON.stringify({
-      schemaVersion: 1, target: 'win-x64', version: '1.2.3', environment: 'production', channel: 'latest',
+      schemaVersion: 1, target: 'win-x64', version: '1.2.3', environment: 'production', channel: 'stable',
       publicUrl: 'https://github.com/lingeniare/vegaharness/releases',
     })}\n`)
     const plan = await createDesktopUploadPlan('win-x64', {
@@ -268,13 +290,13 @@ describe('desktop upload plan', () => {
         DSH_DESKTOP_AUTO_UPDATE_ENV: 'production',
         DSH_DESKTOP_UPDATE_PROVIDER: 'github',
         DSH_DESKTOP_UPDATE_GITHUB_REPO: 'lingeniare/vegaharness',
-        DSH_DESKTOP_UPDATE_CHANNEL: 'latest',
+        DSH_DESKTOP_UPDATE_CHANNEL: 'stable',
       },
     })
     expect(plan.artifacts.map(artifact => artifact.key)).toEqual([
       'vega-harness-1.2.3-win-x64.exe',
       'vega-harness-1.2.3-win-x64.exe.blockmap',
-      'latest.yml',
+      'stable.yml',
     ])
     const feed = plan.artifacts.at(-1)
     expect(feed?.channelMetadata).toBe(true)

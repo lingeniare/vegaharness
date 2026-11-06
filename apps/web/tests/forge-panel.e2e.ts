@@ -447,6 +447,8 @@ it.skipIf(MODE === 'record')('automatically shows a numbered PR when gh JSON omi
   const { settled } = await sendPrompt(page, scaffold)
   const sessionId = await settled
   const events = await readPersistedEvents(scaffold, sessionId)
+  const request = events.find(event => event.type === 'request/header')
+  expect(request?.data.header.tools?.filter(tool => tool.name === 'create_worktree')).toHaveLength(1)
   const toolOutput = events.flatMap(event => event.type === 'tool/result'
     ? event.data.message.content.flatMap(block => block.type === 'text' ? [block.text] : []) : []).join('\n')
   expect(toolOutput).toContain('Add the pull request panel')
@@ -685,8 +687,9 @@ it.skipIf(MODE === 'record')('marks a draft change request ready for review and 
 })
 
 it.skipIf(MODE === 'record')('shows the local changes of the Session by scope and the changes of its change requests, expanding unchanged lines', async () => {
-  const { scaffold, page, root, project, tripwire } = await launchPanel('web-e2e-forge-panel-changes', 'follow-up')
-  // origin/main stops at the twelve-line README; the branch adds a commit, a staged file, an edit, and an untracked file.
+  const { scaffold, page, root, project, tripwire } = await launchPanel('web-e2e-forge-panel-changes', 'follow-up', { branch: 'feat' })
+  // origin/main stops at the twelve-line README; the branch adds a commit, which `topic` also has, a staged file, an edit,
+  // and an untracked file.
   await writeFile(join(project, 'README.md'), Array.from({ length: 12 }, (_, index) => `line ${index + 1}\n`).join(''))
   await git(project, 'commit', '--quiet', '-am', 'readme')
   await git(project, 'update-ref', 'refs/remotes/origin/main', 'HEAD')
@@ -695,6 +698,7 @@ it.skipIf(MODE === 'record')('shows the local changes of the Session by scope an
   await writeFile(join(project, 'src', 'app.ts'), 'export const app = 1\n')
   await git(project, 'add', 'src/app.ts')
   await git(project, 'commit', '--quiet', '-m', 'app')
+  await git(project, 'branch', 'topic')
   await writeFile(join(project, 'src', 'extra.ts'), 'export const extra = 1\n')
   await git(project, 'add', 'src/extra.ts')
   await writeFile(join(project, 'README.md'), Array.from({ length: 12 }, (_, index) => index === 9 ? 'line ten\n' : `line ${index + 1}\n`).join(''))
@@ -1075,8 +1079,9 @@ it.skipIf(MODE === 'record')('uses horizontal arrows to navigate files while pre
   const { scaffold, page, project, tripwire } = await launchPanel('web-e2e-forge-file-keys')
   await git(project, 'update-ref', 'refs/remotes/origin/main', 'HEAD')
   await git(project, 'symbolic-ref', 'refs/remotes/origin/HEAD', 'refs/remotes/origin/main')
-  for (const path of ['a.txt', 'b.txt', 'c.txt']) {
-    await writeFile(join(project, path), Array.from({ length: path === 'c.txt' ? 1 : 80 }, (_, line) => `line ${line + 1}\n`).join(''))
+  await mkdir(join(project, 'src'))
+  for (const path of ['src/a.txt', 'src/b.txt', 'README.md']) {
+    await writeFile(join(project, path), Array.from({ length: path === 'README.md' ? 1 : 80 }, (_, line) => `line ${line + 1}\n`).join(''))
   }
   const { settled } = await sendPrompt(page, scaffold)
   await settled
@@ -1102,11 +1107,11 @@ it.skipIf(MODE === 'record')('uses horizontal arrows to navigate files while pre
   await expect.poll(() => scroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
   await scroll.evaluate((element) => { element.scrollTop = 0 })
   await page.keyboard.press('ArrowRight')
-  await expect.poll(() => tree.getByRole('button', { name: 'b.txt', exact: true }).getAttribute('aria-current')).toBe('true')
+  await expect.poll(() => tree.getByRole('button', { name: 'src/b.txt', exact: true }).getAttribute('aria-current')).toBe('true')
   expect(await b.getAttribute('data-expanded')).toBe('')
   expect(await scroll.evaluate(element => document.activeElement === element)).toBe(true)
   await page.keyboard.press('ArrowRight')
-  await expect.poll(() => tree.getByRole('button', { name: 'c.txt', exact: true }).getAttribute('aria-current')).toBe('true')
+  await expect.poll(() => tree.getByRole('button', { name: 'README.md', exact: true }).getAttribute('aria-current')).toBe('true')
   const lastPosition = await scroll.evaluate(element => element.scrollTop)
   const lastBox = await c.boundingBox(), viewport = await scroll.boundingBox()
   if (lastBox === null || viewport === null) throw new Error('The last file and scroll viewport must be rendered')
@@ -1115,9 +1120,9 @@ it.skipIf(MODE === 'record')('uses horizontal arrows to navigate files while pre
   await page.keyboard.press('ArrowRight')
   expect(await scroll.evaluate(element => element.scrollTop)).toBe(lastPosition)
   await page.keyboard.press('ArrowLeft')
-  await expect.poll(() => tree.getByRole('button', { name: 'b.txt', exact: true }).getAttribute('aria-current')).toBe('true')
+  await expect.poll(() => tree.getByRole('button', { name: 'src/b.txt', exact: true }).getAttribute('aria-current')).toBe('true')
   await page.keyboard.press('ArrowLeft')
-  await expect.poll(() => tree.getByRole('button', { name: 'a.txt', exact: true }).getAttribute('aria-current')).toBe('true')
+  await expect.poll(() => tree.getByRole('button', { name: 'src/a.txt', exact: true }).getAttribute('aria-current')).toBe('true')
   await b.evaluate((element) => {
     const viewport = element.closest('[data-forge-changes-scroll]')!
     viewport.scrollTop += element.getBoundingClientRect().top - viewport.getBoundingClientRect().top + 100
@@ -1133,8 +1138,65 @@ it.skipIf(MODE === 'record')('uses horizontal arrows to navigate files while pre
   expect(await input.evaluate(element => (element as HTMLTextAreaElement).selectionStart)).toBe(11)
   await input.press('ArrowRight')
   expect(await input.inputValue()).toBe('keep editing')
-  expect(await tree.getByRole('button', { name: 'a.txt', exact: true }).getAttribute('aria-current')).toBe('true')
+  expect(await tree.getByRole('button', { name: 'src/a.txt', exact: true }).getAttribute('aria-current')).toBe('true')
   expect(await input.evaluate(element => document.activeElement === element)).toBe(true)
+  expect(tripwire.pageErrors).toEqual([])
+  expect(tripwire.warnings).toEqual([])
+})
+
+it.skipIf(MODE === 'record')('keeps tall branch and changed-file menus aligned with their triggers', async () => {
+  const { scaffold, page, project, tripwire } = await launchPanel('web-e2e-forge-tall-menus')
+  await Promise.all(Array.from({ length: 45 }, (_, index) =>
+    git(project, 'update-ref', `refs/heads/worktree/long-menu-regression-${index}`, 'HEAD')))
+  const option = page.locator('[data-forge-worktree]')
+  await option.getByRole('checkbox', { name: '新建工作树', exact: true }).check()
+  const base = option.getByRole('button', { name: '基于 main', exact: true })
+  await base.click()
+  const menu = page.getByRole('menu')
+  await menu.getByRole('menuitem', { name: 'worktree/long-menu-regression-44', exact: true }).waitFor()
+  await expect.poll(async () => {
+    const trigger = await base.boundingBox()
+    const card = await menu.boundingBox()
+    return trigger === null || card === null ? Infinity : Math.abs(trigger.x + trigger.width - card.x - card.width)
+  }).toBeLessThan(1)
+  await page.keyboard.press('Escape')
+  expect(await base.getAttribute('aria-expanded')).toBe('false')
+  await option.getByRole('checkbox', { name: '新建工作树', exact: true }).uncheck()
+
+  await git(project, 'update-ref', 'refs/remotes/origin/main', 'HEAD')
+  await git(project, 'symbolic-ref', 'refs/remotes/origin/HEAD', 'refs/remotes/origin/main')
+  await mkdir(join(project, 'src'))
+  await Promise.all(Array.from({ length: 60 }, (_, index) =>
+    writeFile(join(project, 'src', `long-file-list-${index}.ts`), `export const value = ${index}\n`)))
+  await git(project, 'add', 'src')
+  await git(project, 'commit', '--quiet', '-m', 'long file list')
+  const { settled } = await sendPrompt(page, scaffold)
+  await settled
+  await page.locator('[data-forge-header]').click()
+  const panel = page.locator('[data-forge-panel]')
+  await panel.getByRole('button', { name: '刷新状态', exact: true }).click()
+  await panel.getByRole('button', { name: /^查看本会话的变更：60 个文件/ }).click()
+  const changes = page.locator('[data-forge-changes="local"]')
+  const files = changes.getByRole('button', { name: '全部 60 个文件', exact: true })
+  await files.click()
+  await menu.getByRole('textbox', { name: '筛选文件…', exact: true }).waitFor()
+  await expect.poll(async () => {
+    const trigger = await files.boundingBox()
+    const card = await menu.boundingBox()
+    return trigger === null || card === null ? Infinity : Math.abs(trigger.x - card.x)
+  }).toBeLessThan(1)
+  await menu.getByRole('textbox', { name: '筛选文件…', exact: true }).fill('long-file-list-59')
+  expect(await menu.getByRole('menuitem', { name: 'src/long-file-list-59.ts', exact: true }).isVisible()).toBe(true)
+  await page.keyboard.press('Escape')
+  expect(await menu.count()).toBe(0)
+  await page.setViewportSize({ width: 390, height: 700 })
+  await files.click()
+  await menu.getByRole('textbox', { name: '筛选文件…', exact: true }).waitFor()
+  await expect.poll(() => menu.evaluate((node) => {
+    const rect = node.getBoundingClientRect()
+    return rect.left >= 12 && rect.right <= 378 && rect.top >= 12 && rect.bottom <= 688
+  })).toBe(true)
+  await page.keyboard.press('Escape')
   expect(tripwire.pageErrors).toEqual([])
   expect(tripwire.warnings).toEqual([])
 })

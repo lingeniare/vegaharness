@@ -117,7 +117,7 @@ export async function publishGithubRelease(
   const api = client(options)
   await api.json('PATCH', `/repos/${plan.owner}/${plan.repo}/releases/${releaseId}`, {
     draft: false,
-    make_latest: plan.channel === 'latest' ? 'legacy' : 'false',
+    make_latest: plan.channel === 'stable' ? 'legacy' : 'false',
   })
 }
 

@@ -888,6 +888,7 @@
     "simplification/2026-09-15-model-agent-availability-and-team-targets.md": "sha256:b37ec30fc0c1bcc25c2f7d40982ef69673c485958bf6cd97569532c173eab8e8",
     "simplification/2026-09-16-subagent-catalog-membership-only.md": "sha256:281347ccd28f020f1d623074890b67bc42f02aea677997ae7de777db1cf68d4e",
     "simplification/2026-09-19-deepseek-messages-only.md": "sha256:241861200ce73e02f77d182633d6ea10b1f29c696c81bff002680762db01d9b5",
+    "simplification/2026-09-26-team-direct-inbox.md": "sha256:0fbb20f2743d7c45c5b180ad49e1132493caac50f77902ef9d12e917b06e14ee",
     "testing/2026-06-11-property-based-testing.md": "sha256:cca3b6299784cff94965f21b6d59966109a0bb41fdc2f8cf56653fa6c417a20a",
     "testing/2026-06-19-acp-snapshot-tests.md": "sha256:3bcd0bf4cba8151c4074349e70e35506369afeaa35c8ae9e83f2afc3840af028",
     "testing/2026-06-20-remove-redundant-snapshot-log-expected-output.md": "sha256:45234e7cc04b6010c6141f8d5924c04547300098f96262d423c50108e7c7011a",

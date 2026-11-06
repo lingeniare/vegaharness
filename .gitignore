@@ -66,6 +66,7 @@ apps/web/dist/
 .artifacts/
 .dsh-build/
 .dsh-report/
+.ui-review/
 .playwright-mcp/
 test-results/
 playwright-report/

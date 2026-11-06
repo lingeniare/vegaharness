@@ -12,6 +12,9 @@ export const en = {
   'panels.label': 'Global panels',
   'navigation.label': 'Navigation',
   'panels.more': 'More',
+  'panels.unpinTooltip': 'Unpin from left sidebar',
+  'panels.unpin': 'Unpin {name} from sidebar',
+  'version.copied': 'Version copied',
 } satisfies Record<string, string>
 
 /** Russian dictionary, checked against the English keys. */
@@ -23,4 +26,7 @@ export const ru = {
   'panels.label': 'Глобальные панели',
   'navigation.label': 'Навигация',
   'panels.more': 'Ещё',
+  'panels.unpinTooltip': 'Открепить от левой боковой панели',
+  'panels.unpin': 'Открепить {name} от боковой панели',
+  'version.copied': 'Версия скопирована',
 } satisfies Record<keyof typeof en, string>

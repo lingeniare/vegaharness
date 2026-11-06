@@ -4,32 +4,43 @@ import type { SettingsFormLabels } from '@deepseek-ai/dsh-client-ui-primitives'
 
 /** Locale keys the page renders. */
 export type WebSearchSettingsLocaleKey =
-  | 'title' | 'description' | 'useVega' | 'useVegaHint' | 'useSearchApi' | 'useSearchApiHint' | 'searchGuide' | 'searchGuideUrl'
-  | 'apiKey' | 'apiKeyHint' | 'apiKeySet' | 'apiKeyUnset'
-  | 'baseUrl' | 'baseUrlHint' | 'searchApiBaseUrl' | 'searchApiBaseUrlHint' | 'maxUses' | 'maxUsesHint' | 'count' | 'countHint'
+  | 'title' | 'description' | 'searchSection' | 'fetchSection'
+  | 'providerDeepSeek' | 'providerLocal' | 'providerDeepSeekFetch' | 'providerMissing' | 'providerAuto'
+  | 'providerLegacy' | 'legacyKeyHint' | 'maxUses' | 'maxUsesHint' | 'invalidMaxUses'
+  | 'providersFailed' | 'retry'
+  | 'pluginProviderHint' | 'searchGuide' | 'searchGuideUrl'
+  | 'credential' | 'apiKeySet' | 'apiKeyUnsetApi'
+  | 'baseUrl' | 'baseUrlHint'
+  | 'count' | 'countHint'
   | 'overridden' | 'reset' | 'readOnly' | 'unavailable'
   | 'save' | 'saving' | 'saveFailed' | 'invalidNumber' | 'invalidCount'
 
 /** English copy. */
 export const en: Record<WebSearchSettingsLocaleKey, string> = {
-  title: 'Web search',
-  description: 'Set up the DeepSeek search provider.',
-  useVega: 'Use the API VEGA account',
-  useVegaHint: 'On by default: search and fetch run through the signed-in API VEGA account\'s server tools, billed to the account balance. Turn off to use the DeepSeek providers below.',
-  useSearchApi: 'Use the new Web Search API',
-  useSearchApiHint: 'Off by default: search runs through DeepSeek Messages. For the new Web Search API\'s features and pricing, see the ',
+  title: 'Web search and fetch',
+  description: 'Choose the providers web search and web fetch use.',
+  searchSection: 'Web search provider',
+  fetchSection: 'Web fetch provider',
+  providerDeepSeek: 'DeepSeek Search API',
+  providerLegacy: 'DeepSeek (legacy)',
+  legacyKeyHint: 'Uses the signed-in account on account-model requests; otherwise uses this API key ({ref}), shared with Models by default.',
+  maxUses: 'Maximum searches per request',
+  maxUsesHint: 'Maximum server-side searches per Messages request: a positive integer, default 5.',
+  invalidMaxUses: 'Enter a positive integer, or leave blank to use the default.',
+  providerLocal: 'Direct fetch',
+  providerDeepSeekFetch: 'DeepSeek Fetch API',
+  providerMissing: '{id} (not loaded)',
+  providerAuto: 'Automatic',
+  providersFailed: "Couldn't load the provider list, so this menu may be incomplete.",
+  retry: 'Retry',
+  pluginProviderHint: 'Configure this provider in its own plugin settings.',
+  credential: 'API key',
+  baseUrl: 'Base URL',
+  baseUrlHint: 'Include the API prefix. Leave blank to use the official address. The provider appends {path}.',
+  apiKeyUnsetApi: 'No key is configured.',
   searchGuide: 'Search & Fetch guide',
-  searchGuideUrl: 'https://api-docs.deepseek.com/guides/search',
-  apiKey: 'API key',
-  apiKeyHint: 'Stored outside the settings file. Leave blank to keep the current key.',
+  searchGuideUrl: 'https://api.vega.chat',
   apiKeySet: 'A key is configured.',
-  apiKeyUnset: 'No key is configured; only conversations using a DeepSeek Account model can search, through the default endpoint.',
-  baseUrl: 'Messages API base URL',
-  baseUrlHint: 'Include the API prefix, such as https://api.deepseek.com/anthropic/v1. The provider appends /messages. Leave blank to restore the default.',
-  searchApiBaseUrl: 'Search / Fetch API base URL',
-  searchApiBaseUrlHint: 'Include the API prefix, such as https://api.deepseek.com/v1/tools. The provider appends /search or /fetch. Leave blank to restore the default.',
-  maxUses: 'Max searches per request',
-  maxUsesHint: 'How many searches the auxiliary model may run within one Messages request. Applies only to the Messages API.',
   count: 'Results per search',
   countHint: 'Results returned per query: an integer from 1 to 50, default 10. This controls result count, not search calls. web_search keeps no more sources than its own result limit.',
   overridden: 'Overridden',
@@ -54,24 +65,30 @@ export function formLabels(t: (key: WebSearchSettingsLocaleKey) => string): Sett
 
 /** Russian dictionary, checked against the English keys. */
 export const ru = {
-  title: 'Веб-поиск',
-  description: 'Настройте поставщика поиска VEGA.',
-  useVega: 'Использовать аккаунт API VEGA',
-  useVegaHint: 'Включено по умолчанию: поиск и загрузка страниц выполняются серверными инструментами вошедшего аккаунта API VEGA и списываются с баланса. Выключите, чтобы использовать провайдеры DeepSeek ниже.',
-  useSearchApi: 'Использовать новый API веб-поиска',
-  useSearchApiHint: 'По умолчанию выключен: поиск выполняется через VEGA Messages. Возможности и тарифы нового API веб-поиска см. в ',
-  searchGuide: 'руководстве Search & Fetch',
-  searchGuideUrl: 'https://api.vega.chat',
-  apiKey: 'API Key',
-  apiKeyHint: 'Хранится отдельно от файла настроек. Оставьте поле пустым, чтобы сохранить текущий ключ.',
-  apiKeySet: 'Ключ настроен.',
-  apiKeyUnset: 'Ключ не настроен; искать через адрес по умолчанию могут только сессии, использующие модель VEGA Account.',
-  baseUrl: 'Базовый URL Messages API',
-  baseUrlHint: 'Укажите префикс API, например https://api.vega.chat/api/v1. Поставщик добавляет /messages. Оставьте пустым, чтобы восстановить значение по умолчанию.',
-  searchApiBaseUrl: 'Базовый URL API Search / Fetch',
-  searchApiBaseUrlHint: 'Укажите префикс API, например https://api.vega.chat/api/v1. Поставщик добавляет /search или /fetch. Оставьте пустым, чтобы восстановить значение по умолчанию.',
+  title: 'Веб-поиск и загрузка страниц',
+  description: 'Выберите провайдеров для веб-поиска и загрузки страниц.',
+  searchSection: 'Провайдер веб-поиска',
+  fetchSection: 'Провайдер загрузки веб-страниц',
+  providerDeepSeek: 'DeepSeek Search API',
+  providerLegacy: 'DeepSeek (прежняя версия)',
+  legacyKeyHint: 'Запросы модели аккаунта используют активный аккаунт; остальные — этот ключ API ({ref}), по умолчанию общий с настройками моделей.',
   maxUses: 'Максимум поисковых запросов на один запрос',
-  maxUsesHint: 'Сколько поисковых запросов вспомогательная модель может выполнить в рамках одного запроса Messages. Применимо только к Messages API.',
+  maxUsesHint: 'Максимум серверных поисков на один запрос Messages: положительное целое число, по умолчанию 5.',
+  invalidMaxUses: 'Введите положительное целое или оставьте пустым для значения по умолчанию.',
+  providerLocal: 'Прямая загрузка',
+  providerDeepSeekFetch: 'DeepSeek Fetch API',
+  providerMissing: '{id} (не загружен)',
+  providerAuto: 'Автоматически',
+  providersFailed: 'Не удалось загрузить список провайдеров, поэтому это меню может быть неполным.',
+  retry: 'Повторить',
+  pluginProviderHint: 'Настройте этого провайдера в настройках его собственного плагина.',
+  credential: 'Ключ API',
+  baseUrl: 'Базовый URL',
+  baseUrlHint: 'Укажите префикс API. Оставьте пустым, чтобы использовать официальный адрес. Провайдер добавляет {path}.',
+  apiKeyUnsetApi: 'Ключ не настроен.',
+  searchGuide: 'Руководство Search & Fetch',
+  searchGuideUrl: 'https://api.vega.chat',
+  apiKeySet: 'Ключ настроен.',
   count: 'Результатов на поиск',
   countHint: 'Результатов, возвращаемых на один запрос: целое число от 1 до 50, по умолчанию 10. Управляет количеством результатов, а не числом вызовов поиска. web_search сохраняет не больше источников, чем позволяет его собственный лимит.',
   overridden: 'Переопределено',

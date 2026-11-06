@@ -203,6 +203,14 @@ export const en = {
   'json.truncated': '… truncated, {total} characters total',
   'clock.md': '{m}/{d}',
   'clock.ymd': '{y}-{m}-{d}',
+  'message.stepProcess.done.context': 'Injected context',
+  'message.trigger.subagent.completed': 'Subagent run completed',
+  'message.trigger.subagent.aborted': 'Subagent run stopped',
+  'message.trigger.subagent.error': 'Subagent run failed',
+  'message.trigger.subagent.maxTokens': 'Subagent reached the token limit',
+  'message.trigger.subagent.refusal': 'Subagent declined the task',
+  'message.trigger.subagent.unknown': 'Subagent run ended unexpectedly',
+  'message.continuation.requested': 'Requested to continue generation',
 } satisfies Record<string, string>
 
 /** Russian dictionary, checked against the English keys. */
@@ -402,4 +410,12 @@ export const ru = {
   'json.truncated': '… обрезано, всего символов: {total}',
   'clock.md': '{d}.{m}',
   'clock.ymd': '{d}.{m}.{y}',
+  'message.stepProcess.done.context': 'Контекст внедрён',
+  'message.trigger.subagent.completed': 'Работа субагента завершена',
+  'message.trigger.subagent.aborted': 'Работа субагента остановлена',
+  'message.trigger.subagent.error': 'Работа субагента завершилась с ошибкой',
+  'message.trigger.subagent.maxTokens': 'Субагент достиг лимита токенов',
+  'message.trigger.subagent.refusal': 'Субагент отказался выполнять задачу',
+  'message.trigger.subagent.unknown': 'Работа субагента неожиданно завершилась',
+  'message.continuation.requested': 'Запрошено продолжение генерации',
 } satisfies Record<keyof typeof en, string>

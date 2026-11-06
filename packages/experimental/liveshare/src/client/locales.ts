@@ -227,6 +227,15 @@ export const en = {
   'viewer.reason.prompt-identity-missing': 'This send carried no request identity to attribute, so the Host did not run it',
   'viewer.reason.viewer-not-authorized': 'Your account no longer has access to this share',
   'viewer.reason.liveshare/read-only': 'This Session is outside the share you hold, so it was not written',
+  'dialog.ptcSandboxWarning': 'Note: LiveShare’s PTC sandbox is not yet complete - a viewer may read or write files outside the shared workspace through run_code. Share only with people you trust.',
+  'dialog.capabilities.global': 'Plugin permissions',
+  'dialog.capabilities.global.none': 'Deny all',
+  'dialog.capabilities.global.all': 'Allow all',
+  'dialog.capabilities.global.custom': 'Custom',
+  'dialog.capabilities.tier.all': 'All methods',
+  'dialog.capabilities.partial': 'Partial',
+  'viewer.pluginUnsupported': 'Plugin {plugin} is not available in this share; some features are unavailable.',
+  'viewer.dismiss': 'Dismiss',
 } satisfies Record<string, string>
 
 /** Locale namespace owned by the Liveshare owner-side browser plugin. */
@@ -463,6 +472,15 @@ export const ru: Record<keyof typeof en, string> = {
   'viewer.reason.prompt-identity-missing': 'В этой отправке не было идентичности запроса для указания авторства, поэтому хост её не выполнил',
   'viewer.reason.viewer-not-authorized': 'Ваша учётная запись больше не имеет доступа к этому общему доступу',
   'viewer.reason.liveshare/read-only': 'Этот сеанс вне вашего общего доступа, поэтому запись не выполнялась',
+  'dialog.ptcSandboxWarning': 'Внимание: песочница PTC в LiveShare пока неполная — зритель может читать или записывать файлы за пределами общего рабочего пространства через run_code. Делитесь только с доверенными людьми.',
+  'dialog.capabilities.global': 'Разрешения плагинов',
+  'dialog.capabilities.global.none': 'Запретить все',
+  'dialog.capabilities.global.all': 'Разрешить все',
+  'dialog.capabilities.global.custom': 'Настроить',
+  'dialog.capabilities.tier.all': 'Все методы',
+  'dialog.capabilities.partial': 'Часть',
+  'viewer.pluginUnsupported': 'Плагин {plugin} не поддерживается в этом общем доступе; некоторые функции недоступны.',
+  'viewer.dismiss': 'Закрыть',
 }
 
 /** Stable locale keys consumed by the share dialog and the viewer surfaces. */

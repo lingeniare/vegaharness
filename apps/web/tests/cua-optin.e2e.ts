@@ -58,17 +58,6 @@ it.skipIf(process.platform !== 'darwin').each([
     expect((await scaffold.ctx.pluginManager.listBundles()).find(bundle => bundle.name === '@deepseek-ai/dsh-cua-bundle'))
       .toMatchObject({ listedByDefault: false, enabled: false, installed: false })
     await plugins.getByRole('button', { name: 'Назад к плагинам', exact: true }).click()
-    const offerCua = async () => {
-      await plugins.getByRole('button', { name: 'Добавить плагин', exact: true }).click()
-      const dialog = page.getByRole('dialog', { name: 'Добавить плагин', exact: true })
-      await dialog.getByRole('textbox', { name: 'Имя пакета или адрес', exact: true }).fill('@deepseek-ai/dsh-cua-bundle')
-      await dialog.getByRole('button', { name: 'Установить', exact: true }).click()
-      const ready = page.getByRole('dialog', { name: 'Установленные', exact: true })
-      await ready.waitFor()
-      expect(await ready.getByText('Включите его, не загружая другую копию.', { exact: true }).count()).toBe(0)
-      return ready.getByRole('button', { name: 'Включить сейчас', exact: true })
-    }
-    const enableNow = await offerCua()
     let toggle = card.getByRole('switch', { name: 'Включить Computer Use', exact: true })
     const originalAgent = scaffold.ctx.agents.list()[0]!
     const ptcAgent = (await scaffold.ctx.agents.create({
@@ -97,12 +86,10 @@ it.skipIf(process.platform !== 'darwin').each([
       return applying
     })
     try {
-      await enableNow.click()
-      await expect.poll(() => enableNow.isEnabled()).toBe(false)
-      expect(await enableNow.getAttribute('aria-busy')).toBe('true')
-      expect(await card.count()).toBe(0)
+      await toggle.click()
+      await card.getByRole('status').getByText('Применение изменений в Computer Use', { exact: true }).waitFor()
       await compareOrRefreshGolden(fileURLToPath(new URL('./expected/cua-permissions/enabling.expected.md', import.meta.url)),
-        await captureStableAria(page, '[data-install-phase="done"] button[aria-busy]', scaffold.workspaceCwd), webSnapshotMode())
+        await captureStableAria(page, '[data-plugin-package="@deepseek-ai/dsh-cua-bundle"] [role="status"]', scaffold.workspaceCwd), webSnapshotMode())
     } finally {
       enabling.resolve(undefined)
       enableCall.mockRestore()
@@ -145,7 +132,7 @@ it.skipIf(process.platform !== 'darwin').each([
       expect(scaffold.ctx.tools.schemas(originalAgent).some(tool => tool.name === 'cua')).toBe(preset === 'ptc')
     }
     const child = await scaffold.ctx.agents.create({
-      sessionId: SessionId('cua-child'), parentAgent: ptcAgent,
+      sessionId: SessionId('cua-child'),
       setup: (ctx) => { scaffold.ctx.agentPresets.composeFrom(ctx, ptcAgent.ctx) },
     })
     expect(scaffold.ctx.tools.schemas(child.agent).some(tool => tool.name === 'cua')).toBe(true)

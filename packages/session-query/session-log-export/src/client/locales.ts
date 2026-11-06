@@ -14,6 +14,7 @@ export const en = {
   'dialog.errorTitle': 'Session export failed',
   'dialog.close': 'Close',
   'dialog.commandFailed': 'Could not start the Session export.',
+  'dialog.session': 'Session: {sessionId}',
 } satisfies Record<string, string>
 
 /** Locale namespace owned by Session export browser feedback. */
@@ -38,4 +39,5 @@ export const ru = {
   'dialog.errorTitle': 'Не удалось экспортировать сессию',
   'dialog.close': 'Закрыть',
   'dialog.commandFailed': 'Не удалось начать экспорт сессии.',
+  'dialog.session': 'Сеанс: {sessionId}',
 } satisfies Record<keyof typeof en, string>

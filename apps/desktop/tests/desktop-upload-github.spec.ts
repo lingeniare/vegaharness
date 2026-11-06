@@ -230,7 +230,7 @@ describe('github releases publication', () => {
       'vega-harness-1.2.3-win-x64.exe.blockmap': 'blockmap-bytes',
       'nightly.yml': 'unused',
     })
-    const selected = plan(directory, 'nightly.yml', { environment: 'production', channel: 'latest',
+    const selected = plan(directory, 'nightly.yml', { environment: 'production', channel: 'stable',
       commit: 'f'.repeat(40), dirty: false })
     const records = join(directory, 'records')
     const failing = {

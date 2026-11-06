@@ -3,13 +3,13 @@ export type MacOSAppUpdateFeed =
   | {
       readonly provider: 'generic'
       readonly publicUrl: string
-      readonly channel?: 'nightly' | 'latest'
+      readonly channel?: 'nightly' | 'stable'
     }
   | {
       readonly provider: 'github'
       readonly owner: string
       readonly repo: string
-      readonly channel?: 'nightly' | 'latest'
+      readonly channel?: 'nightly' | 'stable'
     }
 
 /** Packaged electron-updater configuration for macOS. */
@@ -17,7 +17,7 @@ export type MacOSAppUpdateConfig =
   | {
       readonly provider: 'generic'
       readonly url: string
-      readonly channel: 'nightly' | 'latest'
+      readonly channel: 'nightly' | 'stable'
       readonly updaterCacheDirName: string
     }
   | {
@@ -25,7 +25,7 @@ export type MacOSAppUpdateConfig =
       readonly owner: string
       readonly repo: string
       readonly vPrefixedTagName: true
-      readonly channel: 'nightly' | 'latest'
+      readonly channel: 'nightly' | 'stable'
       readonly updaterCacheDirName: string
     }
 

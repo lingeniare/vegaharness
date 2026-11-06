@@ -68,6 +68,7 @@ export const en = {
   'app.explorer': 'File Explorer',
   'app.filemanager': 'Files',
   'app.terminal': 'Terminal',
+  'menu.openIn': 'Open in',
 } satisfies Record<string, string>
 
 /** Key domain of the `open-in-app` namespace (en is the source of truth). */
@@ -104,4 +105,5 @@ export const ru = {
   'app.explorer': 'Проводник',
   'app.filemanager': 'Файлы',
   'app.terminal': 'Терминал',
+  'menu.openIn': 'Открыть с помощью',
 } satisfies Record<keyof typeof en, string>

@@ -394,6 +394,17 @@ export const en = {
   // aligned with these English values.
   'terminal.sendInput': '(send input)',
   'terminal.session': 'Terminal {sessionId}',
+  'input.continue': 'Continue generating',
+  'hero.headline': 'Into the Unknown',
+  'hero.preview': 'Preview',
+  'header.more': 'More actions',
+  'tool.title.subagentFork': 'Fork subagent',
+  'detail.status.corrupt': 'Corrupt',
+  'detail.status.unsupported': 'Unsupported',
+  'detail.status.unavailable': 'Unavailable',
+  'detail.field.agentName': 'Agent name',
+  'detail.field.agentDescription': 'Agent task description',
+  'detail.wait.ended': 'Wait ended',
 } satisfies Record<string, string>
 
 /** Russian dictionary, checked against the English keys. */
@@ -781,4 +792,15 @@ export const ru = {
   'detail.schedule.active': 'Включено',
   'detail.schedule.paused': 'Приостановлена',
   'detail.schedule.ended': 'Завершена',
+  'input.continue': 'Продолжить генерацию',
+  'hero.headline': 'В неизвестность',
+  'hero.preview': 'Предварительный просмотр',
+  'header.more': 'Другие действия',
+  'tool.title.subagentFork': 'Создать субагент (наследовать контекст)',
+  'detail.status.corrupt': 'Повреждено',
+  'detail.status.unsupported': 'Не поддерживается',
+  'detail.status.unavailable': 'Недоступно',
+  'detail.field.agentName': 'Имя агента',
+  'detail.field.agentDescription': 'Описание задачи агента',
+  'detail.wait.ended': 'Ожидание завершено',
 } satisfies Record<keyof typeof en, string>

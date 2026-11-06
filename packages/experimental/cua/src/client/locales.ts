@@ -35,6 +35,9 @@ export const en = {
   revoke: 'Revoke', revoked: 'Application access revoked', requested: 'Review the macOS prompt, or open System Settings if no prompt appears', opened: 'System Settings opened',
   applicationsFailed: 'Could not load application access: {message}', iconsFailed: 'Could not load application icons: {message}',
   failed: 'Could not update permissions: {message}', queryFailed: 'Could not check permissions: {message}',
+  approvalRisks: 'Risks',
+  approvalRiskTitle: 'Computer use risks',
+  approvalRiskNotice: 'The agent can access only apps you approve, and can read and control them in the background.\n\nOnline games, messaging apps, and other apps may restrict automation. Violating their rules could result in your account with that app being suspended or banned.\n\nProceed at your own risk. To stop automated control at any time, press Stop in VEGA Harness.',
 }
 /** Keys shared by all supported locale dictionaries. */
 export type CuaPermissionLocaleKey = keyof typeof en
@@ -74,4 +77,7 @@ export const ru = {
   revoke: 'Отозвать', revoked: 'Доступ к приложению отозван', requested: 'Просмотрите подсказку macOS или откройте «Системные настройки», если подсказка не появляется.', opened: 'Системные настройки открыты',
   applicationsFailed: 'Не удалось загрузить доступ к приложению: {message}.', iconsFailed: 'Не удалось загрузить значки приложений: {message}.',
   failed: 'Не удалось обновить разрешения: {message}.', queryFailed: 'Не удалось проверить разрешения: {message}',
+  approvalRisks: 'Риски',
+  approvalRiskTitle: 'Риски управления компьютером',
+  approvalRiskNotice: 'Агент получает доступ только к приложениям, которые вы разрешили, и может читать их содержимое и управлять ими в фоновом режиме.\n\nВ онлайн-играх, мессенджерах и других приложениях могут действовать ограничения на автоматизацию. Нарушение их правил может привести к временной или постоянной блокировке вашей учётной записи в соответствующем приложении.\n\nВы пользуетесь этой возможностью на свой страх и риск. Чтобы в любой момент остановить автоматизированное управление, нажмите «Остановить» в VEGA Harness.',
 } satisfies Record<keyof typeof en, string>
