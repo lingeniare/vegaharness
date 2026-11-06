@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-pii-shield",
   "description": "Composer PII-shield toggle for the VEGA route: shield indicator left of the model selector writing the anonymize settings field",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "publishConfig": {
     "access": "public"
   },

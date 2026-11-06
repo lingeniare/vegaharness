@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-llm-vega-account",
   "description": "VEGA (api.vega.chat) account-managed provider over the pi-ai transport",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "publishConfig": {
     "access": "public"
   },
