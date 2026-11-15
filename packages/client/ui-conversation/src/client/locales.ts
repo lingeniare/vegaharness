@@ -405,6 +405,16 @@ export const en = {
   'detail.field.agentName': 'Agent name',
   'detail.field.agentDescription': 'Agent task description',
   'detail.wait.ended': 'Wait ended',
+  'tool.title.officeRender': 'Render document',
+  'tool.title.officeConvert': 'Convert document',
+  'tool.title.officeRecalculate': 'Recalculate workbook',
+  'tool.webFetch.failure.dns': 'Couldn\'t resolve the host name. Check your network, proxy, or DNS settings.',
+  'tool.webFetch.failure.refused': 'Connection refused. Check the address, port, or proxy.',
+  'tool.webFetch.failure.connectionTimeout': 'Connection timed out. Check your network or proxy, then retry.',
+  'tool.webFetch.failure.certificate': 'Certificate verification failed. Check the system clock, proxy, or certificates.',
+  'tool.webFetch.failure.interrupted': 'Connection interrupted. Try again later.',
+  'tool.webFetch.failure.unreachable': 'Network or host unreachable. Check your network connection or proxy.',
+  'tool.webFetch.failure.network': 'Network request failed. See the output for details.',
 } satisfies Record<string, string>
 
 /** Russian dictionary, checked against the English keys. */
@@ -803,4 +813,14 @@ export const ru = {
   'detail.field.agentName': 'Имя агента',
   'detail.field.agentDescription': 'Описание задачи агента',
   'detail.wait.ended': 'Ожидание завершено',
+  'tool.title.officeRender': 'Отрисовать документ',
+  'tool.title.officeConvert': 'Преобразовать документ',
+  'tool.title.officeRecalculate': 'Пересчитать книгу',
+  'tool.webFetch.failure.dns': 'Не удалось разрешить имя хоста. Проверьте настройки сети, прокси или DNS.',
+  'tool.webFetch.failure.refused': 'Соединение отклонено. Проверьте адрес, порт или прокси.',
+  'tool.webFetch.failure.connectionTimeout': 'Истекло время ожидания соединения. Проверьте сеть или прокси и повторите попытку.',
+  'tool.webFetch.failure.certificate': 'Не удалось проверить сертификат. Проверьте системное время, прокси или сертификаты.',
+  'tool.webFetch.failure.interrupted': 'Подключение прервано. Повторите попытку позже.',
+  'tool.webFetch.failure.unreachable': 'Сеть или хост недоступны. Проверьте сетевое подключение или прокси.',
+  'tool.webFetch.failure.network': 'Сетевой запрос не выполнен. Подробности см. в выводе.',
 } satisfies Record<keyof typeof en, string>

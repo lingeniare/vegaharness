@@ -4,13 +4,14 @@
  *
  * Hand-built row props spread allow-all access Hooks, so they cannot show that the browsing region
  * reads the Hooks a page actually binds. This spec replaces the runtime's allow-all access row with the
- * remote-access snapshot owner itself and renders the real slot tree, so the global and Workspace
- * access Hooks are the renderer's bindings over one non-owner snapshot.
+ * remote-access snapshot owner itself and renders the real slot tree, so the Workspace access Hooks
+ * are the renderer's bindings over one non-owner snapshot.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, screen } from '@testing-library/react'
-import type { TypertResourceKind } from '@deepseek-ai/dsh-api-remote-access/client'
+import type { AccessEffect, RemoteEndpoint, TypertResourceKind } from '@deepseek-ai/dsh-api-remote-access/client'
 import { ClientAccessState } from '@deepseek-ai/dsh-api-remote-access/src/client/state.ts'
+import { whenAllowed } from '@deepseek-ai/dsh-api-remote-access/src/client/when-allowed.ts'
 import type { WorkspaceId } from '@deepseek-ai/dsh-api-workspace-controller/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
@@ -21,7 +22,7 @@ import { apply as applyMenus, inject as injectMenus } from '@deepseek-ai/dsh-cli
 import { apply, inject } from '@deepseek-ai/dsh-client-ui-workspace/client'
 import { SECTION_HOOK_CONTEXT, SECTION_INJECT } from './section-scroller.client.ts'
 
-usePinnedBrowserLanguages('ru')
+usePinnedBrowserLanguages('ru-CN')
 
 afterEach(cleanup)
 beforeEach(() => { localStorage.clear() })
@@ -48,6 +49,8 @@ async function bench(access: ClientAccessState, options: { ungroupedSession?: Se
     apply(ctx) {
       ctx.provide('remoteAccess', {
         source: (kind: TypertResourceKind, id: string, action: string) => access.resource(kind, id, action),
+        whenAccess: (action: RemoteEndpoint, callback: () => AccessEffect) =>
+          whenAllowed(ctx, access.global(action), callback, `access-assembly: ${action}`),
       })
       ctx.slots.provideRoot({ keyedHooks: { remoteAccess: action => access.global(action) } })
     },
@@ -92,7 +95,7 @@ describe('Workspace header actions under the page access snapshot', () => {
     try {
       runtime.renderRoot()
       const header = await screen.findByRole('treeitem')
-      expect(screen.queryByRole('button', { name: 'Создать сессию в рабочей области Project' })).toBeNull()
+      expect(screen.queryByRole('button', { name: 'Действия для рабочей области Project' })).toBeNull()
       expect(screen.getByRole('button', { name: 'Действия для рабочей области Project' })).toBeTruthy()
       const target = { kind: 'workspace' as const, value: { workspaceId: WORKSPACE, path: '/projects/project', displayTitle: 'Project' } }
       const deniedMenu = runtime.ctx.contextMenus.resolve(target)
@@ -125,23 +128,23 @@ describe('Workspace header actions under the page access snapshot', () => {
 
       // The owner's snapshot answers every action.
       act(() => { access.replace({ type: 'baseline', owner: true }) })
-      expect(screen.getByRole('button', { name: 'Создать сессию в рабочей области Project' })).toBeTruthy()
+      expect(screen.getByRole('button', { name: 'Действия для рабочей области Project' })).toBeTruthy()
     } finally {
       await runtime.dispose()
     }
   })
 
-  it('asks the global resource before the Ungrouped header offers New Session', async () => {
+  it('never offers New Session on the Ungrouped header, even under a global grant', async () => {
     const access = new ClientAccessState({ type: 'baseline', owner: false, grants: [] })
     const runtime = await bench(access, { ungroupedSession: 'loose' as SessionId })
     try {
       runtime.renderRoot()
       await screen.findByText('Без группы')
-      expect(screen.queryByRole('button', { name: 'Создать сессию в рабочей области Без группы' })).toBeNull()
+      expect(screen.queryByRole('button', { name: 'Создать сессию в рабочей области Project' })).toBeNull()
       act(() => {
         access.update({ type: 'upsert', grant: { resource: { kind: 'global' }, actions: ['session/create'] } })
       })
-      expect(screen.getByRole('button', { name: 'Создать сессию в рабочей области Без группы' })).toBeTruthy()
+      expect(screen.queryByRole('button', { name: 'Создать сессию в рабочей области Project' })).toBeNull()
     } finally {
       await runtime.dispose()
     }

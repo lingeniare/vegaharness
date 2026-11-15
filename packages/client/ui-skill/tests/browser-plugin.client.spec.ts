@@ -1,4 +1,4 @@
-import { en, ru } from '../src/client/locales.ts'
+import { es, fr, de, ru, pt } from '../src/client/locales.ts'
 /**
  * ui-skill browser half: source and keyed toolview registration +
  * locale dictionaries + source duplicate-name proof +
@@ -141,7 +141,39 @@ describe('apply', () => {
     expect(entry?.locale).toBe('skill')
     expect(entry?.component).toBe(SkillToolRow)
     expect(presentation.dictionaries).toEqual([{
-      namespace: 'skill', dictionaries: { en, ru },
+      namespace: 'skill', dictionaries: {
+        es, fr, de, ru, pt,
+        ru: {
+          'row.title': 'Скилл',
+          'row.running': 'Загрузка скилла',
+          'row.preparing': 'Подготовка к загрузке скилла',
+          'row.failed': 'Не удалось загрузить скилл',
+          'row.stopped': 'Загрузка скилла остановлена',
+          'row.instructions': 'Инструкции',
+          'row.inspect': 'Просмотреть',
+          'menu.userOnly': 'только для пользователя',
+        },
+        en: {
+          'row.title': 'Skill',
+          'row.running': 'Loading skill',
+          'row.preparing': 'Preparing to load a skill',
+          'row.failed': 'Skill load failed',
+          'row.stopped': 'Skill load stopped',
+          'row.instructions': 'Instructions',
+          'row.inspect': 'Inspect',
+          'menu.userOnly': 'user-only',
+        },
+        ja: {
+          'row.title': 'スキル',
+          'row.running': 'スキルを読み込み中',
+          'row.preparing': 'スキルの読み込みを準備中',
+          'row.failed': 'スキルの読み込みに失敗しました',
+          'row.stopped': 'スキルの読み込みが停止しました',
+          'row.instructions': '手順',
+          'row.inspect': '詳細を確認',
+          'menu.userOnly': 'ユーザー専用',
+        },
+      },
     }])
   })
 
@@ -228,7 +260,7 @@ describe('candidates: sessionId addressing', () => {
     }
   })
 
-  it('lists via {sessionId} and ranks case-insensitive subsequence matches with prefixes first', async () => {
+  it('lists via {sessionId} and ranks prefix, substring, then fuzzy name matches', async () => {
     const { list, payloads } = countingList()
     const { source } = await bench(list)
     const items = await source.candidates(proj('s1'), req('co'))
@@ -239,10 +271,12 @@ describe('candidates: sessionId addressing', () => {
       { name: 'code-review', description: 'review flow' },
     ])
     const names = async (query: string) => (await source.candidates(proj('s1'), req(query))).map(c => c.name)
-    // 'ru' prefixes deploy and is a subsequence of code-review: the prefix ranks first.
-    await expect(names('ru')).resolves.toEqual(['deploy', 'code-review'])
+    // 'de' prefixes deploy and occurs inside code-review: the prefix ranks first.
+    await expect(names('de')).resolves.toEqual(['deploy', 'code-review'])
     await expect(names('REV')).resolves.toEqual(['code-review'])
     await expect(names('zzz')).resolves.toEqual([])
+    // Descriptions do not match: 'flow' appears only in descriptions.
+    await expect(names('flow')).resolves.toEqual([])
   })
 
   it('rejects on a failed result (the slash shell owns the menu-side fold)', async () => {
@@ -453,7 +487,7 @@ describe('user-only marking', () => {
     const candidates = await source.candidates(proj('s1'), req(''))
     expect(candidates).toEqual([
       { name: 'shared-skill', description: 'both surfaces' },
-      { name: 'user-only-skill', description: 'только для пользователя · user surface only' },
+      { name: 'user-only-skill', description: 'commit flow' },
     ])
   })
 })

@@ -211,6 +211,11 @@ export const en = {
   'message.trigger.subagent.refusal': 'Subagent declined the task',
   'message.trigger.subagent.unknown': 'Subagent run ended unexpectedly',
   'message.continuation.requested': 'Requested to continue generation',
+  'chat.loadingOlder': 'Loading earlier',
+  'chat.processingOlder': 'Processing',
+  'chat.retryOlder': 'Retry loading',
+  'chat.historyStart': 'Start of conversation',
+  'message.inheritedHistory': 'Inherited history above',
 } satisfies Record<string, string>
 
 /** Russian dictionary, checked against the English keys. */
@@ -418,4 +423,9 @@ export const ru = {
   'message.trigger.subagent.refusal': 'Субагент отказался выполнять задачу',
   'message.trigger.subagent.unknown': 'Работа субагента неожиданно завершилась',
   'message.continuation.requested': 'Запрошено продолжение генерации',
+  'chat.loadingOlder': 'Загрузка истории',
+  'chat.processingOlder': 'Обработка',
+  'chat.retryOlder': 'Повторить загрузку',
+  'chat.historyStart': 'Начало разговора',
+  'message.inheritedHistory': 'Выше — унаследованная история',
 } satisfies Record<keyof typeof en, string>

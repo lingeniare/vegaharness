@@ -29,7 +29,7 @@ import { SECTION_HOOK_CONTEXT, SECTION_INJECT } from './section-scroller.client.
 
 // The service reads its initial locale from the browser; these specs assert
 // the shipped Chinese copy, so they state the browser they assume.
-usePinnedBrowserLanguages('ru')
+usePinnedBrowserLanguages('ru-CN')
 
 const SID = 's1' as SessionId
 
@@ -123,7 +123,7 @@ describe('session rename through the assembled browser', () => {
     fireEvent.click(trigger)
     await view.findByRole('menuitem', { name: 'Закрепить сессию' })
     expect(view.getAllByRole('menuitem').map(item => item.textContent)).toEqual([
-      'Закрепить сессию', 'Переименовать', 'Разветвить сессию', 'Копировать ID сессии', 'Export action', 'Last action', 'Архивировать сессию',
+      'Закрепить сессию', 'Переименовать', 'Отметить как непрочитанное', 'Разветвить сессию', 'Копировать ID сессии', 'Export action', 'Last action', 'Архивировать сессию',
     ])
     expect(view.getAllByRole('separator')).toHaveLength(3)
     const last = view.getByRole('menuitem', { name: 'Last action' })
@@ -165,7 +165,7 @@ describe('session rename through the assembled browser', () => {
     }))
     await runtime.sessions.add({
       id: SID,
-      summary: { title: '旧标题', displayTitle: '旧标题', cwd: '/w/alpha' },
+      summary: { title: 'Persisted title', displayTitle: 'Persisted title', cwd: '/w/alpha' },
       session: { rename },
     })
     await runtime.sessions.retainFor(runtime.ctx, SID, { source: 'mainView' }).ready
@@ -175,7 +175,7 @@ describe('session rename through the assembled browser', () => {
     const view = runtime.renderRoot()
 
     // The current session's group auto-expands; open the row's action menu.
-    const row = (await view.findByText('旧标题')).closest('[role="treeitem"]')!
+    const row = (await view.findByText('Persisted title')).closest('[role="treeitem"]')!
     fireEvent.click(within(row as HTMLElement).getByLabelText('Действия для сессии 旧标题'))
     fireEvent.click(await view.findByRole('menuitem', { name: 'Переименовать' }))
     // The rename row dismissed the menu; the dialog lives in the overlay list.
@@ -183,7 +183,7 @@ describe('session rename through the assembled browser', () => {
 
     // The dialog seeds from the current title; submit a padded value.
     const input = await view.findByLabelText('Название сессии') as HTMLInputElement
-    expect(input.value).toBe('旧标题')
+    expect(input.value).toBe('Persisted title')
     fireEvent.change(input, { target: { value: '  分叉  实验记录  ' } })
     fireEvent.click(view.getByRole('button', { name: 'Переименовать' }))
 
@@ -194,9 +194,9 @@ describe('session rename through the assembled browser', () => {
     await waitFor(() => { expect(view.queryByLabelText('Название сессии')).toBeNull() })
     // The manager lands the unary echo in the list store (its own package
     // tests own that hop); the row re-labels from list state alone.
-    await runtime.sessions.updateSummary(SID, { displayTitle: '分叉 实验记录', title: '分叉 实验记录' })
-    await view.findByText('分叉 实验记录')
-    expect(view.queryByText('旧标题')).toBeNull()
+    await runtime.sessions.updateSummary(SID, { displayTitle: 'ID сессии скопирован', title: 'ID сессии скопирован' })
+    await view.findByText('ID сессии скопирован')
+    expect(view.queryByText('Persisted title')).toBeNull()
     await runtime.dispose()
   })
 
@@ -207,7 +207,7 @@ describe('session rename through the assembled browser', () => {
     }))
     await runtime.sessions.add({
       id: SID,
-      summary: { title: '旧标题', displayTitle: '旧标题', cwd: '/w/alpha' },
+      summary: { title: 'Persisted title', displayTitle: 'Persisted title', cwd: '/w/alpha' },
       session: { rename },
     })
     await runtime.sessions.retainFor(runtime.ctx, SID, { source: 'mainView' }).ready
@@ -217,7 +217,7 @@ describe('session rename through the assembled browser', () => {
     const view = runtime.renderRoot()
     await runtime.flush()
 
-    const row = (await view.findByText('旧标题')).closest('[role="treeitem"]')!
+    const row = (await view.findByText('Persisted title')).closest('[role="treeitem"]')!
     fireEvent.click(within(row as HTMLElement).getByLabelText('Действия для сессии 旧标题'))
     fireEvent.click(await view.findByRole('menuitem', { name: 'Переименовать' }))
     const input = await view.findByLabelText('Название сессии')
@@ -229,7 +229,7 @@ describe('session rename through the assembled browser', () => {
     const alert = await view.findByRole('alert')
     expect(alert.textContent).toContain('title write failed')
     expect(view.getByLabelText('Название сессии')).toBeTruthy()
-    expect(view.getByText('旧标题')).toBeTruthy()
+    expect(view.getByText('Persisted title')).toBeTruthy()
     await runtime.dispose()
   })
 })

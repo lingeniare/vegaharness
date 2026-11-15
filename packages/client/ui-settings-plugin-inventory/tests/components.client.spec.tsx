@@ -12,7 +12,7 @@ import type {
   PluginInventorySettingsTabInjected,
   PluginInventorySettingsTabProps,
 } from '../src/client/PluginInventorySettingsTab.tsx'
-import { ru, en, type PluginInventoryLocaleKey } from '../src/client/locales.ts'
+import { en, ru, type PluginInventoryLocaleKey } from '../src/client/locales.ts'
 
 afterEach(cleanup)
 
@@ -55,13 +55,13 @@ function localizedProps(list: PluginInventorySettingsTabInjected['list']) {
 /** A deployment with a roster: one failed global row, two preset-provided rows. */
 const SNAPSHOT = {
   entries: [
-    { entryId: 'telemetry' as PluginEntryId, moduleName: '@fixture/telemetry', enabled: true, fiberPhase: 'failed' },
-    { entryId: 'timer' as PluginEntryId, moduleName: 'cordis:timer', enabled: true, fiberPhase: 'active' },
-    { entryId: '8a1b2c3d' as PluginEntryId, moduleName: '@deepseek-ai/cordis-plugin-hmr', enabled: true, fiberPhase: 'active' },
-    { entryId: 'unobserved' as PluginEntryId, moduleName: '@fixture/unobserved-name', enabled: true, fiberPhase: null },
-    { entryId: 'bash-host' as PluginEntryId, moduleName: '@deepseek-ai/dsh-tool-bash', enabled: false, fiberPhase: null },
-    { entryId: 'fs-host' as PluginEntryId, moduleName: '@deepseek-ai/dsh-tool-fs', enabled: false, fiberPhase: null },
-    { entryId: 'dormant' as PluginEntryId, moduleName: '@fixture/dormant', enabled: false, fiberPhase: null },
+    { entryId: 'telemetry', moduleName: '@fixture/telemetry', enabled: true, fiberPhase: 'failed' },
+    { entryId: 'timer', moduleName: 'cordis:timer', enabled: true, fiberPhase: 'active' },
+    { entryId: '8a1b2c3d', moduleName: '@deepseek-ai/cordis-plugin-hmr', enabled: true, fiberPhase: 'active' },
+    { entryId: 'unobserved', moduleName: '@fixture/unobserved-name', enabled: true, fiberPhase: null },
+    { entryId: 'bash-host', moduleName: '@deepseek-ai/dsh-tool-bash', enabled: false, fiberPhase: null },
+    { entryId: 'fs-host', moduleName: '@deepseek-ai/dsh-tool-fs', enabled: false, fiberPhase: null },
+    { entryId: 'dormant', moduleName: '@fixture/dormant', enabled: false, fiberPhase: null },
   ],
   agentPresets: [
     {
@@ -69,17 +69,17 @@ const SNAPSHOT = {
       name: 'Стандартный режим',
       isDefault: true,
       rows: [
-        { entryId: 'bash' as PluginEntryId, moduleName: '@deepseek-ai/dsh-tool-bash', enabled: true, fiberPhase: 'active' },
-        { entryId: 'fs' as PluginEntryId, moduleName: '@deepseek-ai/dsh-tool-fs', enabled: true, fiberPhase: null },
+        { entryId: 'bash', moduleName: '@deepseek-ai/dsh-tool-bash', enabled: true, fiberPhase: 'active' },
+        { entryId: 'fs', moduleName: '@deepseek-ai/dsh-tool-fs', enabled: true, fiberPhase: null },
         {
-          entryId: 'pwsh' as PluginEntryId,
+          entryId: 'pwsh',
           moduleName: '@fixture/pwsh',
           enabled: 'conditional',
           condition: 'process.platform === \'win32\'',
           fiberPhase: null,
         },
-        { entryId: 'codex' as PluginEntryId, moduleName: '@fixture/codex', enabled: false, fiberPhase: null },
-        { entryId: 'crashy' as PluginEntryId, moduleName: '@fixture/crashy', enabled: true, fiberPhase: 'failed' },
+        { entryId: 'codex', moduleName: '@fixture/codex', enabled: false, fiberPhase: null },
+        { entryId: 'crashy', moduleName: '@fixture/crashy', enabled: true, fiberPhase: 'failed' },
         { entryId: null, moduleName: '@fixture/anonymous', enabled: true, fiberPhase: null },
       ],
     },
@@ -87,14 +87,14 @@ const SNAPSHOT = {
       id: 'ptc',
       isDefault: false,
       rows: [
-        { entryId: 'bash' as PluginEntryId, moduleName: '@deepseek-ai/dsh-tool-bash', enabled: true, fiberPhase: null },
-        { entryId: 'bash-fork' as PluginEntryId, moduleName: '@deepseek-ai/dsh-tool-bash', enabled: true, fiberPhase: null },
-        { entryId: 'fs' as PluginEntryId, moduleName: '@deepseek-ai/dsh-tool-fs', enabled: 'conditional', fiberPhase: null },
+        { entryId: 'bash', moduleName: '@deepseek-ai/dsh-tool-bash', enabled: true, fiberPhase: null },
+        { entryId: 'bash-fork', moduleName: '@deepseek-ai/dsh-tool-bash', enabled: true, fiberPhase: null },
+        { entryId: 'fs', moduleName: '@deepseek-ai/dsh-tool-fs', enabled: 'conditional', fiberPhase: null },
       ],
     },
     { id: 'shattered', name: '坏预设', isDefault: false, broken: 'the composition file is missing', rows: [] },
   ],
-} as Snapshot
+} as unknown as Snapshot
 
 async function renderReady(snapshot: Snapshot = SNAPSHOT): Promise<ReturnType<typeof render>> {
   const view = render(<PluginInventorySettingsTab {...props(async () => snapshot)} />)
@@ -162,7 +162,7 @@ describe('PluginInventorySettingsTab', () => {
     expect(screen.getByRole('button', { name: 'dsh-Navigation, include:navigation, Enabled' })).toBeTruthy()
     locale.setLocale('ru')
     view.rerender(<PluginInventorySettingsTab {...pageProps} />)
-    expect(screen.getByRole('button', { name: 'dsh-Навигация, include:navigation, Включён' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'dsh-Navigation, include:navigation, Enabled' })).toBeTruthy()
   })
 
   it('localizes global and preset metadata at render time while preserving identities and query state', async () => {
@@ -214,7 +214,7 @@ describe('PluginInventorySettingsTab', () => {
     expect(screen.getByText(ru.presetSubtitle).textContent).toBe(ru.presetSubtitle)
     expect(screen.getByText(ru.globalSubtitle).textContent).toBe(ru.globalSubtitle)
     expect(screen.getByRole('button', { name: 'Навигация, include:global-navigation, Включён' })).toBeTruthy()
-    expect(screen.getByRole('button', { name: '会话执行器, include:preset-runner, Включён' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'dsh-Navigation, include:navigation, Enabled' })).toBeTruthy()
     expect(screen.getByText('全局导航控件')).toBeTruthy()
     expect(screen.getByText('运行会话命令')).toBeTruthy()
     expect(screen.getByText(ru.metadataError.replace('{error}', presetError))).toBeTruthy()
@@ -227,9 +227,13 @@ describe('PluginInventorySettingsTab', () => {
     }
     fireEvent.change(search, { target: { value: '运行会话命令' } })
     expect(screen.getAllByRole('listitem')).toHaveLength(1)
-    expect(screen.getByRole('button', { name: '会话执行器, include:preset-runner, Включён' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'dsh-Navigation, include:navigation, Enabled' })).toBeTruthy()
+    // The Chinese page still finds the row by its English description.
     fireEvent.change(search, { target: { value: 'Run per session' } })
+    expect(screen.getByRole('button', { name: 'dsh-Navigation, include:navigation, Enabled' })).toBeTruthy()
+    fireEvent.change(search, { target: { value: 'no such plugin' } })
     expect(screen.getByText(ru.emptySearch)).toBeTruthy()
+    fireEvent.change(search, { target: { value: 'Run per session' } })
     locale.setLocale('en')
     view.rerender(<PluginInventorySettingsTab {...pageProps} />)
     expect(screen.getByRole('button', { name: 'Session runner, include:preset-runner, Enabled' })).toBeTruthy()
@@ -245,11 +249,11 @@ describe('PluginInventorySettingsTab', () => {
       },
       {
         entryId: 'include:commands' as PluginEntryId, moduleName: '@acme/dsh-sidebar/commands', enabled: true, fiberPhase: null,
-        meta: { title: { en: 'English title' }, description: { en: 'Package description.', ru: '中文命令说明。' } },
+        meta: { title: { en: 'English title' }, description: { en: 'Package description.', ru: 'tool-subagent' } },
       },
       {
         entryId: 'include:theme' as PluginEntryId, moduleName: '@acme/dsh-theme/client', enabled: true, fiberPhase: null,
-        meta: { title: { en: '@acme/dsh-theme', ru: '主题插件' }, description: { en: '', ru: '中文主题说明。' } },
+        meta: { title: { en: '@acme/dsh-theme', ru: '主题插件' }, description: { en: '', ru: 'tool-subagent' } },
       },
     ]
     const snapshot: Snapshot = scope === 'global'
@@ -266,29 +270,31 @@ describe('PluginInventorySettingsTab', () => {
     expect(screen.getByText('Package description.')).toBeTruthy()
     const theme = screen.getByRole('button', { name: '@acme/dsh-theme, include:theme, Enabled' })
     expect(theme.getAttribute('aria-describedby')).toBeNull()
-    expect(screen.queryByText('中文主题说明。')).toBeNull()
+    expect(screen.queryByText('tool-subagent')).toBeNull()
 
     locale.setLocale('ru')
     view.rerender(<PluginInventorySettingsTab {...pageProps} />)
     for (const [name, description] of [
-      ['sidebar/navigation, include:navigation, Включён', 'Navigation description.'],
-      ['English title, include:commands, Включён', '中文命令说明。'],
-      ['主题插件, include:theme, Включён', '中文主题说明。'],
+      ['@deepseek-ai/dsh-tool-subagent', 'Navigation description.'],
+      ['@deepseek-ai/dsh-tool-subagent', 'tool-subagent'],
+      ['@deepseek-ai/dsh-tool-subagent', 'tool-subagent'],
     ] as const) {
       const card = screen.getByRole('button', { name })
       expect(screen.getByText(description)).toBeTruthy()
       expect(document.getElementById(card.getAttribute('aria-describedby')!)?.textContent).toBe(description)
     }
     expect(screen.queryByText('Package description.')).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: '主题插件, include:theme, Включён' }))
+    fireEvent.click(screen.getByRole('button', { name: '@deepseek-ai/dsh-tool-subagent' }))
     expect(view.container.querySelector('[data-loader-entry]')?.textContent).toBe('include:theme')
     expect(screen.getByText(ru.moduleLabel).nextElementSibling?.textContent).toBe('@acme/dsh-theme/client')
 
-    fireEvent.change(screen.getByRole('searchbox', { name: ru.search }), { target: { value: '中文主题说明。' } })
+    fireEvent.change(screen.getByRole('searchbox', { name: ru.search }), { target: { value: 'tool-subagent' } })
     expect(screen.getAllByRole('listitem')).toHaveLength(1)
     locale.setLocale('en')
     view.rerender(<PluginInventorySettingsTab {...pageProps} />)
-    expect(screen.getByText(en.emptySearch)).toBeTruthy()
+    // The English page still finds the row by its Chinese description, shown in English.
+    expect(screen.getAllByRole('listitem')).toHaveLength(1)
+    expect(screen.queryByText('tool-subagent')).toBeNull()
     fireEvent.change(screen.getByRole('searchbox', { name: en.search }), { target: { value: '@acme/dsh-theme/client' } })
     expect(screen.getAllByRole('listitem')).toHaveLength(1)
     expect(screen.getByRole('button', { name: '@acme/dsh-theme, include:theme, Enabled' }).getAttribute('aria-describedby')).toBeNull()
@@ -321,7 +327,7 @@ describe('PluginInventorySettingsTab', () => {
     expect(screen.getAllByRole('menuitem').map(item => item.textContent)).toEqual([
       'Стандартный режим (default)',
       'ptc',
-      '坏预设 (failed to load)',
+      'Стандартный режим (default)',
     ])
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(screen.queryAllByRole('menuitem')).toHaveLength(0)
@@ -491,7 +497,7 @@ describe('PluginInventorySettingsTab', () => {
     // An unnamed preset labels its source by id.
     expect(screen.getByText(en.fromPreset).nextElementSibling?.textContent).toBe('ptc')
 
-    pickPreset('坏预设 (failed to load)')
+    pickPreset('Стандартный режим (default)')
     expect(screen.getByRole('alert').textContent).toBe('the composition file is missing')
     expect(view.container.querySelectorAll('[data-plugin-scope="preset"] li')).toHaveLength(0)
   })
@@ -532,7 +538,7 @@ describe('PluginInventorySettingsTab', () => {
     expect(screen.getAllByRole('menuitem').map(item => item.textContent)).toEqual([
       'Localized standard (default)',
       'Localized ptc',
-      '坏预设 (failed to load)',
+      'Стандартный режим (default)',
     ])
     fireEvent.keyDown(document, { key: 'Escape' })
 

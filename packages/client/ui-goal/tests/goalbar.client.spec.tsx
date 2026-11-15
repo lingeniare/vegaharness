@@ -48,7 +48,7 @@ describe('GoalBar', () => {
     expect(complete.container.firstChild).toBeNull()
   })
 
-  it('active goal: goal glyph, "Текущая цель", truncated objective, edit and clear actions', () => {
+  it('renders nothing while loading, absent, or when the goal is complete', () => {
     const actions = makeActions()
     render(<GoalBar goal={makeGoal()} {...actions} t={t} />)
     expect(screen.getByText('Текущая цель')).toBeTruthy()
@@ -146,26 +146,36 @@ describe('GoalBar', () => {
     expect(screen.getByRole('textbox', { name: 'Содержание цели' })).toBeTruthy()
   })
 
-  it('active goal: the pause action pauses', () => {
+  it('active goal: the pause action follows edit and clear, and pauses', () => {
     const actions = makeActions()
     render(<GoalBar goal={makeGoal()} activation="armed" {...actions} t={t} />)
+    expect(screen.getAllByRole('button').map(b => b.getAttribute('aria-label'))).toEqual(['Редактировать цель', 'Очистить цель', 'Приостановить цель'])
     fireEvent.click(screen.getByRole('button', { name: 'Приостановить цель' }))
     expect(actions.onPause).toHaveBeenCalledTimes(1)
   })
 
-  it('active disarmed goal: "Неактивная цель" with a resume action instead of pause', () => {
+  it('active goal with unknown activation: keeps a disabled pause after edit and clear', () => {
+    const actions = makeActions()
+    render(<GoalBar goal={makeGoal()} {...actions} t={t} />)
+    expect(screen.getAllByRole('button').map(b => b.getAttribute('aria-label'))).toEqual(['Редактировать цель', 'Очистить цель', 'Приостановить цель'])
+    expect(screen.getByRole('button', { name: 'Приостановить цель' }).hasAttribute('disabled')).toBe(true)
+  })
+
+  it('renders nothing while loading, absent, or when the goal is complete', () => {
     const actions = makeActions()
     render(<GoalBar goal={makeGoal()} activation="disarmed" {...actions} t={t} />)
     expect(screen.getByText('Неактивная цель')).toBeTruthy()
+    expect(screen.queryByText('Приостановленная цель')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Возобновить цель' }))
     expect(actions.onResume).toHaveBeenCalledTimes(1)
     expect(screen.queryByRole('button', { name: 'Приостановить цель' })).toBeNull()
   })
 
-  it('paused goal: "Неактивная цель" with a resume action before edit', () => {
+  it('renders nothing while loading, absent, or when the goal is complete', () => {
     const actions = makeActions()
     render(<GoalBar goal={makeGoal({ phase: 'paused' })} {...actions} t={t} />)
     expect(screen.getByText('Приостановленная цель')).toBeTruthy()
+    expect(screen.getAllByRole('button').map(b => b.getAttribute('aria-label'))).toEqual(['Редактировать цель', 'Очистить цель', 'Возобновить цель'])
     fireEvent.click(screen.getByRole('button', { name: 'Возобновить цель' }))
     expect(actions.onResume).toHaveBeenCalledTimes(1)
   })
@@ -199,7 +209,7 @@ describe('GoalBar', () => {
     expect(screen.queryByText('Текущая цель')).toBeNull()
   })
 
-  it('blocked goal: "Заблокированная цель" with the block reason as the strip tooltip', () => {
+  it('renders nothing while loading, absent, or when the goal is complete', () => {
     const actions = makeActions()
     const goal = makeGoal({ phase: 'blocked', blockedReason: { code: 'stalled', message: 'No progress in 3 rounds' } })
     render(<GoalBar goal={goal} {...actions} t={t} />)

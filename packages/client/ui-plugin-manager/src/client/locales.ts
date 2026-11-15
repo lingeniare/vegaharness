@@ -301,6 +301,8 @@ export const en = {
   detailInvalid: 'The plugin declares an invalid details file.',
   detailFailed: 'Could not read the details.',
   detailFootnotes: 'Footnotes',
+  statusNotRunning: 'Not running',
+  reasonUnexpectedPackage: 'The plugin source installed another package or version than requested; the installation was undone. Report it to the plugin\'s publisher or the index maintainer.',
 } satisfies Record<string, string>
 
 /** Russian dictionary, checked against the English keys. */
@@ -596,4 +598,6 @@ export const ru = {
   detailInvalid: 'Плагин объявляет неверный файл сведений.',
   detailFailed: 'Подробности прочитать не удалось.',
   detailFootnotes: 'Сноски',
+  statusNotRunning: 'Не запущено',
+  reasonUnexpectedPackage: 'Источник плагина установил не тот пакет или не ту версию, которые были запрошены; установка отменена. Сообщите об этом издателю плагина или сопровождающему индекса плагинов.',
 } satisfies Record<keyof typeof en, string>

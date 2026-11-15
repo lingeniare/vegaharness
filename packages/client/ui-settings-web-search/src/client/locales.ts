@@ -52,6 +52,14 @@ export const en: Record<WebSearchSettingsLocaleKey, string> = {
   saveFailed: 'The deployment did not accept these values; they were left for you to correct.',
   invalidNumber: 'Enter a number, or leave blank to use the default.',
   invalidCount: 'Enter an integer from 1 to 50, or leave blank to use the default.',
+  billing: 'Billing',
+  billingAuto: 'Automatic',
+  billingAutoHint: "Follows the conversation's DeepSeek account or API key; with other models, uses the API key first, then the signed-in account.",
+  billingAccount: 'Signed-in DeepSeek account',
+  billingAccountHint: 'Requires signing in to DeepSeek.',
+  billingApiKey: 'DeepSeek API key',
+  billingApiKeyHint: 'Uses the API key from the Models page; set one first.',
+  billingAdvancedOverride: 'Overridden by {fields}',
 }
 
 /**
@@ -100,4 +108,12 @@ export const ru = {
   saveFailed: 'Развертывание не приняло эти значения; они оставлены для исправления.',
   invalidNumber: 'Введите число или оставьте поле пустым, чтобы использовать значение по умолчанию.',
   invalidCount: 'Введите целое число от 1 до 50 или оставьте поле пустым, чтобы использовать значение по умолчанию.',
+  billing: 'Оплата',
+  billingAuto: 'Автоматически',
+  billingAutoHint: 'Следует аккаунту или ключу API DeepSeek из разговора; с другими моделями сначала ключ API, затем активный аккаунт.',
+  billingAccount: 'Активный аккаунт DeepSeek',
+  billingAccountHint: 'Требуется вход в DeepSeek.',
+  billingApiKey: 'Ключ API DeepSeek',
+  billingApiKeyHint: 'Использует ключ API со страницы моделей; сначала задайте его.',
+  billingAdvancedOverride: 'Переопределено: {fields}',
 } satisfies Record<keyof typeof en, string>

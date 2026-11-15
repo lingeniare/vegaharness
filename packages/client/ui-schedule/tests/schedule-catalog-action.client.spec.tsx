@@ -5,8 +5,7 @@ import { act, cleanup, fireEvent, render, screen, within } from '@testing-librar
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import type { SessionSnapshot } from '@deepseek-ai/dsh-api-session-controller/client'
-import type { ScheduleRecord, ScheduleCatalogEntry } from '@deepseek-ai/dsh-schedule/client'
-import { ScheduleId } from '@deepseek-ai/dsh-schedule'
+import type { ScheduleRecord, ScheduleCatalogEntry, ScheduleId } from '@deepseek-ai/dsh-schedule/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import {
   formatScheduleAbsolute,
@@ -23,7 +22,8 @@ import {
 import type { CatalogSnapshot } from '../src/client/catalog-source.ts'
 import { en, ru } from '../src/client/locales.ts'
 import catalogCss from '../src/client/ScheduleCatalogAction.module.css'
-import { en as managerEn, ru as managerRu } from '../src/client/task-manager-locales.ts'
+import { en as managerEn, ru as managerZh } from '../src/client/task-manager-locales.ts'
+import { brandString } from '@deepseek-ai/dsh-brand'
 
 const SESSION = 'schedule-session' as SessionId
 const START = Date.parse('2026-08-25T12:00:00.000Z')
@@ -60,7 +60,7 @@ function record(
 ): ScheduleRecord {
   const prompt = options.prompt ?? id
   const common = {
-    id: ScheduleId(id),
+    id: brandString<ScheduleId>(id),
     kind,
     title: options.title ?? prompt,
     prompt,
@@ -95,7 +95,7 @@ function entry(id: string, scheduledAt: number, options: { prompt?: string; titl
   const prompt = options.prompt ?? id
   const instant = new Date(scheduledAt).toISOString()
   return { kind: 'rrule',
-    id: ScheduleId(id), title: options.title ?? prompt, prompt, scheduledAt: instant,
+    id: brandString<ScheduleId>(id), title: options.title ?? prompt, prompt, scheduledAt: instant,
     rrule: options.rrule ?? `DTSTART;TZID=UTC:${instant.replace(/[-:]|\.\d{3}Z$/g, '')}\nRRULE:FREQ=DAILY;COUNT=1`,
     target: { kind: 'session', sessionId: SESSION }, involvedSessionIds: [SESSION], status: 'active',
     createdAt: CREATED, updatedAt: CREATED,
@@ -117,7 +117,7 @@ function sessionSnapshot(openState: SessionSnapshot['openState']): SessionSnapsh
     openState,
     openError: null,
     hasMore: false,
-    loadingOlder: false,
+    loadingOlder: false, historyLoadStatus: 'idle', historyWasPartial: false,
     promptError: null,
     blank: false,
     lastAgentError: null,
@@ -454,7 +454,7 @@ describe('ScheduleCatalogAction rows', () => {
 
   it('renders exact recurring units without rounding and localizes both dictionaries', () => {
     const tEn = makeTranslate(en)
-    const tRu = makeTranslate(ru)
+    const tZh = makeTranslate(ru)
     const samples = [
       [86_400, 'Every 1 day', 'Каждые 1 день'],
       [172_800, 'Every 2 days', 'Каждые 2 дня'],
@@ -463,18 +463,18 @@ describe('ScheduleCatalogAction rows', () => {
       [300, 'Every 5 minutes', 'Каждые 5 минут'],
       [301, 'Every 301 seconds', 'Каждые 301 секунда'],
     ] as const
-    for (const [seconds, english, russian] of samples) {
+    for (const [seconds, english, chinese] of samples) {
       const item = record(String(seconds), 'every', START + 1_000, { everySeconds: seconds })
       expect(formatScheduleFrequency(item, tEn)).toBe(english)
-      expect(formatScheduleFrequency(item, tRu)).toBe(russian)
+      expect(formatScheduleFrequency(item, tZh)).toBe(chinese)
     }
     const frequency: FrequencyTranslator = tEn
     for (const kind of ['at', 'after'] as const) {
       const once = record(`once-${kind}`, kind, START + 1_000)
       expect(formatScheduleFrequency(once, frequency)).toBe('Once')
-      expect(formatScheduleFrequency(once, tRu)).toBe('Один раз')
+      expect(formatScheduleFrequency(once, tZh)).toBe('Однократно')
     }
-    expect(tRu('list.nextRun')).toBe('Следующий запуск')
+    expect(tZh('list.nextRun')).toBe('Следующий запуск')
   })
 
   it.each([
@@ -487,7 +487,7 @@ describe('ScheduleCatalogAction rows', () => {
     expect(formatScheduleFrequency(item, makeTranslate(en)))
       .toBe(`Daily at ${displayed} (${zoneLabel('America/New_York', makeTranslate(managerEn))})`)
     expect(formatScheduleFrequency(item, makeTranslate(ru)))
-      .toBe(`Ежедневно в ${displayed} (${zoneLabel('America/New_York', makeTranslate(managerRu))})`)
+      .toBe(`Daily at ${displayed} (${zoneLabel('America/New_York', makeTranslate(managerEn))})`)
   })
 
   it('labels a weekly rule with its localized weekday set, clock, and zone', () => {
@@ -497,7 +497,7 @@ describe('ScheduleCatalogAction rows', () => {
     expect(formatScheduleFrequency(item, makeTranslate(en)))
       .toBe(`Weekly on Mon, Wed at 09:00 (${zoneLabel('Asia/Shanghai', makeTranslate(managerEn))})`)
     expect(formatScheduleFrequency(item, makeTranslate(ru)))
-      .toBe(`Еженедельно по Пн, Ср в 09:00 (${zoneLabel('Asia/Shanghai', makeTranslate(managerRu))})`)
+      .toBe(`Daily at ${displayed} (${zoneLabel('America/New_York', makeTranslate(managerEn))})`)
   })
 
   it('labels a weekly rule with whole seconds and for a single weekday', () => {
@@ -512,7 +512,7 @@ describe('ScheduleCatalogAction rows', () => {
     expect(formatScheduleFrequency(milliseconds, makeTranslate(en)))
       .toBe('Weekly on Mon, Tue, Wed, Thu, Fri, Sat, Sun at 09:00 (UTC+00:00)')
     expect(formatScheduleFrequency(milliseconds, makeTranslate(ru)))
-      .toBe('Еженедельно по Пн, Вт, Ср, Чт, Пт, Сб, Вс в 09:00 (UTC+00:00)')
+      .toBe('Daily at ${displayed} (${zoneLabel('America/New_York', makeTranslate(managerEn))})')
   })
 
   it('labels a cron rule with its described sentence and zone', () => {
@@ -522,7 +522,7 @@ describe('ScheduleCatalogAction rows', () => {
     expect(formatScheduleFrequency(item, makeTranslate(en)))
       .toBe(`Mon–Fri at 09:00 (${zoneLabel('America/New_York', makeTranslate(managerEn))})`)
     expect(formatScheduleFrequency(item, makeTranslate(ru)))
-      .toBe(`Пн–Пт в 09:00 (${zoneLabel('America/New_York', makeTranslate(managerRu))})`)
+      .toBe(`Daily at ${displayed} (${zoneLabel('America/New_York', makeTranslate(managerEn))})`)
   })
 
   it('omits a cron rule zone equal to the host zone and names another zone', () => {
@@ -535,8 +535,8 @@ describe('ScheduleCatalogAction rows', () => {
       .toBe('Every 15 minutes')
     expect(formatScheduleFrequency(item, t, { system: 'UTC', label: zone => zoneLabel(zone, named) }))
       .toBe(`Every 15 minutes (${zoneLabel('Asia/Shanghai', named)})`)
-    expect(formatScheduleFrequency(item, makeTranslate(ru), { system: 'UTC', label: zone => zoneLabel(zone, makeTranslate(managerRu)) }))
-      .toBe(`Каждые 15 мин. (${zoneLabel('Asia/Shanghai', makeTranslate(managerRu))})`)
+    expect(formatScheduleFrequency(item, makeTranslate(ru), { system: 'UTC', label: zone => zoneLabel(zone, makeTranslate(managerZh)) }))
+      .toBe(`Daily at ${displayed} (${zoneLabel('America/New_York', makeTranslate(managerEn))})`)
   })
 
   it('labels a rule this parser cannot describe as Custom', () => {

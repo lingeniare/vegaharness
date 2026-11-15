@@ -1,6 +1,0 @@
-{
-  "meta": {
-    "title": "api-account-controller",
-    "description": "Expose safe account operations over authenticated Remote."
-  }
-}

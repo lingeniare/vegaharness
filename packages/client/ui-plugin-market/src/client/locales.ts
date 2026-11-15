@@ -90,6 +90,8 @@ export const en = {
   detailInvalid: 'The plugin declares an invalid details file.',
   detailFailed: 'Could not read the details.',
   footnotes: 'Footnotes',
+  update: 'Update',
+  updateTitle: 'Update {name} to {version}',
 } satisfies Record<string, string>
 
 /** Discover tab copy. */
@@ -183,4 +185,6 @@ export const ru = {
   detailInvalid: 'Плагин объявляет неверный файл сведений.',
   detailFailed: 'Подробности прочитать не удалось.',
   footnotes: 'Сноски',
+  update: 'Обновить',
+  updateTitle: 'Обновить {name} до {version}',
 } satisfies Record<keyof typeof en, string>

@@ -1,20 +1,23 @@
 /** Validate packaged Desktop update artifacts before any network upload begins. */
 
+import type { DesktopPackageTargetName } from './package-target.ts'
+import type { DesktopUploadArtifact } from '@deepseek-ai/dsh-desktop-publisher/desktop-upload-types.ts'
 import { createHash } from 'node:crypto'
 import { createReadStream } from 'node:fs'
 import { readFile, stat } from 'node:fs/promises'
 import { basename, join, resolve } from 'node:path'
 import { dump, load } from 'js-yaml'
-import type { DesktopPackageTargetName } from './package-target.ts'
 import {
   desktopBuildRecordFilename,
   desktopGithubInstallerFilename,
   desktopLatestInstallerFilename,
   desktopUpdateMetadataFilename,
   resolveDesktopUploadConfig,
-} from './desktop-auto-update-environment.mjs'
+} from '@deepseek-ai/dsh-desktop-publisher/desktop-auto-update-environment.mjs'
 import { desktopTargetBuildPaths } from './desktop-build-paths.mjs'
 import { validateDesktopBuildVersion } from './desktop-build-version.mjs'
+
+export type { DesktopUploadArtifact } from '@deepseek-ai/dsh-desktop-publisher/desktop-upload-types.ts'
 
 const APP_ROOT = resolve(import.meta.dirname, '..')
 const REPOSITORY_ROOT = resolve(APP_ROOT, '..', '..')
@@ -27,19 +30,6 @@ const TARGETS = {
   readonly arch: string
   readonly os: string
 }>
-
-/** One local file and its final object metadata. */
-export interface DesktopUploadArtifact {
-  readonly path: string
-  readonly filename: string
-  readonly key: string
-  readonly contentType: string
-  /** Browser save name for fixed website downloads, preserving the validated installer basename. */
-  readonly contentDisposition?: string
-  readonly channelMetadata: boolean
-  /** Published YAML with normalized artifact URLs; binary bytes remain file-backed. */
-  readonly contents?: string
-}
 
 /** Shared shape of a validated installer or update upload, channel metadata ordered last. */
 interface DesktopUploadPlanBase {

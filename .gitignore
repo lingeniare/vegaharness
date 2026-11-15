@@ -63,6 +63,7 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 apps/web/dist/
+apps/cli/docs/
 .artifacts/
 .dsh-build/
 .dsh-report/

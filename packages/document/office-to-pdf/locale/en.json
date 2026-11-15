@@ -1,6 +1,0 @@
-{
-  "meta": {
-    "title": "office-to-pdf",
-    "description": "Shared Office-to-PDF conversion with bounded queues and caching."
-  }
-}

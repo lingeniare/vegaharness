@@ -23,6 +23,10 @@ export const en = {
   attachmentEnded: 'The terminal connection ended. Reconnect to continue.',
   invalidOutput: 'The terminal screen could not be received. Reconnect to recover it.',
   terminalLimit: 'The terminal limit has been reached. Close unused terminals and try again. Exited terminals also count toward the limit.',
+  'badge.agent': 'Agent', 'badge.agentHint': 'Opened by the agent. Typing here takes over; the agent can then only read it.',
+  'badge.sandbox': 'Sandbox',
+  'badge.readOnlyHint': "Commands run in the agent's read-only sandbox, including commands you type here.",
+  'badge.workspaceWriteHint': "Commands run in the agent's workspace sandbox, including commands you type here.",
 }
 
 /** Russian dictionary, checked against the English keys. */
@@ -41,4 +45,8 @@ export const ru = {
   attachmentEnded: 'Подключение к терминалу завершено. Подключитесь повторно, чтобы продолжить.',
   invalidOutput: 'Не удалось получить изображение экрана терминала. Подключитесь повторно, чтобы восстановить его.',
   terminalLimit: 'Достигнуто максимальное количество терминалов. Закройте неиспользуемые терминалы и попробуйте ещё раз. Завершённые терминалы также учитываются.',
+  'badge.agent': 'Агент', 'badge.agentHint': 'Открыт агентом. Если вы начнёте вводить здесь, управление перейдёт к вам; после этого агент сможет только читать его.',
+  'badge.sandbox': 'Песочница',
+  'badge.readOnlyHint': 'Команды выполняются в песочнице агента только для чтения, включая команды, которые вы вводите здесь.',
+  'badge.workspaceWriteHint': 'Команды выполняются в песочнице рабочей области агента, включая команды, которые вы вводите здесь.',
 } satisfies Record<keyof typeof en, string>

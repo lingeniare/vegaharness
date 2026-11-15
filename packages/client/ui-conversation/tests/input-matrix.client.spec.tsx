@@ -1,4 +1,3 @@
-import { ru } from '../src/client/locales.ts'
 // @vitest-environment jsdom
 import { contextMenuHook } from '@deepseek-ai/dsh-client-test-runtime'
 /**
@@ -17,7 +16,7 @@ import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import {
   allowAllAccess, bindSnapshotSelector, conversationSnapshot, sessionSnapshot,
 } from '@deepseek-ai/dsh-client-test-runtime'
-import type { SessionStatusSnapshot } from '@deepseek-ai/dsh-client-ui-session/client'
+import type { SessionStatusSnapshot } from '@deepseek-ai/dsh-client-ui-session-status/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { SubmitAttachment, SubmitOutcome } from '../src/client/contract/input.ts'
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
@@ -26,6 +25,8 @@ import type { DraftAttachmentId } from '../src/client/contract/input.ts'
 import { SessionInputShell } from '../src/client/input/facade.ts'
 import { InputBar } from '../src/client/skeleton/InputBar.tsx'
 import type { InputBarProps } from '../src/client/skeleton/InputBar.tsx'
+import { ru } from '../src/client/locales.ts'
+import { createComposerFileIntake } from '../src/client/input/file-intake.ts'
 
 // Every fixture carries the resource hook the resources plugin merges into GlobalStandardProps.
 const useResource = (() => ({ status: 'none' as const, value: undefined, failure: undefined })) as GlobalStandardProps['useResource']
@@ -77,6 +78,7 @@ function mountBar(shell: SessionInputShell, over?: { running?: boolean; disabled
     addFiles: () => null,
     useFileUploads: bindSnapshotSelector(createSnapshotStore({})),
     retryFileUpload: undefined,
+    registerFileIntake: createComposerFileIntake(),
     removeAttachment: () => {},
     // Every id resolves so the bar's registry prune never drops a test image.
     resolveDraftAttachments: ids => ids.map(id => ({
@@ -95,6 +97,7 @@ function mountBar(shell: SessionInputShell, over?: { running?: boolean; disabled
     stop: vi.fn(),
     t: makeTranslate(ru, commonRu),
     variant: 'composer',
+    occurrence: 'main',
   }
   return render(<InputBar {...props} />)
 }
@@ -180,7 +183,7 @@ describe('matrix row: claimed', () => {
     expect(textarea.getAttribute('contenteditable')).toBe('true')
     // Free editing after the chip: hint drops, claim holds.
     typeAtCaret('发布版本')
-    expect(shell.snapshot.draft).toBe('/goal 发布版本')
+    expect(shell.snapshot.draft).toBe('')
     expect(shell.snapshot.phase).toBe('claimed')
     expect(textarea.style.getPropertyValue('--dsh-composer-hint')).toBe('')
   })
@@ -201,7 +204,7 @@ describe('matrix row: claimed', () => {
   it('replacing the whole draft removes the chip and releases to plain', () => {
     const { view, shell, claim } = bench()
     claim()
-    act(() => { shell.setDraft('goal 发布.') })
+    act(() => { shell.setDraft('/goal 发布') })
     expect(shell.snapshot.phase).toBe('plain')
     expect(shell.snapshot.claim).toBeUndefined()
     expect(view.container.querySelector('[data-composer-command]')).toBeNull()
@@ -260,11 +263,11 @@ describe('matrix row: claimed with attachments', () => {
 
   it('a serialize rejection blocks the transaction: notice, no submit call, images kept', async () => {
     const submit = vi.fn(() => Promise.resolve({ kind: 'success' as const }))
-    const { view, textarea, shell, claim, release } = bench({ submit, serialize: () => Promise.reject(new Error('附件已失效')) })
+    const { view, textarea, shell, claim, release } = bench({ submit, serialize: () => Promise.reject(new Error('Не удалось выполнить')) })
     claim('/goal ', 'Цель', true)
     act(() => { shell.addAttachments([img]) })
     fireEvent.keyDown(textarea, { key: 'Enter' })
-    await vi.waitFor(() => { expect(view.getByText('附件已失效')).toBeTruthy() })
+    await vi.waitFor(() => { expect(view.getByText('Не удалось выполнить')).toBeTruthy() })
     expect(submit).not.toHaveBeenCalled()
     expect(shell.snapshot.attachmentIds).toEqual([img])
     expect(release).not.toHaveBeenCalled()

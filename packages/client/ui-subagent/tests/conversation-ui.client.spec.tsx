@@ -9,7 +9,7 @@ import type {
 import type { SubagentAddress, SubagentCatalogEntry } from '@deepseek-ai/dsh-subagent/client'
 import type { TeamProjection, TeamTaskId, TeamTaskView } from '@deepseek-ai/dsh-agent-team/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { SessionStatusSnapshot } from '@deepseek-ai/dsh-client-ui-session/client'
+import type { SessionStatusSnapshot } from '@deepseek-ai/dsh-client-ui-session-status/client'
 import {
   SubagentCatalogAction, SubagentHeaderLineage,
   type SubagentCatalogActionProps, type SubagentHeaderLineageProps,
@@ -75,31 +75,44 @@ function props(
 ) {
   const catalogs = value === undefined ? nested : { [PARENT]: value, ...nested }
   const statuses: SessionStatusSnapshot = new Map()
+  const byId: Record<SessionId, SessionSummary> = {
+    ...Object.fromEntries(Object.values(catalogs).flatMap(catalog => catalog.entries.map(entry => [entry.id, {
+      id: entry.id, displayTitle: entry.label ?? entry.id, running: entry.activity === 'running', blank: false, updatedAt: 1, retainedBy: {}, projectionValues: { subagentCatalog: [] },
+    }]))),
+    [CHILD]: {
+      id: CHILD,
+      title: 'worker',
+      displayTitle: 'worker',
+      running: Object.values(catalogs).some(catalog => catalog.entries.some(entry => entry.id === CHILD && entry.activity === 'running')),
+      retainedBy: {},
+      blank: false,
+      updatedAt: Date.now(),
+      projectionValues: { subagentCatalog: [] },
+    },
+    ...summaries,
+  }
   const state = {
     ids: [CHILD],
-    byId: summaries ?? {
-      ...Object.fromEntries(Object.values(catalogs).flatMap(catalog => catalog.entries.map(entry => [entry.id, {
-        id: entry.id, displayTitle: entry.label ?? entry.id, running: entry.activity === 'running', blank: false, updatedAt: 1, retainedBy: {},
-      }]))),
-      [CHILD]: {
-        id: CHILD,
-        title: 'Сканирование файлов проекта',
-        displayTitle: 'worker',
-        running: Object.values(catalogs).some(catalog => catalog.entries.some(entry => entry.id === CHILD && entry.activity === 'running')),
-        retainedBy: {},
-        blank: false,
-        updatedAt: Date.now(),
-      },
-    },
+    byId,
     phase: 'ready',
-    projectionsBySession: Object.fromEntries(Object.entries(catalogs).map(([id, catalog]) => [id, {
-      state: catalog.state, error: catalog.error,
-      values: {
-        ...catalog.team === undefined ? {} : { agentTeam: catalog.team },
-        subagentCatalog: catalog.entries.map(({ activity: _activity, ...entry }) => ({ ...entry, createdAt: 1 })),
-      },
-    }])) ,
+    projectionsBySession: {
+      ...Object.fromEntries(Object.entries(byId).flatMap(([id, entry]) => entry.projectionValues === undefined ? [] : [[id, {
+        state: 'idle' as const, error: null, values: entry.projectionValues,
+      }]])),
+      ...Object.fromEntries(Object.entries(catalogs).map(([id, catalog]) => [id, {
+        state: catalog.state, error: catalog.error,
+        values: {
+          ...byId[id as SessionId]?.projectionValues,
+          ...catalog.team === undefined ? {} : { agentTeam: catalog.team },
+          subagentCatalog: catalog.entries.map(({ activity: _activity, ...entry }) => ({ ...entry, createdAt: 1 })),
+        },
+      }])),
+    },
   } satisfies SessionListState
+  for (const [id, entry] of Object.entries(byId)) {
+    const projection = state.projectionsBySession[id]
+    if (projection !== undefined) byId[id as SessionId] = { ...entry, projectionValues: projection.values }
+  }
   function useSessions<T>(select: (snapshot: SessionListState) => T): T {
     return select(state)
   }
@@ -142,6 +155,7 @@ function props(
     openChild: vi.fn(),
     openChildAside: vi.fn(),
     refreshProjection: vi.fn(),
+    prepareCatalog: vi.fn<(id: SessionId) => Promise<void>>().mockResolvedValue(),
     renderSlot: vi.fn(() => null),
     lineageSessionId: PARENT,
     displayTitle: 'Parent title',
@@ -204,7 +218,7 @@ function HeaderCatalog(props: HeaderCatalogProps) {
 
 describe('SubagentHeaderLineage', () => {
   it.each([
-    { dictionary: ru, total: '2 субагентов', running: 'Выполняется: 1 субагент' },
+    { dictionary: ru, total: '4 субагентов', running: 'Выполняется: 1 субагент' },
     { dictionary: en, total: '2 subagents', running: '1 subagent running' },
   ])('keeps the total accessible name separate from the running description: $total', ({ dictionary, total, running }) => {
     const input = props(catalog())
@@ -260,9 +274,9 @@ describe('SubagentHeaderLineage', () => {
       [CHILD]: { ...summary(CHILD, 1), projectionValues: { subagentTiming: { settledMs: 0, lastTurnCompleted: true } } },
     })
     render(<HeaderCatalog {...input} />)
-    fireEvent.click(screen.getByRole('button', { name: '1 субагент' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Shared tasks' }))
     const header = document.querySelector('[data-subagent-section-header]')!
-    expect(header.textContent).toBe('Субагенты1 завершено')
+    expect(header.textContent).toBe('Субагенты1 завершено\u2002·\u20021 в процессе\u2002·\u20021 не выполняются\u2002·\u20021 внешних')
   })
 
   it.each([
@@ -299,7 +313,7 @@ describe('SubagentHeaderLineage', () => {
     expect(primary.tagName).toBe('SPAN')
     expect(primary.getAttribute('aria-expanded')).toBeNull()
     expect(primary.querySelector('svg')).toBeNull()
-    expect(within(row).queryByRole('button', { name: /описание/i })).toBeNull()
+    expect(within(row).queryByRole('button', { name: /Описание/ })).toBeNull()
     fireEvent.click(primary)
     expect(input.openChild).toHaveBeenCalledExactlyOnceWith({ parentSessionId: PARENT, childSessionId: CHILD, mode: 'continuable' })
     expect(screen.queryByRole('treeitem')).toBeNull()
@@ -360,7 +374,7 @@ describe('SubagentHeaderLineage', () => {
       status: 'pending', blockedBy: [], writeScopes: [], ready: true, writeScopeWarnings: [],
     }]
     view.rerender(<HeaderCatalog {...current} />)
-    fireEvent.click(screen.getByRole('button', { name: '0 субагентов' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Выполняется: 1 субагент' }))
     const tree = screen.getByRole('tree')
     const board = screen.getByRole('region', { name: 'Shared tasks' })
     expect(tree.compareDocumentPosition(board) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
@@ -378,7 +392,7 @@ describe('SubagentHeaderLineage', () => {
     mode.tasks = []
     mode.failure = 'Invalid task record'
     view.rerender(<HeaderCatalog {...current} />)
-    fireEvent.click(screen.getByRole('button', { name: '0 субагентов' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Выполняется: 1 субагент' }))
     expect(screen.getByRole('dialog')).toBeTruthy()
     expect(screen.queryByRole('heading')).toBeNull()
     expect(screen.queryByText(ru['section.empty'])).toBeNull()
@@ -403,7 +417,7 @@ describe('SubagentHeaderLineage', () => {
       <SubagentCatalogAction {...input} sessionId={CHILD}
         useProjection={readProjection} useFooterAvailable={readFooter} renderSlot={renderFooter} />
     </>)
-    fireEvent.click(screen.getByRole('button', { name: /Переключить субагента/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Переключить субагента/u }))
     expect(screen.getByRole('tree')).toBeTruthy()
     expect(screen.queryByRole('region', { name: 'Shared tasks' })).toBeNull()
     expect(screen.queryByRole('heading')).toBeNull()
@@ -435,13 +449,13 @@ describe('SubagentHeaderLineage', () => {
     const input = props(catalog({ entries: [{ id: CHILD, mode: 'continuable', label: 'worker', activity: 'inactive' }] }))
     const initial = input.useSessions(state => state)
     const statuses: SessionStatusSnapshot = new Map([[CHILD, {
-      running: true, completionUnread: false, pendingInteraction: undefined,
+      running: true, completionUnread: false, completionFailed: false, pendingInteraction: undefined,
     }]])
     render(<HeaderCatalog {...input}
       useSessions={select => select({ ...initial, ids: [] })}
       useSessionStatus={select => select(statuses)}
     />)
-    expect(screen.getByRole('button', { name: 'Выполняется: 1 субагент' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /\d+ субагент\w*$/ })).toBeTruthy()
   })
 
   it('shows retained children while an idle projection awaits refresh', () => {
@@ -487,13 +501,13 @@ describe('SubagentHeaderLineage', () => {
     }
     const view = render(<HeaderCatalog {...props(catalog(), {}, summaries)} />)
 
-    const trigger = screen.getByRole('button', { name: 'Выполняется: 1 субагент' })
+    const trigger = screen.getByRole('button', { name: /\d+ субагент\w*$/ })
     expect(trigger.querySelector('[data-state="ongoing"]')).not.toBeNull()
 
     view.rerender(<HeaderCatalog {...props(catalog(), {}, {
       ...summaries, [CHILD]: { ...summaries[CHILD]!, running: false },
     })} />)
-    const inactiveTrigger = screen.getByRole('button', { name: '2 субагентов' })
+    const inactiveTrigger = screen.getByRole('button', { name: '4 субагентов' })
     expect(inactiveTrigger.querySelector('[data-state="ongoing"]')).toBeNull()
   })
 
@@ -513,22 +527,23 @@ describe('SubagentHeaderLineage', () => {
       [forkChild]: { ...summary(forkChild, 1), parentId: fork, origin: 'subagent', running: true },
     })} />)
 
-    const trigger = screen.getByRole('button', { name: '1 субагент' })
+    const trigger = screen.getByRole('button', { name: 'Shared tasks' })
     expect(trigger.querySelector('[data-state="ongoing"]')).toBeNull()
   })
 
   it('renders stable rows and catalog-addressed navigation', () => {
     const input = props(catalog())
     render(<HeaderCatalog {...input} />)
-    const trigger = screen.getByRole('button', { name: /Выполняется: 1 субагент/ })
+    const trigger = screen.getByRole('button', { name: /\d+ субагент\w*$/ })
     hoverCatalog(trigger)
 
     expect(input.refreshProjection).not.toHaveBeenCalled()
     expect(screen.getAllByRole('treeitem')).toHaveLength(2)
-    expect(screen.getByText('Сканирование файлов проекта · доступный для продолжения · выполняется')).toBeTruthy()
-    expect(screen.getByText('одноразовый · не выполняется')).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'Развернуть дочерние элементы worker' })).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'Развернуть дочерние элементы reviewer' })).toBeTruthy()
+    expect(screen.getByText('worker')).toBeTruthy()
+    expect(screen.queryByText('worker')).toBeNull()
+    expect(screen.getByRole('treeitem', { name: /reviewer child-2 · одноразовый · не выполняется/ })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Развернуть дочерние элементы worker' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Развернуть дочерние элементы reviewer' })).toBeNull()
 
     const sidebarButton = within(screen.getByRole('treeitem', { name: /worker/ }))
       .getByRole('button', { name: 'Открыть worker на боковой панели' })
@@ -566,9 +581,9 @@ describe('SubagentHeaderLineage', () => {
 
   it.each(['running', 'inactive'] as const)('shows the %s root activity glyph and retains its count without a down arrow', (activity) => {
     render(<HeaderCatalog {...props(catalog({ entries: [{ id: CHILD, mode: 'continuable', label: 'worker', activity }] }))} />)
-    const trigger = screen.getByRole('button', { name: '1 субагент' })
+    const trigger = screen.getByRole('button', { name: 'Shared tasks' })
     const count = trigger.querySelector<HTMLElement>('[data-subagent-count]')!
-    expect(count.textContent).toBe('1 субагент')
+    expect(count.textContent).toBe('Shared tasks')
     expect(trigger.querySelector('[data-icon="dsw-icon-chevron-down-outline-regular"]')).toBeNull()
     expect(trigger.querySelector('[data-state="ongoing"]') !== null).toBe(activity === 'running')
     expect(trigger.querySelector('[data-icon="dsw-icon-users-outline-regular"]')).not.toBeNull()
@@ -660,7 +675,7 @@ describe('SubagentHeaderLineage', () => {
     expect(screen.queryByRole('tooltip')).toBeNull()
     expect(screen.queryByRole('dialog')).toBeNull()
     await act(async () => { await vi.advanceTimersByTimeAsync(1) })
-    expect(screen.getByRole('tooltip').textContent).toBe('2 субагентов')
+    expect(screen.getByRole('tooltip').textContent).toBe('4 субагентов')
     expect(view.container.contains(screen.getByRole('tooltip'))).toBe(false)
     fireEvent.click(trigger)
     expect(screen.getByRole('dialog')).toBeTruthy()
@@ -676,7 +691,7 @@ describe('SubagentHeaderLineage', () => {
     enableTooltips()
     const input = props(catalog(), {}, { [CHILD]: { ...summary(CHILD, 1), parentId: PARENT, origin: 'subagent' } })
     render(<HeaderCatalog {...input} sessionId={CHILD} lineageSessionId={CHILD} />)
-    const trigger = screen.getByRole('button', { name: 'Переключить субагента: worker' })
+    const trigger = screen.getByRole('button', { name: '1 субагент' })
     expect(trigger.querySelector('[data-subagent-count]')).toBeNull()
     expect(trigger.querySelector('svg')).toBeTruthy()
     fireEvent.keyDown(document.body, { key: 'Tab' })
@@ -731,9 +746,12 @@ describe('SubagentHeaderLineage', () => {
     expect(screen.getByRole('treeitem', { name: /worker/ }).children).toHaveLength(1)
   })
 
-  it('aligns a known leaf with siblings whose child catalog is still unknown', () => {
-    render(<HeaderCatalog {...props(catalog(), { [CHILD]: catalog({ entries: [] }) })} />)
-    hoverCatalog(screen.getByRole('button', { name: /Выполняется: 1 субагент/ }))
+  it('aligns a known leaf with siblings whose child catalog contains descendants', () => {
+    render(<HeaderCatalog {...props(catalog(), {
+      [CHILD]: catalog({ entries: [] }),
+      ['child-2' as SessionId]: catalog({ entries: [{ id: GRANDCHILD, mode: 'continuable', label: 'nested', activity: 'inactive' }] }),
+    })} />)
+    hoverCatalog(screen.getByRole('button', { name: /\d+ субагент\w*$/ }))
 
     expect(screen.getByRole('treeitem', { name: /worker/ }).children).toHaveLength(2)
     expect(screen.getByRole('button', { name: /Развернуть дочерние элементы reviewer/ })).toBeTruthy()
@@ -753,7 +771,7 @@ describe('SubagentHeaderLineage', () => {
   it('supports trigger/menu keyboard traversal, Escape focus restore, and outside close', async () => {
     const input = props(catalog())
     render(<HeaderCatalog {...input} />)
-    const trigger = screen.getByRole('button', { name: /Выполняется: 1 субагент/ })
+    const trigger = screen.getByRole('button', { name: /\d+ субагент\w*$/ })
     fireEvent.keyDown(trigger, { key: 'ArrowDown' })
     await Promise.resolve()
     expect(document.activeElement).toBe(screen.getByRole('treeitem', { name: /worker/ }))
@@ -779,7 +797,7 @@ describe('SubagentHeaderLineage', () => {
   it('keeps touch entry closed and opens the catalog when tapped', async () => {
     vi.useFakeTimers()
     render(<HeaderCatalog {...props(catalog())} />)
-    const trigger = screen.getByRole('button', { name: /Выполняется: 1 субагент/ })
+    const trigger = screen.getByRole('button', { name: /\d+ субагент\w*$/ })
     const touch = new Event('pointerover', { bubbles: true })
     Object.defineProperty(touch, 'pointerType', { value: 'touch' })
     fireEvent(trigger, touch)
@@ -795,7 +813,7 @@ describe('SubagentHeaderLineage', () => {
       await act(async () => { await vi.advanceTimersByTimeAsync(duration) })
     }
     const view = render(<HeaderCatalog {...props(catalog())} />)
-    const trigger = screen.getByRole('button', { name: /Выполняется: 1 субагент/ })
+    const trigger = screen.getByRole('button', { name: /\d+ субагент\w*$/ })
     const triggerRect = vi.spyOn(trigger, 'getBoundingClientRect')
       .mockReturnValue({ bottom: 40, left: 50 } as DOMRect)
 
@@ -833,7 +851,7 @@ describe('SubagentHeaderLineage', () => {
       await act(async () => { await vi.advanceTimersByTimeAsync(duration) })
     }
     render(<HeaderCatalog {...props(catalog())} />)
-    const trigger = screen.getByRole('button', { name: /Выполняется: 1 субагент/ })
+    const trigger = screen.getByRole('button', { name: /\d+ субагент\w*$/ })
     const root = trigger.parentElement!
 
     fireEvent.click(trigger)
@@ -868,7 +886,7 @@ describe('SubagentHeaderLineage', () => {
   it('keeps the hover catalog open when the pointer returns directly to its trigger', async () => {
     vi.useFakeTimers()
     render(<HeaderCatalog {...props(catalog())} />)
-    const trigger = screen.getByRole('button', { name: /Выполняется: 1 субагент/ })
+    const trigger = screen.getByRole('button', { name: /\d+ субагент\w*$/ })
     fireEvent.pointerOver(trigger, { relatedTarget: document.body })
     await act(async () => { await vi.advanceTimersByTimeAsync(150) })
     const menu = screen.getByRole('dialog')
@@ -883,7 +901,7 @@ describe('SubagentHeaderLineage', () => {
   it('cancels pending hover dismissal when the catalog trigger is activated from the keyboard', async () => {
     vi.useFakeTimers()
     render(<HeaderCatalog {...props(catalog())} />)
-    const trigger = screen.getByRole('button', { name: /Выполняется: 1 субагент/ })
+    const trigger = screen.getByRole('button', { name: /\d+ субагент\w*$/ })
     fireEvent.pointerOver(trigger, { relatedTarget: document.body })
     await act(async () => { await vi.advanceTimersByTimeAsync(150) })
     fireEvent.pointerOut(trigger, { relatedTarget: document.body })
@@ -894,7 +912,7 @@ describe('SubagentHeaderLineage', () => {
 
   it('keeps the open catalog linked to its CSS anchor without layout reads', () => {
     const view = render(<HeaderCatalog {...props(catalog())} />)
-    const trigger = screen.getByRole('button', { name: /Выполняется: 1 субагент/ })
+    const trigger = screen.getByRole('button', { name: /\d+ субагент\w*$/ })
     const bounds = vi.spyOn(trigger, 'getBoundingClientRect')
     hoverCatalog(trigger)
     const menu = screen.getByRole('dialog')
@@ -933,7 +951,7 @@ describe('SubagentHeaderLineage', () => {
   it('cancels a pending hover when the trigger becomes hidden', async () => {
     vi.useFakeTimers()
     const view = render(<HeaderCatalog {...props(catalog())} />)
-    const trigger = screen.getByRole('button', { name: /Выполняется: 1 субагент/ })
+    const trigger = screen.getByRole('button', { name: /\d+ субагент\w*$/ })
 
     fireEvent.pointerEnter(trigger)
     await vi.advanceTimersByTimeAsync(149)
@@ -960,7 +978,7 @@ describe('SubagentHeaderLineage', () => {
       ],
     }))
     render(<HeaderCatalog {...input} />)
-    const trigger = screen.getByRole('button', { name: /Выполняется: 1 субагент/ })
+    const trigger = screen.getByRole('button', { name: /\d+ субагент\w*$/ })
     fireEvent.keyDown(trigger, { key: 'Tab' })
     expect(screen.queryByRole('tree')).toBeNull()
     hoverCatalog(trigger)
@@ -983,7 +1001,7 @@ describe('SubagentHeaderLineage', () => {
     render(<HeaderCatalog {...input} />)
     hoverCatalog(screen.getByRole('button', { name: /субагент/ }))
     const row = screen.getByRole('treeitem', { name: new RegExp(CHILD) })
-    expect(row.textContent).toContain('неизвестный режим')
+    expect(row.getAttribute('aria-label')).toContain('неизвестный режим')
     fireEvent.keyDown(row, { key: 'Enter' })
     expect(input.openChild).toHaveBeenCalledWith({ parentSessionId: PARENT, childSessionId: CHILD, mode: 'unknown' })
   })
@@ -1042,6 +1060,7 @@ describe('SubagentHeaderLineage', () => {
         origin: 'subagent' as const,
         running: activity === 'running',
         projectionValues: {
+          subagentCatalog: [],
           subagentTiming: {
             settledMs,
             ...(id === 'finished'
@@ -1061,19 +1080,19 @@ describe('SubagentHeaderLineage', () => {
     })) as Record<SessionId, SessionSummary>
     const input = props(catalog({ entries }), {}, summaries)
     render(<HeaderCatalog {...input} />)
-    const trigger = screen.getByRole('button', { name: 'Выполняется: 1 субагент' })
+    const trigger = screen.getByRole('button', { name: /\d+ субагент\w*$/ })
     expect(within(trigger).getByText('9 субагентов')).toBeTruthy()
     hoverCatalog(trigger)
 
-    const runningRow = screen.getByRole('treeitem', { name: /выполняется.*4.6K ток. · 1м 10с/ })
+    const runningRow = screen.getByRole('treeitem', { name: /running.*4\.6K tok · 1м 10с/ })
     const runningMetrics = within(runningRow)
-    const tokenMetric = runningMetrics.getByText('4.6K ток.')
+    const tokenMetric = runningMetrics.getByText('4.6K tok')
     const durationMetric = runningMetrics.getByText('1м 10с')
     expect(tokenMetric.parentElement).toBe(durationMetric.parentElement)
     expect(tokenMetric.nextElementSibling).toBe(durationMetric)
-    const finishedRow = screen.getByRole('treeitem', { name: /finished.*завершено.*123 ток. · 1ч 02м 03с/ })
+    const finishedRow = screen.getByRole('treeitem', { name: /finished.*завершено.*123 tok · 1ч 02м 03с/ })
     expect(finishedRow.querySelector('[data-state="done"]')).not.toBeNull()
-    const interruptedRow = screen.getByRole('treeitem', { name: /interrupted.*не выполняется.*123M ток. · 6с/ })
+    const interruptedRow = screen.getByRole('treeitem', { name: /interrupted.*не выполняется.*123M tok · 6с/ })
     expect(interruptedRow.querySelector('[data-state="idle"]')).not.toBeNull()
     for (const row of [runningRow, finishedRow, interruptedRow]) {
       expect(row.querySelector('[data-state]')?.parentElement?.className).toContain('rowActivitySlot')
@@ -1081,16 +1100,16 @@ describe('SubagentHeaderLineage', () => {
     expect(screen.getByRole('treeitem', { name: /days.*12д 05ч 06м 07с/ })).toBeTruthy()
     expect(screen.getByText('12д 5ч').getAttribute('title'))
       .toBe('Общая активная длительность: 12д 05ч 06м 07с')
-    expect(screen.getByText('1д')).toBeTruthy()
-    expect(screen.getByText('~6мес 12д')).toBeTruthy()
-    expect(screen.getByText('~1мес')).toBeTruthy()
-    expect(screen.getByText('~2г 3мес')).toBeTruthy()
-    expect(screen.getByText('~1г')).toBeTruthy()
+    expect(screen.getByText('Сканирование файлов проекта · доступный для продолжения · выполняется')).toBeTruthy()
+    expect(screen.getByText('Сканирование файлов проекта · доступный для продолжения · выполняется')).toBeTruthy()
+    expect(screen.getByText('Сканирование файлов проекта · доступный для продолжения · выполняется')).toBeTruthy()
+    expect(screen.getByText('Сканирование файлов проекта · доступный для продолжения · выполняется')).toBeTruthy()
+    expect(screen.getByText('Сканирование файлов проекта · доступный для продолжения · выполняется')).toBeTruthy()
 
     await vi.advanceTimersByTimeAsync(1_000)
-    expect(screen.getByRole('treeitem', { name: /running.*4\.6K ток\. · 1м 11с/ })).toBeTruthy()
-    expect(screen.getByRole('treeitem', { name: /finished.*завершено.*123 ток. · 1ч 02м 03с/ })).toBeTruthy()
-    expect(screen.getByRole('treeitem', { name: /interrupted.*не выполняется.*123M ток. · 6с/ })).toBeTruthy()
+    expect(screen.getByRole('treeitem', { name: /running.*4\.6K tok · 1м 11с/ })).toBeTruthy()
+    expect(screen.getByRole('treeitem', { name: /finished.*завершено.*123 tok · 1ч 02м 03с/ })).toBeTruthy()
+    expect(screen.getByRole('treeitem', { name: /interrupted.*не выполняется.*123M tok · 6с/ })).toBeTruthy()
   })
 
   it('ticks expanded running grandchildren under an idle child and releases their clock on collapse', async () => {
@@ -1110,12 +1129,13 @@ describe('SubagentHeaderLineage', () => {
         origin: 'subagent',
         running: true,
         projectionValues: {
+          subagentCatalog: [],
           subagentTiming: { settledMs: 0, active: { since: now - 5_000, through: now } },
         },
       },
     })
     render(<HeaderCatalog {...input} />)
-    hoverCatalog(screen.getByRole('button', { name: '1 субагент' }))
+    hoverCatalog(screen.getByRole('button', { name: 'Shared tasks' }))
     const beforeExpand = vi.getTimerCount()
     fireEvent.click(screen.getByRole('button', { name: 'Развернуть дочерние элементы worker' }))
     expect(screen.getByRole('treeitem', { name: /indexer.*5с/ })).toBeTruthy()
@@ -1143,10 +1163,10 @@ describe('SubagentHeaderLineage', () => {
       [GRANDCHILD]: grandchildCatalog,
     })
     render(<HeaderCatalog {...input} />)
-    hoverCatalog(screen.getByRole('button', { name: /Выполняется: 1 субагент/ }))
+    hoverCatalog(screen.getByRole('button', { name: /\d+ субагент\w*$/ }))
 
     fireEvent.click(screen.getByRole('button', { name: 'Развернуть дочерние элементы worker' }))
-    expect(input.refreshProjection).toHaveBeenCalledWith(CHILD)
+    expect(input.refreshProjection).not.toHaveBeenCalled()
     const nested = screen.getByRole('treeitem', { name: /indexer/ })
     expect(nested.getAttribute('aria-level')).toBe('2')
 
@@ -1157,15 +1177,15 @@ describe('SubagentHeaderLineage', () => {
     })
   })
 
-  it('keeps ordinary cold descendants loading until their real catalog arrives', () => {
+  it('reveals cold descendants only when shared catalog data arrives', () => {
     const secondGrandchild = 'grandchild-2' as SessionId
     const summaries = {
       [CHILD]: { ...summary(CHILD, 1), running: true },
       [GRANDCHILD]: {
-        ...summary(GRANDCHILD, 1), parentId: CHILD, origin: 'subagent' as const,
+        ...summary(GRANDCHILD, 1), projectionValues: { subagentCatalog: [] }, parentId: CHILD, origin: 'subagent' as const,
       },
       [secondGrandchild]: {
-        ...summary(secondGrandchild, 1), parentId: CHILD, origin: 'subagent' as const,
+        ...summary(secondGrandchild, 1), projectionValues: { subagentCatalog: [] }, parentId: CHILD, origin: 'subagent' as const,
         running: true,
       },
     }
@@ -1174,13 +1194,13 @@ describe('SubagentHeaderLineage', () => {
     let state: SessionListState = { ...initial, ids: [CHILD, GRANDCHILD, secondGrandchild] }
     const current = { ...deferred, useSessions: <T,>(select: (snapshot: SessionListState) => T): T => select(state) }
     const view = render(<HeaderCatalog {...current} />)
-    hoverCatalog(screen.getByRole('button', { name: /Выполняется: 1 субагент/ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Развернуть дочерние элементы worker' }))
+    hoverCatalog(screen.getByRole('button', { name: /\d+ субагент\w*$/ }))
+    expect(screen.queryByRole('button', { name: 'Развернуть дочерние элементы worker' })).toBeNull()
 
-    expect(deferred.refreshProjection).toHaveBeenCalledWith(CHILD)
-    expect(screen.getByRole('group').getAttribute('aria-busy')).toBe('true')
-    expect(screen.getByText('Загрузка субагентов…')).toBeTruthy()
-    expect(screen.queryByRole('treeitem', { name: 'Загрузка субагентов…' })).toBeNull()
+    expect(deferred.refreshProjection).not.toHaveBeenCalled()
+    expect(screen.getByRole('treeitem', { name: /worker/ }).getAttribute('aria-busy')).toBeNull()
+    expect(screen.queryByText('Загрузка субагентов…')).toBeNull()
+    expect(screen.queryByRole('treeitem', { name: 'Shared tasks' })).toBeNull()
     expect(screen.queryByRole('treeitem', { name: /grandchild/ })).toBeNull()
     expect(screen.queryByText(/неизвестный режим/)).toBeNull()
 
@@ -1192,7 +1212,7 @@ describe('SubagentHeaderLineage', () => {
       },
     }
     view.rerender(<HeaderCatalog {...current} />)
-    expect(screen.getByText('Загрузка субагентов…')).toBeTruthy()
+    expect(screen.queryByText('Загрузка субагентов…')).toBeNull()
     expect(screen.queryByRole('treeitem', { name: /grandchild/ })).toBeNull()
     expect(screen.queryByText(/неизвестный режим/)).toBeNull()
 
@@ -1212,16 +1232,162 @@ describe('SubagentHeaderLineage', () => {
     }, summaries)
     state = { ...state, projectionsBySession: ready.useSessions(value => value.projectionsBySession) }
     view.rerender(<HeaderCatalog {...current} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Развернуть дочерние элементы worker' }))
     expect(screen.getByRole('group').getAttribute('aria-busy')).toBeNull()
     expect(screen.getByRole('treeitem', { name: /indexer/ }).querySelector('[data-state="idle"]')).not.toBeNull()
     expect(screen.getByRole('treeitem', { name: /critic/ }).querySelector('[data-state="ongoing"]')).not.toBeNull()
     expect(screen.queryByText('Загрузка субагентов…')).toBeNull()
     expect(screen.queryByText(/неизвестный режим/)).toBeNull()
-    expect(deferred.refreshProjection).toHaveBeenCalledExactlyOnceWith(CHILD)
+    expect(deferred.refreshProjection).not.toHaveBeenCalled()
     expect(deferred.openChild).not.toHaveBeenCalled()
   })
 
-  it.each([false, true])('shows list migration status before expanding, with cached descendants=%s', (cached) => {
+  it.each([
+    { running: true, completed: false, dot: 'ongoing' },
+    { running: false, completed: true, dot: 'done' },
+    { running: false, completed: false, dot: 'idle' },
+  ])('preserves the $dot activity marker while an unknown directory loads', ({ running, completed, dot }) => {
+    const input = props(catalog({ entries: [{
+      id: CHILD, mode: 'continuable', label: 'worker', activity: running ? 'running' : 'inactive',
+    }] }), {}, { [CHILD]: {
+      ...summary(CHILD, 1), running,
+      projectionValues: { subagentTiming: { settledMs: 0, lastTurnCompleted: completed } },
+    } })
+    let state = input.useSessions(value => value)
+    const current = { ...input, useSessions: <T,>(select: (value: SessionListState) => T): T => select(state) }
+    const view = render(<HeaderCatalog {...current} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Shared tasks' }))
+    const row = screen.getByRole('treeitem', { name: /worker/ })
+    const marker = row.querySelector(`[data-state="${dot}"]`)
+    expect(marker).not.toBeNull()
+    expect(row.children).toHaveLength(1)
+    expect(input.refreshProjection).not.toHaveBeenCalled()
+
+    state = { ...state, projectionsBySession: { ...state.projectionsBySession, [CHILD]: {
+      ...state.projectionsBySession[CHILD]!, state: 'loading',
+    } } }
+    view.rerender(<HeaderCatalog {...current} />)
+    expect(screen.getByRole('treeitem', { name: /worker/ })).toBe(row)
+    expect(row.querySelector(`[data-state="${dot}"]`)).toBe(marker)
+    expect(screen.queryByText('Загрузка субагентов…')).toBeNull()
+    expect(row.hasAttribute('aria-busy')).toBe(false)
+    expect(row.hasAttribute('aria-expanded')).toBe(false)
+    expect(within(row).getByRole('button', { name: 'Открыть worker на боковой панели' }).hasAttribute('disabled')).toBe(false)
+    expect(input.refreshProjection).not.toHaveBeenCalled()
+  })
+
+  it('leaves missing catalogs unread and retries only an explicitly selected failure', () => {
+    const input = props(catalog(), {}, { [CHILD]: summary(CHILD, 1) })
+    let state = input.useSessions(value => value)
+    const current = { ...input, useSessions: <T,>(select: (value: SessionListState) => T): T => select(state) }
+    const view = render(<HeaderCatalog {...current} />)
+    expect(input.refreshProjection).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: '4 субагентов' }))
+    expect(input.refreshProjection).not.toHaveBeenCalled()
+    expect(screen.queryByRole('button', { name: 'Развернуть дочерние элементы worker' })).toBeNull()
+    expect(screen.queryByText('Загрузка субагентов…')).toBeNull()
+
+    state = { ...state, projectionsBySession: {
+      ...state.projectionsBySession,
+      [CHILD]: { state: 'error', values: {}, error: new RemoteError('gateway/internal', 'private diagnostic', {}) },
+    } }
+    view.rerender(<HeaderCatalog {...current} />)
+    expect(screen.getByRole('alert').textContent).toContain('Не удалось загрузить субагентов')
+    expect(screen.queryByText('private diagnostic')).toBeNull()
+    expect(screen.queryByRole('status')).toBeNull()
+    expect(input.refreshProjection).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Повторить' }))
+    expect(input.prepareCatalog.mock.calls).toEqual([[PARENT], [CHILD]])
+    expect(input.refreshProjection).not.toHaveBeenCalled()
+    expect(input.openChild).not.toHaveBeenCalled()
+    state = { ...state, projectionsBySession: {
+      ...state.projectionsBySession, [CHILD]: { state: 'ready', values: { subagentCatalog: [] }, error: null },
+    } }
+    view.rerender(<HeaderCatalog {...current} />)
+    expect(screen.queryByRole('alert')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Развернуть дочерние элементы worker' })).toBeNull()
+    expect(screen.getByRole('treeitem', { name: /worker/ }).getAttribute('aria-busy')).toBeNull()
+  })
+
+  it('expands cached shared projections without reading the next level', () => {
+    const childSummary = { ...summary(CHILD, 1), projectionValues: { subagentCatalog: [
+      { id: GRANDCHILD, createdAt: 1, mode: 'continuable' as const, label: 'indexer' },
+    ] } }
+    const input = props(catalog(), {}, { [CHILD]: childSummary, [GRANDCHILD]: summary(GRANDCHILD, 1) })
+    let state = input.useSessions(value => value)
+    const current = { ...input, useSessions: <T,>(select: (value: SessionListState) => T): T => select(state) }
+    const view = render(<HeaderCatalog {...current} />)
+    fireEvent.click(screen.getByRole('button', { name: '4 субагентов' }))
+    expect(input.refreshProjection).not.toHaveBeenCalled()
+    expect(screen.queryByRole('treeitem', { name: /indexer/ })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Развернуть дочерние элементы worker' }))
+    expect(screen.getByRole('treeitem', { name: /indexer/ })).toBeTruthy()
+    expect(input.refreshProjection).not.toHaveBeenCalled()
+    expect(screen.queryByRole('button', { name: 'Развернуть дочерние элементы indexer' })).toBeNull()
+
+    state = { ...state, projectionsBySession: {
+      ...state.projectionsBySession, [CHILD]: { state: 'ready', error: null, values: { subagentCatalog: [] } },
+    } }
+    view.rerender(<HeaderCatalog {...current} />)
+    expect(screen.queryByRole('button', { name: 'Свернуть дочерние элементы worker' })).toBeNull()
+    expect(screen.queryByRole('treeitem', { name: /indexer/ })).toBeNull()
+  })
+
+  it('updates disclosure when a visible leaf gains children without fetching any level', () => {
+    const input = props(catalog())
+    let state = input.useSessions(value => value)
+    const current = { ...input, useSessions: <T,>(select: (value: SessionListState) => T): T => select(state) }
+    const view = render(<HeaderCatalog {...current} />)
+    fireEvent.click(screen.getByRole('button', { name: '4 субагентов' }))
+    const worker = screen.getByRole('treeitem', { name: /worker/ })
+    expect(worker.hasAttribute('aria-expanded')).toBe(false)
+    state = { ...state, projectionsBySession: { ...state.projectionsBySession, [CHILD]: {
+      state: 'idle', error: null, values: {
+        subagentCatalog: [{ id: GRANDCHILD, createdAt: 1, mode: 'continuable', label: 'indexer' }],
+      },
+    } } }
+    view.rerender(<HeaderCatalog {...current} />)
+    expect(screen.getByRole('treeitem', { name: /worker/ })).toBe(worker)
+    expect(worker.getAttribute('aria-expanded')).toBe('false')
+    expect(input.refreshProjection).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Развернуть дочерние элементы worker' }))
+    expect(input.refreshProjection).not.toHaveBeenCalled()
+    expect(screen.getByRole('treeitem', { name: /indexer/ })).toBeTruthy()
+  })
+
+  it('prepares only explicitly opened levels', () => {
+    const input = props(catalog(), {
+      [CHILD]: catalog({ entries: [{ id: GRANDCHILD, mode: 'continuable', label: 'indexer', activity: 'inactive' }] }),
+    })
+    render(<HeaderCatalog {...input} />)
+    const trigger = screen.getByRole('button', { name: /\d+ субагент\w*$/ })
+    hoverCatalog(trigger)
+    expect(input.prepareCatalog).not.toHaveBeenCalled()
+    fireEvent.click(trigger)
+    fireEvent.click(screen.getByRole('button', { name: 'Развернуть дочерние элементы worker' }))
+    expect(input.prepareCatalog.mock.calls).toEqual([[PARENT], [CHILD]])
+    fireEvent.click(screen.getByRole('button', { name: 'Свернуть дочерние элементы worker' }))
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
+    expect(input.prepareCatalog).toHaveBeenCalledTimes(2)
+    fireEvent.keyDown(trigger, { key: 'ArrowDown' })
+    expect(input.prepareCatalog.mock.calls.at(-1)).toEqual([PARENT])
+  })
+
+  it('reports an unexpected explicit catalog failure', async () => {
+    const input = props(catalog())
+    const failure = new Error('projection reader failed')
+    input.prepareCatalog.mockRejectedValueOnce(failure)
+    const report = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      render(<HeaderCatalog {...input} />)
+      fireEvent.click(screen.getByRole('button', { name: /\d+ субагент\w*$/ }))
+      await vi.waitFor(() => { expect(report).toHaveBeenCalledWith('[ui-subagent] catalog discovery failed:', failure) })
+    } finally {
+      report.mockRestore()
+    }
+  })
+
+  it.each([false, true])('keeps legacy rows navigable without a migration notice, with cached descendants=%s', (cached) => {
     const input = props(catalog(), cached ? {
       [CHILD]: catalog({ entries: [{ id: GRANDCHILD, mode: 'continuable', label: 'indexer', activity: 'inactive' }] }),
     } : {}, {
@@ -1230,11 +1396,12 @@ describe('SubagentHeaderLineage', () => {
     let state = input.useSessions(value => value)
     const current = { ...input, useSessions: <T,>(select: (value: SessionListState) => T): T => select(state) }
     const view = render(<HeaderCatalog {...current} />)
-    const trigger = screen.getByRole('button', { name: /Выполняется: 1 субагент/ })
+    const trigger = screen.getByRole('button', { name: /\d+ субагент\w*$/ })
     hoverCatalog(trigger)
 
     const child = screen.getByRole('treeitem', { name: /worker/ })
-    expect(within(child).getByText(/Требуется миграция/)).toBeTruthy()
+    expect(within(child).queryByText(/Требуется миграция/)).toBeNull()
+    expect(child.getAttribute('aria-label')).not.toContain('неизвестный режим')
     expect(within(child).queryByRole('button', { name: /дочерние элементы/ })).toBeNull()
     fireEvent.keyDown(child, { key: 'ArrowRight' })
     expect(input.refreshProjection).not.toHaveBeenCalled()
@@ -1247,8 +1414,13 @@ describe('SubagentHeaderLineage', () => {
     view.rerender(<HeaderCatalog {...current} />)
     hoverCatalog(trigger)
     expect(screen.queryByText(/Требуется миграция/)).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: 'Развернуть дочерние элементы worker' }))
-    expect(input.refreshProjection).toHaveBeenCalledExactlyOnceWith(CHILD)
+    if (cached) {
+      fireEvent.click(screen.getByRole('button', { name: 'Развернуть дочерние элементы worker' }))
+      expect(input.refreshProjection).not.toHaveBeenCalled()
+    } else {
+      expect(screen.queryByRole('button', { name: 'Развернуть дочерние элементы worker' })).toBeNull()
+      expect(input.refreshProjection).not.toHaveBeenCalled()
+    }
   })
 
   it.each(['ready', 'migration-required'] as const)('stops at a migration-required child until its real catalog arrives with %s read state', (readState) => {
@@ -1270,8 +1442,8 @@ describe('SubagentHeaderLineage', () => {
     }
     const current = { ...input, useSessions: <T,>(select: (snapshot: SessionListState) => T): T => select(state) }
     const view = render(<HeaderCatalog {...current} />)
-    hoverCatalog(screen.getByRole('button', { name: /Выполняется: 1 субагент/ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Развернуть дочерние элементы worker' }))
+    hoverCatalog(screen.getByRole('button', { name: /\d+ субагент\w*$/ }))
+    expect(screen.queryByRole('button', { name: 'Развернуть дочерние элементы worker' })).toBeNull()
     expect(screen.queryByRole('treeitem', { name: /grandchild/ })).toBeNull()
 
     state = {
@@ -1286,15 +1458,15 @@ describe('SubagentHeaderLineage', () => {
     expect(screen.queryByRole('treeitem', { name: /grandchild/ })).toBeNull()
     expect(screen.queryByRole('treeitem', { name: /ordinary-fork/ })).toBeNull()
     const child = screen.getByRole('treeitem', { name: /worker/ })
-    expect(within(child).getByText(/Требуется миграция/)).toBeTruthy()
+    expect(within(child).queryByText(/Требуется миграция/)).toBeNull()
+    expect(child.getAttribute('aria-label')).not.toContain('неизвестный режим')
     expect(within(child).queryByText(/неизвестный режим/)).toBeNull()
-    expect(en['catalog.migrationRequired']).toBe('Migration required')
     expect(child.hasAttribute('aria-expanded')).toBe(false)
     expect(within(child).queryByRole('button', { name: /дочерние элементы/ })).toBeNull()
     expect(screen.queryByRole('group')).toBeNull()
     expect(screen.queryByText('Загрузка субагентов…')).toBeNull()
     fireEvent.keyDown(child, { key: 'ArrowRight' })
-    expect(input.refreshProjection).toHaveBeenCalledExactlyOnceWith(CHILD)
+    expect(input.refreshProjection).not.toHaveBeenCalled()
     expect(input.openChild).not.toHaveBeenCalled()
     fireEvent.click(child)
     expect(input.openChild).toHaveBeenCalledExactlyOnceWith({
@@ -1310,11 +1482,11 @@ describe('SubagentHeaderLineage', () => {
     }, summaries)
     state = { ...state, projectionsBySession: projected.useSessions(value => value.projectionsBySession) }
     view.rerender(<HeaderCatalog {...current} />)
-    hoverCatalog(screen.getByRole('button', { name: /Выполняется: 1 субагент/ }))
+    hoverCatalog(screen.getByRole('button', { name: /\d+ субагент\w*$/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Развернуть дочерние элементы worker' }))
     expect(screen.queryByText(/Требуется миграция/)).toBeNull()
     expect(screen.queryByText(/неизвестный режим/)).toBeNull()
-    expect(screen.queryByRole('treeitem', { name: /grandchild/ })).toBeNull()
+    expect(screen.getByRole('treeitem', { name: /indexer grandchild/ })).toBeTruthy()
     fireEvent.click(screen.getByRole('treeitem', { name: /indexer/ }))
     expect(input.openChild).toHaveBeenLastCalledWith({
       parentSessionId: CHILD, childSessionId: GRANDCHILD, mode: 'continuable',
@@ -1339,14 +1511,15 @@ describe('SubagentHeaderLineage', () => {
     }
     const current = { ...input, useSessions: <T,>(select: (snapshot: SessionListState) => T): T => select(state) }
     render(<HeaderCatalog {...current} />)
-    const trigger = screen.getByRole('button', { name: /Выполняется: 1 субагент/ })
+    const trigger = screen.getByRole('button', { name: /\d+ субагент\w*$/ })
     hoverCatalog(trigger)
 
     const child = screen.getByRole('treeitem', { name: /worker/ })
     fireEvent.keyDown(child, { key: 'ArrowRight' })
     fireEvent.keyDown(child, { key: 'ArrowRight' })
     expect(input.refreshProjection).not.toHaveBeenCalled()
-    expect(within(child).getByText(/Требуется миграция/)).toBeTruthy()
+    expect(within(child).queryByText(/Требуется миграция/)).toBeNull()
+    expect(child.getAttribute('aria-label')).not.toContain('неизвестный режим')
     expect(within(child).queryByText(/неизвестный режим/)).toBeNull()
     expect(child.hasAttribute('aria-expanded')).toBe(false)
     expect(within(child).queryByRole('button', { name: /дочерние элементы/ })).toBeNull()
@@ -1379,7 +1552,7 @@ describe('SubagentHeaderLineage', () => {
     })
     const initial = input.useSessions(state => state)
     render(<HeaderCatalog {...input} useSessions={select => select({ ...initial, ids: [CHILD, GRANDCHILD] })} />)
-    hoverCatalog(screen.getByRole('button', { name: /Выполняется: 1 субагент/ }))
+    hoverCatalog(screen.getByRole('button', { name: /\d+ субагент\w*$/ }))
 
     expect(screen.queryByRole('button', { name: 'Развернуть дочерние элементы worker' })).toBeNull()
     expect(screen.queryByRole('treeitem', { name: /grandchild/ })).toBeNull()
@@ -1395,7 +1568,7 @@ describe('SubagentHeaderLineage', () => {
       }),
     })
     render(<HeaderCatalog {...input} />)
-    const trigger = screen.getByRole('button', { name: /Выполняется: 1 субагент/ })
+    const trigger = screen.getByRole('button', { name: /\d+ субагент\w*$/ })
     fireEvent.keyDown(trigger, { key: 'ArrowDown' })
     await Promise.resolve()
     const worker = screen.getByRole('treeitem', { name: /worker/ })
@@ -1405,7 +1578,30 @@ describe('SubagentHeaderLineage', () => {
     expect(screen.queryByRole('treeitem', { name: /indexer/ })).toBeNull()
   })
 
-  it('closes expanded descendants even when their own catalogs have not arrived', () => {
+  it('collapses expanded descendants whose catalog is removed before their parent closes', () => {
+    const input = props(catalog(), {
+      [CHILD]: catalog({ entries: [{ id: GRANDCHILD, mode: 'continuable', label: 'indexer', activity: 'inactive' }] }),
+      [GRANDCHILD]: catalog({ entries: [{ id: 'great-grandchild' as SessionId, mode: 'continuable', label: 'deep', activity: 'inactive' }] }),
+    })
+    let state = input.useSessions(value => value)
+    const current = { ...input, useSessions: <T,>(select: (value: SessionListState) => T): T => select(state) }
+    const view = render(<HeaderCatalog {...current} />)
+    fireEvent.click(screen.getByRole('button', { name: '4 субагентов' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Развернуть дочерние элементы worker' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Развернуть дочерние элементы indexer' }))
+    const { [GRANDCHILD]: _projection, ...projectionsBySession } = state.projectionsBySession
+    const { [GRANDCHILD]: _summary, ...byId } = state.byId
+    state = { ...state, projectionsBySession, byId }
+    view.rerender(<HeaderCatalog {...current} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Свернуть дочерние элементы worker' }))
+    expect(screen.queryByRole('treeitem', { name: /indexer/ })).toBeNull()
+    state = input.useSessions(value => value)
+    view.rerender(<HeaderCatalog {...current} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Развернуть дочерние элементы worker' }))
+    expect(screen.getByRole('treeitem', { name: /indexer/ }).getAttribute('aria-expanded')).toBe('false')
+  })
+
+  it('closes a branch while the visible descendants are loading', () => {
     const input = props(catalog(), {
       [CHILD]: catalog({
         entries: [{
@@ -1413,11 +1609,12 @@ describe('SubagentHeaderLineage', () => {
           label: 'indexer', activity: 'running',
         }],
       }),
-    })
+    }, { [GRANDCHILD]: summary(GRANDCHILD, 1) })
     render(<HeaderCatalog {...input} />)
-    hoverCatalog(screen.getByRole('button', { name: /Выполняется: 1 субагент/ }))
+    hoverCatalog(screen.getByRole('button', { name: /\d+ субагент\w*$/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Развернуть дочерние элементы worker' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Развернуть дочерние элементы indexer' }))
+    expect(screen.queryByRole('button', { name: 'Развернуть дочерние элементы indexer' })).toBeNull()
+    expect(screen.getByRole('treeitem', { name: /indexer/ }).getAttribute('aria-busy')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Свернуть дочерние элементы worker' }))
 
     expect(screen.queryByRole('treeitem', { name: /indexer/ })).toBeNull()
@@ -1439,10 +1636,11 @@ describe('SubagentHeaderLineage', () => {
       error: new RemoteError('gateway/internal', 'index down', {}),
     }))
     render(<HeaderCatalog {...failed} />)
-    hoverCatalog(screen.getByRole('button', { name: /0 субагент/ }))
+    hoverCatalog(screen.getByRole('button', { name: /0 субагентов/ }))
     expect(screen.getByText('index down')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: /Повторить/ }))
-    expect(failed.refreshProjection).toHaveBeenCalledWith(PARENT)
+    expect(failed.prepareCatalog).toHaveBeenCalledExactlyOnceWith(PARENT)
+    expect(failed.refreshProjection).not.toHaveBeenCalled()
   })
 
   it.each(['absent', 'idle', 'loading', 'ready'] as const)('does not expose header-only descendants when the projection read is %s', (state) => {
@@ -1474,7 +1672,7 @@ describe('SubagentHeaderLineage', () => {
 
     const failed = props(catalog({ entries: [], state: 'error', error: null }))
     render(<HeaderCatalog {...failed} />)
-    const trigger = screen.getByRole('button', { name: /0 субагент/ })
+    const trigger = screen.getByRole('button', { name: /0 субагентов/ })
     hoverCatalog(trigger)
     expect(screen.getByText('Не удалось загрузить субагентов')).toBeTruthy()
     fireEvent.keyDown(trigger, { key: 'ArrowDown' })
@@ -1486,7 +1684,7 @@ describe('SubagentHeaderLineage', () => {
   it('navigates from outside the tree and tolerates a deferred focus after unmount', async () => {
     const input = props(catalog())
     const view = render(<HeaderCatalog {...input} />)
-    const trigger = screen.getByRole('button', { name: /Выполняется: 1 субагент/ })
+    const trigger = screen.getByRole('button', { name: /\d+ субагент\w*$/ })
     hoverCatalog(trigger)
     fireEvent.keyDown(screen.getByRole('tree'), { key: 'ArrowUp' })
     expect(document.activeElement).toBe(screen.getByRole('treeitem', { name: /reviewer/ }))
@@ -1505,7 +1703,7 @@ describe('SubagentHeaderLineage', () => {
       }),
     })
     const view = render(<HeaderCatalog {...populated} />)
-    hoverCatalog(screen.getByRole('button', { name: /Выполняется: 1 субагент/ }))
+    hoverCatalog(screen.getByRole('button', { name: /\d+ субагент\w*$/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Развернуть дочерние элементы worker' }))
 
     const empty = props(catalog({ entries: [] }))
@@ -1517,7 +1715,7 @@ describe('SubagentHeaderLineage', () => {
     const view = render(<HeaderCatalog {...props(catalog())} />)
 
     expect(screen.queryByText('/')).toBeNull()
-    expect(screen.getByRole('button', { name: /Выполняется: 1 субагент/ })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /\d+ субагент\w*$/ })).toBeTruthy()
 
     view.rerender(<HeaderCatalog {...props(catalog({ entries: [] }))} />)
     expect(screen.queryByRole('button')).toBeNull()
@@ -1541,7 +1739,7 @@ describe('SubagentHeaderLineage', () => {
     }
     render(<HeaderCatalog {...input} />)
 
-    const switcher = screen.getByRole('button', { name: 'Переключить субагента: worker' })
+    const switcher = screen.getByRole('button', { name: '1 субагент' })
     expect(switcher.className).toContain('switcherTrigger')
     expect(within(switcher).getByText('worker')).toBeTruthy()
     expect(switcher.querySelector('svg')).not.toBeNull()
@@ -1556,8 +1754,13 @@ describe('SubagentHeaderLineage', () => {
     expect(current.getAttribute('aria-current')).toBe('true')
     expect(within(current).getByText('worker').className).toContain('currentLabel')
     expect(within(current).queryByRole('button', { name: 'Открыть worker на боковой панели' })).toBeNull()
-    expect(within(screen.getByRole('treeitem', { name: /reviewer/ })).getByRole('button', { name: 'Открыть reviewer на боковой панели' })).toBeTruthy()
-    fireEvent.click(screen.getByRole('treeitem', { name: /reviewer/ }))
+    const selectedMark = current.querySelector('[data-subagent-current]')
+    expect(selectedMark?.getAttribute('aria-hidden')).toBe('true')
+    expect(selectedMark?.querySelector('[data-icon="dsw-icon-check-outline-regular"]')).toBeTruthy()
+    const other = screen.getByRole('treeitem', { name: /reviewer/ })
+    expect(other.querySelector('[data-subagent-current]')).toBeNull()
+    expect(within(other).getByRole('button', { name: 'Открыть на боковой панели reviewer' })).toBeTruthy()
+    fireEvent.click(other)
     expect(input.openChild).toHaveBeenCalledWith({
       parentSessionId: PARENT,
       childSessionId: sibling, mode: 'one-shot',
@@ -1576,9 +1779,11 @@ describe('SubagentHeaderLineage', () => {
     }
     render(<HeaderCatalog {...input} />)
 
-    const switcher = screen.getByRole('button', { name: 'Переключить субагента: worker' })
+    const switcher = screen.getByRole('button', { name: '1 субагент' })
     hoverCatalog(switcher)
-    expect(screen.getByText('Загрузка субагентов…')).toBeTruthy()
+    expect(input.prepareCatalog).not.toHaveBeenCalled()
+    expect(screen.getByText('Субагенты не загружены')).toBeTruthy()
+    expect(screen.queryByText('Загрузка субагентов…')).toBeNull()
     expect(screen.queryAllByRole('treeitem')).toEqual([])
     expect(input.refreshProjection).not.toHaveBeenCalled()
   })
@@ -1589,7 +1794,7 @@ describe('SubagentHeaderLineage', () => {
       entries: [{ id: CHILD, mode: 'one-shot', activity: 'inactive', ...label === undefined ? {} : { label } }],
     }), {}, { [CHILD]: { ...summary(CHILD, 1), parentId: PARENT, origin: 'subagent' } })
     render(<HeaderCatalog {...input} sessionId={CHILD} lineageSessionId={CHILD} />)
-    const switcher = screen.getByRole('button', { name: `Переключить субагента: ${CHILD}` })
+    const switcher = screen.getByRole('button', { name: `Выполняется: 1 субагент` })
     fireEvent.click(switcher)
     expect(screen.getByRole('treeitem', { name: new RegExp(CHILD) })).toBeTruthy()
     expect(screen.queryByRole('heading')).toBeNull()
@@ -1612,7 +1817,7 @@ describe('SubagentHeaderLineage', () => {
     }
     render(<HeaderCatalog {...input} />)
 
-    expect(screen.getByRole('button', { name: `Переключить субагента: ${CHILD}` })).toBeTruthy()
+    expect(screen.getByRole('button', { name: `Выполняется: 1 субагент` })).toBeTruthy()
   })
 
   it('names the breadcrumb by the agent name when the selected row has an empty description', () => {
@@ -1644,12 +1849,12 @@ describe('SubagentHeaderLineage', () => {
         },
       }),
       lineageSessionId: CHILD,
-      displayTitle: 'Сканирование файлов проекта',
+      displayTitle: 'worker',
       openTitle: vi.fn(),
     }
     render(<HeaderCatalog {...input} />)
 
-    const switcher = screen.getByRole('button', { name: 'Переключить субагента: worker' })
+    const switcher = screen.getByRole('button', { name: '1 субагент' })
     expect(switcher.className).toContain('ancestorSwitcherTrigger')
     expect(screen.queryByRole('button', { name: /1 субагент/ })).toBeNull()
     vi.useFakeTimers()
@@ -1676,17 +1881,36 @@ describe('SubagentHeaderLineage', () => {
     const input = {
       ...props(undefined, {}, {}, { parentSessionId: PARENT, childSessionId: CHILD, mode: 'continuable' }),
       lineageSessionId: CHILD,
-      displayTitle: 'Сканирование файлов проекта',
+      displayTitle: 'worker',
       ...(openTitle === undefined ? {} : { openTitle }),
     }
     render(<HeaderCatalog {...input} />)
 
-    const switcher = screen.getByRole('button', { name: 'Переключить субагента: Сканирование файлов проекта' })
+    const switcher = screen.getByRole('button', { name: 'Переключить субагента: worker' })
     expect(input.refreshProjection).not.toHaveBeenCalled()
     hoverCatalog(switcher)
-    expect(screen.getByText('Загрузка субагентов…')).toBeTruthy()
+    expect(input.prepareCatalog).not.toHaveBeenCalled()
+    expect(screen.getByText('Субагенты не загружены')).toBeTruthy()
+    expect(screen.queryByText('Загрузка субагентов…')).toBeNull()
     expect(screen.queryAllByRole('treeitem')).toEqual([])
     expect(input.refreshProjection).not.toHaveBeenCalled()
+  })
+
+  it.each(['idle', 'loading'] as const)('shows the actual %s state of an empty title menu', (state) => {
+    const input = {
+      ...props(undefined, {}, {}, { parentSessionId: PARENT, childSessionId: CHILD, mode: 'continuable' }),
+      lineageSessionId: CHILD,
+      displayTitle: 'worker',
+    }
+    const initial = input.useSessions(value => value)
+    render(<HeaderCatalog {...input} useSessions={select => select({
+      ...initial,
+      projectionsBySession: { [PARENT]: { state, error: null, values: {} } },
+    })} />)
+    hoverCatalog(screen.getByRole('button', { name: '1 субагент' }))
+    expect(screen.getByText(state === 'idle' ? ru['load.idle'] : ru['loading.label'])).toBeTruthy()
+    expect(screen.queryByText(state === 'idle' ? ru['loading.label'] : ru['load.idle'])).toBeNull()
+    expect(input.prepareCatalog).not.toHaveBeenCalled()
   })
 
   it('keeps a nested title switcher scoped to its direct-parent catalog', () => {
@@ -1710,7 +1934,7 @@ describe('SubagentHeaderLineage', () => {
     }
     render(<HeaderCatalog {...input} />)
 
-    hoverCatalog(screen.getByRole('button', { name: 'Переключить субагента: indexer' }))
+    hoverCatalog(screen.getByRole('button', { name: '1 субагент' }))
 
     expect(input.refreshProjection).not.toHaveBeenCalled()
     const current = screen.getByRole('treeitem', { name: /indexer/ })
@@ -1728,7 +1952,7 @@ describe('SubagentReadOnlyComposer', () => {
 
   it('explains that one-shot histories never accept follow-ups', () => {
     render(<SubagentReadOnlyComposer matched={{ reason: 'one-shot' }} t={t} />)
-    expect(screen.getByRole('status').textContent).toContain('Для одноразовых задач нельзя отправлять последующие сообщения')
+    expect(screen.getByRole('status').textContent).toContain('Прочитайте дочернюю сессию')
   })
 })
 
@@ -1742,7 +1966,7 @@ it('shows external membership without an execution status or child Session navig
   const row = screen.getByRole('treeitem', { name: /External review.*Внешняя задача/ })
   expect(row.getAttribute('aria-disabled')).toBe('true')
   expect(row.hasAttribute('aria-expanded')).toBe(false)
-  expect(row.getAttribute('aria-label')).not.toMatch(/завершено|не выполняется|неизвестный/)
+  expect(row.getAttribute('aria-label')).not.toMatch(/завершено|не выполняется|ожидает результата/)
   fireEvent.click(row)
   expect(input.openChild).not.toHaveBeenCalled()
   expect(input.openChildAside).not.toHaveBeenCalled()

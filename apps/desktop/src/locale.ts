@@ -181,6 +181,16 @@ export const en = {
   updateDownloadSpaceFailed: 'Not enough disk space to download the update. Free up space, then retry.',
   updateDownloadPermissionFailed: 'Cannot write the update files. Check the folder permissions and retry.',
   updateDownloadBusyFailed: 'An update file is in use. Close the program using it, then retry.',
+  updateConfigurationFailed: 'Update settings could not be applied. Fix the configuration file and restart, or select an update channel in Settings.',
+  updateConfigurationRead: 'Settings file error; updates are paused',
+  updateConfigurationFormat: 'Settings file error; updates are paused',
+  updateConfigurationChannel: 'Settings file error; updates are paused',
+  updateConfigurationCleanup: 'Updates paused: cannot discard previous update; restart the app',
+  updateReloadSettings: 'Reload settings',
+  updateConfigurationDetails: 'Review settings',
+  updateShowSettingsFile: 'Show settings file',
+  updateDownloadInProgress: 'Downloading update',
+  updateDownloadDetail: 'The update is downloading in the background. You can continue using the app.',
 } as const
 
 /** Every Desktop locale supplies the complete English key set. */
@@ -368,6 +378,16 @@ export const ru = {
   updateDownloadSpaceFailed: 'Недостаточно места для загрузки обновления. Освободите место и повторите попытку.',
   updateDownloadPermissionFailed: 'Не удалось записать файлы обновления. Проверьте права доступа к папке и повторите попытку.',
   updateDownloadBusyFailed: 'Файл обновления занят. Закройте использующую его программу и повторите попытку.',
+  updateConfigurationFailed: 'Не удалось применить настройки обновления. Исправьте файл и перезапустите приложение или выберите канал в настройках.',
+  updateConfigurationRead: 'Ошибка файла настроек; обновления приостановлены',
+  updateConfigurationFormat: 'Ошибка файла настроек; обновления приостановлены',
+  updateConfigurationChannel: 'Ошибка файла настроек; обновления приостановлены',
+  updateConfigurationCleanup: 'Обновления приостановлены: не удалось удалить предыдущее обновление; перезапустите приложение',
+  updateReloadSettings: 'Перечитать настройки',
+  updateConfigurationDetails: 'Проверить настройки',
+  updateShowSettingsFile: 'Показать файл настроек',
+  updateDownloadInProgress: 'Загрузка обновления',
+  updateDownloadDetail: 'Обновление загружается в фоновом режиме. Вы можете продолжать пользоваться приложением.',
 } satisfies DesktopMessages
 
 const dictionaries = { en, ru }

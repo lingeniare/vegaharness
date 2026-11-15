@@ -128,6 +128,16 @@ export const en = {
   'time.months': '{n}mo',
   'time.years': '{n}y',
   'time.ago': '{t} ago',
+  'shortcut.closeDialog': 'Close the open dialog first',
+  'shortcut.closePanel': 'Close the open panel to return to the session',
+  'shortcut.archivedReading': 'Archived sessions have no unread reminders',
+  'shortcut.toggleRead': 'Toggle read/unread',
+  'shortcut.readingUnavailable': 'Reading state is unavailable. Reload the page to reconnect.',
+  'status.unread': 'Unread',
+  'status.failed': 'Run failed',
+  'menu.markRead': 'Mark as read',
+  'menu.markUnread': 'Mark as unread',
+  'toast.readingFailed': 'Could not confirm reading state. Try again.',
 } satisfies Record<string, string>
 
 /** Russian dictionary, checked against the English keys. */
@@ -251,4 +261,14 @@ export const ru = {
   'time.months': '{n} мес.',
   'time.years': '{n} г.',
   'time.ago': '{t} назад',
+  'shortcut.closeDialog': 'Сначала закройте открытое диалоговое окно',
+  'shortcut.closePanel': 'Закройте открытую панель, чтобы вернуться к сеансу',
+  'shortcut.archivedReading': 'У архивных сеансов нет напоминаний о непрочитанном',
+  'shortcut.toggleRead': 'Переключить прочитано/не прочитано',
+  'shortcut.readingUnavailable': 'Статус прочтения недоступен. Перезагрузите страницу для повторного подключения.',
+  'status.unread': 'Не прочитано',
+  'status.failed': 'Ошибка выполнения',
+  'menu.markRead': 'Отметить как прочитанное',
+  'menu.markUnread': 'Отметить как непрочитанное',
+  'toast.readingFailed': 'Не удалось подтвердить статус прочтения. Повторите попытку.',
 } satisfies Record<keyof typeof en, string>

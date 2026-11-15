@@ -25,6 +25,7 @@ it('generates Russian NSIS strings from the same files that select packaged lang
   expect(source).toContain('!ifdef LANG_RUSSIAN\n')
   expect(source).toContain('LangString INSTALLER_INSTALL_ru_RU ${LANG_ENGLISH} "Установить сейчас"')
   expect(source).toContain('LangString INSTALLER_INSTALL_en_US ${LANG_RUSSIAN} "Install now"')
+  expect(source.match(/^LangString INSTALLER_UPDATE_WAIT /gmu)).toHaveLength(locales.length)
   expect(source.match(/^LangString /gmu))
     .toHaveLength(locales.length * Object.keys(locales[0]!.strings).length * (1 + locales.length))
   const russian = locales.filter(locale => locale.id === 'ru_RU')

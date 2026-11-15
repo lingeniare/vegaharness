@@ -48,6 +48,7 @@ export const en = {
   'progress.active': '{count} in progress',
   'progress.inactive': '{count} not running',
   'progress.external': '{count} external',
+  'load.idle': 'Subagents not loaded',
 } satisfies Record<string, string>
 
 /** `subagent` namespace dictionaries. */
@@ -108,4 +109,5 @@ export const ru = {
   'progress.active': '{count} в процессе',
   'progress.inactive': '{count} не выполняются',
   'progress.external': '{count} внешних',
+  'load.idle': 'Субагенты не загружены',
 } satisfies Record<keyof typeof en, string>

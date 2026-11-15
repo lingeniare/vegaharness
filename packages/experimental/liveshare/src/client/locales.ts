@@ -236,6 +236,7 @@ export const en = {
   'dialog.capabilities.partial': 'Partial',
   'viewer.pluginUnsupported': 'Plugin {plugin} is not available in this share; some features are unavailable.',
   'viewer.dismiss': 'Dismiss',
+  'dialog.ownerStateHeld': 'Another VEGA process holds the share state; manage shares there, or quit it first.',
 } satisfies Record<string, string>
 
 /** Locale namespace owned by the Liveshare owner-side browser plugin. */
@@ -481,6 +482,7 @@ export const ru: Record<keyof typeof en, string> = {
   'dialog.capabilities.partial': 'Часть',
   'viewer.pluginUnsupported': 'Плагин {plugin} не поддерживается в этом общем доступе; некоторые функции недоступны.',
   'viewer.dismiss': 'Закрыть',
+  'dialog.ownerStateHeld': 'Состояние общего доступа удерживает другой процесс VEGA; управляйте общим доступом в нём или сначала завершите его.',
 }
 
 /** Stable locale keys consumed by the share dialog and the viewer surfaces. */
