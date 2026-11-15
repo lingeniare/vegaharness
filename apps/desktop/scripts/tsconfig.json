@@ -1,0 +1,7 @@
+{
+  // Resolution facade for tsx launching scripts/dev.ts and the other script
+  // entrypoints on a clean tree: the app-level solution file deliberately has
+  // no extends, so without this file workspace imports resolve to unbuilt lib/.
+  "extends": "../../../tsconfig.base.json",
+  "files": []
+}
