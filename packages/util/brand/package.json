@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-brand",
   "description": "Stateless branded primitive types for the VEGA Harness",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "publishConfig": {
     "access": "public"
   },
