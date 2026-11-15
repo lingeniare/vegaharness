@@ -1,5 +1,5 @@
 /** VEGA account-route adapter: pi-ai transport plus listing readiness, VEGA headers, and account error translation. */
-import { ACCOUNT_QUOTA_EXCEEDED_CODE, APP_IDENTITY, isQuotaExceededError, LlmError } from '@deepseek-ai/dsh-llm'
+import {ACCOUNT_QUOTA_EXCEEDED_CODE, APP_IDENTITY, isQuotaExceededError, LlmError, type BuiltinLlmFailureCode} from '@deepseek-ai/dsh-llm'
 import type { GenerateOptions, LlmModelInfo, PreparedAdapterCall, StreamChunk } from '@deepseek-ai/dsh-llm'
 import { PiAiAdapter } from '@deepseek-ai/dsh-llm-pi-ai'
 import type { PiAiAdapterOptions, PiAiRequestHeaderContext } from '@deepseek-ai/dsh-llm-pi-ai'
@@ -27,7 +27,7 @@ export interface VegaAdapterOptions extends Omit<PiAiAdapterOptions, 'resolveApi
 /** Failure vocabulary the VEGA gateway emits inside OpenAI-style error bodies. */
 interface TranslatedFailure {
   readonly message: string
-  readonly code: string
+  readonly code: BuiltinLlmFailureCode
 }
 
 const PII_CODE = /"code"\s*:\s*"(pii_[a-z_]+)"|\b(pii_[a-z_]+)\b/i
@@ -52,7 +52,7 @@ function translateFailure(message: string, code: string): TranslatedFailure | un
     // `pii_unavailable` never reached the provider (fail-closed), so it keeps
     // the retry-classified server code; other shield rejections are terminal.
     if (name === 'pii_unavailable') return { message, code: 'SERVER' }
-    return { message, code: `PII_${name.slice(4).toUpperCase()}` }
+    return { message, code: 'INVALID_REQUEST' }
   }
   return undefined
 }

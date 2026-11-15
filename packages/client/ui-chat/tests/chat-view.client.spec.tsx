@@ -43,7 +43,7 @@ import { derivePresentationPolicy, type CollapseTiming, type FoldedReplies } fro
 import { CHAT_FLOW_INJECT, CHAT_NODE_INJECT } from '../src/client/apply.ts'
 import { ChatView } from '../src/client/chat/ChatView.tsx'
 import { ChatFlow } from '../src/client/chat/ChatFlow.tsx'
-import { en, ru, pt } from '../src/client/locale.ts'
+import { en, ru } from '../src/client/locale.ts'
 import { AssistantNodeView } from '../src/client/chat/AssistantNodeView.tsx'
 import { CommandNodeView, ManualCompactionNodeView } from '../src/client/chat/CommandNodeView.tsx'
 import {
@@ -4915,8 +4915,8 @@ describe('ChatView', () => {
 
 const fileDrag = { prepare: vi.fn(async () => ({ start: () => true, release: () => {} })), reportFailure: vi.fn() }
 
-it('formats Portuguese elapsed minutes with numeric units', () => {
-  expect(formatRunDuration(90_000, key => pt[key])).toBe('1m 30s')
+it('formats Russian elapsed minutes with numeric units', () => {
+  expect(formatRunDuration(90_000, key => ru[key])).toBe('1м 30с')
 })
 
 it('does not infer menu targets from links or data attributes inside a plugin flow slot', () => {

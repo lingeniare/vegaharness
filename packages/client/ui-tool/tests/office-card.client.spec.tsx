@@ -7,11 +7,11 @@ import { cleanup, fireEvent, render } from '@testing-library/react'
 import { contextMenuHook, bindSnapshotSelector, makeTranslate, SlotTestRuntime } from '@deepseek-ai/dsh-client-test-runtime'
 import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
+import { ru as commonRu } from '@deepseek-ai/dsh-client-locale/src/locales/ru.ts'
 import type { StartedToolCall, ToolResultNode } from '@deepseek-ai/dsh-client-ui-chat/client'
 import type { SessionListState } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { zh, en, ja, es, fr, de, ru, pt } from '@deepseek-ai/dsh-client-ui-conversation/src/client/locales.ts'
+import { en, ru } from '@deepseek-ai/dsh-client-ui-conversation/src/client/locales.ts'
 import { PartialArguments } from '@deepseek-ai/dsh-util-values'
 import type { AttachmentId, ImageAttachmentRef } from '@deepseek-ai/dsh-attachment/types'
 import { brandString } from '@deepseek-ai/dsh-brand'
@@ -22,7 +22,7 @@ import { OfficeRow, officeToolview, type OfficeRowProps } from '../src/client/to
 afterEach(cleanup)
 
 const SID = 's1' as SessionId
-const t: ToolTreeProps['t'] = makeTranslate(zh, commonZh)
+const t: ToolTreeProps['t'] = makeTranslate(ru, commonRu)
 const RENDER_ARGS = '{"input":"docs/deck.pptx"}'
 const image: ImageAttachmentRef = {
   attachmentId: brandString<AttachmentId>(`sha256:${'b'.repeat(64)}`), mediaType: 'image/png', bytes: 120, width: 800, height: 600,
@@ -132,7 +132,7 @@ describe('OfficeRow', () => {
     const runtime = await SlotTestRuntime.create()
     onTestFinished(() => runtime.dispose())
     const locale = new LocaleRuntime(runtime.ctx)
-    locale.register('conversation', { en, zh })
+    locale.register('conversation', { en, ru })
     runtime.ctx.provide('locale', locale)
     runtime.slots.installLocale(locale)
     const fiber = await runtime.mount(officeToolview)
@@ -147,14 +147,8 @@ describe('OfficeRow', () => {
 })
 
 it.each([
-  ['zh', zh, ['渲染文档', '转换文档', '重算工作簿']],
   ['en', en, ['Render document', 'Convert document', 'Recalculate workbook']],
-  ['ja', ja, ['文書を描画', '文書を変換', 'ブックを再計算']],
-  ['es', es, ['Representar documento', 'Convertir documento', 'Recalcular libro']],
-  ['fr', fr, ['Afficher le document', 'Convertir le document', 'Recalculer le classeur']],
-  ['de', de, ['Dokument rendern', 'Dokument konvertieren', 'Arbeitsmappe neu berechnen']],
   ['ru', ru, ['Отрисовать документ', 'Преобразовать документ', 'Пересчитать книгу']],
-  ['pt', pt, ['Renderizar documento', 'Converter documento', 'Recalcular pasta de trabalho']],
 ] as const)('keeps the %s Office titles on the dedicated keys', (_language, dictionary, titles) => {
   expect([dictionary['tool.title.officeRender'], dictionary['tool.title.officeConvert'], dictionary['tool.title.officeRecalculate']]).toEqual(titles)
 })

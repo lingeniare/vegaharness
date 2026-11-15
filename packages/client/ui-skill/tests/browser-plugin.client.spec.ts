@@ -1,4 +1,3 @@
-import { es, fr, de, ru, pt } from '../src/client/locales.ts'
 /**
  * ui-skill browser half: source and keyed toolview registration +
  * locale dictionaries + source duplicate-name proof +
@@ -142,7 +141,6 @@ describe('apply', () => {
     expect(entry?.component).toBe(SkillToolRow)
     expect(presentation.dictionaries).toEqual([{
       namespace: 'skill', dictionaries: {
-        es, fr, de, ru, pt,
         ru: {
           'row.title': 'Скилл',
           'row.running': 'Загрузка скилла',

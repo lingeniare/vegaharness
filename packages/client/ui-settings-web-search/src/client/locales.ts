@@ -14,6 +14,8 @@ export type WebSearchSettingsLocaleKey =
   | 'count' | 'countHint'
   | 'overridden' | 'reset' | 'readOnly' | 'unavailable'
   | 'save' | 'saving' | 'saveFailed' | 'invalidNumber' | 'invalidCount'
+  | 'billing' | 'billingAuto' | 'billingAutoHint' | 'billingAccount' | 'billingAccountHint'
+  | 'billingApiKey' | 'billingApiKeyHint' | 'billingAdvancedOverride'
 
 /** English copy. */
 export const en: Record<WebSearchSettingsLocaleKey, string> = {

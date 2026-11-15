@@ -8,7 +8,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, within } from '@testing-library/react'
 import { sessionFileAddress } from '@deepseek-ai/dsh-util-workspace-path'
-import { zh } from '../src/client/locales.ts'
+import { ru } from '../src/client/locales.ts'
 import { defaultRules, enabledPaths } from '../src/client/search-rules.ts'
 import type { WorkspaceSearchPreferences } from '../src/client/search-rules.ts'
 import type { DirLevel } from '../src/client/store.ts'
@@ -27,7 +27,7 @@ const ROOT_LEVEL: DirLevel = {
 }
 const SRC_LEVEL: DirLevel = { entries: [{ name: 'a.ts', type: 'file', size: 1 }, { name: 'b.ts', type: 'file', size: 1 }], truncated: false }
 const A = sessionFileAddress(SESSION, 'src/a.ts')
-const t = makeTranslate(zh)
+const t = makeTranslate(ru)
 
 beforeEach(() => {
   Element.prototype.scrollIntoView = vi.fn()
@@ -51,7 +51,7 @@ async function revealed(h: Mounted): Promise<void> {
   await act(() => h.script.settle({ ok: true, value: SRC_LEVEL }))
 }
 
-const field = (h: Mounted): HTMLInputElement => within(h.view.container).getByRole<HTMLInputElement>('searchbox', { name: zh['search.placeholder'] })
+const field = (h: Mounted): HTMLInputElement => within(h.view.container).getByRole<HTMLInputElement>('searchbox', { name: ru['search.placeholder'] })
 const body = (h: Mounted): HTMLElement => h.view.container.querySelector<HTMLElement>('[data-files-body]')!
 
 /**
@@ -61,7 +61,7 @@ const body = (h: Mounted): HTMLElement => h.view.container.querySelector<HTMLEle
 const emptyHint = (h: Mounted): string | undefined => {
   const button = body(h).querySelector<HTMLElement>('[data-files-search-hint]')
   if (button === null) return undefined
-  expect(button.getAttribute('aria-label')).toBe(zh['search.emptyHint.label'])
+  expect(button.getAttribute('aria-label')).toBe(ru['search.emptyHint.label'])
   fireEvent.click(button)
   const text = document.querySelector('[role="tooltip"]')?.textContent
   fireEvent.click(button)
@@ -71,7 +71,7 @@ const emptyHint = (h: Mounted): string | undefined => {
 const status = (h: Mounted): string | null | undefined => h.view.container.querySelector('[data-files-search-status]')?.textContent
 const paths = (h: Mounted): string[] => [...body(h).querySelectorAll('[data-files-entry]')].map(li => li.getAttribute('data-files-path')!)
 const dialog = (h: Mounted): HTMLElement | null => h.view.queryByRole('dialog')
-const settingsButton = (h: Mounted): HTMLElement => h.view.getByRole('button', { name: zh['search.settings'] })
+const settingsButton = (h: Mounted): HTMLElement => h.view.getByRole('button', { name: ru['search.settings'] })
 
 /** jsdom omits mousedown's focus default; honor its cancellation before clicking. */
 function pointerClick(target: HTMLElement): void {
@@ -122,14 +122,14 @@ describe('the search bar', () => {
   it('searches as the reader types and draws the matches as a highlighted tree with its count', async () => {
     const h = mountNavigator('sidebar://files')
     await shown(h)
-    expect(h.view.queryByRole('button', { name: zh['search.clear'] })).toBeNull()
+    expect(h.view.queryByRole('button', { name: ru['search.clear'] })).toBeNull()
     await type(h, ' Ab ', ['src/tab.ts', 'lib/AB/', 'lib/AB/x.ts'])
     expect(requests(h)).toEqual([{ query: 'Ab', excludedPaths: enabledPaths(defaultRules()), includeHidden: false, respectGitignore: true }])
     expect(status(h)).toBe(t('search.results', { count: '3' }))
     expect(paths(h)).toEqual([`${ROOT}/lib`, `${ROOT}/lib/AB`, `${ROOT}/lib/AB/x.ts`, `${ROOT}/src`, `${ROOT}/src/tab.ts`])
     expect([...body(h).querySelectorAll('mark')].map(mark => mark.textContent)).toEqual(['AB', 'ab'])
     expect(body(h).querySelector(`[data-files-path="${ROOT}/src/tab.ts"] button`)?.textContent).toBe('tab.ts')
-    expect(h.view.getByRole('button', { name: zh['search.clear'] })).toBeTruthy()
+    expect(h.view.getByRole('button', { name: ru['search.clear'] })).toBeTruthy()
     // Whitespace around the same text asks nothing new and keeps the count.
     await type(h, 'Ab')
     expect(requests(h)).toHaveLength(1)
@@ -160,7 +160,7 @@ describe('the search bar', () => {
     expect(body(h).getAttribute('data-files-view')).toBe('search')
     expect(body(h).scrollTop).toBe(0)
     fireEvent.scroll(body(h), { target: { scrollTop: 12 } })
-    act(() => { fireEvent.click(h.view.getByRole('button', { name: zh['search.clear'] })) })
+    act(() => { fireEvent.click(h.view.getByRole('button', { name: ru['search.clear'] })) })
     expect(document.activeElement).toBe(field(h))
     expect(status(h)).toBe('')
     expect(body(h).getAttribute('data-files-view')).toBe('tree')
@@ -183,30 +183,30 @@ describe('the search bar', () => {
     const h = mountNavigator('sidebar://files')
     await shown(h)
     await type(h, 'zzz')
-    expect(body(h).textContent).toBe(zh['search.empty'])
-    expect(emptyHint(h)).toBe(zh['search.emptyHint.all'])
+    expect(body(h).textContent).toBe(ru['search.empty'])
+    expect(emptyHint(h)).toBe(ru['search.emptyHint.all'])
     expect(status(h)).toBe(t('search.results', { count: '0' }))
     const settle = async (preferences: Partial<WorkspaceSearchPreferences>): Promise<string | undefined> => {
       await settled(() => { h.face.setSearchPreferences(ROOT, preferences) })
-      expect(body(h).textContent).toBe(zh['search.empty'])
+      expect(body(h).textContent).toBe(ru['search.empty'])
       return emptyHint(h)
     }
-    expect(await settle({ showHidden: true })).toBe(zh['search.emptyHint.excludedIgnored'])
+    expect(await settle({ showHidden: true })).toBe(ru['search.emptyHint.excludedIgnored'])
     expect(requests(h).at(-1)).toMatchObject({ excludedPaths: enabledPaths(defaultRules()), includeHidden: true })
-    expect(await settle({ rules: [] })).toBe(zh['search.emptyHint.ignored'])
+    expect(await settle({ rules: [] })).toBe(ru['search.emptyHint.ignored'])
     expect(requests(h).at(-1)).toMatchObject({ excludedPaths: [], includeHidden: true })
-    expect(await settle({ showHidden: false })).toBe(zh['search.emptyHint.hiddenIgnored'])
+    expect(await settle({ showHidden: false })).toBe(ru['search.emptyHint.hiddenIgnored'])
     // Turning ignore files off leaves out only what the other two settings take.
-    expect(await settle({ respectGitignore: false })).toBe(zh['search.emptyHint.hidden'])
+    expect(await settle({ respectGitignore: false })).toBe(ru['search.emptyHint.hidden'])
     expect(requests(h).at(-1)).toMatchObject({ respectGitignore: false })
     // With nothing excluded, hidden entries shown, and ignore files not respected, the search left nothing out.
     expect(await settle({ showHidden: true })).toBeUndefined()
     // A rule that is listed but off excludes nothing.
     expect(await settle({ rules: [{ path: 'dist', enabled: false }] })).toBeUndefined()
     // Leaving out hidden entries is the only thing that remains.
-    expect(await settle({ showHidden: false })).toBe(zh['search.emptyHint.hidden'])
-    expect(await settle({ rules: defaultRules(), showHidden: true })).toBe(zh['search.emptyHint.excluded'])
-    expect(await settle({ showHidden: false })).toBe(zh['search.emptyHint.both'])
+    expect(await settle({ showHidden: false })).toBe(ru['search.emptyHint.hidden'])
+    expect(await settle({ rules: defaultRules(), showHidden: true })).toBe(ru['search.emptyHint.excluded'])
+    expect(await settle({ showHidden: false })).toBe(ru['search.emptyHint.both'])
   })
 
   it('says below the results, matched or not, when only the first matches are drawn and when some directories were not searched', async () => {
@@ -221,11 +221,11 @@ describe('the search bar', () => {
     h.searches.answerWith(answer(['src/a.ts'], { incomplete: true }))
     await type(h, 'ab')
     expect(note('search-truncated')).toBeUndefined()
-    expect(note('search-incomplete')).toBe(zh['search.incomplete'])
+    expect(note('search-incomplete')).toBe(ru['search.incomplete'])
     h.searches.answerWith(answer([], { truncated: true, incomplete: true }))
     await type(h, 'zzz')
-    expect(body(h).textContent).toBe(`${zh['search.empty']}${t('search.truncated', { count: '0' })}${zh['search.incomplete']}`)
-    expect(emptyHint(h)).toBe(zh['search.emptyHint.all'])
+    expect(body(h).textContent).toBe(`${ru['search.empty']}${t('search.truncated', { count: '0' })}${ru['search.incomplete']}`)
+    expect(emptyHint(h)).toBe(ru['search.emptyHint.all'])
   })
 
   it('keeps the last results drawn with a spinner while the next search runs, and draws only a spinner before the first answer', async () => {
@@ -266,7 +266,7 @@ describe('the search bar', () => {
     expect(status(h)).toBe('')
     expect(paths(h)).toEqual([])
     h.searches.answerWith(answer(['src/a.ts']))
-    const retry = within(failed()!).getByRole('button', { name: zh['search.retry'] })
+    const retry = within(failed()!).getByRole('button', { name: ru['search.retry'] })
     await settled(() => { fireEvent.click(retry) })
     expect(requests(h)).toHaveLength(2)
     expect(requests(h)[1]).toEqual(requests(h)[0])
@@ -295,12 +295,12 @@ describe('the hidden-entry control', () => {
     await shown(h)
     const eye = (): HTMLElement => h.view.container.querySelector<HTMLElement>('[data-files-show-hidden]')!
     expect(eye().getAttribute('aria-pressed')).toBe('false')
-    expect(eye().getAttribute('aria-label')).toBe(zh['search.showHidden'])
+    expect(eye().getAttribute('aria-label')).toBe(ru['search.showHidden'])
     // The name stays fixed; only `aria-pressed` reports the state.
     expect(paths(h)).not.toContain(`${ROOT}/.env`)
     act(() => { fireEvent.click(eye()) })
     expect(eye().getAttribute('aria-pressed')).toBe('true')
-    expect(eye().getAttribute('aria-label')).toBe(zh['search.showHidden'])
+    expect(eye().getAttribute('aria-label')).toBe(ru['search.showHidden'])
     expect(paths(h)).toContain(`${ROOT}/.env`)
     await type(h, 'env', ['.env'])
     expect(requests(h)[0]?.includeHidden).toBe(true)
@@ -316,7 +316,7 @@ describe('the hidden-entry control', () => {
     await act(() => h.script.watches.ready(ROOT))
     await act(() => h.script.settle({ ok: true, value: { entries: [{ name: '.env', type: 'file', size: 1 }], truncated: false } }))
     expect(body(h).querySelector('[data-files-row="empty"]')).toBeNull()
-    expect(body(h).querySelector('[data-files-row="hidden-only"]')?.textContent).toBe(zh.emptyHidden)
+    expect(body(h).querySelector('[data-files-row="hidden-only"]')?.textContent).toBe(ru.emptyHidden)
     act(() => { fireEvent.click(h.view.container.querySelector('[data-files-show-hidden]')!) })
     expect(body(h).querySelector('[data-files-row="hidden-only"]')).toBeNull()
     expect(paths(h)).toEqual([`${ROOT}/.env`])
@@ -389,7 +389,7 @@ describe('the settings panel', () => {
     await shown(h)
     pointerClick(settingsButton(h))
     const panel = dialog(h)!
-    const add = within(panel).getByRole('textbox', { name: zh['settings.add'] })
+    const add = within(panel).getByRole('textbox', { name: ru['settings.add'] })
     act(() => {
       fireEvent.change(add, { target: { value: './cache/' } })
       fireEvent.keyDown(add, { key: 'Enter' })
@@ -416,13 +416,13 @@ describe('the settings panel', () => {
     // Pressing the magnifier on a closed panel takes the keyboard as any button does.
     expect(fireEvent.mouseDown(settingsButton(h))).toBe(true)
     let panel = open(h)
-    expect(within(panel).getByText(zh['settings.title'])).toBeTruthy()
-    expect(document.activeElement).toBe(within(panel).getByRole('textbox', { name: zh['settings.add'] }))
+    expect(within(panel).getByText(ru['settings.title'])).toBeTruthy()
+    expect(document.activeElement).toBe(within(panel).getByRole('textbox', { name: ru['settings.add'] }))
     expect(h.view.container.querySelectorAll('[data-files-show-hidden]')).toHaveLength(1)
     pointerClick(within(panel).getByRole('checkbox', { name: t('settings.toggle', { path: 'dist' }) }))
     // Nothing is written while the panel is open.
     expect(stored(h).rules.find(rule => rule.path === 'dist')?.enabled).toBe(true)
-    pointerClick(within(panel).getByRole('button', { name: zh['settings.close'] }))
+    pointerClick(within(panel).getByRole('button', { name: ru['settings.close'] }))
     expect(dialog(h)).toBeNull()
     expect(document.activeElement).toBe(settingsButton(h))
     expect(stored(h).rules.find(rule => rule.path === 'dist')?.enabled).toBe(false)
@@ -454,8 +454,8 @@ describe('the settings panel', () => {
     const h = mountNavigator('sidebar://files')
     await shown(h)
     const panel = open(h)
-    const restore = (): HTMLElement | null => within(panel).queryByRole('button', { name: zh['settings.restore'] })
-    const add = within(panel).getByRole('textbox', { name: zh['settings.add'] })
+    const restore = (): HTMLElement | null => within(panel).queryByRole('button', { name: ru['settings.restore'] })
+    const add = within(panel).getByRole('textbox', { name: ru['settings.add'] })
     const rules = (): string[] => [...panel.querySelectorAll('[data-files-rule]')].map(row => row.getAttribute('data-files-rule')!)
     const defaults = rules()
     const type = (value: string): void => {
@@ -487,10 +487,10 @@ describe('the settings panel', () => {
     const h = mountNavigator('sidebar://files')
     await shown(h)
     const panel = open(h)
-    const add = within(panel).getByRole<HTMLInputElement>('textbox', { name: zh['settings.add'] })
+    const add = within(panel).getByRole<HTMLInputElement>('textbox', { name: ru['settings.add'] })
     act(() => { fireEvent.change(add, { target: { value: '../x' } }) })
     act(() => { fireEvent.keyDown(add, { key: 'Enter' }) })
-    expect(within(panel).getByRole('alert').textContent).toBe(zh['settings.invalid.parent'])
+    expect(within(panel).getByRole('alert').textContent).toBe(ru['settings.invalid.parent'])
     expect(add.getAttribute('aria-invalid')).toBe('true')
     act(() => { fireEvent.change(add, { target: { value: 'tmp/' } }) })
     expect(within(panel).queryByRole('alert')).toBeNull()
@@ -506,7 +506,7 @@ describe('the settings panel', () => {
     const panel = open(h)
     act(() => { h.face.setSearchPreferences(ROOT, { showHidden: true }) })
     pointerClick(within(panel).getByRole('checkbox', { name: t('settings.toggle', { path: 'dist' }) }))
-    pointerClick(within(panel).getByRole('button', { name: zh['settings.close'] }))
+    pointerClick(within(panel).getByRole('button', { name: ru['settings.close'] }))
     expect(stored(h).showHidden).toBe(true)
     expect(stored(h).rules.find(rule => rule.path === 'dist')?.enabled).toBe(false)
   })
@@ -516,7 +516,7 @@ describe('the settings panel', () => {
     await shown(h)
     const panel = open(h)
     pointerClick(within(panel).getByRole('checkbox', { name: t('settings.toggle', { path: 'dist' }) }))
-    const eye = h.view.getByRole('button', { name: zh['search.showHidden'] })
+    const eye = h.view.getByRole('button', { name: ru['search.showHidden'] })
     pointerClick(eye)
     expect(dialog(h)).toBeNull()
     expect(document.activeElement).toBe(eye)
@@ -533,7 +533,7 @@ describe('the settings panel', () => {
     await type(h, 'a')
     expect(requests(h)[0]?.respectGitignore).toBe(true)
     const panel = open(h)
-    const gitignore = within(panel).getByRole<HTMLInputElement>('checkbox', { name: zh['settings.respectGitignore'] })
+    const gitignore = within(panel).getByRole<HTMLInputElement>('checkbox', { name: ru['settings.respectGitignore'] })
     expect(gitignore.checked).toBe(true)
     pointerClick(within(panel).getByRole('checkbox', { name: t('settings.toggle', { path: 'dist' }) }))
     pointerClick(gitignore)
@@ -543,10 +543,10 @@ describe('the settings panel', () => {
     expect(stored(h).rules.find(rule => rule.path === 'dist')?.enabled).toBe(true)
     expect(requests(h)[1]).toMatchObject({ respectGitignore: false, excludedPaths: enabledPaths(defaultRules()) })
     expect(dialog(h)).not.toBeNull()
-    pointerClick(within(panel).getByRole('button', { name: zh['settings.close'] }))
+    pointerClick(within(panel).getByRole('button', { name: ru['settings.close'] }))
     expect(stored(h)).toMatchObject({ respectGitignore: false })
     expect(stored(h).rules.find(rule => rule.path === 'dist')?.enabled).toBe(false)
-    expect(within(open(h)).getByRole('checkbox', { name: zh['settings.respectGitignore'] })).toHaveProperty('checked', false)
+    expect(within(open(h)).getByRole('checkbox', { name: ru['settings.respectGitignore'] })).toHaveProperty('checked', false)
   })
 
   it('searches again with the saved rules when the panel closes during a search', async () => {
@@ -555,7 +555,7 @@ describe('the settings panel', () => {
     await type(h, 'a')
     const panel = open(h)
     pointerClick(within(panel).getByRole('checkbox', { name: t('settings.toggle', { path: 'dist' }) }))
-    pointerClick(within(panel).getByRole('button', { name: zh['settings.close'] }))
+    pointerClick(within(panel).getByRole('button', { name: ru['settings.close'] }))
     expect(requests(h)[1]?.excludedPaths).not.toContain('dist')
   })
 })

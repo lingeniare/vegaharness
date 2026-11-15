@@ -65,14 +65,14 @@ export async function requestVegaListing(url: string, token: string, signal: Abo
   const response = await fetch(url, {
     headers: { authorization: `Bearer ${token}`, ...attributionHeaders() },
     redirect: 'error', signal,
-  }).catch((error: unknown) => { throw new LlmError(`vega model listing request failed: ${String(error)}`, 'MODEL_LISTING_FAILED', { cause: error }) })
+  }).catch((error: unknown) => { throw new LlmError(`vega model listing request failed: ${String(error)}`, 'DISCOVERY_FAILED', { cause: error }) })
   if (!response.ok) {
     await response.body?.cancel()
-    throw new LlmError(`vega model listing failed with HTTP ${response.status}`, 'MODEL_LISTING_FAILED')
+    throw new LlmError(`vega model listing failed with HTTP ${response.status}`, 'DISCOVERY_FAILED')
   }
   const payload: unknown = await response.json()
   const data = fieldsOf(payload)?.data
-  if (!Array.isArray(data)) throw new LlmError('vega model listing payload is not a model array', 'MODEL_LISTING_FAILED')
+  if (!Array.isArray(data)) throw new LlmError('vega model listing payload is not a model array', 'DISCOVERY_FAILED')
   const entries: ListingEntry[] = []
   const seen = new Set<string>()
   let skipped = 0

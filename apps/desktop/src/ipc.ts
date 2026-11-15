@@ -51,7 +51,7 @@ export interface DesktopUpdateState {
   /** Main-owned diagnostics without subprocess output or credentials; hidden until expanded. */
   readonly technicalDetails?: string
   readonly percent?: number
-  readonly failedOperation?: 'check' | 'download' | 'install'
+  readonly failedOperation?: 'check' | 'download' | 'install' | 'configuration'
   /** Main-owned preparation cause; UI wording is selected by the active locale. */
   readonly preparationFailure?: DesktopUpdatePreparationFailureKind
   /** Current filesystem failure, independent of previous cache cleanup attempts. */
@@ -69,6 +69,7 @@ export type DesktopUpdateFailureKind =
   | 'download-busy'
   | 'install'
   | 'install-network'
+  | 'configuration'
   | 'stop-failed'
   | 'tasks-changed'
   | 'tasks-unavailable'

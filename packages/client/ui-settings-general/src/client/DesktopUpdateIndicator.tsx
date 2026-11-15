@@ -28,6 +28,7 @@ function updateCopy(state: DesktopUpdatePresentation, t: SettingsTranslate): { l
   }
   if (state.phase === 'error') {
     const failures: Readonly<Record<DesktopUpdateFailureKind, string>> = {
+      configuration: t('desktop.update.configurationFailed'),
       check: t('desktop.update.checkFailed'),
       'check-network': t('desktop.update.checkNetworkFailed'),
       download: t('desktop.update.downloadFailed'),

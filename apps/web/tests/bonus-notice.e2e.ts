@@ -758,7 +758,7 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
     const firstNode = await refreshCards.first().elementHandle()
     platform.grant('b3333333-3333-4333-8333-333333333333', '33.00')
     platform.grant('b2222222-2222-4222-8222-222222222222', '32.00')
-    await openSettings(refreshPage, 'zh')
+    await openSettings(refreshPage, 'ru')
     await expect.poll(() => refreshCards.count()).toBe(3)
     expect(await cardText(refreshCards.first())).toContain('31.00')
     expect(await refreshCards.first().evaluate((element, previous) => element === previous, firstNode)).toBe(true)

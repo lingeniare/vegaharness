@@ -11,6 +11,7 @@ export type DesktopUpdateFailureKind =
   | 'download-busy'
   | 'install'
   | 'install-network'
+  | 'configuration'
   | 'stop-failed'
   | 'tasks-changed'
   | 'tasks-unavailable'
@@ -22,6 +23,7 @@ export interface DesktopUpdatePresentation {
   readonly version?: string
   readonly percent?: number
   readonly failure?: DesktopUpdateFailureKind
+  readonly configurationError?: 'read' | 'format' | 'channel' | 'cleanup'
 }
 
 /** Optional carrier API; it cannot select artifacts or authorize installation. */

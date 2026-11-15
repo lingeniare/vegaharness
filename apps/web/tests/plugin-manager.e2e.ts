@@ -66,13 +66,13 @@ describe('web e2e: plugin manager', () => {
   }
 
   /** Change the UI language through Settings and close the dialog. */
-  async function setLanguage(language: 'en' | 'zh'): Promise<void> {
+  async function setLanguage(language: 'en' | 'ru'): Promise<void> {
     if (await page.locator('html').getAttribute('lang') === language) return
     const settings = language === 'en' ? 'Настройки' : 'Settings'
-    const source = language === 'en' ? 'китайский' : 'English'
-    const target = language === 'en' ? 'English' : 'китайский'
+    const source = language === 'en' ? 'русский' : 'English'
+    const target = language === 'en' ? 'English' : 'русский'
     if (await page.getByRole('dialog', { name: settings }).count() === 0) {
-      await openSettings(page, language === 'en' ? 'zh' : 'en')
+      await openSettings(page, language === 'en' ? 'ru' : 'en')
     }
     await page.getByRole('dialog', { name: settings }).getByRole('button', { name: source }).click()
     await page.getByRole('menuitem', { name: target }).click()
@@ -112,7 +112,7 @@ describe('web e2e: plugin manager', () => {
       // widths shrink the actions to icons before they wrap; the collapsed-bar case
       // pins those widths.
       const PINNED_PLACEMENT: Record<number, 'beside' | 'below'> = { 1680: 'beside', 1024: 'beside' }
-      for (const language of ['en', 'zh'] as const) {
+      for (const language of ['en', 'ru'] as const) {
         const context = await browser.newContext({
           viewport: { width: 1680, height: 1000 }, locale: language === 'en' ? 'en-US' : RU_BROWSER_LOCALE,
           reducedMotion: 'reduce',
@@ -846,7 +846,7 @@ describe('web e2e: plugin manager', () => {
     expect(await panel.locator('[data-plugin-group="extensions"] [data-plugin-package="@deepseek-ai/dsh-experimental-liveshare"]').count()).toBe(0)
     await panel.getByRole('button', { name: 'Ещё', exact: true }).click()
     await panel.getByRole('heading', { name: 'Экспериментальные плагины', exact: true, level: 1 }).waitFor()
-    expect(await panel.getByText(experimentalBundleDescription('inspector-profile', 'zh'), { exact: true }).count()).toBe(1)
+    expect(await panel.getByText(experimentalBundleDescription('inspector-profile', 'ru'), { exact: true }).count()).toBe(1)
     const bundles = await scaffold.ctx.pluginManager.listBundles()
     expect(bundles.some(bundle => bundle.name === '@deepseek-ai/dsh-experimental-terminal-bundle')).toBe(true)
     expect(await panel.getByRole('switch', { name: 'Включить Persistent terminals', exact: true }).count()).toBe(0)
@@ -1179,7 +1179,7 @@ describe('web e2e: plugin manager', () => {
       expect(await englishPreview.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(640)
       expect(await englishPreview.getAttribute('src')).not.toBe(chineseSource)
     } finally {
-      await setLanguage('zh')
+      await setLanguage('ru')
     }
     expect(await preview.getAttribute('src')).toBe(chineseSource)
     await panel.getByRole('button', { name: 'Назад к Экспериментальные плагины', exact: true }).click()
@@ -1202,7 +1202,7 @@ describe('web e2e: plugin manager', () => {
     let english = false
     try {
       for (const [language, alt] of [
-        ['zh', '会话关联 GitHub PR，跟踪检查、评审与代码差异，并用工作树隔离任务改动'],
+        ['ru', 'Беседа, связанная с pull request GitHub: проверки, рецензии, различия в коде и отдельное рабочее дерево'],
         ['en', 'A conversation linked to a GitHub pull request, with checks, reviews, code diffs, and an isolated worktree'],
       ] as const) {
         if (language === 'en') {
@@ -1228,7 +1228,7 @@ describe('web e2e: plugin manager', () => {
       expect(sources[0]).not.toBe(sources[1])
     } finally {
       await page.setViewportSize({ width: 1680, height: 1000 })
-      if (english) await setLanguage('zh')
+      if (english) await setLanguage('ru')
     }
     await compareOrRefreshGolden(join(SNAPSHOT_DIR, 'forge-preview.expected.md'),
       await captureStableAria(page, '[data-plugin-panel]', scaffold.workspaceCwd, {
@@ -1268,7 +1268,7 @@ describe('web e2e: plugin manager', () => {
       }), MODE)
       expect(await panel.locator('[data-plugin-name]').textContent()).toBe('@fixture/bundle')
     } finally {
-      await setLanguage('zh')
+      await setLanguage('ru')
     }
     await panel.getByRole('button', { name: 'Назад к плагинам' }).click()
     expect(tripwire.pageErrors).toEqual([])
@@ -1297,7 +1297,7 @@ describe('web e2e: plugin manager', () => {
         await panel.getByRole('button', { name: `View ${title}`, exact: true }).waitFor()
       }
     } finally {
-      await setLanguage('zh')
+      await setLanguage('ru')
     }
     await panel.getByRole('button', { name: 'Просмотреть Voice input', exact: true }).waitFor()
     expect(tripwire.pageErrors).toEqual([])

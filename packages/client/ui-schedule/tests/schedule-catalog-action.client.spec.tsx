@@ -22,7 +22,7 @@ import {
 import type { CatalogSnapshot } from '../src/client/catalog-source.ts'
 import { en, ru } from '../src/client/locales.ts'
 import catalogCss from '../src/client/ScheduleCatalogAction.module.css'
-import { en as managerEn, ru as managerZh } from '../src/client/task-manager-locales.ts'
+import { en as managerEn, ru as managerRu } from '../src/client/task-manager-locales.ts'
 import { brandString } from '@deepseek-ai/dsh-brand'
 
 const SESSION = 'schedule-session' as SessionId
@@ -497,7 +497,7 @@ describe('ScheduleCatalogAction rows', () => {
     expect(formatScheduleFrequency(item, makeTranslate(en)))
       .toBe(`Weekly on Mon, Wed at 09:00 (${zoneLabel('Asia/Shanghai', makeTranslate(managerEn))})`)
     expect(formatScheduleFrequency(item, makeTranslate(ru)))
-      .toBe(`Daily at ${displayed} (${zoneLabel('America/New_York', makeTranslate(managerEn))})`)
+      .toBe(`Еженедельно по Пн, Ср в 09:00 (${zoneLabel('Asia/Shanghai', makeTranslate(managerRu))})`)
   })
 
   it('labels a weekly rule with whole seconds and for a single weekday', () => {
@@ -512,7 +512,7 @@ describe('ScheduleCatalogAction rows', () => {
     expect(formatScheduleFrequency(milliseconds, makeTranslate(en)))
       .toBe('Weekly on Mon, Tue, Wed, Thu, Fri, Sat, Sun at 09:00 (UTC+00:00)')
     expect(formatScheduleFrequency(milliseconds, makeTranslate(ru)))
-      .toBe('Daily at ${displayed} (${zoneLabel('America/New_York', makeTranslate(managerEn))})')
+      .toBe('Еженедельно по Пн, Вт, Ср, Чт, Пт, Сб, Вс в 09:00 (UTC+00:00)')
   })
 
   it('labels a cron rule with its described sentence and zone', () => {
@@ -522,7 +522,7 @@ describe('ScheduleCatalogAction rows', () => {
     expect(formatScheduleFrequency(item, makeTranslate(en)))
       .toBe(`Mon–Fri at 09:00 (${zoneLabel('America/New_York', makeTranslate(managerEn))})`)
     expect(formatScheduleFrequency(item, makeTranslate(ru)))
-      .toBe(`Daily at ${displayed} (${zoneLabel('America/New_York', makeTranslate(managerEn))})`)
+      .toBe(`Пн–Пт в 09:00 (${zoneLabel('America/New_York', makeTranslate(managerRu))})`)
   })
 
   it('omits a cron rule zone equal to the host zone and names another zone', () => {
@@ -535,8 +535,8 @@ describe('ScheduleCatalogAction rows', () => {
       .toBe('Every 15 minutes')
     expect(formatScheduleFrequency(item, t, { system: 'UTC', label: zone => zoneLabel(zone, named) }))
       .toBe(`Every 15 minutes (${zoneLabel('Asia/Shanghai', named)})`)
-    expect(formatScheduleFrequency(item, makeTranslate(ru), { system: 'UTC', label: zone => zoneLabel(zone, makeTranslate(managerZh)) }))
-      .toBe(`Daily at ${displayed} (${zoneLabel('America/New_York', makeTranslate(managerEn))})`)
+    expect(formatScheduleFrequency(item, makeTranslate(ru), { system: 'UTC', label: zone => zoneLabel(zone, makeTranslate(managerRu)) }))
+      .toBe(`Каждые 15 мин. (${zoneLabel('Asia/Shanghai', makeTranslate(managerRu))})`)
   })
 
   it('labels a rule this parser cannot describe as Custom', () => {

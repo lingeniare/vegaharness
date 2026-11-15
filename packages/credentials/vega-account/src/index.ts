@@ -5,7 +5,8 @@ import { platform, release } from 'node:os'
 import { Context, Service } from '@deepseek-ai/cordis'
 import Schema from '@deepseek-ai/schemastery'
 import { z } from 'zod'
-import { DeepSeekAccount, installAccountTaskCancellation, platformClientHeaders, type AccountBonusBatch, type AccountBonusOrderId, type AccountClientMetadata, type AccountDetails, type AccountUserId, type AccountView, type PlatformSession, type SignInAttemptId, type SignInAttemptView } from '@deepseek-ai/dsh-deepseek-account'
+import { DeepSeekAccount, type AccountClientMetadata, type AccountDetails, type AccountNotificationBatch, type AccountNotification, type AccountNotificationEvent, type AccountNotificationId, type AccountUpdate, type AccountUserId, type AccountView, type PlatformSession, type SignInAttemptId, type SignInAttemptView } from '@deepseek-ai/dsh-deepseek-account'
+import { platformClientHeaders } from '@deepseek-ai/dsh-deepseek-account/client-metadata'
 import { credentialKey } from '@deepseek-ai/dsh-credentials'
 import type { AuthorizationSession } from '@deepseek-ai/dsh-authorization'
 import { readAccountDetail } from './details.ts'
@@ -26,6 +27,16 @@ const SLOW_DOWN_INCREMENT_MS = 5_000
 export interface Config {
   /** VEGA origin serving device auth, account and inference APIs. */
   platformOrigin?: string
+  /** Notification API origin; unused while VEGA exposes no notification feed. */
+  harnessOrigin?: string
+  /** Optional frontend deployment selector for embedded Platform pages. */
+  embeddedPageDist?: string
+  /** Exact HTTP(S) origin allowed to receive account tokens for inference and files. */
+  inferenceOrigin?: string
+  /** Map authorization and completion pages to platformOrigin for private development proxies. */
+  rewriteBrowserOrigin?: boolean
+  /** Overrides for account requests; merged over requestHeaders, Cookie pairs merge by name. */
+  accountRequestHeaders?: Record<string, string>
   /** Registered OAuth client name; also the managed-key route segment. */
   clientId?: string
   /** Requested device-authorization scope. */
@@ -54,6 +65,11 @@ export interface Config {
 /** Validated deployment choices. */
 export const Config = Schema.object({
   platformOrigin: Schema.string().default('https://api.vega.chat'),
+  harnessOrigin: Schema.string().default(''),
+  embeddedPageDist: Schema.string().default(''),
+  inferenceOrigin: Schema.string().default('https://api.vega.chat'),
+  rewriteBrowserOrigin: Schema.boolean().default(false),
+  accountRequestHeaders: Schema.dict(Schema.string().role('secret')).default({}),
   clientId: Schema.string().min(1).default('vegaharness'),
   scope: Schema.string().default('api'),
   desktopPlatform: Schema.union([Schema.const('darwin'), Schema.const('win32'), Schema.const(null)]).default(null),
@@ -78,88 +94,87 @@ interface Attempt {
 
 /** The VEGA implementation owns device-flow state and its opaque stored managed key. */
 export class VegaAccount extends DeepSeekAccount {
-  static inject = ['credentials', 'authorization']
-  static Config = Config
-  private readonly origin: string
+  static override inject = ['credentials', 'authorization']
+  static override Config = Config
+  private readonly apiOrigin: string
   private readonly clientId: string
   private readonly scope: string
   private readonly links: AccountView['links']
-  private readonly platform: 'darwin' | 'win32' | null
-  private readonly requestHeaders: Record<string, string>
-  private readonly requestTimeout: number
-  private readonly balanceTimeout: number
-  private readonly attemptTimeout: number
-  private readonly logoutPolicy: LogoutRetryPolicy
-  private readonly logoutLifetime = new AbortController()
-  private readonly revocations = new Set<Promise<void>>()
-  private attempt: Attempt | undefined
-  private readonly listeners = new Set<(identityOnly: boolean) => void>()
+  private readonly desktopPlatform: 'darwin' | 'win32' | null
+  private readonly deployHeaders: Record<string, string>
+  private readonly httpTimeout: number
+  private readonly balTimeout: number
+  private readonly signInDeadline: number
+  private readonly logoutRetry: LogoutRetryPolicy
+  private readonly logoutScope = new AbortController()
+  private readonly pendingRevocations = new Set<Promise<void>>()
+  private signInAttempt: Attempt | undefined
+  private readonly watchers = new Set<(kind: 'snapshot' | 'credentials-changed' | 'identity') => void>()
   /**
    * Latest ready profile read and the grant token it was read with. Binding the token keeps a
    * cached identity from answering for a credential that has since changed.
    */
-  private lastProfile: { readonly token: string; readonly profile: Extract<AccountDetails['profile'], { status: 'ready' }> } | undefined
-  private detailsLifetime = new AbortController()
-  private closed = false
-  private removing: Promise<AccountView> | undefined
+  private profileCache: { readonly token: string; readonly profile: Extract<AccountDetails['profile'], { status: 'ready' }> } | undefined
+  private detailsScope = new AbortController()
+  private disposed = false
+  private removal: Promise<AccountView> | undefined
 
   /** @param ctx - Host with authorization and credentials services. @param config - deployment options. */
   constructor(ctx: Context, config: Config = {}) {
     super(ctx)
-    installAccountTaskCancellation(ctx)
     const resolved = Config(config)
-    this.origin = platformOrigin(resolved.platformOrigin, resolved.allowLoopbackHttp)
+    this.apiOrigin = platformOrigin(resolved.platformOrigin, resolved.allowLoopbackHttp)
     this.clientId = resolved.clientId
     this.scope = resolved.scope
-    const dashboard = `${this.origin}/dashboard`
+    const dashboard = `${this.apiOrigin}/dashboard`
     this.links = {
       usageUrl: resolved.usageUrl || dashboard,
       topUpUrl: resolved.topUpUrl || `${dashboard}/billing`,
     }
-    this.platform = resolved.desktopPlatform
-    this.requestHeaders = platformHeaders(resolved.requestHeaders)
-    this.requestTimeout = resolved.requestTimeoutMs
-    this.balanceTimeout = resolved.balanceTimeoutMs
-    this.attemptTimeout = resolved.attemptTimeoutMs
-    this.logoutPolicy = {
-      maxRetries: resolved.logoutMaxRetries, delayMs: resolved.logoutRetryDelayMs, requestTimeoutMs: this.requestTimeout,
+    this.desktopPlatform = resolved.desktopPlatform
+    this.deployHeaders = platformHeaders(resolved.requestHeaders)
+    this.httpTimeout = resolved.requestTimeoutMs
+    this.balTimeout = resolved.balanceTimeoutMs
+    this.signInDeadline = resolved.attemptTimeoutMs
+    this.logoutRetry = {
+      maxRetries: resolved.logoutMaxRetries, delayMs: resolved.logoutRetryDelayMs, requestTimeoutMs: this.httpTimeout,
     }
     ctx.authorization.registerFlow({
       key: KEY, label: 'API VEGA', methods: [{ id: 'browser', label: 'API VEGA' }],
       run: (session) => {
-        const attempt = this.attempt
+        const attempt = this.signInAttempt
         if (attempt === undefined) return Promise.reject(new VegaAuthError('protocol'))
-        attempt.running = this.run(session, attempt)
+        attempt.running = this.runFlow(session, attempt)
         return attempt.running
       },
     })
     ctx.on('credentials/record-updated', (key) => {
       if (key !== KEY) return
-      this.invalidateDetails()
-      this.changed()
+      this.invalidateDetailCache()
+      this.notify('credentials-changed')
     })
     ctx.effect(() => async () => {
-      this.closed = true
-      this.logoutLifetime.abort()
-      this.invalidateDetails()
-      const active = this.attempt
+      this.disposed = true
+      this.logoutScope.abort()
+      this.invalidateDetailCache()
+      const active = this.signInAttempt
       if (active !== undefined) {
         if (active.view.phase !== 'committing') active.controller.abort()
         await active.done
       }
-      await this.removing
-      await Promise.all(this.revocations)
-      this.changed()
+      await this.removal
+      await Promise.all(this.pendingRevocations)
+      this.notify()
     }, 'account: active attempt lifetime')
   }
 
-  async [Service.init](): Promise<void> {
+  override async [Service.init](): Promise<void> {
     const record = await this.ctx.credentials.readRecord(KEY)
     if (record === undefined) return
     if (record.kind !== 'grant') throw new VegaAuthError('storage')
     const parsed = grant.safeParse(record.payload)
     if (!parsed.success) throw new VegaAuthError('storage')
-    if (parsed.data.issuer === this.origin) return
+    if (parsed.data.issuer === this.apiOrigin) return
     await this.ctx.credentials.deleteRecord(KEY)
   }
 
@@ -168,7 +183,7 @@ export class VegaAccount extends DeepSeekAccount {
     if (record !== undefined && (record.kind !== 'grant' || !grant.safeParse(record.payload).success)) {
       throw new VegaAuthError('storage')
     }
-    const attempt = this.attempt?.view ?? null
+    const attempt = this.signInAttempt?.view ?? null
     return {
       status: record === undefined ? 'signed-out' : 'credential-stored',
       // Credential removal can notify watchers before sign-out finishes clearing the attempt.
@@ -180,76 +195,81 @@ export class VegaAccount extends DeepSeekAccount {
   }
 
   override async getProfile(client: AccountClientMetadata): Promise<AccountDetails['profile'] | null> {
-    const lifetime = this.detailsLifetime
-    const stored = await this.readCurrentGrant(lifetime)
+    const lifetime = this.detailsScope
+    const stored = await this.readGrant(lifetime)
     if (stored === null || lifetime.signal.aborted) return null
-    const result = await this.getDetail('profile', client, { lifetime, stored })
-    if (this.detailsLifetime !== lifetime) return null
-    if (result !== null) this.cacheProfile(stored.token, result)
+    const result = await this.readDetail('profile', client, { lifetime, stored })
+    if (this.detailsScope !== lifetime) return null
+    if (result !== null) this.storeProfile(stored.token, result)
     if (result?.status !== 'failed') return result
     // Only this same grant's last ready read may stand in for a failed refresh.
-    const cached = this.lastProfile?.token === stored.token ? this.lastProfile.profile : undefined
+    const cached = this.profileCache?.token === stored.token ? this.profileCache.profile : undefined
     return cached ?? result
   }
 
   override getBalance(client: AccountClientMetadata): Promise<AccountDetails['balance'] | null> {
-    return this.getDetail('balance', client)
+    return this.readDetail('balance', client)
   }
 
-  /** VEGA exposes no bonus program; the outcome is an empty projection. */
-  override getUnnotifiedBonuses(_client: AccountClientMetadata): Promise<AccountBonusBatch | null> {
+  /** VEGA exposes no notification feed; the outcome is an empty projection. */
+  override getNotifications(_client: AccountClientMetadata): Promise<AccountNotificationBatch | null> {
     return Promise.resolve(null)
   }
 
-  /** VEGA exposes no bonus program; nothing can be acknowledged. */
-  override ackBonusNotified(_accountId: AccountUserId, _orderId: AccountBonusOrderId, _client: AccountClientMetadata): Promise<boolean> {
+  /** VEGA exposes no notification feed; there is no content to read. */
+  override getNotificationContent(_id: AccountNotificationId, _client: AccountClientMetadata): Promise<AccountNotification | null> {
+    return Promise.resolve(null)
+  }
+
+  /** VEGA exposes no notification feed; nothing can be acknowledged. */
+  override reportNotificationEvent(_id: AccountNotificationId, _event: AccountNotificationEvent, _client: AccountClientMetadata): Promise<boolean> {
     return Promise.resolve(false)
   }
 
-  private async getDetail<K extends keyof AccountDetails>(field: K, client: AccountClientMetadata,
+  private async readDetail<K extends keyof AccountDetails>(field: K, client: AccountClientMetadata,
     captured?: { lifetime: AbortController; stored: z.infer<typeof grant> }): Promise<AccountDetails[K] | null> {
-    const lifetime = captured?.lifetime ?? this.detailsLifetime
-    const stored = captured?.stored ?? await this.readCurrentGrant(lifetime)
+    const lifetime = captured?.lifetime ?? this.detailsScope
+    const stored = captured?.stored ?? await this.readGrant(lifetime)
     if (stored === null || lifetime.signal.aborted) return null
     try {
-      const details = await readAccountDetail(field, this.origin, stored.token,
-        AbortSignal.any([lifetime.signal, AbortSignal.timeout(field === 'balance' ? this.balanceTimeout : this.requestTimeout)]),
-        this.detailHeaders(client), client.locale)
-      return this.detailsLifetime !== lifetime ? null : details
+      const details = await readAccountDetail(field, this.apiOrigin, stored.token,
+        AbortSignal.any([lifetime.signal, AbortSignal.timeout(field === 'balance' ? this.balTimeout : this.httpTimeout)]),
+        this.headersFor(client), client.locale)
+      return this.detailsScope !== lifetime ? null : details
     } catch (_unauthorized) {
       // readAccountDetail exposes only authenticated credential rejection failures.
-      if (this.detailsLifetime === lifetime) await this.expireCredential(stored.token, lifetime)
+      if (this.detailsScope === lifetime) await this.expireGrant(stored.token, lifetime)
       return null
     }
   }
 
   /** Deployment account headers plus the client identity headers derived from one call's metadata. */
-  private detailHeaders(client: AccountClientMetadata): Record<string, string> {
-    return { ...this.requestHeaders, ...platformClientHeaders(this.platform, client) }
+  private headersFor(client: AccountClientMetadata): Record<string, string> {
+    return { ...this.deployHeaders, ...platformClientHeaders(this.desktopPlatform, client) }
   }
 
   override async rejectToken(token: string): Promise<void> {
-    const lifetime = this.detailsLifetime
-    const stored = await this.readCurrentGrant(lifetime)
-    if (stored?.token !== token || this.detailsLifetime !== lifetime) return
-    await this.expireCredential(token, lifetime)
+    const lifetime = this.detailsScope
+    const stored = await this.readGrant(lifetime)
+    if (stored?.token !== token || this.detailsScope !== lifetime) return
+    await this.expireGrant(token, lifetime)
   }
 
-  private async expireCredential(token: string, lifetime: AbortController): Promise<void> {
-    this.removing ??= (async () => {
-      if (this.attempt !== undefined) await this.cancelSignIn(this.attempt.view.id)
+  private async expireGrant(token: string, lifetime: AbortController): Promise<void> {
+    this.removal ??= (async () => {
+      if (this.signInAttempt !== undefined) await this.cancelSignIn(this.signInAttempt.view.id)
       const record = await this.ctx.credentials.readRecord(KEY)
-      if (this.closed || this.detailsLifetime !== lifetime || record?.kind !== 'grant') return this.getState()
+      if (this.disposed || this.detailsScope !== lifetime || record?.kind !== 'grant') return this.getState()
       const current = grant.parse(record.payload)
-      if (current.token !== token || current.issuer !== this.origin) return this.getState()
+      if (current.token !== token || current.issuer !== this.apiOrigin) return this.getState()
       await this.ctx.credentials.deleteRecord(KEY)
       this.ctx.emit('deepseek-account/session-expired')
-      this.attempt = undefined
+      this.signInAttempt = undefined
       this.ctx.emit('deepseek-account/signed-out')
-      this.changed()
+      this.notify()
       return this.getState()
-    })().finally(() => { this.removing = undefined })
-    await this.removing
+    })().finally(() => { this.removal = undefined })
+    await this.removal
   }
 
   override async getDeviceIdentity(): Promise<{ deviceId?: string; userId?: AccountUserId; osVersion: string }> {
@@ -260,7 +280,7 @@ export class VegaAccount extends DeepSeekAccount {
     const parsed = record?.kind === 'grant' ? device.safeParse(record.payload) : undefined
     return {
       ...parsed?.success ? { deviceId: parsed.data.id } : {},
-      ...this.lastProfile?.profile.value.id == null ? {} : { userId: this.lastProfile.profile.value.id },
+      ...this.profileCache?.profile.value.id == null ? {} : { userId: this.profileCache.profile.value.id },
       osVersion: `${platform()} ${release()}`,
     }
   }
@@ -286,71 +306,71 @@ export class VegaAccount extends DeepSeekAccount {
     return Promise.resolve(null)
   }
 
-  private async readCurrentGrant(lifetime: AbortController): Promise<z.infer<typeof grant> | null> {
-    if (this.closed) return null
+  private async readGrant(lifetime: AbortController): Promise<z.infer<typeof grant> | null> {
+    if (this.disposed) return null
     const record = await this.ctx.credentials.readRecord(KEY)
     if (record === undefined || lifetime.signal.aborted) return null
     if (record.kind !== 'grant') throw new VegaAuthError('storage')
     const parsed = grant.safeParse(record.payload)
     if (!parsed.success) throw new VegaAuthError('storage')
     // A private origin override must never forward a grant issued by another environment.
-    if (parsed.data.issuer !== this.origin) throw new VegaAuthError('protocol')
+    if (parsed.data.issuer !== this.apiOrigin) throw new VegaAuthError('protocol')
     return parsed.data
   }
 
   override async resolveToken(url: string): Promise<string | undefined> {
-    if (this.closed || this.removing !== undefined) return undefined
+    if (this.disposed || this.removal !== undefined) return undefined
     const destination = new URL(url)
     // VEGA serves auth, account and inference from one origin; the managed key
     // authenticates every request on it.
-    if (destination.origin !== this.origin || destination.username || destination.password) return undefined
+    if (destination.origin !== this.apiOrigin || destination.username || destination.password) return undefined
     const record = await this.ctx.credentials.readRecord(KEY)
     if (record === undefined) return undefined
     if (record.kind !== 'grant') throw new VegaAuthError('storage')
     const result = grant.safeParse(record.payload)
     if (!result.success) throw new VegaAuthError('storage')
-    if (result.data.issuer !== this.origin) return undefined
+    if (result.data.issuer !== this.apiOrigin) return undefined
     return result.data.token
   }
 
   override async startSignIn(client: AccountClientMetadata, _callbackOrigin: string, _loginSource: 'web' | 'desktop'): Promise<AccountView> {
-    if (this.removing !== undefined) await this.removing
-    if (this.closed) throw new VegaAuthError('protocol')
-    if (this.attempt !== undefined && ['initializing', 'waiting-browser', 'exchanging', 'committing'].includes(this.attempt.view.phase)) {
+    if (this.removal !== undefined) await this.removal
+    if (this.disposed) throw new VegaAuthError('protocol')
+    if (this.signInAttempt !== undefined && ['initializing', 'waiting-browser', 'exchanging', 'committing'].includes(this.signInAttempt.view.phase)) {
       return this.getState()
     }
-    const previous = this.attempt
+    const previous = this.signInAttempt
     if (previous !== undefined) {
       await previous.done
       // Disposal can close the provider while the previous attempt settles.
-      if (this.closed) throw new VegaAuthError('protocol')
-      if (this.attempt !== previous) return this.getState()
+      if (this.disposed) throw new VegaAuthError('protocol')
+      if (this.signInAttempt !== previous) return this.getState()
     }
     const attempt: Attempt = {
-      clientHeaders: platformClientHeaders(this.platform, client),
+      clientHeaders: platformClientHeaders(this.desktopPlatform, client),
       view: { id: randomUUID() as SignInAttemptId, phase: 'initializing' },
       controller: new AbortController(), done: Promise.resolve(), running: Promise.resolve(),
     }
-    this.attempt = attempt
+    this.signInAttempt = attempt
     attempt.done = this.ctx.authorization.begin({
       key: KEY, signal: attempt.controller.signal,
       interaction: { notify: () => undefined, prompt: () => Promise.reject(new VegaAuthError('protocol')) },
     }).then((outcome) => {
-      this.update(attempt, { phase: outcome.status === 'authorized' ? 'succeeded' : 'cancelled' })
+      this.patchAttempt(attempt, { phase: outcome.status === 'authorized' ? 'succeeded' : 'cancelled' })
     }).catch((error: unknown) => {
       const code = error instanceof VegaAuthError ? error.code : 'protocol'
       console.error('[vega-account] sign-in failed', { errorCode: code })
-      this.update(attempt, { phase: code === 'expired' ? 'expired' : 'failed', errorCode: code })
+      this.patchAttempt(attempt, { phase: code === 'expired' ? 'expired' : 'failed', errorCode: code })
     }).then(async () => {
       // begin() may report cancellation before the poll loop observes its signal.
       await attempt.running.catch(() => undefined)
     })
-    this.changed()
+    this.notify()
     return this.getState()
   }
 
   override async cancelSignIn(id: SignInAttemptId): Promise<AccountView> {
-    const attempt = this.attempt
+    const attempt = this.signInAttempt
     if (attempt?.view.id === id) {
       if (attempt.view.phase !== 'committing') {
         attempt.controller.abort()
@@ -362,63 +382,105 @@ export class VegaAccount extends DeepSeekAccount {
   }
 
   override signOut(client: AccountClientMetadata): Promise<AccountView> {
-    this.removing ??= (async () => {
-      if (this.closed) throw new VegaAuthError('protocol')
-      if (this.attempt !== undefined) await this.cancelSignIn(this.attempt.view.id)
+    this.removal ??= (async () => {
+      if (this.disposed) throw new VegaAuthError('protocol')
+      if (this.signInAttempt !== undefined) await this.cancelSignIn(this.signInAttempt.view.id)
       const record = await this.ctx.credentials.readRecord(KEY)
       if (record !== undefined) {
         if (record.kind !== 'grant') throw new VegaAuthError('storage')
         const parsed = grant.safeParse(record.payload)
         if (!parsed.success) throw new VegaAuthError('storage')
-        if (parsed.data.issuer !== this.origin) throw new VegaAuthError('protocol')
+        if (parsed.data.issuer !== this.apiOrigin) throw new VegaAuthError('protocol')
         await this.ctx.credentials.deleteRecord(KEY)
-        this.revoke(parsed.data.token, platformClientHeaders(this.platform, client))
+        this.revokeGrant(parsed.data.token, platformClientHeaders(this.desktopPlatform, client))
       }
-      this.attempt = undefined
+      this.signInAttempt = undefined
       this.ctx.emit('deepseek-account/signed-out')
-      this.changed()
+      this.notify()
       return this.getState()
-    })().finally(() => { this.removing = undefined })
-    return this.removing
+    })().finally(() => { this.removal = undefined })
+    return this.removal
   }
 
-  override async *watch(signal: AbortSignal, includeIdentityChanges = false): AsyncIterable<AccountView> {
-    let dirty = true
+  override watch(signal: AbortSignal, includeIdentityChanges = false): AsyncIterable<AccountUpdate> {
+    return this.streamUpdates(signal, includeIdentityChanges)
+  }
+
+  override watchState(signal: AbortSignal): AsyncIterable<AccountUpdate> {
+    return this.streamUpdates(signal, false)
+  }
+
+  private async *streamUpdates(signal: AbortSignal, includeIdentityChanges: boolean): AsyncIterable<AccountUpdate> {
+    let pending: AccountUpdate['type'] | undefined = 'snapshot'
     let wake: (() => void) | undefined
-    const wakeUp = (): void => { dirty = true; wake?.() }
-    const changed = (identityOnly: boolean): void => { if (!identityOnly || includeIdentityChanges) wakeUp() }
-    this.listeners.add(changed)
-    signal.addEventListener('abort', wakeUp, { once: true })
+    const changed = (kind: 'snapshot' | 'credentials-changed' | 'identity'): void => {
+      if (kind === 'identity' && !includeIdentityChanges) return
+      if (kind === 'credentials-changed' || pending === undefined) {
+        pending = kind === 'credentials-changed' ? kind : 'snapshot'
+      }
+      wake?.()
+    }
+    const abort = (): void => { wake?.() }
+    this.watchers.add(changed)
+    signal.addEventListener('abort', abort, { once: true })
     try {
-      while (!this.closed && !signal.aborted) {
-        if (dirty) { dirty = false; yield await this.getState(); continue }
+      while (!this.disposed && !signal.aborted) {
+        if (pending !== undefined) {
+          const type = pending
+          pending = undefined
+          const scope = this.detailsScope
+          const state = await this.getState()
+          // A credential write during the read owns the next event and its replacement state.
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Abort or disposal can occur during the state read.
+          if (scope !== this.detailsScope || signal.aborted || this.disposed) continue
+          yield { type, state }
+          continue
+        }
         await new Promise<void>((resolve) => { wake = resolve })
       }
     } finally {
-      this.listeners.delete(changed)
-      signal.removeEventListener('abort', wakeUp)
+      this.watchers.delete(changed)
+      signal.removeEventListener('abort', abort)
     }
   }
 
-  private revoke(token: string, headers: Record<string, string>): void {
-    if (this.closed) return
-    const revocation = revokeAccount(this.origin, this.clientId, token, this.logoutPolicy,
-      this.logoutLifetime.signal, { ...this.requestHeaders, ...headers }).finally(() => { this.revocations.delete(revocation) })
-    this.revocations.add(revocation)
+  override async *watchExpiry(signal: AbortSignal): AsyncIterable<'session-expired'> {
+    const lifetime = AbortSignal.any([signal, this.logoutScope.signal])
+    let pending = 0
+    let wake: (() => void) | undefined
+    const stop = this.ctx.on('deepseek-account/session-expired', () => { pending++; wake?.() })
+    const abort = (): void => { wake?.() }
+    lifetime.addEventListener('abort', abort, { once: true })
+    try {
+      while (!lifetime.aborted) {
+        if (pending > 0) { pending--; yield 'session-expired'; continue }
+        await new Promise<void>((resolve) => { wake = resolve })
+      }
+    } finally {
+      stop()
+      lifetime.removeEventListener('abort', abort)
+    }
   }
 
-  private invalidateDetails(): void {
-    this.lastProfile = undefined
-    this.detailsLifetime.abort()
-    this.detailsLifetime = new AbortController()
+  private revokeGrant(token: string, headers: Record<string, string>): void {
+    if (this.disposed) return
+    const revocation = revokeAccount(this.apiOrigin, this.clientId, token, this.logoutRetry,
+      this.logoutScope.signal, { ...this.deployHeaders, ...headers }).finally(() => { this.pendingRevocations.delete(revocation) })
+    this.pendingRevocations.add(revocation)
   }
 
-  private changed(identityOnly = false): void { for (const listener of this.listeners) listener(identityOnly) }
+  private invalidateDetailCache(): void {
+    this.profileCache = undefined
+    this.detailsScope.abort()
+    this.detailsScope = new AbortController()
+  }
 
-  private update(attempt: Attempt, value: Partial<SignInAttemptView>): void {
+  private notify(kind: 'snapshot' | 'credentials-changed' | 'identity' = 'snapshot'): void { for (const listener of this.watchers) listener(kind) }
+
+  private patchAttempt(attempt: Attempt, value: Partial<SignInAttemptView>): void {
     const { authorizeUrl: _url, userCode: _code, ...rest } = attempt.view
     attempt.view = { ...rest, ...value }
-    this.changed()
+    this.notify()
   }
 
   /**
@@ -427,11 +489,11 @@ export class VegaAccount extends DeepSeekAccount {
    * @param token - grant the profile was read with.
    * @param profile - profile outcome to record when it carries account data.
    */
-  private cacheProfile(token: string, profile: AccountDetails['profile']): void {
+  private storeProfile(token: string, profile: AccountDetails['profile']): void {
     if (profile.status !== 'ready') return
-    const previous = this.lastProfile?.profile.value.id || null
-    this.lastProfile = { token, profile }
-    if (previous !== (profile.value.id || null)) this.changed(true)
+    const previous = this.profileCache?.profile.value.id || null
+    this.profileCache = { token, profile }
+    if (previous !== (profile.value.id || null)) this.notify('identity')
   }
 
   /**
@@ -440,28 +502,28 @@ export class VegaAccount extends DeepSeekAccount {
    * @param session - attempt cancellation and the required commit point.
    * @param attempt - visible attempt state this run updates.
    */
-  private async run(session: AuthorizationSession, attempt: Attempt): Promise<void> {
+  private async runFlow(session: AuthorizationSession, attempt: Attempt): Promise<void> {
     const deadline = new AbortController()
-    let expiresAt = Date.now() + this.attemptTimeout
+    let expiresAt = Date.now() + this.signInDeadline
     const signal = AbortSignal.any([session.signal, deadline.signal])
-    const timer = setTimeout(() => { deadline.abort() }, this.attemptTimeout)
+    const timer = setTimeout(() => { deadline.abort() }, this.signInDeadline)
     try {
-      const init = deviceCode.safeParse(await requestDeviceCode(this.origin, this.clientId, this.scope,
-        AbortSignal.any([signal, AbortSignal.timeout(this.requestTimeout)]), attempt.clientHeaders))
+      const init = deviceCode.safeParse(await requestDeviceCode(this.apiOrigin, this.clientId, this.scope,
+        AbortSignal.any([signal, AbortSignal.timeout(this.httpTimeout)]), attempt.clientHeaders))
       if (!init.success) throw new VegaAuthError('protocol')
       const authorizeUrl = browserUrl(init.data.verification_uri_complete ?? init.data.verification_uri)
       const now = Date.now()
       expiresAt = Math.min(expiresAt, now + init.data.expires_in * 1000)
       const remaining = expiresAt - now
       if (remaining <= 0) { deadline.abort(); signal.throwIfAborted() }
-      this.update(attempt, { phase: 'waiting-browser', authorizeUrl, userCode: init.data.user_code, expiresAt })
+      this.patchAttempt(attempt, { phase: 'waiting-browser', authorizeUrl, userCode: init.data.user_code, expiresAt })
       let interval = Math.max(MIN_POLL_INTERVAL_MS, init.data.interval * 1000)
       let sessionToken: string | undefined
       while (Date.now() < expiresAt) {
         await delay(interval, undefined, { signal })
         signal.throwIfAborted()
-        const outcome = await requestDeviceToken(this.origin, this.clientId, init.data.device_code,
-          AbortSignal.any([signal, AbortSignal.timeout(this.requestTimeout)]), attempt.clientHeaders)
+        const outcome = await requestDeviceToken(this.apiOrigin, this.clientId, init.data.device_code,
+          AbortSignal.any([signal, AbortSignal.timeout(this.httpTimeout)]), attempt.clientHeaders)
         const token = deviceToken.safeParse(outcome)
         if (token.success) { sessionToken = token.data.access_token; break }
         const failure = deviceTokenError.safeParse(outcome)
@@ -480,20 +542,20 @@ export class VegaAccount extends DeepSeekAccount {
       }
       if (sessionToken === undefined) throw new VegaAuthError('expired')
       signal.throwIfAborted()
-      this.update(attempt, { phase: 'exchanging' })
+      this.patchAttempt(attempt, { phase: 'exchanging' })
       await this.ensureDeviceRecord()
-      const minted = mintedKey.safeParse(await requestMintKey(this.origin, this.clientId, sessionToken,
-        AbortSignal.any([signal, AbortSignal.timeout(this.requestTimeout)]), attempt.clientHeaders))
+      const minted = mintedKey.safeParse(await requestMintKey(this.apiOrigin, this.clientId, sessionToken,
+        AbortSignal.any([signal, AbortSignal.timeout(this.httpTimeout)]), attempt.clientHeaders))
       if (!minted.success) throw new VegaAuthError('protocol')
       if (Date.now() >= expiresAt) deadline.abort()
       signal.throwIfAborted()
-      this.update(attempt, { phase: 'committing' })
+      this.patchAttempt(attempt, { phase: 'committing' })
       try {
-        await session.commit({ kind: 'grant', payload: { version: 1, token: minted.data.key, issuer: this.origin } })
+        await session.commit({ kind: 'grant', payload: { version: 1, token: minted.data.key, issuer: this.apiOrigin } })
       } catch (error) {
         // A minted key that never reached the store is a live orphan: revoke it
         // best-effort before the attempt reports the storage failure.
-        this.revoke(minted.data.key, attempt.clientHeaders)
+        this.revokeGrant(minted.data.key, attempt.clientHeaders)
         throw error instanceof VegaAuthError ? error : new VegaAuthError('storage')
       }
     } catch (error) {

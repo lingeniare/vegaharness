@@ -25,7 +25,7 @@ const digest = (contents: string) => ({
 })
 
 async function fixture(target: 'mac-arm64' | 'mac-x64' | 'win-x64' = 'mac-arm64',
-  preset: 'production' | 'test' = 'production', channel: 'nightly' | 'stable' = 'nightly') {
+  preset: 'production' | 'test' = 'production', channel: 'stable' | 'stable' = 'stable') {
   const root = await mkdtemp(join(tmpdir(), 'desktop-rollout-'))
   try {
     const directory = join(root, 'releases', '42', '1')
@@ -70,8 +70,8 @@ function transport(contents: string) {
 }
 
 it.each([
-  ['mac-arm64', 'production', 'nightly'], ['win-x64', 'production', 'nightly'],
-  ['mac-x64', 'production', 'stable'], ['mac-arm64', 'test', 'nightly'], ['win-x64', 'test', 'stable'],
+  ['mac-arm64', 'production', 'stable'], ['win-x64', 'production', 'stable'],
+  ['mac-x64', 'production', 'stable'], ['mac-arm64', 'test', 'stable'], ['win-x64', 'test', 'stable'],
 ] as const)('promotes %s %s %s from 10 to 30 to 100 without installer files or binary requests', async (target, preset, channel) => {
   const f = await fixture(target, preset, channel)
   try {
@@ -146,7 +146,7 @@ it('requires initial publication evidence and prepares approval without installe
     await expect(prepareDesktopRolloutCi(env)).rejects.toThrow(/initial COS/u)
     const record = await createDesktopPublicationRecord(join(f.root, 'upload-records'), {
       repository: 'owner/repo', runId: '42', attempt: '1',
-      destination: `bucket-123/${f.plan.upload.publicUrl}nightly`, actor: 'operator',
+      destination: `bucket-123/${f.plan.upload.publicUrl}stable`, actor: 'operator',
       operation: 'publish', reason: 'fixture', stagingPercentage: 10,
     })
     await record.record({ type: 'feeds-complete' })
@@ -218,7 +218,7 @@ it.each(['apply', 'changed-approval', 'replaced-feed', 'website'] as const)('che
     }))
     const record = await createDesktopPublicationRecord(join(f.root, 'upload-records'), {
       repository: 'owner/repo', runId: '42', attempt: '1', actor: 'operator',
-      destination: `bucket-123/${f.plan.upload.publicUrl}nightly`, operation: 'publish', reason: 'fixture',
+      destination: `bucket-123/${f.plan.upload.publicUrl}stable`, operation: 'publish', reason: 'fixture',
     })
     await record.record({ type: 'feeds-complete' })
     const env = { RUNNER_NAME: 'runner', GITHUB_REPOSITORY: 'owner/repo', DSH_PACKAGING_CONFIG_DIR: config,
@@ -345,7 +345,7 @@ it.each(['mac-arm64', 'win-x64'] as const)('accepts %s metadata produced by the 
     await writeFile(join(f.directory, `${base}.${extension}.blockmap`), 'blockmap')
     if (target !== 'win-x64') await writeFile(join(f.directory, `${base}.dmg`), 'installer')
     await writeFile(join(f.directory, desktopBuildRecordFilename(target)), JSON.stringify({
-      schemaVersion: 1, target, version: f.manifest.source.version, channel: 'nightly',
+      schemaVersion: 1, target, version: f.manifest.source.version, channel: 'stable',
       environment: 'production', publicUrl: f.plan.upload.publicUrl, commit: f.manifest.source.commit, dirty: false,
     }))
     const original = await createDesktopUploadPlan(target, { artifactsRoot: f.directory, environment: f.environment,

@@ -4,14 +4,14 @@ import { createHash } from 'node:crypto'
 import { createReadStream } from 'node:fs'
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import type { DesktopGithubUploadPlan, DesktopUploadArtifact } from './desktop-upload-plan.ts'
+import type { DesktopGithubUploadPlan, DesktopUploadArtifact } from '../../desktop-publisher/src/desktop-upload-types.ts'
 import {
   desktopArtifactDigest,
   publishDesktopRelease,
   type DesktopObjectDigest,
   type DesktopPublishTransport,
   type DesktopRemoteObject,
-} from './desktop-publish.ts'
+} from '../../desktop-publisher/src/desktop-publish.ts'
 import { recordPackagingEvent } from './packaging-run.mjs'
 
 interface GithubAsset {

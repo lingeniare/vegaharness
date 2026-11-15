@@ -14,16 +14,14 @@ export interface DesktopUploadArtifact {
   readonly contents?: string
 }
 
-/** A validated installer or update upload, with any channel metadata ordered last. */
-export interface DesktopUploadPlan {
+/** Shared shape of a validated installer or update upload, channel metadata ordered last. */
+interface DesktopUploadPlanBase {
   readonly environment: 'test' | 'production'
+  readonly channel: 'stable'
   readonly target: DesktopAutoUpdateTarget
   readonly version: string
   /** Update feed directory URL, or the single installer URL for a fixed download. */
   readonly publicUrl: string
-  readonly bucket: string
-  readonly secretIdEnvName: string
-  readonly secretKeyEnvName: string
   readonly artifacts: readonly DesktopUploadArtifact[]
   /** Commit the artifacts were packaged from, absent for a package built before builds recorded it. */
   readonly commit?: string
@@ -31,7 +29,26 @@ export interface DesktopUploadPlan {
   readonly dirty?: boolean
 }
 
+/** A validated upload bound for the generic object-storage destination. */
+export interface DesktopGenericUploadPlan extends DesktopUploadPlanBase {
+  readonly provider: 'generic'
+  readonly bucket: string
+  readonly secretIdEnvName: string
+  readonly secretKeyEnvName: string
+}
+
+/** A validated upload bound for a GitHub Releases destination. */
+export interface DesktopGithubUploadPlan extends DesktopUploadPlanBase {
+  readonly provider: 'github'
+  readonly owner: string
+  readonly repo: string
+  readonly tokenEnvName: string
+}
+
+/** A validated installer or update upload, with any channel metadata ordered last. */
+export type DesktopUploadPlan = DesktopGenericUploadPlan | DesktopGithubUploadPlan
+
 /** A publication operation targeting exactly one metadata object or installer. */
-export type DesktopSingleUploadPlan = Omit<DesktopUploadPlan, 'artifacts'> & {
+export type DesktopSingleUploadPlan = Omit<DesktopGenericUploadPlan, 'artifacts'> & {
   readonly artifacts: readonly [DesktopUploadArtifact]
 }

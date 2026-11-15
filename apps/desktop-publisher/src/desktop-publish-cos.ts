@@ -25,6 +25,7 @@ export function desktopPublishCos(
   plan: DesktopUploadPlan, credentials: DesktopCosCredentials,
   createClient: (credentials: DesktopCosCredentials) => COS = createDesktopCos,
 ): DesktopPublishTransport {
+  if (plan.provider !== 'generic') throw new Error('desktop publish: COS transport requires the generic object-storage provider')
   const keys = new Map(plan.artifacts.map(artifact => [artifact.key, artifact.channelMetadata]))
   const client = () => createClient(credentials)
   const location = (key: string) => {

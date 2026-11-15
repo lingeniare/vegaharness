@@ -644,11 +644,11 @@ describe('FileNavigator beside a preview', () => {
     const h = mountNavigator('sidebar://files')
     act(() => { h.face.focus(PANE) })
     await act(() => h.script.watches.ready(ROOT))
-    expect(document.activeElement).toBe(h.view.getByRole('searchbox', { name: zh['search.placeholder'] }))
+    expect(document.activeElement).toBe(h.view.getByRole('searchbox', { name: ru['search.placeholder'] }))
     act(() => { (document.activeElement as HTMLElement).blur() })
     act(() => { h.face.focus(PANE) })
     await endTask()
-    expect(document.activeElement).toBe(h.view.getByRole('searchbox', { name: zh['search.placeholder'] }))
+    expect(document.activeElement).toBe(h.view.getByRole('searchbox', { name: ru['search.placeholder'] }))
   })
 
   it('keeps the pane\'s tree when a preview is replaced in place by the file it opened', async () => {

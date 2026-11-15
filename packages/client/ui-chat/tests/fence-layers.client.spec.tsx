@@ -2,13 +2,13 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
-import { zh } from '../src/client/locale.ts'
+import { ru as commonRu } from '@deepseek-ai/dsh-client-locale/src/locales/ru.ts'
+import { ru } from '../src/client/locale.ts'
 import {
   DiffFenceLayer, MathFenceLayer, type DiffFenceLayerProps, type MathFenceLayerProps,
 } from '../src/client/fence/FenceLayers.tsx'
 
-const t = makeTranslate(zh, commonZh)
+const t = makeTranslate(ru, commonRu)
 
 afterEach(() => {
   cleanup()

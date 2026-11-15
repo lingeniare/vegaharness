@@ -44,8 +44,9 @@ export async function prepareDesktopRollout(directory: string, manifest: Desktop
   const platform = windows ? 'win32' : 'darwin'
   const update = resolveDesktopUploadConfig({ ...environment, DSH_DESKTOP_UPDATE_CHANNEL: source.channel },
     platform, source.target === 'mac-arm64' ? 'arm64' : 'x64')
+  if (update.provider !== 'generic') throw new Error('desktop rollout: rollout requires the generic object-storage provider')
   if (update.environment !== source.preset) throw new Error('desktop rollout: environment differs from original package')
-  const filename = desktopUpdateMetadataFilename(source.version, platform, source.channel)
+  const filename = desktopUpdateMetadataFilename(source.version, platform)
   const item = manifest.files.find(file => file.name === filename)
   if (!item) throw new Error(`desktop rollout: manifest has no update metadata ${filename}`)
   const contents = await readFile(join(directory, filename), 'utf8')
@@ -68,7 +69,7 @@ export async function prepareDesktopRollout(directory: string, manifest: Desktop
     ...(parsed.path === undefined ? {} : { path: url }) })
   return { expected, upload: {
     environment: source.preset, target: source.target, version: source.version, commit: source.commit, dirty: false,
-    publicUrl: update.publicUrl, bucket: update.bucket,
+    provider: 'generic', channel: 'stable', publicUrl: update.publicUrl, bucket: update.bucket,
     secretIdEnvName: update.secretIdEnvName, secretKeyEnvName: update.secretKeyEnvName,
     artifacts: [{ path: join(directory, filename), filename, key: `${update.keyPrefix}/${filename}`,
       contents: expected, contentType: 'application/yaml', channelMetadata: true }],

@@ -62,7 +62,7 @@ export async function prepareWebsiteInstaller(directory: string, manifest: Deskt
     const key = `desktop/${desktopLatestInstallerFilename(route.target)}`
     const contentDisposition = `attachment; filename="${file.name}"`
     return { handle, digest, contentDisposition, md5: md5.digest('base64'), plan: {
-      environment: 'production', target: route.target, version: source.version, commit: source.commit, dirty: false,
+      provider: 'generic', environment: 'production', channel: 'stable', target: route.target, version: source.version, commit: source.commit, dirty: false,
       bucket, publicUrl: desktopWebsiteInstallerUrl(route.target),
       secretIdEnvName: 'DOWNLOAD_PROD_COS_SECRET_ID', secretKeyEnvName: 'DOWNLOAD_PROD_COS_SECRET_KEY',
       artifacts: [{ path, filename: file.name, key, channelMetadata: false,
