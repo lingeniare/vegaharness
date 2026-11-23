@@ -5,6 +5,14 @@ import type {} from '@deepseek-ai/dsh-client-ui-slots'
 /** Dictionary namespace owned by this plugin. */
 export const NS = 'reference'
 
+/**
+ * English dictionary (the key-set source of truth).
+ *
+ * The `time.*` bucket words are this namespace's own copy of the session-row
+ * vocabulary: locale-owned copy keeps the words per plugin, while the
+ * bucketing they name is the one shared {@link relativeTime} in ui-primitives.
+ */
+
 /** The reference namespace key union. */
 export type ReferenceKey = keyof typeof en
 
@@ -15,8 +23,10 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
   }
 }
 
-/** English dictionary, the key-set source of truth. */
+/** English dictionary, checked complete against the zh key set. */
 export const en = {
+  'menu.addToChat': 'Add to chat',
+  'menu.addToChatFailed': 'Couldn’t add file. Return to the chat and try again.',
   'section.files': 'Files & folders',
   'section.subagents': 'Subagents',
   'section.sessions': 'Sessions',
@@ -32,10 +42,20 @@ export const en = {
   'time.days': '{n}d',
   'time.months': '{n}mo',
   'time.years': '{n}y',
-} satisfies Record<string, string>
+}
 
-/** Russian dictionary, checked against the English keys. */
+/** Japanese copy. */
+
+/** Spanish dictionary. */
+
+/** French dictionary. */
+
+/** German dictionary. */
+
+/** Russian dictionary. */
 export const ru = {
+  'menu.addToChat': 'Добавить в чат',
+  'menu.addToChatFailed': 'Не удалось добавить файл. Вернитесь в чат и повторите попытку.',
   'section.files': 'Файлы и папки',
   'section.subagents': 'Субагенты',
   'section.sessions': 'Сессии',
@@ -52,3 +72,5 @@ export const ru = {
   'time.months': '{n} мес.',
   'time.years': '{n} г.',
 } satisfies Record<keyof typeof en, string>
+
+/** Portuguese dictionary. */

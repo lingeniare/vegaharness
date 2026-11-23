@@ -32,7 +32,7 @@ it.each(['win32', 'darwin'])('requests one silent reminder and returns to confir
   const f = setup(platform)
   f.ready(); f.ready()
   expect(native.notices).toHaveLength(1)
-  expect(native.notices[0]!.options).toEqual({ title: 'Обновление готово', body: '返回应用确认安装 и 重启。', silent: true })
+  expect(native.notices[0]!.options).toEqual({ title: 'Обновление готово', body: 'Вернитесь в приложение, чтобы подтвердить установку и перезапустить.', silent: true })
   if (platform === 'win32') expect(f.window.flashFrame).toHaveBeenCalledWith(true)
   else expect(native.dock.bounce).toHaveBeenCalledWith('informational')
   native.notices[0]!.emit('click')

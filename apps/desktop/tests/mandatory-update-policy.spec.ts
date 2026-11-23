@@ -53,7 +53,7 @@ describe('mandatory update policy', () => {
     request.mockResolvedValueOnce(Response.json({ error: { code: 'UNAUTHENTICATED' } }, { status: 401 }))
     expect(await policy.check('launch')).toMatchObject({ error: 'unavailable' })
   })
-  it('sends an anonymous independent request with installed release headers and fixed Nightly', async () => {
+  it('sends an anonymous independent request with installed release headers and fixed Stable', async () => {
     const { policy, request } = fixture()
     await expect(policy.check('launch')).resolves.toEqual({ blocking: false, checking: false })
     const [url, options] = request.mock.calls[0]!

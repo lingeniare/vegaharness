@@ -81,10 +81,10 @@ function useDisclosure() {
   const [expanded, setExpanded] = useState(false)
   return { expanded, setExpanded, toggle: () => { setExpanded(value => !value) } }
 }
-const { zh } = dictionaries
+const { ru } = dictionaries
 
-function props(meta: unknown = { timeline: receipt }, language: 'en' | 'zh' = 'en') {
-  const dict = language === 'zh' ? zh : en
+function props(meta: unknown = { timeline: receipt }, language: 'en' | 'ru' = 'en') {
+  const dict = language === 'ru' ? ru : en
   return {
     phase: 'result',
     block: { isError: false, meta, content: [{ type: 'text', text: '{"tree":"plan"}' }] },
@@ -124,18 +124,18 @@ describe('conversation task cards', () => {
     expect(screen.getByRole<HTMLButtonElement>('button', { name: en.taskUpdatePending }).disabled).toBe(true)
   })
   it('uses fixed recorded progress, inline notes, parent context and elapsed time across midnight', () => {
-    const { container, rerender } = render(<TaskCard {...props({ timeline: receipt }, 'zh')} />)
+    const { container, rerender } = render(<TaskCard {...props({ timeline: receipt }, 'ru')} />)
     expect(screen.queryByRole('region')).toBeNull()
-    expand(zh.taskUpdate)
+    expand(ru.taskUpdate)
     expect(screen.getByRole('region', { name: 'Saved work' })).toBeTruthy()
-    expect(screen.getByLabelText(`${zh.progress}: 43.50% → 61.00%`)).toBeDefined()
+    expect(screen.getByLabelText(`${ru.progress}: 43.50% → 61.00%`)).toBeDefined()
     expect(screen.getByText('Save and recover')).toBeTruthy()
     expect(screen.getByText('Changes survive reopening.')).toBeTruthy()
     expect(screen.getByText('Waiting for an older backup sample.')).toBeTruthy()
-    expect(screen.getByText(/距离上次更新任务树 6 分钟/)).toBeTruthy()
+    expect(screen.getByText(/6 мин с последнего обновления дерева задач/)).toBeTruthy()
     expect(container.querySelectorAll('time')).toHaveLength(1)
     expect(container.querySelector('time')?.dateTime).toBe(new Date(receipt.at).toISOString())
-    rerender(<TaskCard {...props({ timeline: receipt }, 'zh')} />)
+    rerender(<TaskCard {...props({ timeline: receipt }, 'ru')} />)
     expect(container.querySelector('.timeline-card-progress')?.textContent).toBe('43.50%61.00%')
     expect(container.querySelector('.timeline-card-heading strong svg')).toBeTruthy()
   })

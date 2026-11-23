@@ -71,7 +71,7 @@ describe('terminalCardModel', () => {
     const card = terminalCardModel(settled({ content: [{ type: 'text', text: `failed\n[exit code: ${code}]` }] }))
     expect(card?.card).toMatchObject({ output: 'failed', exitCode: code })
     expect(terminalExitLabel(card, enT)).toBe(`exit code ${code}`)
-    expect(terminalExitLabel(card, t)).toBe(`код завершения ${code}`)
+    expect(terminalExitLabel(card, t)).toBe(`код выхода ${code}`)
   })
 
   it('omits exit capsules without a settled foreground failure', () => {
@@ -98,7 +98,7 @@ describe('terminalCardModel', () => {
     expect(model.card).toMatchObject({ output: '(no output)\n[timed out after 100ms]', exitCode: null })
     expect(terminalFailed(model)).toBe(true)
     expect(terminalExitLabel(model, enT)).toBe('no exit code')
-    expect(terminalExitLabel(model, t)).toBe('нет кода завершения')
+    expect(terminalExitLabel(model, t)).toBe('код выхода отсутствует')
   })
 
   it('derives a running standard-shell card from raw arguments', () => {
@@ -161,7 +161,7 @@ describe('terminalCardModel', () => {
       call: { name: 'bash', argsRaw: shellArgs({ workdir: '/srv/other' }) },
     }), '/w/app')?.card.cwd).toBe('/srv/other')
     // With no session cwd there is nothing to resolve against: a relative path
-    // stays as authored and an omitted one stays absent (a bare ` prompt).
+    // stays as authored and an omitted one stays absent (a bare `$` prompt).
     expect(terminalCardModel(settled({
       call: { name: 'bash', argsRaw: shellArgs({ workdir: 'packages/ui' }) },
     }))?.card.cwd).toBe('packages/ui')
@@ -395,9 +395,9 @@ describe('chat row terminal body', () => {
     const view = render(<GenericToolCard {...ownerProps(settled())} />)
     // Collapsed: the one-line summary row only, no output.
     expect(view.getByText('List files')).toBeTruthy()
-    expect(view.queryByText(/a\\.ts/)).toBeNull()
+    expect(view.queryByText(/a\.ts/)).toBeNull()
     toggleRow(view)
-    expect(view.getByText('Копировать', RAW)).toBeTruthy()
+    expect(view.getByText('a.ts  b.ts', RAW)).toBeTruthy()
     expect(view.getByText('ls -la')).toBeTruthy()
     // The args JSON body the generic path would have shown is gone.
     expect(view.queryByText(/"command"/)).toBeNull()
@@ -410,7 +410,7 @@ describe('chat row terminal body', () => {
     }))} />)
     toggleRow(view)
     expect(view.getByText('line-5')).toBeTruthy()
-    expect(view.getByText('Копировать')).toBeTruthy()
+    expect(view.getByText('line-19')).toBeTruthy()
     expect(view.queryByText(/ещё/)).toBeNull()
   })
 
@@ -454,7 +454,7 @@ describe('chat row terminal body', () => {
   })
 
   it.each([
-    { locale: 'zh', translate: t, description: 'Терминал pty-3', command: '(отправить ввод)' },
+    { locale: 'ru', translate: t, description: 'Терминал pty-3', command: '(отправить ввод)' },
     { locale: 'en', translate: enT, description: 'Terminal pty-3', command: '(send input)' },
   ])('renders terminal_send copy through the $locale locale', ({ translate, description, command }) => {
     const block = running({
@@ -490,8 +490,8 @@ describe('chat row terminal body', () => {
       content: [{ type: 'text', text: 'boom\n[exit code: 2]' }],
     }))} />)
     expect(view.container.querySelector('[data-state]')?.getAttribute('data-state')).toBe('error')
-    expect(view.getByText('код завершения 2')).toBeTruthy()
-    expect(view.getByText('код завершения 2').previousElementSibling?.textContent).toBe('List files')
+    expect(view.getByText('код выхода 2')).toBeTruthy()
+    expect(view.getByText('код выхода 2').previousElementSibling?.textContent).toBe('List files')
     expect(view.container.querySelector('[class*="_errorSummary_"]')).toBeNull()
   })
 })
@@ -513,13 +513,13 @@ describe('BashRow terminal card', () => {
   it('collapses to the summary row; the whole row toggles the command output', () => {
     const view = render(<BashRow {...rowProps(settled())} />)
     expect(view.getByText('List files')).toBeTruthy()
-    expect(view.queryByText(/a\\.ts/)).toBeNull()
+    expect(view.queryByText(/a\.ts/)).toBeNull()
     fireEvent.click(view.container.querySelector('[data-expandable]')!)
     expect(view.getByText('a.ts  b.ts', RAW)).toBeTruthy()
     expect(view.getByText('Копировать')).toBeTruthy()
     // Collapse back in place: the summary row returns, the card unmounts.
     fireEvent.click(view.container.querySelector('[data-expandable]')!)
-    expect(view.queryByText(/a\\.ts/)).toBeNull()
+    expect(view.queryByText(/a\.ts/)).toBeNull()
     expect(view.getByText('List files')).toBeTruthy()
   })
 
@@ -551,10 +551,10 @@ describe('BashRow terminal card', () => {
     }))} />)
     expect(view.container.querySelector('[data-variant="bash"]')?.getAttribute('data-state')).toBe('error')
     expect(view.container.querySelector('[class*="_errorSummary_"]')).toBeNull()
-    expect(view.getByText('код завершения 2')).toBeTruthy()
+    expect(view.getByText('код выхода 2')).toBeTruthy()
     expect(view.getByText('List files')).toBeTruthy()
     fireEvent.keyDown(view.getByRole('button'), { key: 'Enter' })
-    expect(view.getAllByText('код завершения 2')).toHaveLength(2)
+    expect(view.getAllByText('код выхода 2')).toHaveLength(2)
     expect(view.getByText('boom', RAW)).toBeTruthy()
   })
 
@@ -578,8 +578,8 @@ describe('BashRow terminal card', () => {
     fireEvent.click(row)
 
     expect(row.getAttribute('aria-expanded')).toBe('true')
-    expect(view.getByText('Ввод')).toBeTruthy()
-    expect(view.getByText('Вывод')).toBeTruthy()
+    expect(view.getByText('ВХОД')).toBeTruthy()
+    expect(view.getByText('ВЫХОД')).toBeTruthy()
     expect(view.getByText(/"command": "ls -la"/)).toBeTruthy()
     expect(view.container.querySelector('[class*="_ioText_"][data-error]')).toBeNull()
     expect(view.container.querySelectorAll('[class*="_ioText_"]')[1]?.textContent)
@@ -730,8 +730,8 @@ describe('BashRow terminal card', () => {
     fireEvent.click(row)
 
     expect(row.getAttribute('aria-expanded')).toBe('true')
-    expect(view.getByText('Ввод')).toBeTruthy()
-    expect(view.getByText('Вывод')).toBeTruthy()
+    expect(view.getByText('ВХОД')).toBeTruthy()
+    expect(view.getByText('ВЫХОД')).toBeTruthy()
     expect(view.getByText(/"command": "ls -la"/)).toBeTruthy()
     expect(view.container.querySelector('[data-error]')?.textContent).toBe('Error: command aborted')
   })

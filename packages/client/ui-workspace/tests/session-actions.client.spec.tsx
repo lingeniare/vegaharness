@@ -224,10 +224,10 @@ describe('SessionRenameDialog', () => {
     const pending = Promise.withResolvers<undefined>()
     const renameSession = vi.fn(() => pending.promise)
     const { settleSessionRename, ask } = renameDialog(renameSession)
-    ask('one', '旧标题')
+    ask('one', 'Old title')
     expect(screen.getByRole('dialog', { name: 'Переименовать сессию' })).toBeTruthy()
     const input = screen.getByLabelText<HTMLInputElement>('Название сессии')
-    expect(input.value).toBe('旧标题')
+    expect(input.value).toBe('Old title')
     // Confirming the current title is allowed (that gesture pins an automatic
     // title); a blank draft is not, by button or by Enter.
     expect(screen.getByRole<HTMLButtonElement>('button', { name: 'Переименовать' }).disabled).toBe(false)
@@ -235,9 +235,9 @@ describe('SessionRenameDialog', () => {
     expect(screen.getByRole<HTMLButtonElement>('button', { name: 'Переименовать' }).disabled).toBe(true)
     fireEvent.keyDown(input, { key: 'Enter' })
     expect(renameSession).not.toHaveBeenCalled()
-    fireEvent.change(input, { target: { value: '  新标题  ' } })
+    fireEvent.change(input, { target: { value: '  New title  ' } })
     fireEvent.click(screen.getByRole('button', { name: 'Переименовать' }))
-    expect(renameSession).toHaveBeenCalledWith(sid('one'), '新标题')
+    expect(renameSession).toHaveBeenCalledWith(sid('one'), 'New title')
     // While the Host call is pending the input locks and closing is blocked.
     expect(input.disabled).toBe(true)
     fireEvent.keyDown(document, { key: 'Escape' })
@@ -342,7 +342,7 @@ describe('SessionArchiveConfirmDialog', () => {
       { kind: 'schedule', items: [{ id: 'schedule-1', label: 'check the build' }] },
     ])
     const dialog = screen.getByRole('dialog', { name: 'Остановить и архивировать эту сессию?' })
-    expect(dialog.textContent).toContain('Остановить и архивировать эту сессию?В сессии «Busy session» ещё есть незавершённая работа. Перед архивацией она будет остановлена. Позже вы сможете восстановить сессию с помощью фильтра «Все диалоги (показывать архивные)» на боковой панели. Остановленная работа не возобновится автоматически.Текущий ходЗапущенные субагенты (2): reviewer, child-2Фоновая задача (1): pnpm run buildНапоминание по расписанию (1): check the buildОтменаОстановить и архивировать')
+    expect(dialog.textContent).toContain('В сессии «Busy session» ещё есть незавершённая работа')
     const lines = [...screen.getByRole('list', { name: 'Будет остановлено' }).querySelectorAll('li')].map(li => li.textContent)
     expect(lines).toEqual([
       'Текущий ход',
@@ -517,7 +517,7 @@ describe('RowActionToast', () => {
   })
 
   it.each([
-    ['zh', t, 'Откройте исходную сессию и завершите миграцию, прежде чем создавать ветку.', 'Открыть исходную сессию'],
+    ['ru', t, 'Откройте исходную сессию и завершите миграцию, прежде чем создавать ветку.', 'Открыть исходную сессию'],
     ['en', tEn, 'Open the original session to complete migration before creating a branch.', 'Open original session'],
   ] as const)('keeps the %s fork notice after menu unmount and opens only on its action', async (_locale, translate, message, action) => {
     const { dismissToast, openForkSource, notify } = await toastSurface(undefined, translate)
@@ -610,12 +610,12 @@ describe('RowActionToast', () => {
 
   it.each(['archived', 'stoppedAndArchived'] as const)('renders a %s follow-up in the same toast with undo', async (kind) => {
     const { notify, undoArchive } = await toastSurface()
-    notify({ kind, sessionId: sid('one'), message: '已归档，工作树将被清理', tone: 'success' })
+    notify({ kind, sessionId: sid('one'), message: 'Архивировано, рабочее дерево будет очищено', tone: 'success' })
     expect(screen.getAllByRole('alert')).toHaveLength(1)
-    expect(screen.getByRole('alert').textContent).toContain('已归档，工作树将被清理')
-    notify({ kind, sessionId: sid('one'), message: '已归档，工作树清理失败', tone: 'warning' })
+    expect(screen.getByRole('alert').textContent).toContain('Архивировано, рабочее дерево будет очищено')
+    notify({ kind, sessionId: sid('one'), message: 'Архивировано, очистка рабочего дерева не удалась', tone: 'warning' })
     expect(screen.getAllByRole('alert')).toHaveLength(1)
-    fireEvent.click(screen.getByRole('button', { name: '撤销' }))
+    fireEvent.click(screen.getByRole('button', { name: 'отменить' }))
     expect(undoArchive).toHaveBeenCalledWith(sid('one'))
   })
 

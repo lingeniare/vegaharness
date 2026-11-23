@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import type { MarketListingEntry, MarketListingVersion } from '@deepseek-ai/dsh-api-remotes/client'
 import type { LocalizedText } from '@deepseek-ai/dsh-package-manifest'
-import { declaredQuery, displayDeclarations, indexLabel, INITIAL_QUERY, presentedVersion, sourceFacts, withText } from '../src/client/presentation.ts'
+import {
+  declaredQuery, displayDeclarations, indexLabel, indexMenuItems, INITIAL_QUERY, presentedVersion, sourceFacts, withText,
+} from '../src/client/presentation.ts'
 
 const resolveText = (text: LocalizedText): string => typeof text === 'string' ? text : text.ru ?? text.en
 
@@ -19,7 +21,7 @@ function entry(name: string, fields: Partial<MarketListingEntry> = {}, metadata:
 describe('displayDeclarations', () => {
   it('orders by localized title, then by id', () => {
     expect(displayDeclarations({
-      b: { title: 'Beta' }, a: { title: { en: 'Alpha', zh: 'Beta' } }, c: { title: 'Alpha' },
+      b: { title: 'Beta' }, a: { title: { en: 'Alpha', ru: 'Beta' } }, c: { title: 'Alpha' },
     }, resolveText, 'en').map(({ id, title }) => ({ id, title }))).toEqual([{ id: 'c', title: 'Alpha' }, { id: 'a', title: 'Beta' }, { id: 'b', title: 'Beta' }])
     expect(displayDeclarations({ z: { title: 'X' }, x: { title: 'X' }, y: { title: 'X' } }, resolveText, 'en').map(item => item.id)).toEqual(['x', 'y', 'z'])
   })
@@ -78,5 +80,63 @@ describe('indexLabel', () => {
     expect(indexLabel({ url: 'https://a.example/i.json', title: { en: 'A', ru: '甲' } }, resolveText)).toBe('甲')
     expect(indexLabel({ url: 'https://a.example/i.json' }, resolveText)).toBe('a.example')
     expect(indexLabel({ url: 'https://[' }, resolveText)).toBe('https://[')
+  })
+})
+
+describe('indexMenuItems', () => {
+  it.each([
+    'git+https://github.com/acme/plugins.git?path=market%2Findex.json&ref=main',
+    'git+ssh://git@github.com/acme/plugins.git',
+  ])('uses the GitHub repository in the toolbar for %s', (url) => {
+    const index = { url, title: { en: 'Internal plugins', ru: 'Внутренние плагины' } }
+    expect(indexMenuItems([index], resolveText)).toEqual([{ id: url, label: 'github:acme/plugins' }])
+    expect(indexLabel(index, resolveText)).toBe('Внутренние плагины')
+  })
+
+  it('preserves localized Raw titles and distinguishes matching titles by their Raw locations', () => {
+    const main = 'https://raw.githubusercontent.com/acme/plugins/refs/heads/main/index.json'
+    const next = 'https://raw.githubusercontent.com/acme/plugins/refs/heads/next/index.json'
+    const release = 'https://raw.githubusercontent.com/acme/plugins/refs/heads/release/stable/index.json'
+    const title = { en: 'Official plugins', ru: 'Официальные плагины' }
+    expect(indexMenuItems([{ url: main, title }, { url: next, title }, { url: release }], resolveText)).toEqual([
+      { id: main, label: 'Официальные плагины · github:acme/plugins · refs/heads/main/index.json' },
+      { id: next, label: 'Официальные плагины · github:acme/plugins · refs/heads/next/index.json' },
+      { id: release, label: 'github:acme/plugins' },
+    ])
+  })
+
+  it('distinguishes same-repository Git indexes by path and ref', () => {
+    const root = 'git+https://github.com/acme/plugins.git'
+    const customPath = `${root}?path=market%2Findex.json`
+    const customRef = `${customPath}&ref=release%2Fstable`
+    expect(indexMenuItems([{ url: root }, { url: customPath }, { url: customRef }], resolveText)).toEqual([
+      { id: root, label: 'github:acme/plugins · HEAD:index.json' },
+      { id: customPath, label: 'github:acme/plugins · HEAD:market/index.json' },
+      { id: customRef, label: 'github:acme/plugins · release/stable:market/index.json' },
+    ])
+  })
+
+  it('distinguishes matching Raw locations without putting URL query strings in labels', () => {
+    const raw = 'https://raw.githubusercontent.com/acme/plugins/main/index.json'
+    const first = `${raw}?token=one`
+    const second = `${raw}?token=two`
+    expect(indexMenuItems([{ url: first }, { url: second }], resolveText)).toEqual([
+      { id: first, label: 'github:acme/plugins · main/index.json (1)' },
+      { id: second, label: 'github:acme/plugins · main/index.json (2)' },
+    ])
+  })
+
+  it('uses the regular index label when the address does not identify a GitHub index', () => {
+    const indexes = [
+      { url: 'git+https://git.example/acme/plugins.git', title: 'Internal plugins' },
+      { url: 'https://github.com/acme/plugins', title: 'Direct index' },
+      { url: 'git+https://github.com/acme', title: 'Invalid Git source' },
+      { url: 'git+https://github.com/acme/plugins.git?token=secret' },
+      { url: 'https://raw.githubusercontent.com/acme/plugins/main' },
+      { url: 'https://[' },
+    ]
+    expect(indexMenuItems(indexes, resolveText).map(item => item.label)).toEqual([
+      'Internal plugins', 'Direct index', 'Invalid Git source', 'github.com', 'raw.githubusercontent.com', 'https://[',
+    ])
   })
 })

@@ -1,4 +1,4 @@
-/** Plugin feature previews are fixed-canvas SVGs beside their detail document: English required, Russian optional. */
+/** Plugin feature previews are fixed-canvas SVGs beside their detail document: English required, localized variants optional. */
 import { globSync, readFileSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import { JSDOM } from 'jsdom'
@@ -15,12 +15,14 @@ it('keeps every preview a self-contained 640×300 SVG', () => {
   const browser = new JSDOM('')
   onTestFinished(() => { browser.window.close() })
   const parser = new browser.window.DOMParser()
-  const groups = new Map<string, { base?: string; ru?: string; other: string[] }>()
+  const groups = new Map<string, { base?: string; ru?: string; zh?: string; other: string[] }>()
   for (const path of svgPaths) {
     const name = basename(path, '.svg')
-    const stem = join(dirname(path), name.endsWith('.ru') ? name.slice(0, -3) : name)
+    const variant = name.match(/\.(ru|zh)$/u)?.[1]
+    const stem = join(dirname(path), variant ? name.slice(0, -3) : name)
     const group = groups.get(stem) ?? { other: [] }
-    if (name.endsWith('.ru')) group.ru = path
+    if (variant === 'ru') group.ru = path
+    else if (variant === 'zh') group.zh = path
     else if (name.includes('.')) group.other.push(path)
     else group.base = path
     groups.set(stem, group)

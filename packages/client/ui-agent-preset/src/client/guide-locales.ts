@@ -10,7 +10,7 @@ export const guideEn = {
   guideStandardIntro: 'Choose Standard mode when starting a new task. Describe what you want to accomplish, point to the relevant files, and explain how to check the result.',
   guideStandardExplanation: [
     '### How it works',
-    'The agent calls tools directly to read and edit files, search, and run terminal commands. It includes Skills, planning, goals, subagents, workflows, plugin management, and context compaction.',
+    'The agent calls tools directly to read and edit files, search, and run terminal commands. It includes Skills, planning, goals, subagents, workflows, plugin management, read-only runtime inspection, and context compaction.',
     'For questions about VEGA and plugin or preset work you request, the dsh-doc skill guides the agent to the installed documentation and source. Its instructions load only when requested or relevant; loading it does not change files, tools, or the profile.',
     '### When to choose it',
     'Start here for everyday coding, file work, and research. Standard mode can also write scripts and process files in batches. PTC changes how tool calls are organized; it is not required for batch tasks.',
@@ -30,7 +30,7 @@ export const guideEn = {
     '### What reaches the model',
     'Tool results first reach the program, which can filter and combine them. The model receives what the program prints or returns; image results are attached separately. Nested tool calls are still recorded and remain subject to tool permissions.',
     '### Compared with Standard mode',
-    'Both modes can handle coding and batch tasks. Standard mode exposes individual tools directly; PTC organizes tool calls in code. The current PTC preset leaves the workflow and plugin management tools disabled. Speed and token use depend on the task and how the program handles its results.',
+    'Both modes can handle coding and batch tasks. Standard mode exposes individual tools directly; PTC organizes tool calls in code. The current PTC preset leaves the workflow tool disabled. Speed and token use depend on the task and how the program handles its results.',
   ].join('\n\n'),
   guidePtcUsage: [
     '### Check a set of configuration files',
@@ -55,7 +55,7 @@ export const guideEn = {
   guideCordisIntro: 'Choose Creator mode for a new task. Describe the capability you want, where it should appear, and how you will verify it.',
   guideCordisExplanation: [
     '### What you can create',
-    'Creator mode includes the standard task tools and adds runtime inspection. Standard and Creator share the dsh-doc guidance for plugin and preset development. The agent can create a plugin that adds a capability or UI, or a preset that combines tools and prompts for a particular job.',
+    'Creator mode focuses on customizing VEGA. It shares read-only runtime inspection and dsh-doc guidance with Standard mode. The agent can create a plugin that adds a capability or UI, or a preset that combines tools and prompts for a particular job.',
     '### Plugins and modes',
     'A plugin adds capabilities to VEGA, such as a tool, a service connection, or a UI entry. A mode is an agent preset that selects tools and defines how the agent works in a task. A plugin can be included in a custom preset.',
     '### How the result takes effect',
@@ -77,7 +77,7 @@ export const guideEn = {
 /** Keys merged into the feature’s ordinary locale seat. */
 export type PresetGuideKey = keyof typeof guideEn
 
-/** Russian dictionary, checked against the English keys. */
+/** Russian help. Examples describe suggested tasks, not recorded runs. */
 export const guideRu = {
   modeExplanation: 'Сведения о режиме',
   howToUse: 'Как использовать',

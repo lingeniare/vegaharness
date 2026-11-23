@@ -10,13 +10,13 @@ import { fileURLToPath } from 'node:url'
 import type { Browser, Locator, Page } from 'playwright'
 import { chromium } from 'playwright'
 import { HIDDEN_BUNDLES } from '@deepseek-ai/dsh-official-bundles'
-import { afterAll, beforeAll, describe, expect, it, onTestFailed } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, onTestFailed, onTestFinished } from 'vitest'
 import { join } from 'node:path'
 import {
   assertFixtureInventory, captureStableAria, compareOrRefreshGolden,
   launchWebScaffold, watchConsole, webSnapshotMode, type WebScaffold,
 } from './scaffold.ts'
-import { RU_BROWSER_LOCALE, saveFailureShot } from './support.ts'
+import { RU_BROWSER_LOCALE, openSettings, saveFailureShot } from './support.ts'
 
 const SNAPSHOT_DIR = fileURLToPath(new URL('./expected/plugin-config', import.meta.url))
 const OFFICIAL_EXPECTED = join(SNAPSHOT_DIR, 'official.expected.md')
@@ -69,16 +69,16 @@ describe('web e2e: plugin configuration pages', () => {
     await page.getByRole('navigation', { name: 'Глобальные панели' }).getByRole('button', { name: 'Плагины', exact: true }).click()
     const panel = page.locator('[data-plugin-panel]')
     await panel.waitFor({ timeout: 10_000 })
-    while (await panel.getByRole('button', { name: /^Назад/ }).count() > 0) {
-      await panel.getByRole('button', { name: /^Назад/ }).first().click()
+    while (await panel.getByRole('button', { name: /^返回/ }).count() > 0) {
+      await panel.getByRole('button', { name: /^返回/ }).first().click()
     }
-    await panel.getByRole('heading', { name: 'Настройки встроенных плагинов', exact: true }).waitFor({ timeout: 20_000 })
+    await panel.getByRole('heading', { name: 'Встроенные настройки плагина', exact: true }).waitFor({ timeout: 20_000 })
     return panel
   }
 
   /** Open one official plugin's page from its card and wait for its form. */
   async function openPage(panel: Locator, title: string): Promise<void> {
-    await panel.getByRole('button', { name: `Просмотреть ${title}`, exact: true }).click()
+    await panel.getByRole('button', { name: `Посмотреть ${title}`, exact: true }).click()
     await panel.locator('[data-plugin-config]').waitFor({ timeout: 10_000 })
   }
 
@@ -93,13 +93,13 @@ describe('web e2e: plugin configuration pages', () => {
 
     // Every page the shipped web composition exposes: the shell executor, the
     // agent loop, subagent selection, and the DeepSeek search provider.
-    await panel.getByRole('button', { name: 'Просмотреть Веб-поиск и загрузка страниц', exact: true }).waitFor({ timeout: 20_000 })
+    await panel.getByRole('button', { name: 'Посмотреть 网页搜索与获取', exact: true }).waitFor({ timeout: 20_000 })
     const basic = panel.locator('[data-plugin-group="basic"]')
     expect(await basic.locator('[data-plugin-item]').count()).toBe(4)
     expect(await basic.locator(':scope > ul > li').evaluateAll(cards => cards.map(card => card.getAttribute('data-plugin-item'))))
       .toEqual(['subagent', 'web-search', 'agent-loop', 'shell'])
-    for (const title of ['Субагенты', 'Веб-поиск и загрузка страниц', 'Цикл агента', 'Терминал']) {
-      expect(await basic.getByRole('button', { name: `Просмотреть ${title}`, exact: true }).count()).toBe(1)
+    for (const title of ['Субагенты', 'Веб-поиск и загрузка', 'Цикл агента', 'Терминал']) {
+      expect(await basic.getByRole('button', { name: `Посмотреть ${title}`, exact: true }).count()).toBe(1)
     }
     // A card carries the one-liner; the fields wait for the page.
     expect(await basic.getByText('Ограничьте время выполнения каждой команды и объём её вывода.', { exact: true }).count()).toBe(1)
@@ -124,11 +124,11 @@ describe('web e2e: plugin configuration pages', () => {
     expect(await basic.count()).toBe(0)
     expect(await extensions.count()).toBe(0)
     expect(await panel.locator('[data-plugin-group="bundles"]').count()).toBe(0)
-    await panel.getByRole('button', { name: 'Просмотреть Инструменты разработчика', exact: true }).click()
+    await panel.getByRole('button', { name: 'Посмотреть 开发者工具', exact: true }).click()
     await panel.locator('[data-plugin-detail]').waitFor()
-    await panel.getByRole('button', { name: 'Назад к Экспериментальные плагины', exact: true }).click()
+    await panel.getByRole('button', { name: 'Вернуться к 实验性插件', exact: true }).click()
     await panel.getByRole('heading', { name: 'Экспериментальные плагины', exact: true, level: 1 }).waitFor()
-    await panel.getByRole('button', { name: 'Назад к плагинам', exact: true }).focus()
+    await panel.getByRole('button', { name: 'Вернуться к плагинам', exact: true }).focus()
     await page.keyboard.press('Space')
     expect(await extensions.getByRole('list').isVisible()).toBe(true)
     expect(await panel.locator('[data-plugin-group="more"]').count()).toBe(0)
@@ -146,13 +146,13 @@ describe('web e2e: plugin configuration pages', () => {
   it('selects search and fetch providers independently and keeps each provider’s settings', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-search-api-settings'))
     const panel = await openPlugins()
-    await openPage(panel, 'Веб-поиск и загрузка страниц')
+    await openPage(panel, 'Веб-поиск и загрузка')
     // A menu's accessible name is its label followed by the selected entry, so the menus are found by id.
     const searchMenu = panel.locator('#plugin-config-web-search-provider')
     const fetchMenu = panel.locator('#plugin-config-web-fetch-provider')
-    const searchSection = panel.getByRole('region', { name: 'Провайдер веб-поиска', exact: true })
-    const fetchSection = panel.getByRole('region', { name: 'Провайдер загрузки веб-страниц', exact: true })
-    const count = panel.getByLabel('Результатов на поиск', { exact: true })
+    const searchSection = panel.getByRole('region', { name: 'Поставщик веб-поиска', exact: true })
+    const fetchSection = panel.getByRole('region', { name: 'Поставщик загрузки веб-страниц', exact: true })
+    const count = panel.getByLabel('Результаты по поиску', { exact: true })
     const save = panel.getByRole('button', { name: 'Сохранить', exact: true })
     /** Pick one entry from a menu. */
     async function choose(menu: Locator, label: string): Promise<void> {
@@ -167,23 +167,38 @@ describe('web e2e: plugin configuration pages', () => {
       await expect.poll(() => page.getByRole('menuitem').count()).toBe(0)
       return items
     }
-    // The shipped composition selects the DeepSeek Search API and local fetch, and the page writes nothing on mount.
-    expect(await searchMenu.textContent()).toBe('DeepSeek Search API')
+    // The shipped composition selects no search provider and local fetch, and the page writes nothing on mount.
+    expect(await searchMenu.textContent()).toBe('Автоматически')
     expect(await fetchMenu.textContent()).toBe('Прямая загрузка')
-    expect(await panel.getByRole('button', { name: 'Провайдер веб-поиска DeepSeek Search API', exact: true }).count()).toBe(1)
-    expect(await panel.getByRole('button', { name: 'Провайдер загрузки веб-страниц Прямая загрузка', exact: true }).count()).toBe(1)
-    expect(await entries(searchMenu)).toEqual(['DeepSeek Search API', 'DeepSeek (прежняя версия)'])
+    expect(await panel.getByRole('button', { name: '网页搜索提供方 自动选择', exact: true }).count()).toBe(1)
+    expect(await panel.getByRole('button', { name: '网页获取提供方 本机直接获取', exact: true }).count()).toBe(1)
+    expect(await entries(searchMenu)).toEqual(['Автоматически', 'DeepSeek Search API', 'Серверный поиск DeepSeek'])
     expect(await entries(fetchMenu)).toEqual(['Прямая загрузка', 'DeepSeek Fetch API'])
     expect(await settingsDocument()).not.toContain('searchProvider:')
     // The page fixes the menu order itself; the Loader imports plugins concurrently, so the
     // Host's registration order is not the YAML row order and only its membership is checked here.
     const hostWeb = scaffold.ctx.get('web') as { listProviders(): Record<'search' | 'fetch', { id: string }[]> } | undefined
     expect(hostWeb?.listProviders().search.map(provider => provider.id).sort()).toEqual(['deepseek-official', 'deepseek-search-api'])
-    expect(await panel.getByRole('link', { name: 'Руководство Search & Fetch', exact: true }).getAttribute('href'))
-      .toBe('https://api-docs.deepseek.com/zh-cn/guides/search')
+    // Automatic selection states which provider the Host runs for each model and shows no provider panel.
+    expect(await searchSection.getByText(
+      'Следует модели разговора: модели DeepSeek используют серверный поиск DeepSeek без платы за каждый поиск; остальные модели используют DeepSeek Search API.', { exact: true },
+    ).count()).toBe(1)
+    expect(await searchSection.getByRole('link', { name: 'Руководство по поиску и получению', exact: true }).getAttribute('href'))
+      .toBe('https://api-docs.deepseek.com/ru-cn/guides/search')
+    expect(await searchSection.getByRole('textbox').count()).toBe(0)
+    expect(await save.isDisabled()).toBe(true)
+
+    // The composition names no search provider, so a selected one is stored.
+    await choose(searchMenu, 'DeepSeek Search API')
+    await save.click()
+    await expect.poll(() => save.isDisabled()).toBe(true)
+    await expect.poll(settingsDocument).toContain('searchProvider: deepseek-search-api')
+    expect(await panel.getByRole('button', { name: '网页搜索提供方 DeepSeek Search API', exact: true }).count()).toBe(1)
+    expect(await panel.getByRole('link', { name: 'Руководство по поиску и получению', exact: true }).getAttribute('href'))
+      .toBe('https://api-docs.deepseek.com/ru-cn/guides/search')
     // Each section shows the description its selected provider registered with the Host, in the active language.
-    expect(await searchSection.getByText('Услуга платная: оплата идёт с аккаунта или ключа API, выбранного в разделе «Оплата».', { exact: true }).count()).toBe(1)
-    expect(await fetchSection.getByText('Бесплатно, доступны адреса интрасети и локальные адреса. Не поддерживает страницы, требующие JavaScript или входа, а также PDF.', { exact: true }).count()).toBe(1)
+    expect(await searchSection.getByText('会产生费用, 由「计费方式」选定的账号或 API Key 支付。', { exact: true }).count()).toBe(1)
+    expect(await fetchSection.getByText('免费，可访问内网和本机。不支持需要 JavaScript 或登录的页面, 也不支持 PDF。', { exact: true }).count()).toBe(1)
     // The Fetch API suggestion is text, not an action.
     expect(await fetchSection.getByRole('button').count()).toBe(1)
     expect(await save.isDisabled()).toBe(true)
@@ -201,7 +216,7 @@ describe('web e2e: plugin configuration pages', () => {
 
     // The Fetch API shows only its billing menu, and the page saves the billing with the selection.
     await choose(fetchMenu, 'DeepSeek Fetch API')
-    expect(await fetchSection.getByText('Адреса интрасети и локальные адреса недоступны. Услуга платная: оплата идёт с аккаунта или ключа API, выбранного в разделе «Оплата».', { exact: true }).count()).toBe(1)
+    expect(await fetchSection.getByText('无法访问内网和本机。会产生费用, 由「计费方式」选定的账号或 API Key 支付。', { exact: true }).count()).toBe(1)
     expect(await fetchSection.getByRole('textbox').count()).toBe(0)
     expect(await fetchSection.getByRole('button').count()).toBe(2)
     const fetchBilling = panel.locator('#plugin-config-web-fetch-billing')
@@ -219,7 +234,7 @@ describe('web e2e: plugin configuration pages', () => {
     await page.reload({ waitUntil: 'load' })
     await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
     await openPlugins()
-    await openPage(panel, 'Веб-поиск и загрузка страниц')
+    await openPage(panel, 'Веб-поиск и загрузка')
     expect(await searchMenu.textContent()).toBe('DeepSeek Search API')
     expect(await fetchMenu.textContent()).toBe('DeepSeek Fetch API')
     const snapshot = await captureStableAria(page, '[data-plugin-panel]', scaffold.workspaceCwd)
@@ -230,9 +245,9 @@ describe('web e2e: plugin configuration pages', () => {
     await expect.poll(() => save.isDisabled()).toBe(true)
     await expect.poll(settingsDocument).not.toContain('fetchProvider: deepseek-fetch-api')
 
-    await choose(searchMenu, 'DeepSeek (прежняя версия)')
+    await choose(searchMenu, 'Серверный поиск DeepSeek')
     const messagesEndpoint = panel.locator('#plugin-config-web-search-endpoint')
-    expect(await panel.getByLabel('Максимум поисковых запросов на один запрос', { exact: true }).inputValue()).toBe('5')
+    expect(await panel.getByLabel('Максимум поисков на запрос', { exact: true }).inputValue()).toBe('5')
     await messagesEndpoint.fill('https://messages.test/anthropic/v1')
     await save.click()
     await expect.poll(() => save.isDisabled()).toBe(true)
@@ -240,18 +255,24 @@ describe('web e2e: plugin configuration pages', () => {
     await page.reload({ waitUntil: 'load' })
     await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
     await openPlugins()
-    await openPage(panel, 'Веб-поиск и загрузка страниц')
-    expect(await searchMenu.textContent()).toBe('DeepSeek (прежняя версия)')
+    await openPage(panel, 'Веб-поиск и загрузка')
+    expect(await searchMenu.textContent()).toBe('Серверный поиск DeepSeek')
     expect(await messagesEndpoint.inputValue()).toBe('https://messages.test/anthropic/v1')
-    expect(await entries(searchMenu)).toEqual(['DeepSeek Search API', 'DeepSeek (прежняя версия)'])
+    expect(await entries(searchMenu)).toEqual(['Автоматически', 'DeepSeek Search API', 'Серверный поиск DeepSeek'])
     expect(await save.isDisabled()).toBe(true)
     expect(await settingsDocument()).toContain('searchProvider: deepseek-official')
     await choose(searchMenu, 'DeepSeek Search API')
     await count.fill('20')
     await save.click()
     await expect.poll(() => save.isDisabled()).toBe(true)
-    await expect.poll(settingsDocument).not.toContain('searchProvider:')
+    await expect.poll(settingsDocument).toContain('searchProvider: deepseek-search-api')
     expect(await settingsDocument()).toContain('count: 20')
+    // Automatic selection clears the stored provider.
+    await choose(searchMenu, 'Автоматически')
+    await save.click()
+    await expect.poll(() => save.isDisabled()).toBe(true)
+    await expect.poll(settingsDocument).not.toContain('searchProvider:')
+    expect(await searchMenu.textContent()).toBe('Автоматически')
     expect(await settingsDocument()).not.toMatch(/ApiKeyEnv:|searchBaseURL:|fetchBaseURL:/)
     expect(tripwire.pageErrors).toEqual([])
   })
@@ -260,7 +281,7 @@ describe('web e2e: plugin configuration pages', () => {
     const panel = await openPlugins()
     await openPage(panel, 'Субагенты')
     const depth = panel.getByLabel('Максимальная глубина рекурсии', { exact: true })
-    const capacity = panel.getByLabel('Лимит параллельных субагентов', { exact: true })
+    const capacity = panel.getByLabel('Предел параллелизма субагентов', { exact: true })
     expect(await depth.inputValue()).toBe('1')
     expect(await capacity.inputValue()).toBe('8')
     await depth.fill('2')
@@ -286,7 +307,7 @@ describe('web e2e: plugin configuration pages', () => {
     await openPage(panel, 'Субагенты')
     expect(await depth.inputValue()).toBe('1')
     expect(await capacity.inputValue()).toBe('8')
-    await panel.getByRole('button', { name: 'Назад к плагинам', exact: true }).click()
+    await panel.getByRole('button', { name: 'Вернуться к плагинам', exact: true }).click()
   })
 
   it('opens field explanations with the keyboard and retains unsaved edits', async () => {
@@ -299,18 +320,18 @@ describe('web e2e: plugin configuration pages', () => {
     await depthHelp.press('Enter')
     const depthRules = panel.getByRole('region', { name: 'О максимальной глубине рекурсии', exact: true })
     await depthRules.waitFor()
-    expect(await depthRules.getByText('Ограничивает количество уровней субагентов, которые может создавать агент.', { exact: true }).count()).toBe(1)
+    expect(await depthRules.getByText('Ограничивает количество уровней субагентов, которые может создать агент.', { exact: true }).count()).toBe(1)
     const depthTable = depthRules.getByRole('table', { name: 'О максимальной глубине рекурсии', exact: true })
-    expect(await depthTable.getByRole('row', { name: '0 Отключить субагентов', exact: true }).count()).toBe(1)
-    expect(await depthTable.getByRole('row', { name: '1 Создавать субагентов может только главный агент', exact: true }).count()).toBe(1)
-    expect(await depthRules.getByText('Если для инструмента задана собственная максимальная глубина рекурсии, приоритет имеет это значение.', { exact: true }).count()).toBe(1)
+    expect(await depthTable.getByRole('row', { name: '0 禁用子智能体', exact: true }).count()).toBe(1)
+    expect(await depthTable.getByRole('row', { name: '1 仅允许主 Agent 创建子智能体', exact: true }).count()).toBe(1)
+    expect(await depthRules.getByText('Если инструмент определяет собственную максимальную глубину рекурсии, этот параметр имеет приоритет.', { exact: true }).count()).toBe(1)
     await depthHelp.press('Enter')
     expect(await depthRules.count()).toBe(0)
     expect(await depth.inputValue()).toBe('2')
-    await panel.getByRole('button', { name: 'О лимите параллельных субагентов', exact: true }).click()
-    const capacityRules = panel.getByRole('region', { name: 'О лимите параллельных субагентов', exact: true })
-    expect(await capacityRules.getByText('Общее количество одновременно работающих субагентов у одного главного агента на всех уровнях рекурсии. Главный агент не учитывается. При достижении лимита новые запросы на запуск отклоняются.', { exact: true }).count()).toBe(1)
-    await panel.getByRole('button', { name: 'Назад к плагинам', exact: true }).click()
+    await panel.getByRole('button', { name: 'О пределе параллелизма субагентов', exact: true }).click()
+    const capacityRules = panel.getByRole('region', { name: 'О пределе параллелизма субагентов', exact: true })
+    expect(await capacityRules.getByText('Общее количество действующих субагентов под одним и тем же основным агентом на всех уровнях рекурсии. Главный Агент исключен. Новые запросы на запуск отклоняются при достижении предела.', { exact: true }).count()).toBe(1)
+    await panel.getByRole('button', { name: 'Вернуться к плагинам', exact: true }).click()
     await openPage(panel, 'Субагенты')
     expect(await depth.inputValue()).toBe('1')
   })
@@ -323,7 +344,7 @@ describe('web e2e: plugin configuration pages', () => {
 
     await panel.getByLabel('Максимальная глубина рекурсии', { exact: true }).fill('2')
     await toggle.click()
-    const models = panel.getByRole('group', { name: 'Модели, которые могут выбирать агенты' })
+    const models = panel.getByRole('group', { name: 'Модели агенты могут выбирать' })
     await models.waitFor({ timeout: 10_000 })
     const firstModel = models.getByRole('checkbox').first()
     await firstModel.check()
@@ -391,8 +412,8 @@ describe('web e2e: plugin configuration pages', () => {
     await timeout.waitFor({ timeout: 10_000 })
 
     await timeout.fill('7000')
-    await panel.getByRole('button', { name: 'Назад к плагинам' }).click()
-    await panel.getByRole('heading', { name: 'Настройки встроенных плагинов', exact: true }).waitFor({ timeout: 10_000 })
+    await panel.getByRole('button', { name: 'Вернуться к плагинам' }).click()
+    await panel.getByRole('heading', { name: 'Встроенные настройки плагина', exact: true }).waitFor({ timeout: 10_000 })
     await openPage(panel, 'Терминал')
 
     await expect.poll(() => panel.getByLabel('Тайм-аут команды (мс)').inputValue(), { timeout: 5_000 }).toBe('12000')
@@ -443,7 +464,7 @@ describe('web e2e: plugin configuration pages', () => {
     const panel = await openPlugins()
 
     // Off, the bundle's browser half is not loaded and the row has no configuration to open.
-    await panel.getByRole('button', { name: 'Просмотреть @fixture/live-client', exact: true }).click()
+    await panel.getByRole('button', { name: 'Посмотреть @fixture/live-client', exact: true }).click()
     const row = panel.locator('[data-plugin-row]', { hasText: 'fixture-live-client' })
     await row.waitFor({ timeout: 10_000 })
     expect(await panel.getByRole('button', { name: 'Настроить @fixture/live-client' }).count()).toBe(0)
@@ -488,11 +509,11 @@ describe('web e2e: plugin configuration pages', () => {
 
     const snapshot = await captureStableAria(page, '[data-plugin-panel]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(ROW_EXPECTED, snapshot, MODE)
-    await rowPage.getByRole('button', { name: 'Назад к @fixture/live-client' }).click()
+    await rowPage.getByRole('button', { name: 'Вернуться к @fixture/live-client' }).click()
     await bundlePage.waitFor({ timeout: 10_000 })
 
     // An official plugin's page is another subject; the fixture's entries render nothing for it.
-    await panel.getByRole('button', { name: 'Назад к плагинам' }).click()
+    await panel.getByRole('button', { name: 'Вернуться к плагинам' }).click()
     await openPage(panel, 'Терминал')
     const itemPage = panel.locator('[data-plugin-item-detail]')
     expect(await itemPage.locator('[data-live-action], [data-live-badge], [data-live-section]').count()).toBe(0)
@@ -503,6 +524,46 @@ describe('web e2e: plugin configuration pages', () => {
     expect(tripwire.warnings).toEqual([])
     await assertFixtureInventory(SNAPSHOT_DIR, ['bundle.expected.md', 'official.expected.md', 'row.expected.md', 'subagent.expected.md', 'web-search.expected.md'])
   })
+})
 
+describe('web e2e: a community plugin settings page', () => {
+  it('shows a settings.section entry in Settings and on its bundle row', async () => {
+    const scaffold = await launchWebScaffold({
+      profile: { packages: [{ dir: join(FIXTURE_PLUGINS, 'fixture-settings-section') }] },
+    })
+    onTestFinished(() => scaffold.close())
+    const browser = await chromium.launch()
+    onTestFinished(() => browser.close())
+    const page = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: RU_BROWSER_LOCALE })
+    const console = watchConsole(page)
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-config-settings-section'))
+    await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
+    await page.getByRole('navigation', { name: 'Глобальные панели' }).getByRole('button', { name: 'Плагины', exact: true }).click()
+    const panel = page.locator('[data-plugin-panel]')
+    await panel.getByRole('button', { name: 'Посмотреть @fixture/settings-section', exact: true }).click({ timeout: 20_000 })
+    const row = panel.locator('[data-plugin-row]', { hasText: 'fixture-settings-section' })
+    await row.waitFor({ timeout: 10_000 })
+    const configure = panel.getByRole('button', { name: 'Настроить @fixture/settings-section' })
+    expect(await configure.count()).toBe(0)
 
+    // Switched on, the browser half mounts and its settings page claims the row.
+    await panel.getByRole('switch', { name: 'Включить @fixture/settings-section' }).click()
+    await configure.waitFor({ timeout: 30_000 })
+    await configure.click()
+    const rowPage = panel.locator('[data-plugin-row-detail="@fixture/settings-section#fixture-settings-section"]')
+    await rowPage.waitFor({ timeout: 10_000 })
+    await rowPage.getByRole('region', { name: 'Fixture settings', exact: true })
+      .getByText('Settings content from the fixture', { exact: true }).waitFor({ timeout: 10_000 })
+
+    // Settings keeps the same page in its navigation.
+    await openSettings(page, 'ru')
+    const dialog = page.getByRole('dialog', { name: 'Настройки', exact: true })
+    await dialog.getByRole('navigation').getByRole('button', { name: 'Fixture settings', exact: true }).click()
+    await dialog.getByRole('region', { name: 'Fixture settings', exact: true })
+      .getByText('Settings content from the fixture', { exact: true }).waitFor({ timeout: 10_000 })
+    await page.keyboard.press('Escape')
+    await expect.poll(() => dialog.count(), { timeout: 5_000 }).toBe(0)
+    expect(console.pageErrors).toEqual([])
+    expect(console.warnings).toEqual([])
+  }, 90_000)
 })

@@ -151,7 +151,7 @@ describe('ModelSelect label slot', () => {
     expect(renderSlot).not.toHaveBeenCalled()
     expect(document.querySelector('[data-provider-id]')).toBeNull()
     act(() => { directory.set(state({ groups: [] })) })
-    expect(screen.getByRole('button', { name: 'Same model' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Выбрать модель' })).toBeTruthy()
     expect(renderSlot).not.toHaveBeenCalled()
   })
 })
@@ -175,13 +175,13 @@ describe('ModelSelect catalog badges', () => {
     render(<ModelSelect renderSlot={renderLabel} locked={false} available directory={createSnapshotStore(badged())}
       load={vi.fn()} resolveText={chinese} select={vi.fn()} t={t} />)
     const trigger = screen.getByRole('button', { name: 'Выбрать модель. Текущая: DeepSeek-V4.1-Flash' })
-    expect(trigger.textContent).toBe('Same model')
+    expect(trigger.textContent).toBe('新 DeepSeek-V4.1-Flash')
     expect(screen.getByText('新').getAttribute('data-tone')).toBe('info')
     fireEvent.click(trigger)
     const current = screen.getByRole('menuitem', { name: /^Модель/ })
-    expect(current.textContent).toContain('Same model')
+    expect(current.textContent).toContain('DeepSeek-V4.1-Flash 新')
     fireEvent.click(current)
-    expect(screen.getAllByRole('menuitemradio').map(row => row.textContent)).toEqual(['Same model', 'DeepSeek-V4-Pro'])
+    expect(screen.getAllByRole('menuitemradio').map(row => row.textContent)).toEqual(['DeepSeek-V4.1-Flash 新', 'DeepSeek-V4-Pro'])
   })
 
   it('hands the badge to a label contribution, which replaces the default rendering', async () => {
@@ -224,7 +224,7 @@ describe('ModelSelect reasoning effort', () => {
     />)
 
     const trigger = screen.getByRole('button', {
-      name: 'DeepSeek-V4-Flash',
+      name: 'Выбрать модель. Текущая: DeepSeek-V4-Flash, уровень усилий при рассуждении: High',
     })
     fireEvent.click(trigger)
     fireEvent.click(screen.getByRole('menuitem', { name: /Уровень усилий/ }))
@@ -267,11 +267,11 @@ describe('ModelSelect reasoning effort', () => {
     />)
 
     fireEvent.click(screen.getByRole('button', {
-      name: 'DeepSeek',
+      name: 'Выбрать модель. Текущая: Model, уровень усилий при рассуждении: По умолчанию',
     }))
     fireEvent.click(screen.getByRole('menuitem', { name: /Уровень усилий/ }))
     expect(screen.getAllByRole('menuitemradio').map(item => item.textContent))
-      .toEqual(['Default', 'Standard'])
+      .toEqual(['По умолчанию', 'Standard'])
   })
 
   it('opens model choices without exposing a saved route absent from the catalog', () => {
@@ -288,8 +288,8 @@ describe('ModelSelect reasoning effort', () => {
       t={t}
     />)
 
-    const trigger = screen.getByRole('button', { name: 'Same model' })
-    expect(trigger.textContent).toBe('Same model')
+    const trigger = screen.getByRole('button', { name: 'Выбрать модель' })
+    expect(trigger.textContent).toBe('Выбрать модель')
     fireEvent.click(trigger)
     expect(screen.queryByRole('menuitem', { name: /Уровень усилий/ })).toBeNull()
     expect(screen.queryByRole('menuitem', { name: /Модель/ })).toBeNull()
@@ -299,7 +299,7 @@ describe('ModelSelect reasoning effort', () => {
     expect(select).not.toHaveBeenCalled()
     expect(directory.getSnapshot().current).toEqual({ provider: 'deepseek-official', model: 'removed-model' })
     fireEvent.keyDown(screen.getByRole('menuitemradio', { name: 'DeepSeek-V4-Flash' }), { key: 'Escape' })
-    expect(screen.queryByRole('group', { name: 'Выбрать модель' })).toBeNull()
+    expect(screen.queryByRole('group', { name: 'Модель и уровень усилий при рассуждении' })).toBeNull()
   })
 
   it.each(['model', 'provider'])('hides the saved id and effort when the selected %s disappears', (removed) => {
@@ -311,13 +311,13 @@ describe('ModelSelect reasoning effort', () => {
       snapshot.groups = removed === 'provider' ? [] : snapshot.groups.map(group => ({ ...group, models: [] }))
       snapshot.routable = false
     }) })
-    const trigger = screen.getByRole('button', { name: 'Same model' })
-    expect(trigger.textContent).toBe('Same model')
+    const trigger = screen.getByRole('button', { name: 'Выбрать модель' })
+    expect(trigger.textContent).toBe('Выбрать модель')
     expect(directory.getSnapshot().current).toEqual(state().current)
     fireEvent.click(trigger)
     expect(screen.getByRole('status').textContent).toBe(ru['empty.models'])
     fireEvent.keyDown(trigger, { key: 'Tab', shiftKey: true })
-    expect(screen.queryByRole('group', { name: 'Выбрать модель' })).toBeNull()
+    expect(screen.queryByRole('group', { name: 'Модель и уровень усилий при рассуждении' })).toBeNull()
   })
 
   it.each([null, state().current])('shows loading until the catalog and Session projection are both ready (%j)', async (current) => {
@@ -341,7 +341,7 @@ describe('ModelSelect reasoning effort', () => {
     directory.set(state())
     await waitFor(() => {
       expect(screen.getByRole('button', {
-        name: 'DeepSeek-V4-Flash',
+        name: 'Выбрать модель. Текущая: DeepSeek-V4-Flash, уровень усилий при рассуждении: High',
       })).toBeTruthy()
     })
   })
@@ -474,8 +474,9 @@ describe('ModelSelect reasoning effort', () => {
     expect(menu.style.left).toBe('')
     expect(menu.style.top).toBe('')
     expect(measure).not.toHaveBeenCalled()
-    // Interactions inside the trigger subtree or the portaled card stay open.
-    expect(fireEvent.mouseDown(menu)).toBe(true)
+    // Interactions inside the trigger subtree or the portaled card stay open;
+    // presses on the card keep focus where it is.
+    expect(fireEvent.mouseDown(menu)).toBe(false)
     expect(fireEvent.mouseDown(trigger)).toBe(false)
     fireEvent.blur(trigger, { relatedTarget: menu })
     expect(screen.getByRole('menu')).toBeTruthy()
@@ -593,6 +594,23 @@ describe('ModelSelect keyboard walk', () => {
     expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: pane === 'model' ? /^Модель/ : /Уровень усилий/ }))
   })
 
+  it('keeps focus and the card open when non-focusable model pane content is pressed', () => {
+    render(<ModelSelect renderSlot={renderLabel} locked={false} available
+      directory={createSnapshotStore(state({ groups: modelGroups(5) }))}
+      load={vi.fn()} resolveText={resolveText} select={vi.fn()} t={t}
+    />)
+    fireEvent.click(screen.getByRole('button', { name: /Выбрать модель/ }))
+    fireEvent.click(screen.getByRole('menuitem', { name: /^Модель/ }))
+    const search = screen.getByRole('searchbox')
+    const heading = document.querySelector<HTMLElement>('[data-menu-group-heading]')!
+    // false = preventDefault ran, so the browser keeps focus where it was.
+    expect(fireEvent.mouseDown(heading)).toBe(false)
+    expect(fireEvent.mouseDown(screen.getAllByRole('menu')[0]!)).toBe(false)
+    // Text inputs keep their default so the caret can still be placed.
+    expect(fireEvent.mouseDown(search)).toBe(true)
+    expect(screen.getAllByRole('menu').length).toBeGreaterThan(0)
+  })
+
   it('↑↓ walk the rows of the shown pane, wrapping, and stay open', () => {
     mountOpen()
     // The trigger holds focus while the menu opens: the first forward step
@@ -703,7 +721,7 @@ describe('ModelSelect keyboard walk', () => {
     expect(fireEvent.mouseDown(retry)).toBe(false)
     fireEvent.click(retry)
     expect(load).toHaveBeenCalledTimes(2)
-    expect(screen.getByRole('group', { name: 'Выбрать модель' })).toBeTruthy()
+    expect(screen.getByRole('group', { name: 'Модель и уровень усилий при рассуждении' })).toBeTruthy()
     retry.focus()
     // A control that is not a row keeps the browser's traversal.
     expect(fireEvent.keyDown(retry, { key: 'Tab' })).toBe(true)
@@ -1076,7 +1094,8 @@ it('hides the inherited effort until a listed model is selected', async () => {
 
 it('places account and official models before third-party models', async () => {
   const groups = ['custom', 'deepseek-official', 'deepseek-account', 'another'].map(id => ({
-    id, name: id, models: [1, 2].map(index => ({ id: `${id}-${index}`, name: `${id}-${index}` })),
+    id, name: id, ...id === 'deepseek-account' ? { accountManaged: true } : {},
+    models: [1, 2].map(index => ({ id: `${id}-${index}`, name: `${id}-${index}` })),
   }))
   const directory = createSnapshotStore<ModelDirectoryState>(state({ current: null, groups }))
   render(<ModelSelect renderSlot={renderLabel} locked={false} available directory={directory} load={vi.fn()}
@@ -1094,6 +1113,7 @@ it('places account and official models before third-party models', async () => {
 it.each([en, ru])('localizes the account group while preserving external names', (copy) => {
   const groups = ['deepseek-account', 'custom'].map(id => ({
     id, name: id === 'deepseek-account' ? 'DeepSeek Account' : 'My Gateway',
+    ...id === 'deepseek-account' ? { accountManaged: true } : {},
     models: [{ id: 'model', name: 'Model' }],
   }))
   render(<ModelSelect renderSlot={renderLabel} locked={false} available

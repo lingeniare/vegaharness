@@ -89,15 +89,15 @@ describe('TodoRow', () => {
   it('summarizes counts and the active item from the call args', () => {
     render(<TodoRow {...rowProps(resultNode(ARGS))} />)
     expect(screen.getByText('Обновить список задач')).toBeTruthy()
-    expect(screen.getByText('3 · 写组件.Выполнено: 1')).toBeTruthy()
+    expect(screen.getByText('Выполнено: 1/3 · 写组件')).toBeTruthy()
   })
 
   it('reports the extra active count outside the ellipsized summary text', () => {
     const { container } = render(<TodoRow {...rowProps(resultNode(JSON.stringify({ todos: PARALLEL })))} />)
-    const text = screen.getByText('5 · 写组件.Выполнено: 1')
+    const text = screen.getByText('Выполнено: 1/5 · 写组件')
     const extra = screen.getByText('+2')
     expect(text.contains(extra)).toBe(false)
-    expect(container.textContent).toContain('5 · 写组件+2.Выполнено: 1')
+    expect(container.textContent).toContain('Выполнено: 1/5 · 写组件+2')
   })
 
   it('omits the active clause when no item is in progress and reads running-call args', () => {
@@ -142,7 +142,7 @@ describe('TodoRow', () => {
     expect(screen.getByText('搭骨架')).toBeTruthy()
     expect(screen.getAllByRole('listitem')).toHaveLength(3)
     expect(screen.getByLabelText('Выполняется')).toBeTruthy()
-    expect(screen.queryByText('Ввод')).toBeNull()
+    expect(screen.queryByText('ВХОД')).toBeNull()
   })
 
   it.each([

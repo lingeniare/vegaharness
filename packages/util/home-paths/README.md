@@ -1,5 +1,6 @@
 ---
 description: "Shared resolution of the VEGA Harness home, its config, data, state, cache, and backup category paths, and the shared agent configuration root, plus tilde expansion and stable watch paths."
+kind: "package-library"
 ---
 
 # @deepseek-ai/dsh-home-paths

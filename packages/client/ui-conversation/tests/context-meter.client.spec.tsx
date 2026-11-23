@@ -71,7 +71,7 @@ describe('ContextMeter', () => {
     vi.useFakeTimers()
     try {
       const view = meter({ contextPressure: { pressureTokens: 32_000, contextWindow: 128_000 } })
-      fireEvent.pointerEnter(view.getByRole('button', { name: '上下文已用 25%' }))
+      fireEvent.pointerEnter(view.getByRole('button', { name: 'Использовано 25% контекста' }))
       act(() => { vi.advanceTimersByTime(200) })
       const tooltip = view.getByRole('tooltip')
       expect(view.container.contains(tooltip)).toBe(false)

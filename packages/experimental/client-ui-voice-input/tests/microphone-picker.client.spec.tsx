@@ -133,7 +133,7 @@ it.each([new Error('device busy'), 'device busy'])('shows capture failures witho
   try {
     await act(async () => { b.media.dispatchEvent(new Event('devicechange')) })
     await screen.findByRole('option', { name: 'Микрофон 1' })
-    await screen.findByText('语音识别失败: device busy')
+    await screen.findByText('Не удалось распознать речь: device busy')
   } finally { b.unmount(); await Promise.all(b.recordings.map(recording => recording.dispose())) }
 })
 
@@ -148,7 +148,7 @@ it('reports unavailable browser capture and enumeration failures beside the fiel
     b.enumerateDevices.mockRejectedValueOnce(new Error('enumeration failed'))
     b.props.createRecording = () => new Recording(() => {}, b.selection.getSnapshot().id)
     b.rerender(<MicrophonePicker {...b.props} />)
-    await screen.findByText('语音识别失败: enumeration failed')
+    await screen.findByText('Не удалось распознать речь: enumeration failed')
   } finally { b.unmount(); await Promise.all(b.recordings.map(recording => recording.dispose())) }
 })
 
@@ -312,7 +312,7 @@ it.each(['resolve', 'reject'])('ignores an older enumeration after a newer hot-p
     await act(async () => { if (settle === 'resolve') pending.resolve(existing); else pending.reject(new Error('Stale failure')) })
     expect(screen.getByRole('option', { name: `USB microphone — ${ru.deviceUnavailable}` })).toBeTruthy()
     expect(screen.queryByRole('img', { name: ru.inputLevel })).toBeNull()
-    expect(screen.queryByText('语音识别失败: Stale failure')).toBeNull()
+    expect(screen.queryByText('Не удалось распознать речь: Stale failure')).toBeNull()
   } finally { pending.resolve([]); b.unmount(); await Promise.all(b.recordings.map(recording => recording.dispose())) }
 })
 
@@ -354,7 +354,7 @@ it('recovers system-default preview after its track ends and shows unavailable w
     expect(b.getUserMedia.mock.calls.at(-1)?.[0].audio).not.toHaveProperty('deviceId')
     b.enumerateDevices.mockResolvedValue([])
     await act(async () => { b.media.dispatchEvent(new Event('devicechange')) })
-    const unavailable = screen.getByRole<HTMLOptionElement>('option', { name: `СИСТЕМАПо умолчанию（Fixture microphone） — ${ru.deviceUnavailable}` })
+    const unavailable = screen.getByRole<HTMLOptionElement>('option', { name: `Системное устройство по умолчанию (Fixture microphone) — ${ru.deviceUnavailable}` })
     expect(unavailable.disabled).toBe(true)
     expect(screen.queryByRole('img', { name: ru.inputLevel })).toBeNull()
   } finally { b.unmount(); await Promise.all(b.recordings.map(recording => recording.dispose())) }

@@ -45,6 +45,7 @@ it('forwards the documented pnpm purge command through both package scripts to t
     'desktop-package-environment.mjs': "export const loadDesktopPackageEnvironment = () => ({ DSH_DESKTOP_AUTO_UPDATE_ENV: 'production' })",
     'desktop-upload-plan.ts': "export const createDesktopUploadPlan = () => { throw new Error('unexpected installer read') }",
     'desktop-upload-run.ts': "export const uploadDesktopRelease = () => { throw new Error('unexpected upload') }",
+    'desktop-upload-github.ts': "export const uploadDesktopGithubRelease = () => { throw new Error('unexpected github upload') }",
     'desktop-release-tag.ts': "export const desktopReleaseTag = () => { throw new Error('unexpected tag') }; export const tagDesktopRelease = desktopReleaseTag",
     'desktop-edgeone.ts': `
       import assert from 'node:assert/strict'

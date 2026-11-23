@@ -42,7 +42,7 @@ function options(...ids: string[]): WebProviderOption[] {
 const SEARCH_OPTIONS = options('deepseek-search-api', 'deepseek-official')
 const FETCH_OPTIONS = options('http', 'deepseek-fetch-api')
 
-/** The locale service's resolution, with Chinese active. */
+/** The locale service's resolution, with Russian active. */
 const resolveText = vi.fn((text: string | { en: string; [locale: string]: string }) => typeof text === 'string' ? text : text.ru ?? text.en)
 
 /** The shipped selection: the DeepSeek Search API with local fetch. */
@@ -133,8 +133,8 @@ describe('WebSearchCard billing', () => {
 
   it.each<[string, readonly string[], string]>([
     ['one own field', ['searchBaseURL'], 'Overridden by searchBaseURL'],
-    // The page's resolver picks Chinese, so two names join with the Chinese enumeration comma.
-    ['both own fields', ['searchBaseURL', 'searchApiKeyEnv'], 'Overridden by searchBaseURL、searchApiKeyEnv'],
+    // The page's resolver picks Russian, so two names join with its enumeration comma.
+    ['both own fields', ['searchBaseURL', 'searchApiKeyEnv'], 'Overridden by searchBaseURL, searchApiKeyEnv'],
   ])('tags the billing with %s and locks its menu', (_label, advancedOverride, tag) => {
     renderPage({ ...apis(), searchBilling: { value: 'auto', overridden: false, advancedOverride } })
     expect(region(en.searchSection).getByText(tag, { exact: true })).toBeTruthy()
@@ -145,8 +145,8 @@ describe('WebSearchCard billing', () => {
 
   it('joins the overriding field names with the separator of the active language', () => {
     renderPage({ ...apis(), fetchBilling: { value: 'auto', overridden: false, advancedOverride: ['fetchBaseURL', 'fetchApiKeyEnv'] } })
-    expect(resolveText).toHaveBeenCalledWith(expect.objectContaining({ en: ', ', ru: '、' }))
-    expect(region(en.fetchSection).getByText('Overridden by fetchBaseURL、fetchApiKeyEnv', { exact: true })).toBeTruthy()
+    expect(resolveText).toHaveBeenCalledWith(expect.objectContaining({ en: ', ', ru: ', ' }))
+    expect(region(en.fetchSection).getByText('Overridden by fetchBaseURL, fetchApiKeyEnv', { exact: true })).toBeTruthy()
   })
 
   it('lists the three billings and selects a new one for its capability only', () => {
@@ -188,7 +188,7 @@ describe('WebSearchCard billing', () => {
     expect([en.billing, en.billingAuto, en.billingAccount, en.billingApiKey])
       .toEqual(['Billing', 'Automatic', 'Signed-in DeepSeek account', 'DeepSeek API key'])
     expect([ru.billing, ru.billingAuto, ru.billingAccount, ru.billingApiKey])
-      .toEqual(['Оплата', 'Автоматически', 'Активный аккаунт DeepSeek', 'DeepSeek API Key'])
+      .toEqual(['Оплата', 'Автоматически', 'Активный аккаунт DeepSeek', 'Ключ API DeepSeek'])
     expect([ru.billingAutoHint, ru.billingAccountHint, ru.billingApiKeyHint, ru.billingAdvancedOverride]).toEqual([
       'Следует аккаунту или ключу API DeepSeek из разговора; с другими моделями сначала ключ API, затем активный аккаунт.',
       'Требуется вход в DeepSeek.',
@@ -207,7 +207,7 @@ describe('WebSearchCard billing', () => {
 describe('WebSearchCard', () => {
   it('offers legacy search in both locales and renders its own settings', () => {
     const { actions } = renderPage(legacy())
-    expect(searchMenu().textContent).toBe('DeepSeek (legacy)')
+    expect(searchMenu().textContent).toBe('DeepSeek server-side search')
     expect(ru.providerLegacy).toBe('DeepSeek (прежняя версия)')
     expect(screen.queryByLabelText(en.count)).toBeNull()
     fireEvent.change(screen.getByLabelText(en.credential), { target: { value: 'new-key' } })
@@ -291,7 +291,7 @@ describe('WebSearchCard', () => {
     renderPage(apis())
     expect(fetchMenu().textContent).toBe(en.providerDeepSeekFetch)
     const guide = screen.getByRole('link', { name: en.searchGuide })
-    expect(guide).toHaveProperty('href', en.searchGuideUrl)
+    expect(guide.getAttribute('href')).toBe(en.searchGuideUrl)
     expect(guide.getAttribute('target')).toBe('_blank')
     expect(guide.getAttribute('rel')).toBe('noopener noreferrer')
     // The description comes first; the guide link is the page's own line after it.
@@ -393,6 +393,27 @@ describe('WebSearchCard', () => {
     fireEvent.click(fetchMenu())
     fireEvent.click(screen.getByRole('menuitem', { name: en.providerAuto }))
     expect(actions.selectProvider).toHaveBeenCalledTimes(1)
+  })
+
+  it('explains automatic Search selection with the guide link, and shows no provider panel under it', () => {
+    const base = shipped()
+    renderPage({ ...base, search: { ...base.search, selected: '', kind: 'none', auto: true } })
+    expect(searchMenu().textContent).toBe(en.providerAuto)
+    expect(screen.getByText(en.searchAutoHint)).toBeTruthy()
+    expect(screen.getByRole('link', { name: en.searchGuide }).getAttribute('href')).toBe(en.searchGuideUrl)
+    expect(screen.queryByLabelText(en.count)).toBeNull()
+  })
+
+  it('does not explain automatic Search selection while a provider is selected or under automatic Fetch selection', () => {
+    const base = shipped()
+    renderPage({
+      ...base,
+      search: { ...base.search, selected: 'deepseek-official', kind: 'none', auto: true },
+      fetch: { ...base.fetch, selected: '', kind: 'none', auto: true },
+    })
+    expect(fetchMenu().textContent).toBe(en.providerAuto)
+    expect(screen.queryByText(en.searchAutoHint)).toBeNull()
+    expect(screen.queryByRole('link', { name: en.searchGuide })).toBeNull()
   })
 
   it('reports a failed provider list read in each section and retries it', () => {

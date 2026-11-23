@@ -582,7 +582,10 @@ async function main(): Promise<void> {
           if (previousAccountStatus === 'credential-stored' && state.status === 'signed-out') {
             void readWelcomeState().then(async (value) => {
               if (needsWelcome(value) && !quitting) {
-                enteredWorkspace = false
+                if (enteredWorkspace) {
+                  enteredWorkspace = false
+                  refreshApplicationMenu()
+                }
                 await showWelcome()
                 if (welcomeWindow !== undefined && !welcomeWindow.isDestroyed()) welcomeWindow.webContents.send(WELCOME_IPC.state, state)
               }
@@ -596,7 +599,10 @@ async function main(): Promise<void> {
           void readWelcomeState().then(async (value) => {
             if (!needsWelcome(value) || quitting) return
             pendingWelcomeNotice = 'session-expired'
-            enteredWorkspace = false
+            if (enteredWorkspace) {
+              enteredWorkspace = false
+              refreshApplicationMenu()
+            }
             await showWelcome()
             const state = await accountBackend.state()
             if (welcomeWindow !== undefined && !welcomeWindow.isDestroyed()) welcomeWindow.webContents.send(WELCOME_IPC.state, state)
@@ -774,7 +780,7 @@ async function main(): Promise<void> {
     // A confirmation on a hidden window would go unseen, so it waits for the next show; the mandatory
     // flow keeps its own taskbar and Dock attention instead.
     if (!isMandatory()) await windowShown()
-    if (quitting) return state
+    if (isQuitting()) return state
     return updates.install(version)
   }
   const windowShown = (): Promise<void> => new Promise((resolve) => {
@@ -1124,6 +1130,9 @@ async function main(): Promise<void> {
         click: () => { void showAbout().catch((error: unknown) => { console.error(error) }) } }
       : { label: currentDesktopLocale().messages.aboutMenu, role: 'about' },
     { type: 'separator' },
+    shortcuts.settingsMenuItem(currentDesktopLocale().messages.settingsMenu,
+      enteredWorkspace && !isMandatory(), () => { focusPrimaryWindow() }),
+    { type: 'separator' },
     { label: currentDesktopLocale().messages.checkUpdatesMenu, click: () => { void openUpdatePrompt(true) } },
     ...process.platform === 'darwin' || process.platform === 'win32'
       ? [{ label: currentDesktopLocale().messages.cliCommandMenu, click: () => { void commandManager.show() } }] : [],
@@ -1291,7 +1300,9 @@ async function main(): Promise<void> {
     if (process.platform === 'win32') window.setBackgroundColor(chromeFallbackFill())
     if (activate) window.show()
     else window.showInactive()
+    const wasInWorkspace = enteredWorkspace
     enteredWorkspace = true
+    if (!wasInWorkspace) refreshApplicationMenu()
     if (welcomeWindow !== undefined) {
       welcomeWindow.close()
       window.webContents.send(DESKTOP_IPC.enterWorkspace)
@@ -1504,7 +1515,10 @@ async function main(): Promise<void> {
       }
       mandatoryUI?.sync()
       if (state.blocking && !wasBlocking) void updateSchedule.check(false, true).catch((error: unknown) => { console.error(error) })
-      wasBlocking = state.blocking
+      if (state.blocking !== wasBlocking) {
+        wasBlocking = state.blocking
+        refreshApplicationMenu()
+      }
     }, policyAuth?.request, () => desktopClientMetadata(locale.id))
     const policy = mandatoryPolicy
     mandatoryUI = new DesktopMandatoryUpdateWindow({

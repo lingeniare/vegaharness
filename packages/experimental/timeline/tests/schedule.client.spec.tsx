@@ -6,7 +6,7 @@ import { act, cleanup, fireEvent, render, screen, within } from '@testing-librar
 import { Schedule } from '../src/client/Schedule.tsx'
 import { ReportDetails } from '../src/client/ReportDetails.tsx'
 import type { ViewState } from '../src/client/store.ts'
-import { en, zh } from '../src/client/locales.ts'
+import { en, ru } from '../src/client/locales.ts'
 import { reportSchema } from '../src/records.ts'
 import type { IntervalReport, TimelineView } from '../src/records.ts'
 
@@ -655,11 +655,11 @@ describe('the column timeline', () => {
         openReport={vi.fn()}
         back={vi.fn()}
         annotate={vi.fn()}
-        t={key => zh[key as keyof typeof zh] ?? key}
+        t={key => ru[key as keyof typeof ru] ?? key}
       />,
     )
     expect(screen.getAllByRole('heading', { level: 4 }).map(heading => heading.textContent)).toEqual([
-      '进展', '待定事项', '你可以做的事',
+      'Ход работы', 'Требует уточнения', 'Как вы можете помочь',
     ])
   })
   it('titles report details by level and shows durations like the report blocks', () => {

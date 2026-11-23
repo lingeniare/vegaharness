@@ -12,7 +12,7 @@ import type { ComposerChainProps } from '@deepseek-ai/dsh-client-ui-conversation
 import { ApplicationApproval, selectApplicationApproval } from './ApplicationApproval.tsx'
 import { PermissionController } from './controller.ts'
 import { PermissionPanel, PermissionSetup, PermissionToast } from './PermissionPanel.tsx'
-import { en, ru, NS, type CuaPermissionLocaleKey } from './locales.ts'
+import { en, NS, ru, type CuaPermissionLocaleKey } from './locales.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface LocaleNamespaceMap {
@@ -32,9 +32,13 @@ export const inject = ['remote', 'slots', 'locale', 'configForms']
  */
 export async function mountCuaPermissions(ctx: Context, contribution: TypertRemoteContribution): Promise<() => Promise<void>> {
   const transport = ctx.plugin(async (owner) => { await owner.remote.$mount(contribution) })
-  const ui = ctx.inject(['remote.cuaAccess', 'slots', 'locale'], (ctx) => {
+  const ui = ctx.inject(['remote.cuaAccess', 'remote.pluginInventory', 'slots', 'locale'], (ctx) => {
     ctx.effect(() => ctx.locale.register(NS, { en, ru }))
-    const controller = new PermissionController(ctx.remote.cuaAccess, () => ctx.locale.getSnapshot().active)
+    const controller = new PermissionController(ctx.remote.cuaAccess, () => ctx.locale.getSnapshot().active, async () => {
+      const result = await ctx.remote.pluginInventory.list()
+      if (!result.ok) return result
+      return { ok: true, value: result.value.entries.some(entry => entry.enabled && entry.moduleName === '@deepseek-ai/dsh-cua-windows') }
+    })
     const face = controller.face()
     ctx.slots.inject('conversation.composer', () => ctx.slots.register({
       name: 'conversation.composer', priority: -1, locale: NS,

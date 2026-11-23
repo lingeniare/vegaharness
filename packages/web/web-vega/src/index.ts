@@ -21,7 +21,7 @@ import {
   VEGA_DEFAULT_MODEL,
   VEGA_PROVIDER_ID,
 } from './provider.ts'
-import type { VegaProviderOptions } from './provider.ts'
+import type { VegaAccountCredential, VegaProviderOptions } from './provider.ts'
 
 export {
   VegaFetchProvider,
@@ -32,6 +32,7 @@ export {
   VEGA_PROVIDER_ID,
 } from './provider.ts'
 export type {
+  VegaAccountCredential,
   VegaCompletion,
   VegaFetchLlmRequest,
   VegaProviderOptions,
@@ -71,7 +72,7 @@ export const Config = z.object({
  */
 function resolveOptions(
   ctx: Context, config: { [K in keyof Config]: ReturnType<Config[K]['get']> },
-): VegaProviderOptions & { readonly resolveAccountToken: (endpoint: string) => Promise<string | undefined> } {
+): VegaProviderOptions & { readonly resolveAccountCredential: (endpoint: string) => Promise<VegaAccountCredential | undefined> } {
   return {
     baseURL: config.baseURL ?? VEGA_DEFAULT_BASE_URL,
     model: config.model,
@@ -85,13 +86,14 @@ function resolveOptions(
         : undefined
     },
     resolveSession: () => ctx.get('agents')?.currentInitiator()?.session.id,
-    resolveAccountToken: async (endpoint) => {
+    resolveAccountCredential: async (endpoint) => {
       const provider = ctx.get('agents')?.currentInitiator()?.session.requestContext()?.provider
       if (provider !== VEGA_PROVIDER_ID) return undefined
-      return await ctx.get('deepseekAccount')?.resolveToken(endpoint)
-    },
-    rejectToken: async (token) => {
-      await ctx.get('deepseekAccount')?.rejectToken(token)
+      const credential = await ctx.get('deepseekAccount')?.resolveRequestCredential(endpoint)
+      const token = credential?.headers['x-dsh-auth-token']
+      return credential === undefined || token === undefined
+        ? undefined
+        : { token, reject: () => credential.reject() }
     },
   }
 }
@@ -114,8 +116,8 @@ async function vegaReady(
   const account = ctx.get('deepseekAccount')
   if (account === undefined) return false
   try {
-    const token = await account.resolveToken(`${options.baseURL}/chat/completions`)
-    return token !== undefined && token.length > 0
+    const credential = await account.resolveRequestCredential(`${options.baseURL}/chat/completions`)
+    return credential !== undefined
   } catch (_unreadableGrant) {
     return false
   }

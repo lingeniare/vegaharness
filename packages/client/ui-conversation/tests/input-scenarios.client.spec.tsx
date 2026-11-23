@@ -116,8 +116,8 @@ function commandSource(
 }
 
 const COMMANDS: FakeCommand[] = [
-  { name: 'goal', description: '设定目标', input: { hint: 'Содержание цели' } },
-  { name: 'compact', description: 'Сжатие Контекст' },
+  { name: 'goal', description: '设定目标', input: { hint: '目标内容' } },
+  { name: 'compact', description: '压缩上下文' },
   { name: 'vision', description: '识别图片', input: { hint: '想问什么', attachments: true } },
 ]
 
@@ -203,6 +203,7 @@ async function scopedBench(register?: (inputTriggers: InputTriggerService) => vo
     useLexicon: bindSnapshotSelector(shell.lexicon),
     useMenuLauncher: bindSnapshotSelector(controller.launcher),
     renderSlot: (() => null) as InputBarProps['renderSlot'],
+    renderSlotChain: (_key, _owner, options) => options?.fallback,
     stop: vi.fn(),
     retry: undefined,
     useStopShortcut: bindSnapshotSelector(createSnapshotStore<readonly string[]>([])),
@@ -341,9 +342,9 @@ describe('scenario: images ride an accepting command through the real pipeline',
 
   it('an imageless enter adjudicates with a zero-image envelope', async () => {
     const b = await bench()
-    act(() => { b.shell.setDraft('/goal ') })
+    act(() => { b.shell.setDraft('/goal 发布') })
     fireEvent.keyDown(b.textarea, { key: 'Enter' })
-    await vi.waitFor(() => { expect(b.execute).toHaveBeenCalledWith('/goal ', []) })
+    await vi.waitFor(() => { expect(b.execute).toHaveBeenCalledWith('/goal 发布', []) })
     expect(b.envelopes).toEqual([{ attachments: 0 }])
     expect(b.serialize).not.toHaveBeenCalled()
     expect(b.release).not.toHaveBeenCalled()
@@ -351,8 +352,8 @@ describe('scenario: images ride an accepting command through the real pipeline',
 })
 
 describe('scenario H: the command chip deletes whole', () => {
-  it.each(['goal', 'Цель', 'plan', 'План', 'feedback', 'Обратная связь'])('keeps /%s claimed until the chip itself is deleted', async (name) => {
-    const { source } = commandSource([{ name, description: name, input: { hint: 'Содержание цели' } }],
+  it.each(['goal', '目标', 'plan', '计划', 'feedback', '反馈'])('keeps /%s claimed until the chip itself is deleted', async (name) => {
+    const { source } = commandSource([{ name, description: name, input: { hint: '目标内容' } }],
       () => Promise.resolve({ kind: 'success' }))
     const b = await scopedBench((triggers) => { triggers.registerSource(source) })
     b.type(`/${name}`)
@@ -418,7 +419,7 @@ describe('scenario H: the command chip deletes whole', () => {
     expect(chip()?.hasAttribute('data-selected')).toBe(true)
     b.append('发布')
     expect(chip()?.hasAttribute('data-selected')).toBe(false)
-    expect(b.shell.snapshot.draft).toBe('/goal ')
+    expect(b.shell.snapshot.draft).toBe('/goal发布')
     expect(b.shell.snapshot.phase).toBe('claimed')
   })
 
@@ -492,7 +493,7 @@ describe('scenario H: the command chip deletes whole', () => {
     expect(chip()?.hasAttribute('data-selected')).toBe(true)
     b.deleteCharacter(false)
     expect(chip()).toBeNull()
-    expect(b.shell.snapshot.draft).toBe('/goal ')
+    expect(b.shell.snapshot.draft).toBe(' 发布')
     expect(b.shell.snapshot.phase).toBe('plain')
   })
 
@@ -510,7 +511,7 @@ describe('scenario H: the command chip deletes whole', () => {
         paragraph.select(1, 1).insertText('立即')
       }, { discrete: true })
     })
-    expect(b.shell.snapshot.draft).toBe('/goal ')
+    expect(b.shell.snapshot.draft).toBe('/goal立即 发布')
     expect(b.shell.snapshot.phase).toBe('claimed')
     expect(b.view.container.querySelector('[data-composer-command]')?.textContent).toBe('/goal')
   })
@@ -525,7 +526,7 @@ describe('scenario H: the command chip deletes whole', () => {
     b.append('发布')
     b.erase(0, 1)
     expect(b.shell.snapshot.phase).toBe('plain')
-    expect(b.shell.snapshot.draft).toBe('/goal ')
+    expect(b.shell.snapshot.draft).toBe(' 发布')
     expect(b.view.container.querySelector('[data-composer-command]')).toBeNull()
     fireEvent.keyDown(b.textarea, { key: 'Enter' })
     expect(b.sink).toHaveBeenCalledWith('发布', [], 'queue', expect.any(AbortSignal), expect.any(Function))
@@ -546,7 +547,7 @@ describe('scenario H: the command chip deletes whole', () => {
       }, { discrete: true })
     })
     expect(b.shell.snapshot.phase).toBe('plain')
-    expect(b.shell.snapshot.draft).toBe('/goal ')
+    expect(b.shell.snapshot.draft).toBe('看看 /goal 发布')
     expect(b.view.container.querySelector('[data-composer-command]')).toBeNull()
   })
 
@@ -564,10 +565,10 @@ describe('scenario H: the command chip deletes whole', () => {
     })
     expect(b.shell.snapshot.phase).toBe('claimed')
     expect(b.shell.snapshot.claim?.name).toBe('goal')
-    expect(b.shell.snapshot.draft).toBe('/goal ')
+    expect(b.shell.snapshot.draft).toBe('/goal 发布')
     expect(b.view.container.querySelector('[data-composer-command]')?.textContent).toBe('/goal')
     fireEvent.keyDown(b.textarea, { key: 'Enter' })
-    await vi.waitFor(() => { expect(b.execute).toHaveBeenCalledWith('/goal ', []) })
+    await vi.waitFor(() => { expect(b.execute).toHaveBeenCalledWith('/goal 发布', []) })
   })
 })
 
@@ -635,11 +636,11 @@ describe('scenario I: unknown /xyz + enter', () => {
         matchEnter: () => Promise.reject(new Error('目录预热失败')),
       } as never)
     })
-    act(() => { b.shell.setDraft('/goal ') })
+    act(() => { b.shell.setDraft('/plan 上线') })
     fireEvent.keyDown(b.textarea, { key: 'Enter' })
     await vi.waitFor(() => { expect(b.view.getByText('目录预热失败')).toBeTruthy() })
     // Never a silent downgrade: draft retained, sink untouched.
-    expect(b.shell.snapshot.draft).toBe('/goal ')
+    expect(b.shell.snapshot.draft).toBe('/plan 上线')
     expect(b.sink).not.toHaveBeenCalled()
   })
 })

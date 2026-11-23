@@ -472,7 +472,7 @@ describe('ScheduleCatalogAction rows', () => {
     for (const kind of ['at', 'after'] as const) {
       const once = record(`once-${kind}`, kind, START + 1_000)
       expect(formatScheduleFrequency(once, frequency)).toBe('Once')
-      expect(formatScheduleFrequency(once, tZh)).toBe('Однократно')
+      expect(formatScheduleFrequency(once, tZh)).toBe('Один раз')
     }
     expect(tZh('list.nextRun')).toBe('Следующий запуск')
   })
@@ -487,7 +487,7 @@ describe('ScheduleCatalogAction rows', () => {
     expect(formatScheduleFrequency(item, makeTranslate(en)))
       .toBe(`Daily at ${displayed} (${zoneLabel('America/New_York', makeTranslate(managerEn))})`)
     expect(formatScheduleFrequency(item, makeTranslate(ru)))
-      .toBe(`Daily at ${displayed} (${zoneLabel('America/New_York', makeTranslate(managerEn))})`)
+      .toBe(`Ежедневно в ${displayed} (${zoneLabel('America/New_York', makeTranslate(managerRu))})`)
   })
 
   it('labels a weekly rule with its localized weekday set, clock, and zone', () => {

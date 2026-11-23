@@ -406,7 +406,7 @@ describe.skipIf(webSnapshotMode() === 'record').each([
         await page.setViewportSize({ width: 402, height })
         await page.getByRole('button', { name: /^选择模型/ }).click()
         await page.getByRole('menuitem', { name: /^推理等级/ }).click()
-        const menu = page.getByRole('menu', { name: '模型与推理等级', exact: true })
+        const menu = page.getByRole('menu', { name: 'Модель и уровень усилий при рассуждении', exact: true })
         await menu.getByRole('menuitemradio').first().click()
         await expect.poll(() => scaffold.ctx.agentDefaultModel.currentSelection().reasoningEffort).toBeUndefined()
         await page.getByRole('button', { name: /^选择模型/ }).click()

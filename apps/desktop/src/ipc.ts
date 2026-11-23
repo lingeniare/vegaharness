@@ -60,6 +60,7 @@ export interface DesktopUpdateState {
 
 /** Classified failure copy selected by the Web locale without exposing raw updater diagnostics. */
 export type DesktopUpdateFailureKind =
+  | 'configuration'
   | 'check'
   | 'check-network'
   | 'download'
@@ -69,7 +70,6 @@ export type DesktopUpdateFailureKind =
   | 'download-busy'
   | 'install'
   | 'install-network'
-  | 'configuration'
   | 'stop-failed'
   | 'tasks-changed'
   | 'tasks-unavailable'
@@ -81,6 +81,7 @@ export interface DesktopUpdatePresentation {
   readonly version?: string
   readonly percent?: number
   readonly failure?: DesktopUpdateFailureKind
+  readonly configurationError?: 'read' | 'format' | 'channel' | 'cleanup'
 }
 
 /** Product documents cannot supply update versions, package URLs, or installation authorization. */

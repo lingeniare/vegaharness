@@ -1,7 +1,11 @@
-/** Key domain of the `pluginMarket` namespace (en is the source of truth). */
+/** Discover tab copy. */
+
+/** English dictionary and key source of truth. */
+
+/** Dictionary keys owned by this plugin. */
 export type PluginMarketLocaleKey = keyof typeof en
 
-/** English dictionary (the key-set source of truth). */
+/** English dictionary. */
 export const en = {
   title: 'Discover',
   refresh: 'Refresh',
@@ -16,9 +20,15 @@ export const en = {
   manageSources: 'Manage index sources…',
   marketMenu: 'Switch plugin index, currently {market}',
   sourcesTitle: 'Index sources',
-  sourcesDescription: 'A plugin index is published as the URL of one index file. Discover browses the indexes listed here.',
+  sourcesDescription: 'Add a plugin index from a JSON address or a Git repository.',
   sourcesLabel: 'Added index sources',
-  sourceUrl: 'Index URL',
+  sourceUrl: 'Source address',
+  sourcePath: 'Index file path',
+  sourceRef: 'Git ref',
+  sourceDefaultRef: 'Default branch',
+  sourceInvalidGit: 'Use an HTTPS or SSH repository address and a valid index path and Git ref.',
+  sourceRepositoryPlaceholder: 'https://github.com/owner/repository',
+  sourcePathPlaceholder: 'index.json',
   sourcePlaceholder: 'https://example.com/index.json',
   addSource: 'Add',
   removeSource: 'Remove',
@@ -51,6 +61,8 @@ export const en = {
   install: 'Install',
   installTitle: 'Install {name}',
   installVersionTitle: 'Install {name} {version}',
+  update: 'Update',
+  updateTitle: 'Update {name} to {version}',
   openInstalled: 'View {name} in Installed',
   statusInstalled: 'Installed',
   statusUpdate: 'Update available',
@@ -90,13 +102,17 @@ export const en = {
   detailInvalid: 'The plugin declares an invalid details file.',
   detailFailed: 'Could not read the details.',
   footnotes: 'Footnotes',
-  update: 'Update',
-  updateTitle: 'Update {name} to {version}',
-} satisfies Record<string, string>
+}
 
-/** Discover tab copy. */
+/** Japanese copy. */
 
-/** Russian dictionary, checked against the English keys. */
+/** Spanish dictionary. */
+
+/** French dictionary. */
+
+/** German dictionary. */
+
+/** Russian dictionary. */
 export const ru = {
   title: 'Обзор',
   refresh: 'Обновить',
@@ -114,6 +130,12 @@ export const ru = {
   sourcesDescription: 'Каталог плагинов публикуется как URL одного индексного файла. «Обзор» просматривает перечисленные здесь индексы.',
   sourcesLabel: 'Добавленные источники индекса',
   sourceUrl: 'URL индекса',
+  sourcePath: 'Путь к файлу индекса',
+  sourceRef: 'Ссылка Git',
+  sourceDefaultRef: 'Ветка по умолчанию',
+  sourceInvalidGit: 'Укажите адрес репозитория HTTPS или SSH, а также допустимый путь к индексу и ссылку Git.',
+  sourceRepositoryPlaceholder: 'https://github.com/owner/repository',
+  sourcePathPlaceholder: 'index.json',
   sourcePlaceholder: 'https://example.com/index.json',
   addSource: 'Добавить',
   removeSource: 'Удалить',
@@ -146,6 +168,8 @@ export const ru = {
   install: 'Установить',
   installTitle: 'Установить {name}',
   installVersionTitle: 'Установить {name} {version}',
+  update: 'Обновить',
+  updateTitle: 'Обновить {name} до {version}',
   openInstalled: 'Открыть {name} в «Установленные»',
   statusInstalled: 'Установлен',
   statusUpdate: 'Доступно обновление',
@@ -185,6 +209,6 @@ export const ru = {
   detailInvalid: 'Плагин объявляет неверный файл сведений.',
   detailFailed: 'Подробности прочитать не удалось.',
   footnotes: 'Сноски',
-  update: 'Обновить',
-  updateTitle: 'Обновить {name} до {version}',
 } satisfies Record<keyof typeof en, string>
+
+/** Portuguese dictionary. */

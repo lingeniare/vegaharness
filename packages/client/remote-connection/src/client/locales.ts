@@ -1,0 +1,76 @@
+/** Copy for the Remote connection settings section. */
+import * as pairing from './pairing-locales.ts'
+
+/** English dictionary and key authority. */
+export const en = {
+  ...pairing.en,
+  title: 'Remote connection',
+  qrTitle: 'QR code login',
+  addressTitle: 'Access address',
+  addressDescription: 'Use the methods below to sign in to VEGA Harness on another device.',
+  copyLink: 'Copy link',
+  linkWarningTitle: 'Keep this login link private',
+  linkWarning: 'This link contains sign-in credentials; anyone who can reach this address can use it to sign in. Send it only to your own devices; do not share it publicly. Restarting the server invalidates the link.',
+  linkCopied: 'Link copied',
+  copyFailed: 'Could not copy the login link. Check clipboard permissions and try again.',
+  generate: 'Create QR code',
+  regenerate: 'Regenerate',
+  cancel: 'Cancel',
+  retry: 'Try again',
+  qr: 'One-time login QR code',
+  warningTitle: 'Keep this code private',
+  warning: 'Anyone with this code can sign in until it is used or expires. Keep it private.',
+  httpWarning: 'HTTP sends login credentials without encryption. Use only on a trusted network.',
+  expires: 'Expires in {seconds}s',
+  used: 'Code used. Check your phone to confirm sign-in.',
+  expired: 'This code has expired. Create a new one to sign in.',
+  replaced: 'Another code replaced this one. Create a new code to continue.',
+  loading: 'Loading remote connection',
+  creating: 'Creating login code',
+  cancelling: 'Cancelling login code',
+  /** Additional lines in this notice appear as numbered steps. */
+  'unreachable-host': 'This address cannot be used to sign in from another device; configure a reachable address, such as a LAN address or an already configured public or VPN address.',
+  'untrusted-host': 'Allow this address in the Host’s trusted hosts before using either login method.',
+  loadFailed: 'Could not load remote connection settings. Try again.',
+  createFailed: 'Could not confirm code creation. A code may still be valid; creating a new one replaces it.',
+  cancelFailed: 'Could not confirm cancellation. This code may still work; try cancelling again.',
+  statusFailed: 'Could not confirm this code’s status. It may still work; retry or cancel it.',
+}
+
+/** Typed keys for all panel content and accessible names. */
+export type RemoteConnectionLocaleKey = keyof typeof en
+
+/** Simplified Chinese dictionary. */
+export const ru: Record<RemoteConnectionLocaleKey, string> = {
+  ...pairing.ru,
+  title: 'Удалённое подключение',
+  qrTitle: 'Вход по QR-коду',
+  addressTitle: 'Адрес доступа',
+  addressDescription: 'Используйте указанные ниже способы для входа в VEGA Harness с другого устройства.',
+  copyLink: 'Копировать ссылку',
+  linkWarningTitle: 'Не публикуйте ссылку для входа',
+  linkWarning: 'Эта ссылка содержит учётные данные для входа; любой, кому доступен этот адрес, может использовать ссылку для входа. Отправляйте её только на свои устройства и не публикуйте. Перезапуск сервера делает ссылку недействительной.',
+  linkCopied: 'Ссылка скопирована',
+  copyFailed: 'Не удалось скопировать ссылку. Проверьте разрешения буфера обмена и повторите попытку.',
+  generate: 'Создать QR-код',
+  regenerate: 'Создать заново',
+  cancel: 'Отмена',
+  retry: 'Повторить',
+  qr: 'Одноразовый QR-код для входа',
+  warningTitle: 'Не делитесь этим кодом',
+  warning: 'Любой обладатель кода может войти, пока код не использован или не истёк. Не передавайте его другим.',
+  httpWarning: 'HTTP передаёт учётные данные без шифрования. Используйте только доверенную сеть.',
+  expires: 'Истекает через {seconds} с',
+  used: 'Код использован. Проверьте на телефоне, выполнен ли вход.',
+  expired: 'Срок действия кода истёк. Создайте новый код для входа.',
+  replaced: 'Этот код заменён другим. Создайте новый код, чтобы продолжить.',
+  loading: 'Загрузка удалённого подключения',
+  creating: 'Создание кода для входа',
+  cancelling: 'Отмена кода для входа',
+  'unreachable-host': 'Этот адрес нельзя использовать для входа с другого устройства; настройте доступный адрес, например доступный адрес LAN или уже настроенный публичный адрес либо адрес VPN.',
+  'untrusted-host': 'Добавьте этот адрес в доверенные хосты Host, прежде чем использовать любой из двух способов входа.',
+  loadFailed: 'Не удалось загрузить настройки удалённого подключения. Повторите попытку.',
+  createFailed: 'Не удалось подтвердить создание кода. Код может оставаться действительным; создание нового заменит его.',
+  cancelFailed: 'Не удалось подтвердить отмену. Код может ещё работать; повторите отмену.',
+  statusFailed: 'Не удалось подтвердить состояние кода. Он может ещё работать; повторите попытку или отмените его.',
+}

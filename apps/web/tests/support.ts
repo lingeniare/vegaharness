@@ -77,7 +77,7 @@ export async function collectWindowSurface(page: Page, controlProbe?: WindowCont
 /**
  * Read the `meta.description` an experimental bundle's plugin page shows for one locale.
  * @param bundle - Package directory under `packages/experimental`.
- * @param locale - Locale resource name, such as `en` or `zh`.
+ * @param locale - Locale resource name, such as `en` or `ru`.
  * @returns The description text from `locale/<locale>.json`.
  */
 export function experimentalBundleDescription(bundle: string, locale: string): string {
@@ -139,7 +139,7 @@ export function requireBuilt(name: string): unknown {
  * surface: with no stored preference the client derives its initial locale
  * from the browser, and Playwright's default browser asks for English.
  */
-export const RU_BROWSER_LOCALE = 'ru-RU'
+export const RU_BROWSER_LOCALE = 'ru-CN'
 
 /** Same-day anchor for seeded event times and the Asia/Shanghai browser clock. */
 export const WEB_FIXTURE_TIME = Date.parse('2026-01-15T12:00:00+08:00')
@@ -210,15 +210,35 @@ export async function pinBrowserClock(page: Page): Promise<void> {
  * Open the standard browser-test page advertising English before client boot.
  * This keeps role locators and goldens deterministic while leaving the Host
  * settings document free to override the provisional browser-derived locale;
- * scenarios asserting the Russian surface advertise
+ * scenarios asserting the Chinese surface advertise
  * {@link RU_BROWSER_LOCALE} instead. The context uses Asia/Shanghai to preserve
  * the recorded Web user-source timezone independently of the host timezone.
+ * The page {@link startWithSessionPanelHidden | starts with the Session panel hidden}.
  * @param browser - Playwright browser owning the page.
  * @param height - Viewport height; width is fixed to the lane baseline.
  * @returns the initialized page.
  */
 export async function newEnglishPage(browser: Browser, height = 1000): Promise<Page> {
-  return await browser.newPage({ viewport: { width: 1680, height }, locale: 'en-US', timezoneId: 'Asia/Shanghai' })
+  const page = await browser.newPage({ viewport: { width: 1680, height }, locale: 'en-US', timezoneId: 'Asia/Shanghai' })
+  await startWithSessionPanelHidden(page)
+  return page
+}
+
+/**
+ * Have a page start with the Session panel's docking turned off, as a reader
+ * who hid the panel has it, unless the origin already stores a choice. At the
+ * lane's baseline width the panel otherwise docks and moves the transcript
+ * aside, which a scenario about the conversation alone does not expect.
+ * @param page - a page that has not navigated yet.
+ */
+export async function startWithSessionPanelHidden(page: Page): Promise<void> {
+  await page.addInitScript((key) => {
+    try {
+      if (localStorage.getItem(key) === null) localStorage.setItem(key, 'false')
+    } catch (_storageUnavailable) {
+      // Documents without storage access, such as about:blank, have no panel to keep hidden.
+    }
+  }, SESSION_PANEL_DOCKING_KEY)
 }
 
 /**
@@ -308,14 +328,14 @@ export function probeFreePort(): Promise<number> {
  * @param page - browser page with the mounted sidebar.
  * @param locale - current UI language.
  */
-export async function revealNavigationDrawer(page: Page, locale: 'en' | 'ru'): Promise<void> {
+export async function revealNavigationDrawer(page: Page, locale: 'en' | 'ru' | 'ja' | 'de'): Promise<void> {
   const drawer = await page.evaluate(() => window.innerWidth < 768
     && !document.documentElement.hasAttribute('data-windows-titlebar'))
   await page.waitForFunction(expected => Boolean(document.querySelector('[data-sidebar-drawer]')) === expected, drawer)
   const closed = page.locator('[data-sidebar-drawer][data-sidebar-collapsed]')
   if (await closed.count() === 0) return
   await page.locator('[data-shell-leading]').getByRole('button', {
-    name: { en: 'Open sidebar', ru: 'Открыть боковую панель' }[locale], exact: true,
+    name: { en: 'Open sidebar', ru: 'Открыть боковую панель', ja: 'サイドバーを開く', de: 'Seitenleiste öffnen' }[locale], exact: true,
   }).click()
   await closed.waitFor({ state: 'detached' })
 }
@@ -376,7 +396,7 @@ export async function connectFreshWorkspaceRu(page: Page, root: string, name = '
   await pathInput.press('Enter')
   await dialog.getByRole('button', { name: 'Открыть', exact: true }).click()
   const editable = modelAvailable ? '[contenteditable="true"]' : ''
-  await page.locator(`[data-composer-input]${editable}[data-placeholder="Опишите, что хотите создать, / команды, @ файлы или сессии"]`)
+  await page.locator(`[data-composer-input]${editable}[data-placeholder='Опишите, что хотите создать, / команды, @ файлы или сессии']`)
     .waitFor({ timeout: 15_000 })
 }
 
@@ -419,8 +439,8 @@ export async function saveFailureShot(page: Page, name: string): Promise<void> {
   mkdirSync(dir, { recursive: true })
   try {
     await page.screenshot({ path: `${dir}/${name}.png`, fullPage: true })
-  } catch {
-    // Best-effort evidence: a dead page/browser at failure time must not mask the real assertion error.
+  } catch (_screenshotFailed) {
+    // Screenshot evidence is optional: a dead page/browser at failure time must not mask the real assertion error.
   }
 }
 
@@ -466,18 +486,117 @@ export function conversationContextKey(kind: string, id: string): string {
  * @param page - browser page with the mounted sidebar.
  * @param locale - current UI language.
  */
-export async function openSettings(page: Page, locale: 'en' | 'ru'): Promise<void> {
-  const labels = { en: ['Account menu', 'Settings'], ru: ['Меню аккаунта', 'Настройки'] } as const
+export async function openSettings(page: Page, locale: 'en' | 'ru' | 'ja'): Promise<void> {
+  const labels = { en: ['Account menu', 'Settings'], ru: ['账号菜单', 'Настройки'], ja: ['アカウントメニュー', '設定'] } as const
   const trigger = page.getByRole('button', {
     name: labels[locale][0], exact: true, includeHidden: true,
   })
   await trigger.waitFor({ state: 'attached' })
   await revealNavigationDrawer(page, locale)
   if (!await trigger.isVisible()) {
-    await page.getByRole('button', { name: { en: 'Open sidebar', ru: 'Открыть боковую панель' }[locale], exact: true }).click()
+    await page.getByRole('button', { name: { en: 'Open sidebar', ru: 'Открыть боковую панель', ja: 'サイドバーを開く' }[locale], exact: true }).click()
   }
   await trigger.click()
   await page.getByRole('menuitem', { name: labels[locale][1], exact: true }).click()
+}
+
+/** localStorage key of the Session panel's docking preference, which the header toggle flips. */
+export const SESSION_PANEL_DOCKING_KEY = 'dsh.sessionPanel.pinned'
+
+/** The Session panel toggle in the Session header. */
+export function sessionPanelToggle(page: Page): Locator {
+  return page.locator('[data-session-panel-toggle]')
+}
+
+/**
+ * Show the Session panel unless it already shows, and wait for its entrance
+ * animation so geometry reads see the final position. A panel over the
+ * conversation closes on presses outside it and a narrower window can hide
+ * it, so each step that reads the panel shows it first. While the layout
+ * settles after a resize the gutter can briefly read wide enough to dock, so
+ * the toggle is pressed again until the panel stays visible.
+ * @param page - the page under test.
+ * @returns the panel.
+ */
+export async function showSessionPanel(page: Page): Promise<Locator> {
+  const toggle = sessionPanelToggle(page)
+  const panel = page.locator('[data-session-panel]')
+  await toggle.waitFor({ timeout: 20_000 })
+  // A plain loop, not expect.poll, so suite setup can call it too.
+  const deadline = Date.now() + 20_000
+  while (true) {
+    if (await toggle.getAttribute('aria-expanded') !== 'true') await toggle.click()
+    // A panel playing its exit is still in the page; it does not count as shown.
+    if (await panel.and(page.locator(':not([data-session-panel-motion="exit"])')).isVisible()) break
+    if (Date.now() >= deadline) throw new Error('the Session panel did not show')
+    await page.waitForTimeout(250)
+  }
+  await panel.evaluate(async (element) => {
+    await Promise.all(element.getAnimations().map(animation => animation.finished))
+  })
+  return panel
+}
+
+/**
+ * Hide the Session panel: with Escape when it shows over the conversation,
+ * and from its toggle when it is docked beside it, which turns docking off
+ * until the toggle shows the panel again.
+ * @param page - the page under test.
+ */
+export async function dismissSessionPanel(page: Page): Promise<void> {
+  const panel = page.locator('[data-session-panel]')
+  const presentation = await panel.evaluateAll(elements => elements[0]?.getAttribute('data-session-panel') ?? null)
+  if (presentation === 'docked') await sessionPanelToggle(page).click()
+  else await page.keyboard.press('Escape')
+  await panel.waitFor({ state: 'detached' })
+}
+
+/**
+ * Measure a Session panel fold control against a data row of its list: both
+ * heights, how far the control's chevron sits from the row's state mark and
+ * its text from the row's name, in px, and the control's type size and state.
+ * @param control - the fold control row (`[data-session-panel-row="fold"]`).
+ * @param row - a data row of the same list.
+ * @param name - selector of the row's name element inside `row`.
+ * @returns the measurements.
+ */
+export async function foldControlLayout(control: Locator, row: Locator, name: string): Promise<{
+  heights: [number, number]
+  chevronOffset: number
+  textOffset: number
+  fontSize: string
+  expanded: string | null
+}> {
+  const rowBox = await row.evaluate((element, selector) => {
+    const mark = element.querySelector('[data-state]')!.getBoundingClientRect()
+    return {
+      height: element.getBoundingClientRect().height,
+      markCenter: mark.left + mark.width / 2,
+      nameLeft: element.querySelector(selector)!.getBoundingClientRect().left,
+    }
+  }, name)
+  return control.evaluate((element, data) => {
+    const chevron = element.querySelector('svg')!.getBoundingClientRect()
+    const text = document.createRange()
+    text.selectNodeContents(element.querySelector('[data-row-part="content"]')!)
+    return {
+      heights: [element.getBoundingClientRect().height, data.height] as [number, number],
+      chevronOffset: chevron.left + chevron.width / 2 - data.markCenter,
+      textOffset: text.getBoundingClientRect().left - data.nameLeft,
+      fontSize: getComputedStyle(element).fontSize,
+      expanded: element.querySelector('button')!.getAttribute('aria-expanded'),
+    }
+  }, rowBox)
+}
+
+/**
+ * Hide the Session panel unless it is already hidden.
+ * @param page - the page under test.
+ */
+export async function hideSessionPanel(page: Page): Promise<void> {
+  const toggle = sessionPanelToggle(page)
+  if (await toggle.getAttribute('aria-expanded') === 'true') await toggle.click()
+  await expect.poll(() => toggle.getAttribute('aria-expanded')).toBe('false')
 }
 
 /**

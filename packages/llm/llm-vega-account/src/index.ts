@@ -61,13 +61,18 @@ export function apply(ctx: Context, config: Config): void {
     }, name),
   })
   const account: VegaAccountBinding = {
-    resolveToken: url => ctx.get('deepseekAccount')?.resolveToken(url) ?? Promise.resolve(undefined),
-    rejectToken: token => ctx.get('deepseekAccount')?.rejectToken(token) ?? Promise.resolve(),
+    credential: async (url) => {
+      const credential = await ctx.get('deepseekAccount')?.resolveRequestCredential(url)
+      const token = credential?.headers['x-dsh-auth-token']
+      return credential === undefined || token === undefined
+        ? undefined
+        : { token, reject: () => credential.reject(), revoked: credential.revoked }
+    },
   }
   const cache = createModelListingCache(ctx, name, PROVIDER, {
     settings: () => settings(),
-    credential: url => account.resolveToken(url),
-    load: (url, token, signal) => requestVegaListing(url, token, signal),
+    credential: url => account.credential(url).then(credential => credential === undefined ? undefined : { authorization: `Bearer ${credential.token}` }),
+    load: (url, headers, signal) => requestVegaListing(url, headers, signal),
   })
 
   // The profile's static half, re-materialized when deployment config changes;

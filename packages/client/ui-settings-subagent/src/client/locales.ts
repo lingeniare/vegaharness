@@ -46,7 +46,7 @@ export const en: Record<SubagentSettingsLocaleKey, string> = {
   subagentCapacityInvalid: 'Enter a whole number of 1 or more.',
   subagentModelSelectionTitle: 'Model selection',
   subagentModelSelectionToggle: 'Allow agents to choose models for Subagents',
-  subagentModelSelectionChoose: 'When enabled, agents can choose a provider, model, and reasoning effort for each Subagent from the authorized models below. Applies only to new sessions.',
+  subagentModelSelectionChoose: 'When enabled, agents can choose a provider, model, and reasoning effort for each Subagent from the authorized models below. Changes apply immediately to every session.',
   subagentModelSelectionAllowed: 'Models agents may choose',
   subagentModelSelectionLoading: 'Loading models…',
   subagentModelSelectionLoadFailed: 'Models could not be loaded.',
@@ -60,6 +60,8 @@ export const en: Record<SubagentSettingsLocaleKey, string> = {
   subagentModelSelectionOff: 'Subagents use configured defaults or inherit the parent agent\'s model. Saved model choices are retained.',
 }
 
+/** Simplified Chinese copy. */
+
 /**
  * The form frame's copy, read from this page's dictionary.
  * @param t - the page's locale reader.
@@ -69,7 +71,15 @@ export function formLabels(t: (key: SubagentSettingsLocaleKey) => string): Setti
   return { unavailable: t('unavailable'), readOnly: t('readOnly'), saveFailed: t('saveFailed'), save: t('save'), saving: t('saving') }
 }
 
-/** Russian dictionary, checked against the English keys. */
+/** Japanese copy. */
+
+/** Spanish dictionary. */
+
+/** French dictionary. */
+
+/** German dictionary. */
+
+/** Russian dictionary. */
 export const ru = {
   overridden: 'Переопределено',
   reset: 'Сбросить до значений по умолчанию',
@@ -107,3 +117,5 @@ export const ru = {
   subagentModelSelectionConflict: 'Настройки изменились в другом месте. Отмените свои изменения и повторите попытку.',
   subagentModelSelectionOff: 'Субагенты используют настроенные модели по умолчанию или наследуют модель родительского агента. Выбранные модели сохраняются.',
 } satisfies Record<keyof typeof en, string>
+
+/** Portuguese dictionary. */

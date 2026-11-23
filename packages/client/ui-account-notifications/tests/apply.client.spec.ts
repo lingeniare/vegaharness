@@ -7,10 +7,19 @@ import { createClientTest, type TestClient, webApp } from '@deepseek-ai/dsh-clie
 import type { AccountNotificationBatch, AccountNotificationId, AccountDetails, AccountView, SignInAttemptId } from '@deepseek-ai/dsh-deepseek-account/types'
 import type { AccountSectionInjected } from '@deepseek-ai/dsh-client-ui-settings-account/client'
 import type { AccountNotificationsInjected } from '../src/client/AccountNotifications.tsx'
-import { NOTIFICATIONS_CONFIG_GLOBAL } from '../src/config.ts'
+import type { Context } from '@deepseek-ai/cordis'
+import { syncedConfig } from '@deepseek-ai/dsh-client-test-runtime'
+import { apply as notificationsApply, inject as notificationsInject } from '../src/client/index.ts'
+import type { AccountNotificationsConfig } from '../src/types.ts'
 import { notification } from './notification-fixture.ts'
 
 const it = createClientTest({ roster: webApp })
+/** The same composition with a one-second initial polling delay synced from the Host. */
+const itWithInterval = createClientTest({ roster: webApp, provide: {
+  '@deepseek-ai/dsh-client-ui-account-notifications': { inject: notificationsInject, apply: (ctx: Context) => {
+    notificationsApply(ctx, syncedConfig<AccountNotificationsConfig>({ notificationPollIntervalMs: 1_000 }))
+  } },
+} })
 const SELF = '@deepseek-ai/dsh-client-ui-settings-account'
 const view: AccountView = { status: 'signed-out', attempt: null,
   links: { usageUrl: 'https://platform.deepseek.com/usage', topUpUrl: 'https://platform.deepseek.com/top_up' } }
@@ -201,8 +210,7 @@ it('refreshes balances and notifications immediately on Settings entry', async (
   expect(c.mock.remote.account.getNotifications).toHaveBeenLastCalledWith(expect.objectContaining({ locale: 'en' }))
 }, 60_000)
 
-it('replaces polling on startup, sign-in and Settings entry and stops on sign-out or unload', async ({ start }) => {
-  vi.stubGlobal(NOTIFICATIONS_CONFIG_GLOBAL, { notificationPollIntervalMs: 1_000 })
+itWithInterval('replaces polling on startup, sign-in and Settings entry and stops on sign-out or unload', async ({ start }) => {
   const c = await start()
   c.mock.remote.account.getNotifications.mockResolvedValue(ok(null))
   c.mock.streams.push('account/watch', { type: 'snapshot', state: stored })
@@ -265,12 +273,12 @@ it('refreshes consumed notification content on a locale change without reading t
   await vi.waitFor(() => { expect(c.mock.remote.account.reportNotificationEvent).toHaveBeenCalledTimes(1) })
   const reads = c.mock.remote.account.getNotifications.mock.calls.length
   c.mock.remote.settings.mutate.mockResolvedValue(ok({
-    ns: 'locale', autoGenerate: false, schema: { type: 'object' }, value: { preference: 'zh' },
+    ns: 'locale', autoGenerate: false, schema: { type: 'object' }, value: { preference: 'ru' },
     applies: 'live', secrets: [], revision: 1,
   }))
-  c.ctx.locale.setLocale('zh')
+  c.ctx.locale.setLocale('ru')
   await vi.waitFor(() => { expect(notificationOperations(c).hooks.notices.getSnapshot()?.[0]?.body).toBe('新的中文内容') })
-  expect(c.mock.remote.account.getNotificationContent).toHaveBeenCalledWith( id, expect.objectContaining({ locale: 'zh' }))
+  expect(c.mock.remote.account.getNotificationContent).toHaveBeenCalledWith( id, expect.objectContaining({ locale: 'ru' }))
   expect(c.mock.remote.account.getNotifications).toHaveBeenCalledTimes(reads)
   expect(c.mock.remote.account.reportNotificationEvent).toHaveBeenCalledTimes(1)
 }, 60_000)
@@ -284,10 +292,10 @@ it('retains notification content when the localization RPC is refused', async ({
   c.mock.streams.push('account/watch', { type: 'snapshot', state: stored })
   await c.flush()
   c.mock.remote.settings.mutate.mockResolvedValue(ok({
-    ns: 'locale', autoGenerate: false, schema: { type: 'object' }, value: { preference: 'zh' },
+    ns: 'locale', autoGenerate: false, schema: { type: 'object' }, value: { preference: 'ru' },
     applies: 'live', secrets: [], revision: 1,
   }))
-  c.ctx.locale.setLocale('zh')
+  c.ctx.locale.setLocale('ru')
   await vi.waitFor(() => { expect(output).toHaveBeenCalledWith('[deepseek-account] notification content read failed') })
   expect(notificationOperations(c).hooks.notices.getSnapshot()?.[0]?.body).toBe('Awarded 5.00')
 }, 60_000)

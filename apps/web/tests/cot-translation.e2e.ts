@@ -245,7 +245,7 @@ it.skipIf(MODE === 'record')('persists Bing reasoning translation across reopen 
   expect(await typography()).toEqual(translatedTypography)
   await page.mouse.move(0, 0)
   const translationAction = body.getByRole('button', { name: 'Показать перевод', exact: true })
-  const titleBox = await reasoning.getByRole('button', { name: 'Размышление', exact: true }).boundingBox()
+  const titleBox = await reasoning.getByRole('button', { name: 'Размышления', exact: true }).boundingBox()
   const actionBox = await translationAction.boundingBox()
   if (titleBox === null || actionBox === null) throw new Error('Reasoning title and translation action must be visible')
   expect(actionBox.y).toBeGreaterThanOrEqual(titleBox.y + titleBox.height)
@@ -313,7 +313,7 @@ it.skipIf(MODE === 'record')('persists Bing reasoning translation across reopen 
   await compareOrRefreshGolden(join(EXPECTED, 'failure.expected.md'),
     await captureStableAria(page, '[data-variant="think"]', scaffold.workspaceCwd), MODE)
   fail = false
-  await body.getByRole('button', { name: 'Повторить', exact: true }).click()
+  await body.getByRole('button', { name: 'Повтор', exact: true }).click()
   await body.getByText(JAPANESE_TRANSLATION, { exact: true }).waitFor()
   await expect.poll(() => body.getAttribute('data-translation-state')).toBe('ready')
   expect(calls).toHaveLength(4)
@@ -345,7 +345,7 @@ it.skipIf(MODE === 'record')('persists Bing reasoning translation across reopen 
   await expect.poll(() => body.getAttribute('data-translation-state')).toBe('ready')
   expect(calls).toHaveLength(6)
 
-  await panel.getByRole('button', { name: '返回 实验性插件', exact: true }).click()
+  await panel.getByRole('button', { name: 'Вернуться к 实验性插件', exact: true }).click()
   await toggle.click()
   await expect.poll(() => toggle.getAttribute('aria-checked'), { timeout: PLUGIN_TOGGLE_SETTLE_MS }).toBe('false')
   await body.waitFor({ state: 'detached' })

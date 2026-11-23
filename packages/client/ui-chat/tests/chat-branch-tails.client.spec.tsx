@@ -1,4 +1,3 @@
-import { ru } from '../src/client/locale.ts'
 // @vitest-environment jsdom
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -24,6 +23,7 @@ import { createUserContentFixture } from './user-content-component-fixture.tsx'
 import { useDisclosure } from '../src/client/chat/use-disclosure.ts'
 import { useSearchableHidden } from '../src/client/chat/searchable-hidden.ts'
 import { ActivityPill, UsagePill, type StatPillProps } from '../src/client/chat/StatsPills.tsx'
+import { ru } from '../src/client/locale.ts'
 import { chatSnapshotFixture } from './chat-snapshot-fixture.client.ts'
 
 afterEach(() => {
@@ -52,12 +52,13 @@ const useDetachedChat: ChatNodeViewProps['useChat'] = bindSnapshotSelector({
 interface MessageItemProps {
   readonly node: ConversationNode
   readonly t: ChatNodeViewProps['t']
+  readonly openCompaction?: React.ComponentProps<typeof CompactionNodeView>['openCompaction']
   readonly referenceLabels?: readonly string[]
   readonly skillNames?: readonly string[]
 }
 
 /** Legacy-node fixture adapter for the independently registered renderers. */
-function MessageItem({ node, t: translate, referenceLabels, skillNames }: MessageItemProps) {
+function MessageItem({ node, t: translate, openCompaction, referenceLabels, skillNames }: MessageItemProps) {
   const kind = node.kind === 'assistant' ? 'assistant-step' : node.kind
   const viewNode: ChatConversationViewNode = {
     key: `fixture:${node.kind}:${node.seq}`,
@@ -93,7 +94,8 @@ function MessageItem({ node, t: translate, referenceLabels, skillNames }: Messag
     case 'context':
       return <ContextMessageNodeView {...props as ChatNodeViewProps<'context'>} />
     case 'compaction':
-      return <CompactionNodeView {...props as ChatNodeViewProps<'compaction'>} />
+      return <CompactionNodeView {...props as ChatNodeViewProps<'compaction'>}
+        openCompaction={openCompaction ?? vi.fn()} useCompactionPreview={select => select(openCompaction !== undefined)} />
     case 'model-retry':
       return <RetryNodeView {...props as ChatNodeViewProps<'model-retry'>} />
     case 'unknown':
@@ -242,8 +244,8 @@ describe('MessageItem arms', () => {
       }}
       />,
     )
-    fireEvent.click(screen.getByRole('button', { name: '复制' }))
-    expect(await screen.findByRole('button', { name: '复制成功' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Копировать' }))
+    expect(await screen.findByRole('button', { name: 'Скопировано' })).toBeTruthy()
     expect(exec).toHaveBeenCalledWith('copy')
   })
 
@@ -382,7 +384,7 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    const disclosure = ctxView.getByRole('button', { name: /^Внедрение контекста\s*fixture$/ })
+    const disclosure = ctxView.getByRole('button', { name: /^Внедрение контекстаs*fixture$/ })
     expect(disclosure.getAttribute('aria-expanded')).toBe('false')
     expect(ctxView.container.querySelector('[data-context-injection-body]')).toBeNull()
     expect(ctxView.container.querySelector('svg')).not.toBeNull()
@@ -423,7 +425,7 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекста\s*AGENTS\.md, sub\/AGENTS\.md$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*AGENTS\.md, sub\/AGENTS\.md$/ }))
     const files = [...view.container.querySelectorAll('[data-context-files] li')].map(node => node.textContent)
     expect(files).toEqual(['AGENTS.mdзагружено', 'sub/AGENTS.mdудалено'])
     // The `<system-reminder>` framing is part of what the model read, so the
@@ -451,7 +453,7 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекста\s*new\/AGENTS\.md, old\/AGENTS\.md$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*new\/AGENTS\.md, old\/AGENTS\.md$/ }))
     const files = [...view.container.querySelectorAll('[data-context-files] li')].map(node => node.textContent)
     expect(files).toEqual(['new/AGENTS.mdдобавлено', 'old/AGENTS.mdобновлено'])
   })
@@ -494,7 +496,7 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекста\s*skill-catalog$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*skill-catalog$/ }))
     const entries = [...view.container.querySelectorAll('[data-context-entries] li')].map(node => node.textContent)
     expect(entries).toEqual(['a-skillDoes A', 'b-skillDoes B'])
     expect(view.container.querySelector('[data-context-text]')).toBeNull()
@@ -518,7 +520,7 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекста\s*skill-catalog$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*skill-catalog$/ }))
     expect(view.container.querySelector('[data-context-catalog-update]')?.textContent).toBe('Каталог замен')
   })
 
@@ -540,7 +542,7 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекста\s*skill-catalog$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*skill-catalog$/ }))
     expect(view.container.querySelector('[data-context-entries]')).toBeNull()
     expect(view.container.querySelector('[data-context-text]')?.textContent).toBe('catalog prose')
     // The marker reports what rendered, not what was declared.
@@ -560,7 +562,7 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекста\s*agent-instructions$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*agent-instructions$/ }))
     expect(view.container.querySelector('[data-context-files]')).toBeNull()
     expect(view.container.querySelector('[data-context-text]')?.textContent).toBe('instruction prose')
     expect(view.container.querySelector('[data-context-fields]')).not.toBeNull()
@@ -596,7 +598,7 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекста\s*plugin$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*plugin$/ }))
     expect(view.container.querySelector('[data-context-fields] dd')?.textContent)
       .toMatch(/… обрезано, всего символов: \d+$/)
   })
@@ -615,7 +617,7 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекста\s*skill-catalog$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*skill-catalog$/ }))
     expect(view.container.querySelector('[data-context-catalog-update]')?.textContent).toBe('Каталог замен')
     expect(view.container.querySelectorAll('[data-context-entries] li')).toHaveLength(0)
     expect(view.container.querySelector('[data-context-injection-body]')?.getAttribute('data-context-form'))
@@ -634,7 +636,7 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекста\s*skill-catalog$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*skill-catalog$/ }))
     expect(view.container.querySelector('[data-context-entries]')).toBeNull()
     expect(view.container.querySelector('[data-context-text]')?.textContent).toBe('catalog prose')
   })
@@ -650,7 +652,7 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекста\s*skill-catalog$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*skill-catalog$/ }))
     expect(view.container.querySelectorAll('[data-context-entries] li')).toHaveLength(200)
     expect(view.container.querySelector('[data-context-entries-truncated]')?.textContent).toBe('… ещё 5')
   })
@@ -667,7 +669,7 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекста\s*skill-catalog$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*skill-catalog$/ }))
     expect(view.getByText(/Неизвестный блок содержимого/)).toBeTruthy()
   })
 
@@ -685,7 +687,7 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекста\s*agent-instructions$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*agent-instructions$/ }))
     expect(view.container.querySelector('[data-context-files]')).toBeNull()
     expect(view.container.querySelector('[data-context-text]')?.textContent).toBe('instruction prose')
   })
@@ -701,7 +703,7 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекста\s*later$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*later$/ }))
     const fields = [...view.container.querySelectorAll('[data-context-fields] dt')].map(node => node.textContent)
     expect(fields).toEqual(['form'])
   })
@@ -722,7 +724,7 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекста\s*@deepseek-ai\/dsh-system-prompt$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*@deepseek-ai\/dsh-system-prompt$/ }))
     const rows = [...view.container.querySelectorAll('[data-context-sections] div')].map(node => node.textContent)
     expect(rows).toEqual(['sandbox:policyworkspace-write', 'workspace/repo'])
   })
@@ -756,7 +758,7 @@ describe('MessageItem arms', () => {
       />,
     )
     expect(view.container.querySelector('[data-context-summary]')).toBeNull()
-    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекста\s*tool-jobs$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*tool-jobs$/ }))
     expect(view.container.querySelector('[data-context-fields]')).not.toBeNull()
   })
 
@@ -794,7 +796,7 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекста\s*plugin$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*plugin$/ }))
     expect(view.container.querySelector('[data-context-snapshot-supersedes]')?.textContent)
       .toBe('Заменяет предыдущие снимки')
   })
@@ -810,10 +812,10 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    fireEvent.click(view.getByRole('button', { name: /^上下文注入\s*runtime-context$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*runtime-context$/ }))
     expect(view.container.querySelector('[data-context-text]')?.textContent).toBe(text)
     expect(view.container.querySelector('[data-context-sections]')).toBeNull()
-    expect(view.queryByText('取代先前的快照')).toBeNull()
+    expect(view.queryByText('Заменяет предыдущие снимки')).toBeNull()
   })
 
   it('a relay names the agent that sent it above what it said', () => {
@@ -828,7 +830,7 @@ describe('MessageItem arms', () => {
       } as never}
       />,
     )
-    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекста\s*agent-message$/ }))
+    fireEvent.click(view.getByRole('button', { name: /^Внедрение контекстаs*agent-message$/ }))
     expect(view.container.querySelector('[data-context-relay-sender]')?.textContent).toBe('Из сессии child-7')
     expect(view.container.querySelector('[data-context-text]')?.textContent).toBe('child report body')
   })
@@ -869,57 +871,47 @@ describe('MessageItem arms', () => {
     expect(unknownView.getByText(/Неизвестное событие интерфейса: surface\/next/)).toBeTruthy()
   })
 
-  it('a compaction marker discloses its summary and never shows the framed checkpoint', () => {
+  it.each([
+    [{ status: 'running' }, 'running', t('message.compaction.running')],
+    [{ status: 'interrupted' }, 'error', t('message.taskStopped')],
+    [{ status: 'ended' }, 'ok', t('command.done')],
+    [{ status: 'ended', error: 'Failure\nDetails' }, 'error', 'Failure Details'],
+  ] as const)('renders automatic compaction progress %j', (progress, state, summary) => {
+    const node = { data: { kind: 'compaction-progress', ...progress } }
+    const view = render(<CompactionNodeView {...{ node, t } as ChatNodeViewProps<'compaction'>}
+      useCompactionPreview={select => select(false)} openCompaction={vi.fn()} />)
+    expect(view.container.querySelector(`[data-state="${state}"]`)).toBeTruthy()
+    expect(view.getByText(summary)).toBeTruthy()
+  })
+
+  it('a compaction marker opens its summary seq in the Sidebar and never shows the framed checkpoint', () => {
+    const openCompaction = vi.fn<(seq: number, signal: AbortSignal) => Promise<string | null>>(async () => null)
     const view = render(
-      <MessageItem t={t} node={{
-        kind: 'compaction', seq: 5, time: 1_000,
-        summary: '## 摘要标题\n\n保留的事实。',
-        summaryEventSeq: 4,
+      <MessageItem t={t} openCompaction={openCompaction} node={{
+        kind: 'compaction', seq: 5, summaryEventSeq: 4, time: 1_000,
         shadowedItemCount: 16,
         shadowedTokenCount: 11_309,
       }}
       />,
     )
-    const row = view.getByRole('button', { name: /Контекст сжат/ })
-    expect(row.getAttribute('aria-expanded')).toBe('false')
+    const row = view.getByRole('button', { name: /Контекст сжат.*Открыть сводку сжатия на боковой панели/ })
+    expect(row).toHaveProperty('disabled', false)
+    expect(row.getAttribute('aria-expanded')).toBeNull()
     expect(view.getByText('Сжато элементов истории: 16 (около 11309 токенов)')).toBeTruthy()
-    expect(view.queryByText(/保留的事实/)).toBeNull()
     fireEvent.click(row)
-    expect(row.getAttribute('aria-expanded')).toBe('true')
-    expect(view.getByRole('heading', { name: '摘要标题' })).toBeTruthy()
-    fireEvent.click(row)
-    expect(row.getAttribute('aria-expanded')).toBe('false')
+    expect(openCompaction).toHaveBeenCalledExactlyOnceWith(4, expect.any(AbortSignal))
+    expect(view.container.querySelector('[class*="compactionBody"]')).toBeNull()
   })
 
-  it('anchors the sticky-header selector: the compaction body sits under compactionRow only while open', () => {
-    const view = render(
-      <MessageItem t={t} node={{
-        kind: 'compaction', seq: 5, time: 1_000,
-        summary: '## 摘要标题\n\n保留的事实。',
-        summaryEventSeq: 4,
-        shadowedItemCount: 16,
-        shadowedTokenCount: 11_309,
-      }}
-      />,
-    )
-    // Collapsed there is no body sibling, so the rule's `:has(.compactionBody)`
-    // gate never matches.
-    expect(view.container.querySelector('[class*="compactionRow"] [class*="compactionBody"]')).toBeNull()
-    fireEvent.click(view.getByRole('button', { name: /Контекст сжат/ }))
-    expect(view.container.querySelector('[class*="compactionRow"] [class*="compactionBody"]')).not.toBeNull()
-  })
-
-  it('a marker whose cited summary event fell outside the window is not expandable', () => {
+  it('a marker without a Sidebar opener is disabled and keeps neutral copy without counts', () => {
     const view = render(<MessageItem t={t} node={{
-      kind: 'compaction', seq: 6, time: 1_000, summary: null,
-      summaryEventSeq: null, shadowedItemCount: null, shadowedTokenCount: null,
+      kind: 'compaction', seq: 6, summaryEventSeq: 5, time: 1_000, shadowedItemCount: null, shadowedTokenCount: null,
     }} />)
     const row = view.getByRole('button', { name: /Контекст сжат/ })
     expect(row).toHaveProperty('disabled', true)
-    expect(row.getAttribute('aria-expanded')).toBeNull()
-    expect(view.getByText('Сводка сжатия недоступна')).toBeTruthy()
-    fireEvent.click(row) // a disabled control stays collapsed
-    expect(row.getAttribute('aria-expanded')).toBeNull()
+    expect(view.getByText('Ранняя история сжата в сводку')).toBeTruthy()
+    expect(view.queryByText('Открыть сводку сжатия на боковой панели')).toBeNull()
+    fireEvent.click(row)
   })
 
   it('collapses retry details behind the durable model retry status', () => {
@@ -951,8 +943,8 @@ describe('MessageItem arms', () => {
     expect(details?.open).toBe(false)
     expect(details?.dataset.active).toBe('true')
     expect(view.getByRole('status').textContent).toBe('Повторный запрос модели (1/2) · 3 с')
-    expect(view.container.textContent).toContain('Задержка перед повтором: 2500мс')
-    expect(view.container.textContent).toContain('Причина сбоя: 连接被重置')
+    expect(view.getByText('Задержка перед повтором:').parentElement?.textContent).toBe('Задержка перед повтором: 2500мс')
+    expect(view.getByText('Причина сбоя:').parentElement?.textContent).toBe('Причина сбоя: 连接被重置')
 
     act(() => { vi.advanceTimersByTime(1_100) })
     expect(view.getByRole('status').textContent).toBe('Повторный запрос модели (1/2) · 2 с')
@@ -1022,7 +1014,7 @@ describe('MessageItem arms', () => {
         policyKey: 'mock-always',
         retry: 3,
         delayMs: 3_500.4,
-        failure: { code: 'TRANSPORT', message: 'ПродолжитьПовторить' },
+        failure: { code: 'TRANSPORT', message: '继续重试' },
       }}
       />,
     )
@@ -1043,7 +1035,7 @@ describe('MessageItem arms', () => {
         retry: 1,
         maxRetries: 2,
         delayMs: 3_500.4,
-        failure: { code: 'TRANSPORT', message: 'ПОЛЬЗОВАТЕЛЬОтмена' },
+        failure: { code: 'TRANSPORT', message: '用户取消' },
       }}
       />,
     )

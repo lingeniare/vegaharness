@@ -55,11 +55,56 @@ describe('shared detail values', () => {
 })
 
 describe('control detail adapters', () => {
+  it('shows Session message acceptance with the recorded target, content, and receipt', () => {
+    const args = { session_id: 'session-review', message: 'Review the change\nCheck the result.' }
+    const text = JSON.stringify({ message_id: 'message-accepted' })
+    expect(details('session_send_message', text, args)).toMatchObject({
+      summary: 'session-review · Accepted',
+      items: [{
+        title: 'session-review',
+        description: args.message,
+        badge: { label: 'Accepted', tone: 'success' },
+        fields: [{ label: 'Message ID', value: 'message-accepted' }],
+      }],
+    })
+    const translate = makeTranslate(ru, commonRu)
+    expect(detailsCardModel(output('session_send_message', text, args), translate, 'ru-CN')?.items[0]?.badge?.label)
+      .toBe(translate('detail.status.accepted'))
+    for (const malformed of ['null', '[]', '{}', '{"message_id":1}', '{"message_id":" "}']) {
+      expect(details('session_send_message', malformed, args)).toBeNull()
+    }
+  })
+
+  it('localizes unreadable catalog statuses in English and Russian', () => {
+    const states = ['corrupt', 'unsupported', 'unavailable']
+    for (const [dictionary, common, locale, labels] of [
+      [en, commonEn, 'en', ['Corrupt', 'Unsupported', 'Unavailable']],
+      [ru, commonRu, 'ru-CN', ['Повреждено', 'Не поддерживается', 'Недоступно']],
+    ] as const) {
+      const translate = makeTranslate(dictionary, common)
+      const result = states.map(status => ({ name: status, status }))
+      expect(detailsCardModel(output('list_agents', JSON.stringify(result)), translate, locale)
+        ?.items.map(item => item.badge?.label)).toEqual(labels)
+    }
+  })
+
+  it('localizes Team owners while preserving inspection owner fields', () => {
+    const translate = makeTranslate(ru, commonRu)
+    for (const tool of ['team_task_get', 'team_task_create', 'team_task_update', 'team_task_list']) {
+      const task = { subject: 'Review', owner: 'reviewer/checker' }
+      const value = tool === 'team_task_list' ? { tasks: [task] } : task
+      expect(detailsCardModel(output(tool, JSON.stringify(value)), translate, 'ru-CN')?.items[0]?.fields)
+        .toContainEqual({ label: 'Ответственный', value: 'reviewer/checker' })
+    }
+    expect(inspectionItems({ owner: 'client-ui-tool' }, translate)[0]?.fields)
+      .toEqual([{ label: 'owner', value: 'client-ui-tool' }])
+  })
+
   it.each([
-    [{ timedOut: false }, 'Активность субагентов · Обнаружены изменения'],
-    [{ timedOut: true }, 'Активность субагентов · Время ожидания истекло'],
+    [{ timedOut: false }, 'Ожидание завершено'],
+    [{ timedOut: true }, 'Время ожидания истекло'],
     [{ timedOut: false, noProgress: { message: 'No pending work' } }, 'Нет активных субагентов'],
-  ] as const)('names subagents in Chinese wait results (%j)', (value, summary) => {
+  ] as const)('renders inbox wait results and historical activity diagnostics (%j)', (value, summary) => {
     const translate = makeTranslate(ru, commonRu)
     expect(translate('tool.title.waitAgent')).toBe('Дождаться субагента')
     expect(detailsCardModel(output('wait_agent', JSON.stringify(value)), translate, 'ru-CN')?.summary).toBe(summary)
@@ -85,6 +130,11 @@ describe('control detail adapters', () => {
       { title: 'root agent', subtitle: 'lead', badge: { label: 'Running', tone: 'info' }, fields: [] },
       { title: 'reviewer', badge: { label: 'Inactive', tone: 'warning' }, fields: [] },
     ])
+    expect(details('list_agents', 'Subagent capacity: running=2, limit=8\nlead [running] — root agent\nreviewer/checker [inactive] — Check tests\nold-id [unavailable]')).toEqual(agents)
+    expect(details('list_agents', JSON.stringify({
+      running: 2, limit: 8,
+      agents: [{ name: 'lead', status: 'running', description: 'root agent' }, { name: 'reviewer', status: 'inactive' }],
+    }))).toEqual(structured)
     expect(details('list_agents', 'reviewer running')).toBeNull()
     expect(details('list_agents', '(no subagents)')?.empty).toBe('No results')
     expect(details('job_list', 'j1 [bash] running — Build')?.items[0]?.fields).toContainEqual({ label: 'Type', value: 'bash' })
@@ -130,7 +180,7 @@ describe('control detail adapters', () => {
     })
     expect(detailsCardModel({ ...block, content: [] }, t, 'en')).toEqual(model)
     expect(detailsCardModel({ ...block, isError: true }, t, 'en')).toBeNull()
-    expect(detailsCardModel(block, makeTranslate(ru, commonRu), 'ru-RU')?.items[0]?.fields).toEqual([
+    expect(detailsCardModel(block, makeTranslate(ru, commonRu), 'ru-CN')?.items[0]?.fields).toEqual([
       { label: 'Описание задачи агента', value: args.description },
       { label: 'Имя агента', value: 'reviewer' },
     ])
@@ -198,6 +248,9 @@ describe('inspection detail adapters', () => {
   })
 
   it('accepts Cordis, workflow, and Ralph producer results', () => {
+    expect(details('cordis_inspect', '{"providers":[{"name":"Service","status":"ready"}]}')?.summary).toBe('1 inspect providers')
+    expect(details('cordis_inspect', '{"provider":"Service","method":"get","data":{"value":1}}')?.summary).toBe('Service.get')
+    expect(details('cordis_inspect', '{}')).toBeNull()
     expect(details('cordis_inspect_list', '{"providers":[{"name":"Service","status":"ready"}]}')?.summary).toBe('1 inspect providers')
     expect(details('cordis_inspect_query', '{"provider":"Service","method":"get","data":{"value":1}}')?.summary).toBe('Service.get')
     expect(details('cordis_inspect_self', '{"mode":"client","plugins":[]}')?.summary).toBe('0 dynamic plugins')

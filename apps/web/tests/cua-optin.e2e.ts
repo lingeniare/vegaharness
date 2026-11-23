@@ -28,15 +28,16 @@ it.skipIf(process.platform !== 'darwin').each([
     const patch = join(directory, 'native-fixture.yml')
     // Permission inspection fails against this non-helper executable; activation still permits dismissing setup.
     await writeFile(patch, JSON.stringify([{ id: 'cua-macos', config: { helperPath: process.execPath } }]))
-    const defaults = join(directory, 'script-defaults')
-    if (script) {
-      await mkdir(defaults)
-      await writeFile(join(defaults, 'package.json'), JSON.stringify({ name: 'cua-script-defaults', version: '1.0.0', dsh: { bundle: { patch: 'cordis.patch.yml' } } }))
-      await writeFile(join(defaults, 'cordis.patch.yml'), '- id: ptc-runtime\n  config:\n    executionMode: vm-script\n    scriptPersistence: false\n')
-    }
+    // Both variants start without retained state so that the persistent-mode action has an effect.
+    const defaults = join(directory, 'ptc-defaults')
+    await mkdir(defaults)
+    await writeFile(join(defaults, 'package.json'), JSON.stringify({ name: 'cua-ptc-defaults', version: '1.0.0', dsh: { bundle: { patch: 'cordis.patch.yml' } } }))
+    await writeFile(join(defaults, 'cordis.patch.yml'), script
+      ? '- id: ptc-runtime\n  config:\n    executionMode: vm-script\n    scriptPersistence: false\n'
+      : '- id: ptc-runtime\n  config:\n    executionMode: per-call\n')
     const harnessHome = join(directory, 'home')
     const scaffold = ownedScaffold = await launchWebScaffold({
-      profile: { packages: script ? [{ dir: defaults, enabled: true }] : [] },
+      profile: { packages: [{ dir: defaults, enabled: true }] },
       harnessHome, extraOverlayPath: [
         fileURLToPath(new URL('./pin-browse-picker.overlay.yml', import.meta.url)), patch,
       ] })
@@ -110,11 +111,12 @@ it.skipIf(process.platform !== 'darwin').each([
     expect(selected()).toContain('@deepseek-ai/dsh-cua-bundle')
     expect(profileManifest().dependencies).toEqual(dependencies)
     expect(await card.getByText('Экспериментальный', { exact: true }).count()).toBe(1)
-    expect(await card.textContent()).not.toContain('сделать режим PTC постоянным')
-    expect(await card.textContent()).not.toContain('переключитесь в режим PTC')
-    expect(await card.textContent()).toContain('вспомогательную программу нужно настроить отдельно')
+    expect(await card.textContent()).not.toContain('将 PTC 模式改为可持久化')
+    expect(await card.textContent()).not.toContain('请切换到 PTC 模式')
+    expect(await card.textContent()).toContain('允许 agent 直接操作电脑上的应用程序。')
+    expect(await card.textContent()).not.toContain('helper')
     expect(await card.textContent()).not.toContain('Swift')
-    const description = await card.getByRole('button', { name: 'Просмотреть Computer Use', exact: true }).evaluate((button) => {
+    const description = await card.getByRole('button', { name: 'Посмотреть Computer Use', exact: true }).evaluate((button) => {
       const element = document.getElementById(button.getAttribute('aria-describedby')!)!
       const style = getComputedStyle(element)
       return { lines: style.webkitLineClamp, height: element.getBoundingClientRect().height,
@@ -174,15 +176,20 @@ it.skipIf(process.platform !== 'darwin').each([
     })).agent
     expect(scaffold.ctx.agentPresets.composedPreset(fresh.ctx)).toBe('ptc')
     expect(scaffold.ctx.tools.schemas(fresh).some(tool => tool.name === 'cua')).toBe(true)
-    await card.getByRole('button', { name: 'Просмотреть Computer Use', exact: true }).click()
-    await plugins.locator('[data-detail-document]').getByText('helperPath', { exact: true }).waitFor()
+    await card.getByRole('button', { name: 'Посмотреть Computer Use', exact: true }).click()
+    const detail = plugins.locator('[data-detail-document]')
+    await detail.getByRole('img', { name: '将会议要点填入备忘录的指令和输入结果' }).waitFor()
+    const guidance = plugins.locator('[data-cua-guidance]')
+    await guidance.getByText(/请谨慎在生产环境中使用/).waitFor()
+    expect(await guidance.textContent()).not.toContain('helperPath')
+    expect(await detail.textContent()).not.toContain('PTC')
     toggle = page.locator('[data-plugin-panel]').getByRole('switch', { name: 'Включить Computer Use', exact: true })
     const persistent = page.getByRole('group', { name: 'Режим выполнения PTC', exact: true })
     if (!codingTools) {
       const panel = page.locator('[data-cua-settings]')
       await expect.poll(() => panel.getAttribute('aria-busy')).toBe('false')
-      expect(await panel.textContent()).toContain('Использование компьютера доступно в стандартном, творческом режимах и режиме PTC')
-      expect(await persistent.textContent()).toContain('хранят состояние использования компьютера отдельно')
+      expect(await panel.textContent()).toContain('标准、创造和 PTC 模式均可使用 Computer Use')
+      expect(await persistent.textContent()).toContain('其他模式始终单独保留 Computer Use 状态')
       for (const width of [1680, 390]) {
         await page.setViewportSize({ width, height: 1000 })
         for (const colorScheme of ['light', 'dark'] as const) {
@@ -192,7 +199,7 @@ it.skipIf(process.platform !== 'darwin').each([
           if (webSnapshotMode() === 'refresh') {
             const directory = fileURLToPath(new URL('../../../.playwright-mcp/cua-run-code-ui', import.meta.url))
             await mkdir(directory, { recursive: true })
-            await panel.screenshot({ path: join(directory, `details-zh-${width}-${colorScheme}.png`), animations: 'disabled' })
+            await panel.screenshot({ path: join(directory, `details-ru-${width}-${colorScheme}.png`), animations: 'disabled' })
           }
         }
       }
@@ -248,7 +255,7 @@ it.skipIf(process.platform !== 'darwin').each([
     const defaultSetting = page.getByRole('group', { name: 'Режим по умолчанию для новых сеансов', exact: true })
     await expect.poll(() => defaultSetting.getByRole('button', { name: 'Установить на PTC', exact: true }).isEnabled()).toBe(true)
     await compareOrRefreshGolden(fileURLToPath(new URL('./expected/cua-permissions/default-mode.expected.md', import.meta.url)),
-      await captureStableAria(page, '[role="group"][aria-label="Режим по умолчанию для новых сеансов"]', scaffold.workspaceCwd), webSnapshotMode())
+      await captureStableAria(page, '[role="group"][aria-label="新会话默认模式"]', scaffold.workspaceCwd), webSnapshotMode())
     await defaultSetting.getByRole('button', { name: 'Установить на PTC', exact: true }).click()
     await expect.poll(() => scaffold.ctx.agentPresets.defaultId).toBe('ptc')
     expect(scaffold.ctx.agentPresets.composedPreset(originalAgent.ctx)).toBe(initialDefault)

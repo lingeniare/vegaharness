@@ -88,7 +88,7 @@ describe('OfficeRow', () => {
 
   it('expands a render to its result text without the image references', () => {
     const view = render(<OfficeRow {...props(settled())} />)
-    expect(view.container.textContent).toContain('渲染文档')
+    expect(view.container.textContent).toContain('Отрисовать документ')
     fireEvent.click(view.container.querySelector('[data-expandable]')!)
     expect(view.container.textContent).toContain(`${SUMMARY}\nPage 2: 800x600 px`)
     expect(view.container.textContent).not.toContain('attachmentId')
@@ -97,7 +97,7 @@ describe('OfficeRow', () => {
 
   it('shows no output body when a settled result carries only images', () => {
     const view = render(<OfficeRow {...props(settled({ content: [{ type: 'image', attachment: image }] }))} />)
-    expect(view.container.textContent).toContain('渲染文档')
+    expect(view.container.textContent).toContain('Отрисовать документ')
     expect(view.container.textContent).not.toContain('attachmentId')
     expect(view.container.querySelector('[data-expandable]')).toBeNull()
   })
@@ -108,8 +108,8 @@ describe('OfficeRow', () => {
   })
 
   it.each([
-    ['office_convert', 'pdf', '转换文档', 'Converted', ', 3 pages'],
-    ['office_recalculate', 'xlsx', '重算工作簿', 'Recalculated', ''],
+    ['office_convert', 'pdf', 'Преобразовать документ', 'Converted', ', 3 pages'],
+    ['office_recalculate', 'xlsx', 'Пересчитать книгу', 'Recalculated', ''],
   ])('keeps the %s result text and output path while its title link opens the input', (name, format, title, verb, pages) => {
     const input = '/w/app/input.xlsx'
     const file = `/tmp/office/output.${format}`

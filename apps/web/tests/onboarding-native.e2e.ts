@@ -57,7 +57,7 @@ describe.skipIf(MODE === 'record').each([false, true])('web e2e: native credenti
         await page.reload({ waitUntil: 'load' })
         acknowledgeReloadConnectionLoss(tripwire, warningsBefore)
       }
-      const accountMenu = page.getByRole('button', { name: '账号菜单', exact: true })
+      const accountMenu = page.getByRole('button', { name: 'Меню аккаунта', exact: true })
       await accountMenu.waitFor()
       expect(await accountMenu.textContent()).toBe('Ещё')
       const triggerBox = (await accountMenu.boundingBox())!
@@ -66,7 +66,7 @@ describe.skipIf(MODE === 'record').each([false, true])('web e2e: native credenti
       const menu = page.getByRole('menu')
       await menu.waitFor()
       expect(await menu.getByRole('menuitem').count()).toBe(3)
-      for (const name of ['Настройки', '意见反馈', 'Войти через API ВЕГА']) {
+      for (const name of ['Настройки', 'Отзыв', 'Войти']) {
         expect(await menu.getByRole('menuitem', { name, exact: true }).count()).toBe(1)
       }
       const menuBox = (await menu.boundingBox())!
@@ -78,27 +78,28 @@ describe.skipIf(MODE === 'record').each([false, true])('web e2e: native credenti
         expect(Math.abs(rowBox.height - 40)).toBeLessThan(1)
         expect(Math.abs(menuBox.width - rowBox.width - 8)).toBeLessThan(1)
         const glyph = (await row.locator('svg').first().boundingBox())!
-        expect(Math.abs(glyph.width - 16)).toBeLessThan(1)
-        expect(Math.abs(glyph.height - 16)).toBeLessThan(1)
+        expect(Math.abs(glyph.width - 14)).toBeLessThan(1)
+        expect(Math.abs(glyph.height - 14)).toBeLessThan(1)
       }
       const menuAria = await captureStableAria(page, '[role="menu"]', scaffold.workspaceCwd)
       await compareOrRefreshGolden(SIGNED_OUT_MENU_EXPECTED, menuAria, MODE)
       await page.keyboard.press('Escape')
       await menu.waitFor({ state: 'detached' })
-      expect(await page.getByRole('dialog', { name: 'Начало работы', exact: true }).count()).toBe(0)
+      expect(await page.getByRole('dialog', { name: '开始使用', exact: true }).count()).toBe(0)
       await openSettings(page, 'ru')
       const settings = page.getByRole('dialog', { name: 'Настройки', exact: true })
       await settings.getByRole('button', { name: 'Модель', exact: true }).click()
-      await settings.getByLabel('API Key', { exact: true }).waitFor()
+      await settings.getByLabel('API 密钥', { exact: true }).waitFor()
+      expect(await settings.getByRole('button', { name: '远程连接', exact: true }).count()).toBe(desktop ? 0 : 1)
       expect(await page.getByRole('dialog', { name: 'Добавьте ключ API, чтобы начать работу.' }).count()).toBe(0)
       expect(await welcome.count()).toBe(0)
       expect(await readFile(credentialPath, 'utf8')).toBe(credentials)
       const aria = await captureStableAria(page, '[role="dialog"]', scaffold.workspaceCwd)
-      await compareOrRefreshGolden(join(SNAPSHOT_DIR, 'models.expected.md'), aria, MODE)
+      await compareOrRefreshGolden(join(SNAPSHOT_DIR, desktop ? 'models-desktop.expected.md' : 'models.expected.md'), aria, MODE)
       await page.keyboard.press('Escape')
     }
     expect(tripwire.warnings).toEqual([])
     expect(tripwire.pageErrors).toEqual([])
-    await assertFixtureInventory(SNAPSHOT_DIR, ['models.expected.md', 'signed-out-menu.expected.md'])
+    await assertFixtureInventory(SNAPSHOT_DIR, ['models-desktop.expected.md', 'models.expected.md', 'signed-out-menu.expected.md'])
   })
 })

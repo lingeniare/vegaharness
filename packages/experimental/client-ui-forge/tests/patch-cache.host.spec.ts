@@ -34,10 +34,10 @@ describe('PatchCache', () => {
     expect(cache.get(key(1), 'v')).toEqual(entry('aaaa'))
 
     // Two three-byte characters bring the total to 13 bytes, so #2, read least recently, leaves.
-    cache.set(key(3), 'v', entry('Изменения'))
+    cache.set(key(3), 'v', entry('变更'))
     expect(cache.get(key(2), 'v')).toBeUndefined()
     expect(cache.get(key(1), 'v')).toEqual(entry('aaaa'))
-    expect(cache.get(key(3), 'v')).toEqual(entry('Изменения'))
+    expect(cache.get(key(3), 'v')).toEqual(entry('变更'))
   })
 
   it('counts the attributes kept beside a patch toward the bound', () => {

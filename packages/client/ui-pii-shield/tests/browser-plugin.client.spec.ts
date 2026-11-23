@@ -29,8 +29,8 @@ function bench(setImpl: (field: string, value: unknown) => Promise<boolean> = ()
   })
   const set = vi.fn(setImpl)
   const form: ConfigForm<PiiShieldSection> = {
-    getSnapshot: store.getSnapshot,
-    subscribe: store.subscribe,
+    getSnapshot: () => store.getSnapshot(),
+    subscribe: listener => store.subscribe(listener),
     mutate: vi.fn(() => Promise.resolve(true)),
     set,
     unset: vi.fn(() => Promise.resolve(true)),

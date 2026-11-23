@@ -1,13 +1,18 @@
 /** Copy for the retained-reminder task manager's `schedule.manager` namespace. */
+import { recommendationEn, recommendationRu } from './recommendation-locales.ts'
 import { frequencyEn, frequencyRu } from './frequency-locales.ts'
 
 /** English task-manager dictionary and key domain. */
 export const en = {
+  'host.edit': 'Edit',
+  'host.reload': 'Load latest version',
+
   'host.create': 'Create',
   'host.createMethod': 'Choose a creation method',
   'host.chatCreate': 'Create in a session',
+  'host.createPrompt': 'Please create an automation task based on the requirements.',
   'host.manualCreate': 'Create manually',
-  'host.closeCreate': 'Close task creation',
+  'host.closeCreate': 'Close creation form',
   'host.creating': 'Creating…',
   'host.createError': 'Could not create the task. Your input is preserved; try again.',
   'host.notFuture': 'Choose a future schedule; edit the task timing before resuming',
@@ -28,14 +33,13 @@ export const en = {
   'host.newSessionInterval': 'Minimum run interval: {interval}',
   'host.limitsLoading': 'Loading the run interval limit',
   'host.limitsError': 'Could not load the run interval limit. Try again before saving.',
-  'host.edit': 'Edit',
   'host.pause': 'Pause',
   'host.resume': 'Resume',
   'host.run': 'Run now',
   'host.runAfterInterval': 'The minimum run interval has not passed. Run now is available at {time}.',
   'host.saveError': 'Could not save. Your changes are preserved; try again.',
-  'host.conflict': 'This task changed elsewhere. Load the latest version before saving.',
-  'host.reload': 'Load latest version',
+  'host.conflict': 'This task changed elsewhere. Review the latest values with your edits, or discard your changes.',
+  'host.reapply': 'Review with my edits',
   'host.runError': 'Could not queue the task. Try again.',
   'host.executionPending': 'This task is queued, running, or was just delivered. Try again later.',
   'host.executionActive': 'This task is queued or running. Manage it in the session.',
@@ -88,7 +92,9 @@ export const en = {
   'delivery.retentionBounds': 'Each task keeps up to {records} delivery records from the last {days} days.',
   'delivery.retentionExplanation': 'When a new record is saved, older records outside these limits are cleared automatically. Clearing records does not stop the task.',
   'detail.name': 'Automation task name',
+  'detail.namePlaceholder': 'E.g. Daily reading digest',
   'detail.instruction': 'Automation task instruction',
+  'detail.instructionPlaceholder': 'Describe the task and result.\nE.g. Summarize my reading list with source links.',
   'detail.session': 'Linked session',
   'detail.openSession': 'Linked session: open linked session',
   'detail.openSessionTitle': 'Linked session {title}: open linked session',
@@ -100,6 +106,7 @@ export const en = {
   'frequency.once': 'Once',
   'frequency.every': 'Every {value} {unit}',
   ...frequencyEn,
+  ...recommendationEn,
   'timing.date': 'Date',
   'timing.time': 'Time',
   'timing.hour': 'Hour',
@@ -119,7 +126,15 @@ export const en = {
   'rule.unsaved': 'Unsaved changes',
   'rule.save': 'Save changes',
   'rule.saving': 'Saving…',
-  'rule.cancel': 'Cancel',
+  'rule.invalid': 'Edit the custom rule, choose another repeat option, or ask the agent to correct it.',
+  'rule.invalidTitle': 'Use a task name of 1–120 characters.',
+  'rule.invalidInterval': 'Enter a whole number of at least 1 for the interval.',
+  'rule.requiredWeekday': 'Select at least one weekday.',
+  'rule.invalidMonthDay': 'Enter a day of the month from 1 to 31.',
+  'rule.invalidTime': 'Choose a valid date and time in the selected time zone.',
+  'rule.invalidZone': 'Choose a valid time zone.',
+  'rule.tooComplex': 'This rule is too frequent or complex. Choose a repeat option or ask the agent to simplify it.',
+  'rule.cancel': 'Discard',
   'rule.once': 'Once',
   'rule.everyMinutes': 'Every N minutes',
   'rule.everyHours': 'Every N hours',
@@ -152,25 +167,26 @@ export const en = {
   'card.open': 'Open',
   'card.openLabel': 'Open task details: {title}',
   'card.deleted': 'Deleted',
-  'host.createPrompt': 'Please create an automation task based on the requirements.',
-  'host.reapply': 'Review with my edits',
-  'detail.namePlaceholder': 'E.g. Daily reading digest',
-  'detail.instructionPlaceholder': 'Describe the task and result.\nE.g. Summarize my reading list with source links.',
-  'rule.invalid': 'Edit the custom rule, choose another repeat option, or ask the agent to correct it.',
-  'rule.invalidTitle': 'Use a task name of 1–120 characters.',
-  'rule.invalidInterval': 'Enter a whole number of at least 1 for the interval.',
-  'rule.requiredWeekday': 'Select at least one weekday.',
-  'rule.invalidMonthDay': 'Enter a day of the month from 1 to 31.',
-  'rule.invalidTime': 'Choose a valid date and time in the selected time zone.',
-  'rule.invalidZone': 'Choose a valid time zone.',
-  'rule.tooComplex': 'This rule is too frequent or complex. Choose a repeat option or ask the agent to simplify it.',
 } as const
 
 /** Keys registered under `schedule.manager`. */
 export type TaskManagerKey = keyof typeof en
 
-/** Russian dictionary, checked against the English keys. */
+/** English dictionary with the same keys as English. */
+
+/** Japanese copy. */
+
+/** Spanish dictionary. */
+
+/** French dictionary. */
+
+/** German dictionary. */
+
+/** Russian dictionary. */
 export const ru = {
+  'host.edit': 'Изменить',
+  'host.reload': 'Загрузить последнюю версию',
+
   'panel': 'Задачи автоматизации',
   'title': 'Задачи автоматизации',
   'new.action': 'Создать',
@@ -211,7 +227,9 @@ export const ru = {
   'delivery.retentionBounds': 'Для каждой задачи хранится не более {records} записей о выполнении за последние {days} дней.',
   'delivery.retentionExplanation': 'При сохранении новой записи старые записи, выходящие за эти ограничения, удаляются автоматически. Удаление записей не останавливает задачу.',
   'detail.name': 'Название задачи автоматизации',
+  'detail.namePlaceholder': 'Например: ежедневная подборка статей',
   'detail.instruction': 'Инструкция для задачи автоматизации',
+  'detail.instructionPlaceholder': 'Опишите задачу и результат.\nНапример: составьте обзор статей со ссылками на источники.',
   'detail.session': 'Связанная сессия',
   'detail.openSession': 'Связанная сессия: открыть исходную сессию',
   'detail.openSessionTitle': 'Связанная сессия {title}: открыть исходную сессию',
@@ -223,6 +241,7 @@ export const ru = {
   'frequency.once': 'Один раз',
   'frequency.every': 'Повторять с интервалом {value} {unit}',
   ...frequencyRu,
+  ...recommendationRu,
   'timing.date': 'Дата',
   'timing.time': 'Время',
   'timing.hour': 'Час',
@@ -242,6 +261,14 @@ export const ru = {
   'rule.unsaved': 'Несохранённые изменения',
   'rule.save': 'Сохранить изменения',
   'rule.saving': 'Сохранение…',
+  'rule.invalid': 'Измените пользовательское правило, выберите другой вариант повтора или попросите агента исправить правило.',
+  'rule.invalidTitle': 'Введите название задачи длиной от 1 до 120 символов.',
+  'rule.invalidInterval': 'Введите для интервала целое число не меньше 1.',
+  'rule.requiredWeekday': 'Выберите хотя бы один день недели.',
+  'rule.invalidMonthDay': 'Введите день месяца от 1 до 31.',
+  'rule.invalidTime': 'Выберите допустимые дату и время в выбранном часовом поясе.',
+  'rule.invalidZone': 'Выберите допустимый часовой пояс.',
+  'rule.tooComplex': 'Это правило слишком частое или сложное. Выберите вариант повтора или попросите агента упростить правило.',
   'rule.cancel': 'Отмена',
   'rule.once': 'Один раз',
   'rule.everyMinutes': 'Каждые N минут',
@@ -252,7 +279,8 @@ export const ru = {
   'rule.zone.system': ' (система)',
   'delete.action': 'Удалить задачу',
   'delete.title': 'Удалить эту задачу?',
-  'delete.description': 'Задача перестанет запускаться, а сама задача и сохранённые записи о её доставке будут удалены. Исходная сессия и её сообщения сохранятся; сообщения в очереди не будут отозваны.',
+  'delete.description': 'Задача перестанет запускаться, а сама задача и сохранённые записи о её доставке будут удалены. Исходная сессия и её сообщения сохранятся; сообщения в очереди не будут отозваны.'
+    + 'Исходный сеанс и его сообщения остаются; сообщения в очереди не изымаются.',
   'delete.confirm': 'Подтвердить удаление',
   'delete.cancel': 'Отмена',
   'delete.close': 'Закрыть подтверждение удаления',
@@ -274,16 +302,15 @@ export const ru = {
   'card.openLabel': 'Открыть сведения о задаче: {title}',
   'card.deleted': 'Удалена',
   'host.chatCreate': 'Создать в беседе',
-  'host.closeCreate': 'Закрыть создание задачи',
+  'host.createPrompt': 'Создай автоматизированную задачу на основе требований.',
   'host.conflict': 'Задача изменена в другом месте. Загрузите последнюю версию перед сохранением.',
+  'host.reapply': 'Проверить со своими правками',
   'host.create': 'Создать',
   'host.createError': 'Не удалось создать задачу. Введённые данные сохранены; попробуйте ещё раз.',
   'host.createMethod': 'Выбрать способ создания',
-  'host.creating': 'Создание…',
   'host.currentConversation': 'Текущая связанная беседа',
   'host.customRule': 'Настроить',
   'host.defaultProject': 'Рабочее пространство по умолчанию',
-  'host.edit': 'Изменить',
   'host.executionActive': 'Задача в очереди или выполняется. Управляйте ею в беседе.',
   'host.executionPending': 'Задача в очереди, выполняется или только что доставлена. Попробуйте позже.',
   'host.frequency.advanced': 'Произвольно',
@@ -294,13 +321,14 @@ export const ru = {
   'host.limitsError': 'Не удалось загрузить минимальный интервал. Попробуйте ещё раз перед сохранением.',
   'host.limitsLoading': 'Загрузка минимального интервала',
   'host.manualCreate': 'Создать вручную',
+  'host.closeCreate': 'Закрыть создание задачи',
+  'host.creating': 'Создание…',
   'host.monthDay': 'День месяца',
   'host.newSessionInterval': 'Минимальный интервал запусков: {interval}',
   'host.notFuture': 'Выберите расписание с будущим запуском; перед возобновлением измените время выполнения задачи.',
   'host.openDeliverySession': 'Открыть беседу',
   'host.pause': 'Приостановить',
   'host.project': 'Связанное рабочее пространство',
-  'host.reload': 'Загрузить последнюю версию',
   'host.resume': 'Возобновить',
   'host.run': 'Запустить сейчас',
   'host.runAfterInterval': 'Минимальный интервал ещё не прошёл. Запуск будет доступен в {time}.',
@@ -317,16 +345,6 @@ export const ru = {
   'list.emptyPaused': 'Нет приостановленных задач автоматизации',
   'status.ended': 'Завершена',
   'status.paused': 'Приостановлена',
-  'detail.namePlaceholder': 'Например: ежедневная подборка статей',
-  'detail.instructionPlaceholder': 'Опишите задачу и результат.\nНапример: составьте обзор статей со ссылками на источники.',
-  'rule.invalid': 'Измените пользовательское правило, выберите другой вариант повтора или попросите агента исправить правило.',
-  'rule.invalidTitle': 'Введите название задачи длиной от 1 до 120 символов.',
-  'rule.invalidInterval': 'Введите для интервала целое число не меньше 1.',
-  'rule.requiredWeekday': 'Выберите хотя бы один день недели.',
-  'rule.invalidMonthDay': 'Введите день месяца от 1 до 31.',
-  'rule.invalidTime': 'Выберите допустимые дату и время в выбранном часовом поясе.',
-  'rule.invalidZone': 'Выберите допустимый часовой пояс.',
-  'rule.tooComplex': 'Это правило слишком частое или сложное. Выберите вариант повтора или попросите агента упростить правило.',
-  'host.createPrompt': 'Создай автоматизированную задачу на основе требований.',
-  'host.reapply': 'Проверить со своими правками',
 } satisfies Record<keyof typeof en, string>
+
+/** Portuguese dictionary. */

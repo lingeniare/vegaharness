@@ -222,7 +222,7 @@ describe('web e2e: Models settings page configures a dormant provider', () => {
     const dialog = page.getByRole('dialog', { name: 'Настройки' })
     await dialog.getByRole('button', { name: 'Изменить minimax-cn' }).click()
     await dialog.getByPlaceholder('•'.repeat('sk-e2e-minimax'.length), { exact: true }).waitFor({ timeout: 10_000 })
-    expect(await dialog.textContent()).not.toContain('API KeyИсточник：')
+    expect(await dialog.textContent()).not.toContain('API 密钥来源：')
     expect(await dialog.textContent()).not.toMatch(/oauth/i)
     await dialog.getByText('Настроено вручную').click()
     const url = dialog.getByLabel('Базовый URL')
@@ -308,12 +308,16 @@ describe('web e2e: Models settings page configures a dormant provider', () => {
     // No provider-scoped reasoning control: effort is a per-model capability
     // and the models under one provider disagree about it, so each model row
     // declares its own levels instead.
-    expect(await dialog.getByLabel('Уровни рассуждений').count()).toBe(0)
+    expect(await dialog.getByLabel('推理强度').count()).toBe(0)
     await custom.getByRole('button', { name: 'Добавить модель', exact: true }).click()
     await custom.getByLabel('ID модели 1').fill('acme-large')
     await custom.getByRole('button', { name: 'Параметры модели 1' }).click()
+    const fieldLeft = async (name: string) => custom.getByLabel(name, { exact: true })
+      .evaluate(element => element.getBoundingClientRect().left)
+    expect(await fieldLeft('Окно контекста 1')).toBe(await fieldLeft('ID модели 1'))
+    expect(await fieldLeft('最大输出 token 数 1')).toBe(await fieldLeft('Отображаемое имя 1'))
     expect(await custom.getByLabel('Окно контекста 1').getAttribute('placeholder')).toBe('1M')
-    expect(await custom.getByLabel('Максимум выходных токенов 1').getAttribute('placeholder')).toBe('128K')
+    expect(await custom.getByLabel('最大输出 token 数 1').getAttribute('placeholder')).toBe('128K')
     expect(await custom.getByRole('group', { name: 'Типы входных данных 1' }).getByRole('checkbox', { name: 'Изображение' }).isChecked()).toBe(false)
     await custom.getByRole('group', { name: 'Типы входных данных 1' }).getByRole('checkbox', { name: 'Изображение' }).check()
     // The switch seeds off, low, medium, and high rows; this route serves no medium.
@@ -363,7 +367,7 @@ describe('web e2e: Models settings page configures a dormant provider', () => {
     const reasoning = dialog.getByRole('group', { name: 'Уровень усилий 1' })
     expect(await reasoning.getByRole('combobox').evaluateAll(selects => selects.map(select => (select as HTMLSelectElement).value)))
       .toEqual(['off', 'low', 'high'])
-    expect(await reasoning.getByLabel('high Значение API').inputValue()).toBe('high')
+    expect(await reasoning.getByLabel('high API 参数值').inputValue()).toBe('high')
     await assertModelInputLayout(page, dialog)
     const snapshot = await captureStableAria(page, '[role="dialog"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(DECLARED_EDIT_EXPECTED, snapshot, MODE)
@@ -372,7 +376,7 @@ describe('web e2e: Models settings page configures a dormant provider', () => {
     await name.fill('Acme 网关')
     await dialog.getByRole('group', { name: 'Типы входных данных 1' }).getByRole('checkbox', { name: 'Изображение' }).uncheck()
     // A gateway with its own spelling for the top level.
-    await reasoning.getByLabel('high Значение API').fill('deep')
+    await reasoning.getByLabel('high API 参数值').fill('deep')
     await dialog.getByRole('button', { name: 'Сохранить', exact: true }).click()
     await expect.poll(async () => dialog.getByLabel('Протокол API').count(), { timeout: 10_000 }).toBe(0)
     // The adapter re-resolved the route under the new protocol and re-registered
@@ -539,6 +543,46 @@ describe('web e2e: Models settings page configures a dormant provider', () => {
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
 
+  it('replaces an installed catalog model\'s reasoning levels and returns to them when switched off', async () => {
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-models-catalog-reasoning'))
+    await scaffold.ctx.settings.mutate('llm-pi-ai', [{
+      op: 'set', path: ['providers', 'openai'], value: { models: [{ id: 'gpt-6-astra', name: 'GPT-6 Astra' }] },
+    }])
+    const dialog = page.getByRole('dialog', { name: 'Настройки' })
+    const edit = dialog.getByRole('button', { name: 'Изменить openai', exact: true })
+    const toggle = dialog.getByRole('switch', { name: 'Уровень усилий 1' })
+    const efforts = async (): Promise<string[]> =>
+      (await scaffold.ctx.llm.resolveModelInfo('openai', 'gpt-6-astra')).reasoning?.efforts.map(effort => String(effort.id)) ?? []
+    const openModelOptions = async (): Promise<void> => {
+      await edit.click()
+      await dialog.getByText('Настроено вручную').click()
+      await dialog.getByRole('button', { name: 'Параметры модели 1' }).click()
+    }
+    try {
+      const inherited = await efforts()
+      expect(inherited).toContain('max')
+      await openModelOptions()
+      expect(await toggle.getAttribute('aria-checked')).toBe('false')
+      await toggle.click()
+      await dialog.getByRole('button', { name: 'Сохранить', exact: true }).click()
+      await toggle.waitFor({ state: 'detached' })
+      expect(await efforts()).toEqual(['off', 'low', 'medium', 'high'])
+      // The saved notice confirms the browser directory refresh, so the reopened draft holds the stored levels.
+      await dialog.getByText('Настройки поставщика openai сохранены.', { exact: true }).waitFor({ timeout: 10_000 })
+
+      await openModelOptions()
+      await expect.poll(() => toggle.getAttribute('aria-checked')).toBe('true')
+      await toggle.click()
+      await dialog.getByRole('button', { name: 'Сохранить', exact: true }).click()
+      await toggle.waitFor({ state: 'detached' })
+      expect(await efforts()).toEqual(inherited)
+    } finally {
+      await scaffold.ctx.settings.mutate('llm-pi-ai', [{ op: 'unset', path: ['providers', 'openai'] }])
+      await edit.waitFor({ state: 'detached' })
+    }
+    expect(tripwire.pageErrors).toEqual([])
+  }, 60_000)
+
   it('saves model drag order, discards canceled moves, and preserves the other provider', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-models-order'))
     const dialog = page.getByRole('dialog', { name: 'Настройки' })
@@ -563,7 +607,7 @@ describe('web e2e: Models settings page configures a dormant provider', () => {
       // Keep the last insertion gap inside the scrollport before native dragging starts.
       await dialog.getByRole('button', { name: 'Добавить модель', exact: true }).scrollIntoViewIfNeeded()
       const source = dialog.getByRole('button', { name: 'Изменить порядок модели 1', exact: true })
-      const target = dialog.getByRole('button', { name: `Изменить порядок модели ${save ? '3' : '2'}`, exact: true })
+      const target = dialog.getByRole('button', { name: `调整模型顺序 ${save ? '3' : '2'}`, exact: true })
       await source.hover()
       const from = await source.boundingBox()
       if (from === null) throw new Error('Model drag handle is not visible')

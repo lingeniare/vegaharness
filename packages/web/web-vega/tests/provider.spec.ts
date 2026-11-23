@@ -5,6 +5,7 @@ import { Context } from '@deepseek-ai/cordis'
 import { VegaFetchProvider, VegaSearchProvider } from '@deepseek-ai/dsh-web-vega'
 import { resolveVegaAnonymize } from '../src/provider.ts'
 import type {
+  VegaAccountCredential,
   VegaProviderOptions,
   VegaSearchLlmRequest,
 } from '@deepseek-ai/dsh-web-vega'
@@ -49,13 +50,13 @@ afterAll(async () => {
 })
 
 const options = (overrides: Partial<VegaProviderOptions> = {}) => (): VegaProviderOptions & {
-  readonly resolveAccountToken: (endpoint: string) => Promise<string | undefined>
+  readonly resolveAccountCredential: (endpoint: string) => Promise<VegaAccountCredential | undefined>
 } => ({
   baseURL: origin,
   model: 'configured/model',
   maxTokens: 64,
   anonymize: false,
-  resolveAccountToken: async () => 'sk-apivega-test',
+  resolveAccountCredential: async () => ({ token: 'sk-apivega-test', reject: async () => undefined }),
   ...overrides,
 })
 
@@ -79,7 +80,7 @@ describe('VegaSearchProvider', () => {
   })
 
   it('maps a missing account token to a credential-missing error', async () => {
-    const provider = new VegaSearchProvider(() => ({ ...options()(), resolveAccountToken: async () => undefined }))
+    const provider = new VegaSearchProvider(() => ({ ...options()(), resolveAccountCredential: async () => undefined }))
     await expect(provider.search({ query: 'dsh' })).rejects.toMatchObject({ code: 'WEB_PROVIDER_CREDENTIAL_MISSING' })
   })
 

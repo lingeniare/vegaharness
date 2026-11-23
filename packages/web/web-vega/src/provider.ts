@@ -141,10 +141,16 @@ export interface VegaProviderOptions {
   readonly resolveModel?: () => string | undefined
   /** Resolve the account session id for `X-Vega-Session`. */
   readonly resolveSession?: () => string | undefined
-  /** Resolve the managed key for one endpoint; undefined while signed out. */
-  readonly resolveAccountToken?: (endpoint: string) => Promise<string | undefined>
-  /** Remove a server-rejected managed key while it still matches the stored login. */
-  readonly rejectToken?: (token: string) => Promise<void>
+  /** Release the managed credential for one endpoint; undefined while signed out or off the account route. */
+  readonly resolveAccountCredential?: (endpoint: string) => Promise<VegaAccountCredential | undefined>
+}
+
+/** The account credential released for one request destination. */
+export interface VegaAccountCredential {
+  /** Managed key the request carries. */
+  readonly token: string
+  /** Remove this credential after the destination rejected it, while it still matches the stored login. */
+  reject(): Promise<void>
 }
 
 /**
@@ -156,14 +162,14 @@ export interface VegaProviderOptions {
  */
 async function chatCompletion(
   options: VegaProviderOptions & {
-    readonly resolveAccountToken: (endpoint: string) => Promise<string | undefined>
-    readonly rejectToken?: (token: string) => Promise<void>
+    readonly resolveAccountCredential: (endpoint: string) => Promise<VegaAccountCredential | undefined>
   },
   body: Record<string, unknown>,
   signal?: AbortSignal,
 ): Promise<VegaCompletion> {
   const endpoint = `${options.baseURL}/chat/completions`
-  const token = await options.resolveAccountToken(endpoint)
+  const credential = await options.resolveAccountCredential(endpoint)
+  const token = credential?.token
   if (token === undefined) {
     throw new WebError(
       'VEGA account sign-in is required for this web request; guide the user to sign in to API VEGA again',
@@ -204,7 +210,7 @@ async function chatCompletion(
     }
     const message = `VEGA API error (HTTP ${status})${detail}`
     if (status === 401 || status === 403) {
-      await options.rejectToken?.(token)
+      await credential?.reject()
       throw new WebError(
         `${message}\n\nVEGA rejected the account sign-in used for this web request; guide the user to sign in to API VEGA again`,
         'WEB_PROVIDER_ERROR',
@@ -255,7 +261,7 @@ export class VegaSearchProvider implements WebSearchProvider {
   /** @param resolveOptions - the options for the NEXT operation, snapshotted per search. */
   constructor(
     private readonly resolveOptions: () => VegaProviderOptions & {
-      readonly resolveAccountToken: (endpoint: string) => Promise<string | undefined>
+      readonly resolveAccountCredential: (endpoint: string) => Promise<VegaAccountCredential | undefined>
     },
     private readonly recordRequest?: (request: VegaSearchLlmRequest) => void,
   ) {}
@@ -304,7 +310,7 @@ export class VegaFetchProvider implements WebFetchProvider {
   /** @param resolveOptions - the options for the NEXT operation, snapshotted per fetch. */
   constructor(
     private readonly resolveOptions: () => VegaProviderOptions & {
-      readonly resolveAccountToken: (endpoint: string) => Promise<string | undefined>
+      readonly resolveAccountCredential: (endpoint: string) => Promise<VegaAccountCredential | undefined>
     },
     private readonly recordRequest?: (request: VegaFetchLlmRequest) => void,
   ) {}

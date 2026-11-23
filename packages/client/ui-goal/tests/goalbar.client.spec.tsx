@@ -48,7 +48,7 @@ describe('GoalBar', () => {
     expect(complete.container.firstChild).toBeNull()
   })
 
-  it('renders nothing while loading, absent, or when the goal is complete', () => {
+  it('active goal: goal glyph, "Текущая цель", truncated objective, edit and clear actions', () => {
     const actions = makeActions()
     render(<GoalBar goal={makeGoal()} {...actions} t={t} />)
     expect(screen.getByText('Текущая цель')).toBeTruthy()
@@ -161,7 +161,7 @@ describe('GoalBar', () => {
     expect(screen.getByRole('button', { name: 'Приостановить цель' }).hasAttribute('disabled')).toBe(true)
   })
 
-  it('renders nothing while loading, absent, or when the goal is complete', () => {
+  it('active disarmed goal: "Неактивная цель" with a resume action instead of pause', () => {
     const actions = makeActions()
     render(<GoalBar goal={makeGoal()} activation="disarmed" {...actions} t={t} />)
     expect(screen.getByText('Неактивная цель')).toBeTruthy()
@@ -171,7 +171,7 @@ describe('GoalBar', () => {
     expect(screen.queryByRole('button', { name: 'Приостановить цель' })).toBeNull()
   })
 
-  it('renders nothing while loading, absent, or when the goal is complete', () => {
+  it('paused goal: "Приостановленная цель" with a resume action after edit and clear', () => {
     const actions = makeActions()
     render(<GoalBar goal={makeGoal({ phase: 'paused' })} {...actions} t={t} />)
     expect(screen.getByText('Приостановленная цель')).toBeTruthy()
@@ -209,7 +209,7 @@ describe('GoalBar', () => {
     expect(screen.queryByText('Текущая цель')).toBeNull()
   })
 
-  it('renders nothing while loading, absent, or when the goal is complete', () => {
+  it('blocked goal: "Заблокированная цель" with the block reason as the strip tooltip', () => {
     const actions = makeActions()
     const goal = makeGoal({ phase: 'blocked', blockedReason: { code: 'stalled', message: 'No progress in 3 rounds' } })
     render(<GoalBar goal={goal} {...actions} t={t} />)

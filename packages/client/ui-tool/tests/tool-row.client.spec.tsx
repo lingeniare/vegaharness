@@ -427,7 +427,7 @@ describe('ToolRow', () => {
     expect(view.getAllByText('end')).toHaveLength(1)
     expect(view.getByText('old', { exact: true })).toBeTruthy()
     expect(view.getByText('new', { exact: true })).toBeTruthy()
-    expect(view.queryByRole('button', { name: /Развернуть оставшиеся/ })).toBeNull()
+    expect(view.queryByRole('button', { name: /Показать ещё/ })).toBeNull()
   })
 
   it('formats the argument body only while expanding it', () => {
@@ -580,9 +580,9 @@ describe('ToolRow', () => {
     const inspect = vi.fn()
     const view = render(<ToolRow {...rowProps} inspect={inspect} />)
     // Collapsed: no pill.
-    expect(view.queryByText('Просмотреть')).toBeNull()
+    expect(view.queryByText('Проверить')).toBeNull()
     fireEvent.click(view.getByRole('button', { name: /Bash/ }))
-    const pill = view.getByText('Просмотреть')
+    const pill = view.getByText('Проверить')
     fireEvent.click(pill)
     expect(inspect).toHaveBeenCalledTimes(1)
     // The pill click must not collapse the row (body is a .row sibling).
@@ -592,7 +592,7 @@ describe('ToolRow', () => {
   it('no inspect callback, no pill', () => {
     const view = render(<ToolRow {...rowProps} />)
     fireEvent.click(view.getByRole('button'))
-    expect(view.queryByText('Просмотреть')).toBeNull()
+    expect(view.queryByText('Проверить')).toBeNull()
   })
 
   it('the expanded card gutter-labels each section it carries (IN / OUT)', () => {
@@ -690,7 +690,7 @@ describe('GenericToolCard', () => {
       }))}
       getFileTriggerProps={() => ({})} />,
     )
-    expect(view.getByText('Применить патч')).toBeTruthy()
+    expect(view.getByText('Редактирование')).toBeTruthy()
     expect(view.getByText('src/x.ts')).toBeTruthy()
     expect(view.container.querySelector('[data-variant="edit"]')).not.toBeNull()
     expect(view.container.querySelector('svg')).not.toBeNull()
@@ -715,7 +715,7 @@ describe('GenericToolCard', () => {
     const view = render(<GenericToolCard {...props('bash', result())} inspect={inspect}
       getFileTriggerProps={() => ({})} />)
     fireEvent.click(view.getByRole('button', { name: /Выполнение команды/ }))
-    fireEvent.click(view.getByText('Просмотреть'))
+    fireEvent.click(view.getByText('Проверить'))
     expect(inspect).toHaveBeenCalledTimes(1)
   })
 
@@ -746,7 +746,7 @@ describe('GenericToolCard', () => {
       getFileTriggerProps={() => ({})} />)
     expect(view.getByText('Отклонено автоматической проверкой')).toBeTruthy()
     fireEvent.click(view.getByRole('button'))
-    expect(view.getByText('Bash')).toBeTruthy()
+    expect(view.getByText('Инструмент не был запущен. Причина: scope was not authorized')).toBeTruthy()
     expect(view.queryByText('ВХОД')).toBeNull()
     expect(view.getAllByText('ВЫХОД')).toHaveLength(1)
     expect(stringify.mock.calls.some(([value]) => (

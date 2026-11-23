@@ -657,7 +657,7 @@ describe('turn rows', () => {
   it('names the sending agent on team-message triggers', () => {
     mount({
       turns: [turn({
-        prompt: 'Team message from hfai-deploy: P1  rebase 完成',
+        prompt: 'Team message from hfai-deploy: P1 已 rebase 完成',
         promptSource: 'team-message',
         promptSender: 'hfai-deploy',
       })],
@@ -665,9 +665,9 @@ describe('turn rows', () => {
     })
     const cell = cellsOf(rowWithPrefix(say('turn.label', { turn: 1 })))[1] as HTMLTableCellElement
     expect(cell.textContent).toContain(`${say('trigger.team-message')} · hfai-deploy`)
-    expect(cell.textContent).toContain('P1  rebase 完成')
+    expect(cell.textContent).toContain('P1 已 rebase 完成')
     expect(cell.textContent).not.toContain('Team message from')
-    expect(cell.getAttribute('title')).toBe('Team message from hfai-deploy: P1  rebase 完成')
+    expect(cell.getAttribute('title')).toBe('Team message from hfai-deploy: P1 已 rebase 完成')
   })
 
   it('shows the frame label and body without opaque session ids', () => {
@@ -675,7 +675,7 @@ describe('turn rows', () => {
       turns: [
         turn({
           turn: 1,
-          prompt: '123456789abc sent a message: 请检查构建.b02b.Agent 52224ac7.8c6e.4d25',
+          prompt: 'Agent 52224ac7-b02b-4d25-8c6e-123456789abc sent a message: 请检查构建',
           promptSource: 'agent-message',
         }),
         turn({
@@ -683,7 +683,7 @@ describe('turn rows', () => {
           prompt: 'Background subagent 10a0dbaa-08dd-4e3f-838d-d6f84b36babe finished and will do no further work.',
           promptSource: 'subagent-settled',
         }),
-        turn({ turn: 3, prompt: 'Team message from stack-rebase: P2 已合 и ', promptSource: 'team-message', promptSender: 'stack-rebase' }),
+        turn({ turn: 3, prompt: 'Team message from stack-rebase: P2 已合并', promptSource: 'team-message', promptSender: 'stack-rebase' }),
       ],
       stepCount: 3,
     })
@@ -697,7 +697,7 @@ describe('turn rows', () => {
     expect(second.textContent).toContain('and will do no further work.')
     const third = cellsOf(rowWithPrefix(say('turn.label', { turn: 3 })))[1] as HTMLTableCellElement
     expect(third.textContent).toContain(`${say('trigger.team-message')} · stack-rebase`)
-    expect(third.textContent).toContain('P2 已合 и ')
+    expect(third.textContent).toContain('P2 已合并')
     expect(third.textContent).not.toContain('Team message from')
   })
 
@@ -921,7 +921,7 @@ describe('turn rows', () => {
     expect(second[1]?.getAttribute('title')).toBe([
       say('step.started.title', { time: formatDateTimeMs(BASE + 4_000) }),
       say('bar.gap', { value: formatMs(3_000) }),
-    ].join('\\\\n'))
+    ].join('\n'))
     const partial = cellsOf(stepRow(4))
     expect(partial[1]?.textContent).toBe('')
     expect(partial[1]?.getAttribute('title')).toBeNull()
@@ -1217,13 +1217,13 @@ describe('step rows', () => {
   })
 
   it('previews the answered text in the did cell and skips blank answers', () => {
-    mount(turnSnapshot([step({ answer: 'first line\\\\nsecond line' })]))
+    mount(turnSnapshot([step({ answer: 'first line\nsecond line' })]))
     const stepDid = cellsOf(stepRow(1))[2] as HTMLTableCellElement
     expect(stepDid.textContent).toContain('first line')
-    expect(within(stepDid).getByTitle(/first line/).getAttribute('title')).toBe('first line\\\\nsecond line')
+    expect(within(stepDid).getByTitle(/first line/).getAttribute('title')).toBe('first line\nsecond line')
 
     cleanup()
-    mount(turnSnapshot([step({ answer: '   \\\\n  ' })]))
+    mount(turnSnapshot([step({ answer: '   \n  ' })]))
     expect(cellsOf(stepRow(1))[2]?.textContent).toBe(say('did.answer'))
 
     cleanup()
@@ -1827,7 +1827,8 @@ describe('step filters', () => {
     expect(screen.getByText(say('steps.total', { total: 25 }))).toBeTruthy()
     expect(stepRows()).toHaveLength(24)
     expect(stepRow(2)).toBeTruthy()
-    expect(bodyRows().some(row => (row.textContent ?? '').startsWith(say('step.label', { step: 1 })))).toBe(false)
+    const stepOne = new RegExp(`^${say('step.label', { step: 1 }).replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')}(?!\\d)`)
+    expect(bodyRows().some(row => stepOne.test(row.textContent ?? ''))).toBe(false)
 
     const readChip = (): HTMLElement => screen.getByRole('button', { name: 'read ×2' })
     expect(readChip().getAttribute('aria-pressed')).toBe('false')

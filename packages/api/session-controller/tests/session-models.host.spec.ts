@@ -97,9 +97,9 @@ async function harness(logged?: {
   sessionId: SessionId
 }> {
   await ctx.plugin(SessionStore)
+  await ctx.plugin(SessionProjectionRegistry)
   await ctx.plugin(SystemPrompt, { personaPrefix: '' })
   await ctx.plugin(LlmRuntime)
-  await ctx.plugin(SessionProjectionRegistry)
   await ctx.plugin(AgentRegistry)
   ctx.llm.registerAdapter(['deepseek-official'], new CatalogAdapter('DeepSeek', [
     { provider: 'deepseek-official', id: 'deepseek-chat', name: 'DeepSeek Chat' },
@@ -364,14 +364,14 @@ describe('Web session model selection', () => {
     const { configurationFixture } = await import('../../../settings/settings/tests/configuration-fixture.ts')
     const configured = await configurationFixture({ hmr: false })
     const { ctx } = await harness(undefined, configured.ctx)
-    ctx.effect(() => ctx.llm.registerAdapter(['deepseek-account'], new CatalogAdapter('Account', [
-      { provider: 'deepseek-account', id: 'first-model', name: 'First' },
-      { provider: 'deepseek-account', id: 'second-model', name: 'Second' },
+    ctx.effect(() => ctx.llm.registerAdapter(['api-vega'], new CatalogAdapter('Account', [
+      { provider: 'api-vega', id: 'first-model', name: 'First' },
+      { provider: 'api-vega', id: 'second-model', name: 'Second' },
     ], REASONING)))
     const describe = vi.fn(async () => ({ configured: configuredKey, writable: true }))
     ctx.provide('credentials', { describe } as never)
     ctx.effect(() => ctx.llm.registerConfigurableProviders([
-      { provider: 'deepseek-account', displayName: 'Account', settingsNs: 'account', settingsPath: [] },
+      { provider: 'api-vega', displayName: 'Account', settingsNs: 'account', settingsPath: [] },
       { provider: 'removed-model-provider', displayName: 'Custom', settingsNs: 'first', settingsPath: ['providers', 'custom'] },
     ]))
     vi.spyOn(ctx.settings, 'describe').mockReturnValue([{
@@ -386,7 +386,7 @@ describe('Web session model selection', () => {
     expect(describe).toHaveBeenCalledWith('CUSTOM_API_KEY')
     expect(ctx.agentDefaultModel.currentSelection()).toEqual(configuredKey
       ? { provider: 'removed', model: 'saved' }
-      : { provider: 'deepseek-account', model: 'first-model', reasoningEffort: 'high' })
+      : { provider: 'api-vega', model: 'first-model', reasoningEffort: 'high' })
     await ctx.fiber.dispose()
   })
 
@@ -910,17 +910,17 @@ it('initializes the account model without reasoning metadata and rejects an empt
   const configured = await configurationFixture({ hmr: false })
   const { ctx } = await harness(undefined, configured.ctx)
   ctx.provide('credentials', { describe: vi.fn() } as never)
-  const dispose = ctx.llm.registerAdapter(['deepseek-account'], new CatalogAdapter('Account', [
-    { provider: 'deepseek-account', id: 'basic', name: 'Basic' },
+  const dispose = ctx.llm.registerAdapter(['api-vega'], new CatalogAdapter('Account', [
+    { provider: 'api-vega', id: 'basic', name: 'Basic' },
   ]))
   const controller = await createSessionTestController(ctx, {
     defaultModelSelection: () => ctx.agentDefaultModel.currentSelection(), cwd: '/tmp',
   })
   await controller.initializeDefaultModel()
-  expect(ctx.agentDefaultModel.currentSelection()).toEqual({ provider: 'deepseek-account', model: 'basic' })
+  expect(ctx.agentDefaultModel.currentSelection()).toEqual({ provider: 'api-vega', model: 'basic' })
   dispose()
   await expect(controller.initializeDefaultModel()).rejects.toMatchObject({
-    code: 'session/provider-models-unavailable', details: { provider: 'deepseek-account' },
+    code: 'session/provider-models-unavailable', details: { provider: 'api-vega' },
   })
 })
 

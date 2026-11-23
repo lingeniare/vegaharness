@@ -5,16 +5,22 @@ export const INSTALL_GIT_EXAMPLE = 'https://github.com/author/dsh-plugin'
 /** Local-path template a field still holding it reports as needing the actual path; no guide entry shows it. */
 export const INSTALL_PATH_EXAMPLE = '/Users/name/my-plugin'
 
+/** English dictionary and key source of truth. */
+
 /** Plugin manager locale key union. */
 export type PluginManagerLocaleKey = keyof typeof en
 
-/** English dictionary the key-set source of truth. */
+/** English dictionary checked against the Chinese key set. */
 export const en = {
   panel: 'Plugins',
+  settingsEntry: 'Plugins',
+  clientSyncing: 'Syncing plugins on this page…',
+  clientSyncFailed: 'Some plugins could not sync on this page. Host enablement is unchanged.',
+  clientSyncRetry: 'Retry this page',
   title: 'Plugins',
   intro: 'Install, enable, and configure plugins',
   infoLabel: 'About plugins',
-  infoDescription: 'Configure official plugins and install or manage other plugins here. View the built-in plugin list and runtime status in Settings → Built-in plugins.',
+  infoDescription: 'Configure official plugins, and install, manage, and configure other plugins here.',
   loading: 'Reading plugins…',
   error: 'Could not read all plugins, possibly due to a network problem',
   unavailable: 'This deployment runs without a manageable profile, so plugins cannot be installed or switched here.',
@@ -26,12 +32,12 @@ export const en = {
   chooseAddMethod: 'Choose how to add a plugin',
   installExisting: 'Install a third-party plugin',
   installExistingDescription: 'Supports npm packages, Git repositories, and local directories',
-  restartNotice: 'Restart VEGA to apply the change. {reason}',
+  restartNotice: 'Restart DSH to apply the change. {reason}',
   restartReasonNoHmr: 'This profile applies changes only at startup.',
-  restartReasonPackageMoved: 'An installed package now resolves to another directory, or the change replaces a package the VEGA installation provides. Uninstall a package before installing it from another location.',
-  restartReasonHostModule: 'The change reaches modules VEGA itself loaded.',
+  restartReasonPackageMoved: 'An installed package now resolves to another directory, or the change replaces a package the DSH installation provides. Uninstall a package before installing it from another location.',
+  restartReasonHostModule: 'The change reaches modules DSH itself loaded.',
   restartReasonUnmanagedPlugin: 'The change reaches a plugin running outside the plugin list.',
-  restartReasonModuleComparison: 'VEGA could not compare the loaded plugins with their files.',
+  restartReasonModuleComparison: 'DSH could not compare the loaded plugins with their files.',
   overriddenNotice: '{name} was saved, but a higher-priority configuration overrides it, so it is not in effect',
   bundlesTitle: 'Installed plugins',
   basicTitle: 'Built-in plugin settings',
@@ -41,6 +47,7 @@ export const en = {
   tabsLabel: 'Plugin views',
   installedTab: 'Installed',
   statusProblem: 'Problem',
+  statusNotRunning: 'Not running',
   statusBeta: 'Experimental',
   reasonLabel: 'Reason',
   metadataError: 'Package metadata error: {error}',
@@ -88,8 +95,8 @@ export const en = {
   installPathTemplateHint: 'Replace this with the actual path to your local plugin directory.',
   installGuideFill: 'Use example',
   installGuideFillAria: 'Use the example {example}',
-  installGuideSafety: 'Install only plugins you trust: they run with your permissions and can damage VEGA Harness or leak your data.',
-  installUpgradeNotice: 'On-demand official plugins offer Update when their version differs from VEGA. To update other plugins, uninstall and reinstall them.',
+  installGuideSafety: 'Install only plugins you trust: they run with your permissions and can damage DeepSeek Harness or leak your data.',
+  installUpgradeNotice: 'On-demand official plugins offer Update when their version differs from DSH. To update other plugins, uninstall and reinstall them.',
   registryToggle: 'Registry',
   registryLegend: 'The npm registry the plugin is downloaded from',
   registryDefault: 'Default registry',
@@ -107,8 +114,8 @@ export const en = {
   installConfirmedRefused: 'This plugin cannot be installed',
   installProblemInvalid: 'This is not a package name or address that can be installed: {reason}',
   installProblemInstalled: 'This plugin is already installed. To upgrade it, uninstall it and install it again',
-  installProblemShipped: 'This plugin ships with VEGA; upgrading VEGA updates it',
-  installBundledTitle: 'This plugin ships with VEGA',
+  installProblemShipped: 'This plugin ships with DSH; upgrading DSH updates it',
+  installBundledTitle: 'This plugin ships with DSH',
   installBundledDescription: 'Enable it without downloading another copy',
   installProblemNotFound: 'No such plugin was found',
   installProblemNotPackage: 'The path does not exist or is not a valid plugin package',
@@ -122,8 +129,8 @@ export const en = {
   statusMissingFiles: 'Package unavailable',
   statusUpdateAvailable: 'Update available',
   sourceNotInstalled: 'Not installed',
-  sourceTargetSpec: 'Source for this VEGA',
-  sourceTargetVersion: 'Version for this VEGA',
+  sourceTargetSpec: 'Source for this DSH',
+  sourceTargetVersion: 'Version for this DSH',
   update: 'Update',
   updateLabel: 'Update {name}',
   versionsTitle: 'Versions',
@@ -133,8 +140,8 @@ export const en = {
   versionsPublished: 'Published {date}',
   versionsLatest: 'Up to date',
   versionsCheckedAt: 'Last checked at {time}',
-  versionsBlocked: 'Newer versions need a VEGA update',
-  versionsBlockedDetail: '{version} needs {peers}; this VEGA is {runtime}',
+  versionsBlocked: 'Newer versions need a DSH update',
+  versionsBlockedDetail: '{version} needs {peers}; this DSH is {runtime}',
   versionsNoneInstallable: 'No newer version to install directly',
   versionsNoneInstallableDetail: 'The newer versions are deprecated, prereleases, or declare no bundle. Expand to see them',
   versionsFailedNetwork: 'Could not reach the registry',
@@ -167,7 +174,7 @@ export const en = {
   updateRunning: 'Updating',
   updateStepChecking: 'Check {version}',
   updateStepRemoving: 'Stop and remove {version}',
-  updateStepInstalling: 'Install {version} from {registry}',
+  updateStepInstalling: 'Install {version} from {source}',
   updateStepRestoring: 'Install {version} again',
   updateDone: 'Updated to {version}',
   updateDoneDetail: 'The new version is running.',
@@ -181,7 +188,7 @@ export const en = {
   updateBroken: 'Update failed; the plugin is not installed',
   updateBrokenDetail: '{to} failed to install, and installing {from} again failed too. Install {name} again from Add plugin.',
   updateLost: 'The update result is unknown',
-  updateLostDetail: 'The connection to VEGA was interrupted: {reason}. Refresh the plugin list to see the installed version.',
+  updateLostDetail: 'The connection to DSH was interrupted: {reason}. Refresh the plugin list to see the installed version.',
   updateOutput: 'Show installation output',
   updateFinish: 'Done',
   installFailedTitle: 'The plugin could not be installed',
@@ -258,7 +265,7 @@ export const en = {
   terminalSignal: 'signal {signal}',
   terminalNoExitCode: 'no exit code',
   installDoneNothing: 'Install finished with no new dependency.',
-  installDoneRestart: 'Installed; restart VEGA to load it. {reason}',
+  installDoneRestart: 'Installed; restart DSH to load it. {reason}',
   installDoneApproved: 'Install scripts allowed for {names}',
   installDoneOtherVersion: 'Under pnpm\'s supply-chain security policy (minimumReleaseAge), versions published more recently than the required age are not installed automatically, so this installation used {installed} instead of the latest version {version}. A newly published version has not completed this waiting period and may contain undetected malicious code or defects. If you need {version}, uninstall the current version and then install {exact} to request that version.',
   installApprovalTitle: 'Install scripts need permission',
@@ -288,11 +295,12 @@ export const en = {
   reasonStopProfile: 'This profile runs without HMR; stop it and uninstall the package with dsh plugin.',
   reasonBundleInUse: 'Other configuration still uses this bundle\'s components; switch them off first.',
   reasonStaleApproval: 'The pending script approvals changed; install again to refresh them.',
-  reasonIncompatibleVersion: '{plugin} is incompatible with VEGA {runtime} (requires {requirements}); running it may cause crashes or data loss.',
-  reasonIncompatibleVersionUnnamed: 'This plugin is incompatible with the running VEGA version; running it may cause crashes or data loss.',
-  reasonUnsupportedPlatform: 'This plugin does not support the operating system running VEGA.',
-  reasonIncompatibleInstall: 'Install a plugin version compatible with this VEGA.',
-  reasonIncompatibleInstalled: 'Uninstall it and install a version compatible with this VEGA.',
+  reasonIncompatibleVersion: '{plugin} is incompatible with DSH {runtime} (requires {requirements}); running it may cause crashes or data loss.',
+  reasonIncompatibleVersionUnnamed: 'This plugin is incompatible with the running DSH version; running it may cause crashes or data loss.',
+  reasonUnsupportedPlatform: 'This plugin does not support the operating system running DSH.',
+  reasonIncompatibleInstall: 'Install a plugin version compatible with this DSH.',
+  reasonIncompatibleInstalled: 'Uninstall it and install a version compatible with this DSH.',
+  reasonUnexpectedPackage: 'The plugin source installed another package or version than requested; the installation was undone. Report it to the plugin\'s publisher or the index maintainer.',
   reasonOperationError: 'The Host reported an error.',
   detailTitle: 'Details',
   detailLoading: 'Reading details',
@@ -301,14 +309,24 @@ export const en = {
   detailInvalid: 'The plugin declares an invalid details file.',
   detailFailed: 'Could not read the details.',
   detailFootnotes: 'Footnotes',
-  statusNotRunning: 'Not running',
-  reasonUnexpectedPackage: 'The plugin source installed another package or version than requested; the installation was undone. Report it to the plugin\'s publisher or the index maintainer.',
-} satisfies Record<string, string>
+}
 
-/** Russian dictionary, checked against the English keys. */
+/** Japanese copy. */
+
+/** Spanish dictionary. */
+
+/** French dictionary. */
+
+/** German dictionary. */
+
+/** Russian dictionary. */
 export const ru = {
   reasonUnsupportedPlatform: 'Этот плагин не поддерживает операционную систему, в которой работает VEGA.',
   panel: 'Плагины',
+  settingsEntry: 'Плагины',
+  clientSyncing: 'Синхронизация плагинов на этой странице…',
+  clientSyncFailed: 'Некоторые плагины не смогли синхронизироваться на этой странице. Включение хоста не изменилось.',
+  clientSyncRetry: 'Повторить эту страницу',
   title: 'Плагины',
   intro: 'Устанавливайте, включайте и настраивайте плагины',
   infoLabel: 'О плагинах',
@@ -339,6 +357,7 @@ export const ru = {
   tabsLabel: 'Представления плагинов',
   installedTab: 'Установленные',
   statusProblem: 'Проблема',
+  statusNotRunning: 'Не запущено',
   statusBeta: 'Экспериментальный',
   reasonLabel: 'Причина',
   metadataError: 'Ошибка метаданных пакета: {error}',
@@ -590,6 +609,7 @@ export const ru = {
   reasonIncompatibleVersionUnnamed: 'Этот плагин несовместим с работающей версией VEGA; его запуск может привести к сбоям или потере данных.',
   reasonIncompatibleInstall: 'Установите версию плагина, совместимую с этой версией VEGA.',
   reasonIncompatibleInstalled: 'Удалите плагин и установите версию, совместимую с этой версией VEGA.',
+  reasonUnexpectedPackage: 'Источник плагина установил не тот пакет или не ту версию, которые были запрошены; установка отменена. Сообщите об этом издателю плагина или сопровождающему индекса плагинов.',
   reasonOperationError: 'Host сообщил об ошибке.',
   detailTitle: 'Подробности',
   detailLoading: 'Читаем подробности',
@@ -598,6 +618,6 @@ export const ru = {
   detailInvalid: 'Плагин объявляет неверный файл сведений.',
   detailFailed: 'Подробности прочитать не удалось.',
   detailFootnotes: 'Сноски',
-  statusNotRunning: 'Не запущено',
-  reasonUnexpectedPackage: 'Источник плагина установил не тот пакет или не ту версию, которые были запрошены; установка отменена. Сообщите об этом издателю плагина или сопровождающему индекса плагинов.',
 } satisfies Record<keyof typeof en, string>
+
+/** Portuguese dictionary. */

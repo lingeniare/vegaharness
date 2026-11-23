@@ -137,7 +137,7 @@ it.each(['version: [private-feed', 'version: 42\n', 'version: invalid-private-ve
         ...f.plan,
         artifacts: f.plan.artifacts.map(artifact => artifact.channelMetadata ? { ...artifact, contents } : artifact),
       }
-      if (remote) f.objects.set('feed/nightly.yml', observed(contents))
+      if (remote) f.objects.set('feed/stable.yml', observed(contents))
       await expect(publishDesktopRelease(plan, f.operations)).rejects.toMatchObject({
         code: remote ? 'verification-failed' : 'invalid-plan',
         message: `desktop publish: invalid ${remote ? 'remote' : 'planned'} channel version`,

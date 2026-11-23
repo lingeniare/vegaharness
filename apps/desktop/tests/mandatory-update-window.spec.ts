@@ -208,7 +208,7 @@ it('rebinds policy updates and reloads to a replacement Windows main window', ()
 it.each(['darwin', 'win32'] as const)('includes the installation wait notice only on Windows: %s', (platform) => {
   const f = setup(platform)
   expect(f.view().locale.messages.mandatoryReadyDetail).toBe(platform === 'win32'
-    ? '更新期间应用将暂时关闭, 完成后会自动打开。\\n\\n更新可能需要一些时间，请耐心等待，期间请勿重复启动应用。'
+    ? 'Приложение временно закроется во время обновления и автоматически откроется после его завершения.\n\nОбновление может занять некоторое время. Пожалуйста, подождите и не запускайте приложение снова во время установки.'
     : 'Приложение закроется во время обновления и автоматически откроется после его завершения.')
 })
 
@@ -405,7 +405,7 @@ it('uses the configured policy title as the native headline without repeating it
   await Promise.resolve()
   const options = native.messageBox.mock.calls[0]![1]
   expect(options.message).toBe('Configured title')
-  expect(options.detail).toBe('Configured detail\\n\\n新版本: 1.0.1-nightly.1')
+  expect(options.detail).toBe('Configured detail\n\nНовая версия: 1.0.1-nightly.1')
 })
 
 

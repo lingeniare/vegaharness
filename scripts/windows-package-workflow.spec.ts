@@ -71,7 +71,7 @@ it('routes manual packaging to the dedicated runner with explicit preset and sig
   expect(workflow.concurrency).toEqual({ group: 'windows-desktop-package', 'cancel-in-progress': false })
   expect(workflow.permissions).toEqual({ contents: 'read' })
   expect(Object.keys(workflow.on.workflow_dispatch!.inputs).sort()).toEqual([
-    'build_version', 'cache_namespace', 'compression_level', 'preset', 'signing', 'source_ref', 'test_release_id', 'update_channel', 'version_mode',
+    'build_version', 'cache_namespace', 'compression_level', 'preset', 'signing', 'source_ref', 'test_release_id', 'version_mode',
   ])
   expect(workflow.on.workflow_dispatch!.inputs.signing!.default).toBe('signed')
   expect(workflow.on.workflow_dispatch!.inputs.compression_level).toMatchObject({ type: 'choice', options: ['3', '7'], default: '3', required: true })
@@ -79,10 +79,8 @@ it('routes manual packaging to the dedicated runner with explicit preset and sig
   expect(workflow.on.workflow_dispatch!.inputs.build_version!.required).toBe(false)
   expect(workflow.on.workflow_dispatch!.inputs.version_mode!.default).toBe('default')
   expect(workflow.on.workflow_dispatch!.inputs.source_ref!.default).toBe('master')
-  expect(workflow.on.workflow_dispatch!.inputs.update_channel!.default).toBe('stable')
   expect(job.env.PACKAGE_VERSION_MODE).toBe("${{ inputs.version_mode == 'follow-dsh' && 'product' || inputs.version_mode == 'build-number' && 'auto' || inputs.version_mode }}")
   expect(job.env.PACKAGE_SOURCE_REF).toBe('${{ inputs.source_ref }}')
-  expect(job.env.DSH_DESKTOP_UPDATE_CHANNEL).toBe('${{ inputs.update_channel }}')
   expect(job.env.DSH_PACKAGING_PRESET).toBe('${{ inputs.preset }}')
   expect(job.env.PACKAGE_SIGNING).toBe('${{ inputs.signing }}')
   expect(job.steps.find(step => step.id === 'checkout')!.with).toMatchObject({ clean: true, 'persist-credentials': false, ref: '${{ inputs.source_ref }}' })
@@ -196,7 +194,7 @@ it.skipIf(process.platform !== 'win32')('stages helpers that remain usable when 
     const temporary = resolve(directory, 'temporary')
     mkdirSync(scripts, { recursive: true })
     mkdirSync(temporary)
-    for (const name of ['windows-packaging-priority.ps1']) {
+    for (const name of ['windows-packaging-priority.ps1', 'windows-packaging-summary.mjs']) {
       writeFileSync(resolve(scripts, name), readFileSync(resolve(root, 'apps/desktop/scripts', name)))
     }
     const stage = resolve(directory, 'stage.ps1')

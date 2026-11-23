@@ -46,7 +46,9 @@
   "dsh": {
     "client": {
       "platform": "web",
-      "external": ["@deepseek-ai/dsh-client-script-realm/client"]
+      "external": [
+        "@deepseek-ai/dsh-client-script-realm/client"
+      ]
     }
   },
   "scripts": {

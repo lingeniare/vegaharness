@@ -12,7 +12,7 @@ describe('Timeline labels', () => {
       const before = locale.getSnapshot().locales.map(item => item.id)
       const off = locale.register('timeline', dictionaries)
       expect(locale.getSnapshot().locales.map(item => item.id)).toEqual(before)
-      expect(before).toEqual(['zh', 'en'])
+      expect(before).toEqual(['en', 'ru'])
       expect(locale.bind('timeline')('title')).toBe(en.title)
       off()
       expect(locale.bind('timeline')('title')).toBe('title')
@@ -20,13 +20,11 @@ describe('Timeline labels', () => {
       await ctx.fiber.dispose()
     }
   })
-  it('resolves all eight app languages, preserves placeholders, and follows external fallback chains', async () => {
+  it('resolves every app language, preserves placeholders, and follows external fallback chains', async () => {
     const ctx = new Context()
     const locale = new LocaleRuntime(ctx, undefined, { languages: ['en'], preference: null })
     try {
       const stop = locale.register('timeline', dictionaries)
-      for (const id of ['ja', 'es', 'fr', 'de', 'ru', 'pt'])
-        locale.addLanguage({ id, label: id, fallback: 'en' })
       for (const [id, dictionary] of Object.entries(dictionaries)) {
         expect(Object.keys(dictionary).sort()).toEqual(Object.keys(en).sort())
         locale.setLocale(id)
@@ -41,9 +39,9 @@ describe('Timeline labels', () => {
           expect(text).not.toMatch(/\{(?:count|percent)\}/u)
         }
       }
-      locale.addLanguage({ id: 'it', label: 'Italiano', fallback: 'fr' })
+      locale.addLanguage({ id: 'it', label: 'Italiano', fallback: 'ru' })
       locale.setLocale('it')
-      expect(locale.bind('timeline')('title')).toBe(dictionaries.fr.title)
+      expect(locale.bind('timeline')('title')).toBe(dictionaries.ru.title)
       stop()
     } finally {
       await ctx.fiber.dispose()

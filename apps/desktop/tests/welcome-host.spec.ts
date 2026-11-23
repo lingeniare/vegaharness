@@ -76,7 +76,7 @@ describe('desktop welcome Web operations', () => {
   it('reads the explicit language preference and recognizes another provider key', async () => {
     const host = transport('ru')
     host.keys.set('EXAMPLE_API_KEY', 'sk-other')
-    const backend = await connectDesktopWelcome(url, cookie, host.send)
+    const backend = connectDesktopWelcome(url, cookie, host.send)
     expect(await backend.read()).toMatchObject({ localePreference: 'ru', hasApiKey: true })
     host.keys.clear()
     expect(await backend.read()).toMatchObject({ hasApiKey: false })
@@ -85,7 +85,7 @@ describe('desktop welcome Web operations', () => {
 
   it('reads language without querying account or model providers', async () => {
     const host = transport('ru')
-    const backend = await connectDesktopWelcome(url, cookie, host.send)
+    const backend = connectDesktopWelcome(url, cookie, host.send)
     host.send.mockClear()
     expect(await backend.readLocalePreference()).toBe('ru')
     expect(host.send).toHaveBeenCalledOnce()

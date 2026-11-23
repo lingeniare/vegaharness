@@ -210,11 +210,11 @@ describe('SDK command dispatch', () => {
   })
 
   it.each([
-    ['compact', '@deepseek-ai/dsh-command-compact', '/compact', '压缩.'],
-    ['permission', '@deepseek-ai/dsh-permission-presets', '/permission read-only', '权限 read-only.'],
-    ['plan', '@deepseek-ai/dsh-plan-mode', '/plan', '计划.'],
-    ['goal', '@deepseek-ai/dsh-command-goal', '/goal', '目标.'],
-  ])('accepts the %s English and Chinese aliases and delivers their lifecycle before resolution', async (name, definitionId, line, alias) => {
+    ['compact', '@deepseek-ai/dsh-command-compact', '/compact', '/сжать'],
+    ['permission', '@deepseek-ai/dsh-permission-presets', '/permission read-only', '/разрешение read-only'],
+    ['plan', '@deepseek-ai/dsh-plan-mode', '/plan', '/план'],
+    ['goal', '@deepseek-ai/dsh-command-goal', '/goal', '/цель'],
+  ])('accepts the %s English and Russian aliases and delivers their lifecycle before resolution', async (name, definitionId, line, alias) => {
     const input = new PassThrough()
     const output = new PassThrough()
     const serverWire = new JsonRpcLineTransport(input, output)
@@ -261,10 +261,10 @@ describe('SDK command dispatch', () => {
   })
 
   it.each([
-    ['compact', '@deepseek-ai/dsh-command-compact', 'Сжать', ''],
-    ['permission', '@deepseek-ai/dsh-permission-presets', 'Разрешение', ' read-only'],
-    ['plan', '@deepseek-ai/dsh-plan-mode', 'План', ' task'],
-    ['goal', '@deepseek-ai/dsh-command-goal', 'Цель', ' task'],
+    ['compact', '@deepseek-ai/dsh-command-compact', 'сжать', ''],
+    ['permission', '@deepseek-ai/dsh-permission-presets', 'разрешение', ' read-only'],
+    ['plan', '@deepseek-ai/dsh-plan-mode', 'план', ' task'],
+    ['goal', '@deepseek-ai/dsh-command-goal', 'цель', ' task'],
   ])('dispatches the renamed %s definition through its registered name and aliases', async (name, id, alias, args) => {
     const h = await setup()
     await h.initialize()
@@ -368,11 +368,11 @@ describe('SDK command dispatch', () => {
 
   it.each([
     ['/plan\u3000Inspect\u3000the\nchange', 'plan', '@deepseek-ai/dsh-plan-mode', ' Inspect\u3000the\nchange'],
-    ['计划\\u00a0	设计\\u00a0方案.', 'plan', '@deepseek-ai/dsh-plan-mode', ' \t设计\u00a0方案'],
+    ['/план 	设计 方案', 'plan', '@deepseek-ai/dsh-plan-mode', ' 	设计 方案'],
     ['/goal\u2003Finish\u3000the task', 'goal', '@deepseek-ai/dsh-command-goal', ' Finish\u3000the task'],
-    ['目标\\u3000\\u00a0完成任务.', 'goal', '@deepseek-ai/dsh-command-goal', ' \u00a0完成任务'],
+    ['/цель　 完成任务', 'goal', '@deepseek-ai/dsh-command-goal', '  完成任务'],
     ['/permission\u00a0read-only', 'permission', '@deepseek-ai/dsh-permission-presets', ' read-only'],
-    ['权限\\u202f	read-only.', 'permission', '@deepseek-ai/dsh-permission-presets', ' \tread-only'],
+    ['/разрешение 	read-only', 'permission', '@deepseek-ai/dsh-permission-presets', ' 	read-only'],
   ])('executes Unicode-separated input %j through its native handler', async (line, name, definitionId, rawInput) => {
     const h = await setup()
     await h.initialize()
@@ -469,7 +469,7 @@ describe('SDK query dispatch', () => {
   ])('rejects invalid query fields %j', async (params) => {
     const h = await setup()
     await h.initialize()
-    await expect(h.server.handleRequest('session/query', params)).rejects.toThrow('session/query requires only')
+    await expect(h.server.handleRequest('session/query', params)).rejects.toThrow('session/query requires a non-empty sessionId and contentBlocks, with an optional timeZone')
     expect(h.ctx.agents.list()).toEqual([])
   })
 

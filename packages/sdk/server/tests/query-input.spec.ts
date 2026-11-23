@@ -75,7 +75,7 @@ describe('SDK query text recognition', () => {
   })
 
   it('preserves exact-name priority over localized aliases', () => {
-    const shadowed = [...commands, { name: '权限', description: 'Another definition' }]
+    const shadowed = [...commands, { name: 'разрешение', description: 'Another definition' }]
     expect(queryCommand('/разрешение read-only', shadowed)).toBeUndefined()
   })
 })

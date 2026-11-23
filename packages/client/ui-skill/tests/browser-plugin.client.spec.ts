@@ -161,16 +161,6 @@ describe('apply', () => {
           'row.inspect': 'Inspect',
           'menu.userOnly': 'user-only',
         },
-        ja: {
-          'row.title': 'スキル',
-          'row.running': 'スキルを読み込み中',
-          'row.preparing': 'スキルの読み込みを準備中',
-          'row.failed': 'スキルの読み込みに失敗しました',
-          'row.stopped': 'スキルの読み込みが停止しました',
-          'row.instructions': '手順',
-          'row.inspect': '詳細を確認',
-          'menu.userOnly': 'ユーザー専用',
-        },
       },
     }])
   })
@@ -485,7 +475,7 @@ describe('user-only marking', () => {
     const candidates = await source.candidates(proj('s1'), req(''))
     expect(candidates).toEqual([
       { name: 'shared-skill', description: 'both surfaces' },
-      { name: 'user-only-skill', description: 'commit flow' },
+      { name: 'user-only-skill', description: 'только для пользователя · user surface only' },
     ])
   })
 })

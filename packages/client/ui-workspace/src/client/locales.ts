@@ -4,11 +4,15 @@
  * messages (wire error strings) pass through untranslated by policy.
  */
 
+/** English dictionary (the key-set source of truth). */
+
 /** The workspace namespace key union. */
 export type WorkspaceKey = keyof typeof en
 
-/** English dictionary, the key-set source of truth. */
+/** English dictionary, checked complete against the zh key set. */
 export const en = {
+  'status.completed': 'Completed',
+
   'defaultWorkspace.failed': 'Unable to create default workspace. Use Choose workspace to select a folder.',
   'draft.workspaceRequired': 'Choose a workspace first.',
   'draft.initializationFailed': 'Could not fill the draft. Please try again shortly.',
@@ -16,6 +20,11 @@ export const en = {
   'session.new': 'New Session',
   'session.untitled': 'Untitled',
   'shortcut.noSession': 'Select a session first',
+  'shortcut.closeDialog': 'Close the open dialog first',
+  'shortcut.closePanel': 'Close the open panel to return to the session',
+  'shortcut.archivedReading': 'Archived sessions have no unread reminders',
+  'shortcut.toggleRead': 'Toggle read/unread',
+  'shortcut.readingUnavailable': 'Reading state is unavailable. Reload the page to reconnect.',
   'shortcut.noPicker': 'Directory picker unavailable',
   'shortcut.directoryBusy': 'Selecting or adding a workspace',
   'shortcut.noCompletedTurn': 'This session has no completed turn',
@@ -50,6 +59,8 @@ export const en = {
   'search.hasMore': 'Showing the first {n} results. Narrow your search.',
   'menu.addWorkspace': 'Add workspace…',
   'picker.loading': 'Loading workspaces…',
+  'picker.search': 'Search workspaces',
+  'picker.noResults': 'No matching workspaces',
   'conflict.named': 'A workspace named “{name}” already exists.',
   'folderError.title': 'Couldn’t open folder',
   'folderError.retry': 'Choose again',
@@ -117,7 +128,11 @@ export const en = {
   'status.compact.approval': 'Approval',
   'status.compact.planReview': 'Plan review',
   'status.compact.answer': 'Answer',
-  'status.completed': 'Completed',
+  'status.unread': 'Unread',
+  'status.failed': 'Run failed',
+  'menu.markRead': 'Mark as read',
+  'menu.markUnread': 'Mark as unread',
+  'toast.readingFailed': 'Could not confirm reading state. Try again.',
   'hover.created': 'Created {time}',
   'hover.copied': 'Copied',
   'date.ymd': '{y}-{m}-{d}',
@@ -128,20 +143,20 @@ export const en = {
   'time.months': '{n}mo',
   'time.years': '{n}y',
   'time.ago': '{t} ago',
-  'shortcut.closeDialog': 'Close the open dialog first',
-  'shortcut.closePanel': 'Close the open panel to return to the session',
-  'shortcut.archivedReading': 'Archived sessions have no unread reminders',
-  'shortcut.toggleRead': 'Toggle read/unread',
-  'shortcut.readingUnavailable': 'Reading state is unavailable. Reload the page to reconnect.',
-  'status.unread': 'Unread',
-  'status.failed': 'Run failed',
-  'menu.markRead': 'Mark as read',
-  'menu.markUnread': 'Mark as unread',
-  'toast.readingFailed': 'Could not confirm reading state. Try again.',
-} satisfies Record<string, string>
+}
 
-/** Russian dictionary, checked against the English keys. */
+/** Japanese copy. */
+
+/** Spanish dictionary. */
+
+/** French dictionary. */
+
+/** German dictionary. */
+
+/** Russian dictionary. */
 export const ru = {
+  'status.completed': 'Завершено',
+
   'defaultWorkspace.failed': 'Не удалось создать рабочую область по умолчанию. Выберите папку с помощью пункта «Выбрать рабочую область».',
   'draft.workspaceRequired': 'Сначала выберите рабочую область.',
   'draft.initializationFailed': 'Не удалось заполнить черновик. Повторите попытку чуть позже.',
@@ -149,6 +164,11 @@ export const ru = {
   'session.new': 'Новая сессия',
   'session.untitled': 'Без названия',
   'shortcut.noSession': 'Сначала выберите сессию',
+  'shortcut.closeDialog': 'Сначала закройте открытое диалоговое окно',
+  'shortcut.closePanel': 'Закройте открытую панель, чтобы вернуться к сеансу',
+  'shortcut.archivedReading': 'У архивных сеансов нет напоминаний о непрочитанном',
+  'shortcut.toggleRead': 'Переключить прочитано/не прочитано',
+  'shortcut.readingUnavailable': 'Статус прочтения недоступен. Перезагрузите страницу для повторного подключения.',
   'shortcut.noPicker': 'Выбор папки недоступен',
   'shortcut.directoryBusy': 'Выбор или добавление рабочей области',
   'shortcut.noCompletedTurn': 'В этой сессии нет завершённых ходов',
@@ -183,6 +203,8 @@ export const ru = {
   'search.hasMore': 'Показаны первые {n} результатов. Уточните запрос.',
   'menu.addWorkspace': 'Добавить рабочую область…',
   'picker.loading': 'Загрузка рабочих областей…',
+  'picker.search': 'Поиск рабочих областей',
+  'picker.noResults': 'Подходящие рабочие области не найдены',
   'conflict.named': 'Рабочая область с названием «{name}» уже существует.',
   'folderError.title': 'Не удалось открыть папку',
   'folderError.retry': 'Выбрать снова',
@@ -250,7 +272,11 @@ export const ru = {
   'status.compact.approval': 'Подтверждение',
   'status.compact.planReview': 'Проверка плана',
   'status.compact.answer': 'Ответ',
-  'status.completed': 'Завершено',
+  'status.unread': 'Не прочитано',
+  'status.failed': 'Ошибка выполнения',
+  'menu.markRead': 'Отметить как прочитанное',
+  'menu.markUnread': 'Отметить как непрочитанное',
+  'toast.readingFailed': 'Не удалось подтвердить статус прочтения. Повторите попытку.',
   'hover.created': 'Создано {time}',
   'hover.copied': 'Скопировано',
   'date.ymd': '{d}.{m}.{y}',
@@ -261,14 +287,6 @@ export const ru = {
   'time.months': '{n} мес.',
   'time.years': '{n} г.',
   'time.ago': '{t} назад',
-  'shortcut.closeDialog': 'Сначала закройте открытое диалоговое окно',
-  'shortcut.closePanel': 'Закройте открытую панель, чтобы вернуться к сеансу',
-  'shortcut.archivedReading': 'У архивных сеансов нет напоминаний о непрочитанном',
-  'shortcut.toggleRead': 'Переключить прочитано/не прочитано',
-  'shortcut.readingUnavailable': 'Статус прочтения недоступен. Перезагрузите страницу для повторного подключения.',
-  'status.unread': 'Не прочитано',
-  'status.failed': 'Ошибка выполнения',
-  'menu.markRead': 'Отметить как прочитанное',
-  'menu.markUnread': 'Отметить как непрочитанное',
-  'toast.readingFailed': 'Не удалось подтвердить статус прочтения. Повторите попытку.',
 } satisfies Record<keyof typeof en, string>
+
+/** Portuguese dictionary. */

@@ -98,7 +98,7 @@ describe('Toast', () => {
       const glyph = view.getByRole('alert').querySelector('[aria-hidden]')
       expect(glyph?.className).toContain('success')
       expect(glyph?.querySelector('svg')).toBeTruthy()
-      expect(view.getByRole('alert').textContent).toBe('会话已归档, 可撤销或筛选已归档会话')
+      expect(view.getByRole('alert').textContent).toBe('Сессия архивирована. Вы можете Отменить или фильтровать архивные сессии')
       fireEvent.click(view.getByRole('button', { name: 'Отменить' }))
       expect(undo).toHaveBeenCalledTimes(1)
       fireEvent.click(view.getByRole('button', { name: 'фильтровать архивные сессии' }))

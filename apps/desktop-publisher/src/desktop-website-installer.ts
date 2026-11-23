@@ -35,13 +35,13 @@ export async function prepareWebsiteInstaller(directory: string, manifest: Deskt
   if (route.preset !== 'production' || source.preset !== 'production'
     || source.repository !== repository || source.runId !== route.runId || source.attempt !== route.attempt
     || source.commit !== route.commit || source.runnerName !== route.runnerName || source.target !== route.target
-    || source.sourceRef !== route.sourceRef || source.channel !== route.channel
+    || source.sourceRef !== route.sourceRef
     || source.qualification !== (route.target === 'win-x64' ? 'signed' : 'notarized')
     || !/^(?:master|dsh-v[0-9][0-9A-Za-z.-]*)$/u.test(source.sourceRef)) {
     throw new Error('website installer: build identity or production qualification mismatch')
   }
   const windows = route.target === 'win-x64'
-  const filename = `deepseek-harness-${source.version}-${route.target}.${windows ? 'exe' : 'dmg'}`
+  const filename = `vega-harness-${source.version}-${route.target}.${windows ? 'exe' : 'dmg'}`
   const file = manifest.files.find(item => item.name === filename)
   if (!file) throw new Error('website installer: selected installer is absent from build manifest')
   const path = join(directory, file.name)

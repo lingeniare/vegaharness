@@ -30,14 +30,14 @@ The index is generated from validated snapshots and the current writer constant.
 | 1 | PR #3349 | [V1](v1.md) | [JSON](v1.schema.json) | 54 / 415 |
 | 2 | `dsh-v0.1.3-alpha.2` | [V2](v2.md) | [JSON](v2.schema.json) | 56 / 435 |
 | 3 | PR #4320 | [V3](v3.md) | [JSON](v3.schema.json) | 60 / 467 |
-| 4 | Current checkout | [Current catalog](../../persistence-catalog.md) | [JSON](../../persistence-schema.json) | 67 / 643 |
+| 4 | Current checkout | [Current catalog](../../persistence-catalog.md) | [JSON](../../persistence-schema.json) | 68 / 655 |
 
 <!-- persistence-format-index:end -->
 
 <a id="scope"></a>
 ## Scope and evidence
 
-Each `vN.md` has `kind: persistence-format`, an identical `yaml persistence-format` declaration binding every root key to its captured digest, and a complete `vN.schema.json`. The [template](../../../.agents/skills/dsh-doc-writing/templates/persistence-format.md) defines these records. Roots cover the logical Session header, physical JSONL header, event envelope, and all first-party events at the selected checkpoint; each root includes every reachable declared type. Packed physical body records have separate codec owners linked from each page.
+Each `vN.md` / `vN.zh.md` pair has `kind: persistence-format`, an identical `yaml persistence-format` declaration binding every root key to its captured digest, a pairing sidecar, and a complete `vN.schema.json`. The [template](../../../.agents/skills/dsh-doc-writing/templates/persistence-format.md) defines these records. Roots cover the logical Session header, physical JSONL header, event envelope, and all first-party events at the selected checkpoint; each root includes every reachable declared type. Packed physical body records have separate codec owners linked from each page.
 
 V0 and V2 use the latest matching tags in the [captured prerelease archive](../releases/README.md). V1 uses an intermediate source tree identified in its reference because the captured tags contain no V1 writer. V3 captures the verified inventory before the V4 writer change in PR #4320. Historical sources retain file paths without line numbers. Snapshots preserve historical optional fields and opaque values; they do not substitute current types into older formats. Historical identifiers remain intact only in schema JSON and the verified generated schema regions; authored prose follows current terminology rules.
 

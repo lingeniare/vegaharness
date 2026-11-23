@@ -1,15 +1,23 @@
 /** VEGA account-route adapter: pi-ai transport plus listing readiness, VEGA headers, and account error translation. */
-import {ACCOUNT_QUOTA_EXCEEDED_CODE, APP_IDENTITY, isQuotaExceededError, LlmError, type BuiltinLlmFailureCode} from '@deepseek-ai/dsh-llm'
+import { ACCOUNT_QUOTA_EXCEEDED_CODE, APP_IDENTITY, isQuotaExceededError, LlmError, type BuiltinLlmFailureCode } from '@deepseek-ai/dsh-llm'
 import type { GenerateOptions, LlmModelInfo, PreparedAdapterCall, StreamChunk } from '@deepseek-ai/dsh-llm'
 import { PiAiAdapter } from '@deepseek-ai/dsh-llm-pi-ai'
 import type { PiAiAdapterOptions, PiAiRequestHeaderContext } from '@deepseek-ai/dsh-llm-pi-ai'
 
+/** The account credential released for one request destination. */
+export interface VegaAccountCredential {
+  /** Managed key the request carries. */
+  readonly token: string
+  /** Remove this credential after the destination rejected it, while it still matches the stored login. */
+  reject(): Promise<void>
+  /** Aborts when the account signs out; the request carrying this credential ends. */
+  readonly revoked: AbortSignal
+}
+
 /** Account credential access the adapter needs, bound to the mounted account service. */
 export interface VegaAccountBinding {
-  /** Resolve the managed key for one request destination; undefined while signed out. */
-  readonly resolveToken: (url: string) => Promise<string | undefined>
-  /** Remove a server-rejected managed key while it still matches the stored login. */
-  readonly rejectToken: (token: string) => Promise<void>
+  /** Release the managed credential for one request destination; undefined while signed out. */
+  readonly credential: (url: string) => Promise<VegaAccountCredential | undefined>
 }
 
 /** Constructor options for {@link VegaAdapter}. */
@@ -62,20 +70,20 @@ function translateFailure(message: string, code: string): TranslatedFailure | un
  * service owns the credential; `GET /models` supplies the live catalog.
  */
 export class VegaAdapter extends PiAiAdapter {
-  /** The token the last credential resolution handed pi-ai, for `rejectToken` binding. */
-  private token: string | undefined
+  /** The credential the last resolution handed pi-ai, for `reject` binding. */
+  private credential: VegaAccountCredential | undefined
 
   /** @param options - VEGA account binding, endpoint, and listing gate, plus the pi-ai options it forwards. */
   constructor(private readonly vega: VegaAdapterOptions) {
     super({
       ...vega,
       resolveApiKey: async () => {
-        const token = await vega.account.resolveToken(vega.baseURL)
-        if (token === undefined) {
+        const credential = await vega.account.credential(vega.baseURL)
+        if (credential === undefined) {
           throw new LlmError('no VEGA account credential is stored', 'MISSING_CREDENTIAL')
         }
-        this.token = token
-        return token
+        this.credential = credential
+        return credential.token
       },
       prepareHeaders: (request, headers) => this.vegaHeaders(request, headers),
     })
@@ -147,10 +155,10 @@ export class VegaAdapter extends PiAiAdapter {
     }
   }
 
-  /** Server rejection retires the token the request used, while it is still the stored login. */
+  /** Server rejection retires the credential the request used, while it is still the stored login. */
   private rejectOnAuthFailure(translated: TranslatedFailure): void {
-    const token = this.token
-    if (translated.code !== 'ACCOUNT_TOKEN_INVALID' || token === undefined) return
-    void this.vega.account.rejectToken(token).catch(() => undefined)
+    const credential = this.credential
+    if (translated.code !== 'ACCOUNT_TOKEN_INVALID' || credential === undefined) return
+    void credential.reject().catch(() => undefined)
   }
 }

@@ -1,7 +1,25 @@
 import type { Translate } from '@deepseek-ai/dsh-client-ui-slots'
 
-/** English dictionary (the key-set source of truth). */
+/** Locale namespace owned by the Liveshare owner-side browser plugin. */
+export const NS = 'liveshare'
+
+/** Simplified-Chinese Liveshare owner copy. */
+
+/** English Liveshare owner copy. */
 export const en = {
+  'dialog.capabilities.description': 'Choose one tier for this share; the tier expands at save time into the endpoints the plugins declare now, so endpoints they add later stay closed.',
+  'dialog.capabilities.none': 'Not open to viewers',
+  'dialog.capabilities.count': 'Endpoints open to viewers: {count}',
+  'dialog.capabilities.tier.read': 'Read-only',
+  'dialog.capabilities.tier.write': 'Writable',
+  'dialog.capabilities.summary.read': 'Read-only · {count} endpoints',
+  'dialog.capabilities.summary.write': 'Writable · {readable} read-only + {writable} writable',
+  'dialog.capabilities.stale': 'The saved selection is not one whole tier; saving again replaces it with the tier you pick.',
+  'dialog.capabilities.noReadable': 'No plugin offers a read-only endpoint, so Read-only cannot be chosen.',
+  'dialog.capabilities.noWritable': 'No plugin offers a writable endpoint, so Writable cannot be chosen.',
+  'dialog.capabilities.writeHint': 'A writable endpoint takes effect only when the shared Session allows writing, and is destructive inside a writable share.',
+  'viewer.sharePath.unavailable': 'This page cannot open workspace files: a share hands over file paths, not file contents.',
+
   'header.action': 'Share',
   'inputOrigin.sharedSession': 'From a shared session [{subjectId}]',
   'dialog.title': 'Share session',
@@ -12,6 +30,7 @@ export const en = {
   'dialog.sessionMode.write': 'Workspace write',
   'dialog.sessionMode.hint.view': 'Read only: viewers read files and the session record within the share\'s scope and can message the session, but every tool runs in a read-only sandbox and no file can be written.',
   'dialog.sessionMode.hint.write': 'Workspace write: the viewer works in a bounded writable sandbox — it modifies files inside the share’s scope under the writable ceiling; reads and writes beyond that scope are refused, and your global settings, credentials, and other Sessions stay closed.',
+  'dialog.ptcSandboxWarning': 'Note: LiveShare’s PTC sandbox is not yet complete - a viewer may read or write files outside the shared workspace through run_code. Share only with people you trust.',
   'dialog.allowsFork': 'Allow viewers to fork the session',
   'dialog.allowsForkHint': 'Forked sessions keep the same permissions as the source session.',
   'dialog.sessionMode.notGranted': 'This Harness did not report the session permission back: an older owner build needs an upgrade before the share can carry it.',
@@ -25,18 +44,13 @@ export const en = {
   'dialog.permissions.unsaved': 'Unsaved changes.',
   'dialog.permissions.discard': 'Unsaved changes; choosing Done again discards them.',
   'dialog.capabilities': 'Plugin endpoints',
-  'dialog.capabilities.description': 'Choose one tier for this share; the tier expands at save time into the endpoints the plugins declare now, so endpoints they add later stay closed.',
-  'dialog.capabilities.none': 'Not open to viewers',
-  'dialog.capabilities.count': 'Endpoints open to viewers: {count}',
+  'dialog.capabilities.global': 'Plugin permissions',
+  'dialog.capabilities.global.none': 'Deny all',
+  'dialog.capabilities.global.all': 'Allow all',
+  'dialog.capabilities.global.custom': 'Custom',
   'dialog.capabilities.tier.none': 'Unavailable',
-  'dialog.capabilities.tier.read': 'Read-only',
-  'dialog.capabilities.tier.write': 'Writable',
-  'dialog.capabilities.summary.read': 'Read-only · {count} endpoints',
-  'dialog.capabilities.summary.write': 'Writable · {readable} read-only + {writable} writable',
-  'dialog.capabilities.stale': 'The saved selection is not one whole tier; saving again replaces it with the tier you pick.',
-  'dialog.capabilities.noReadable': 'No plugin offers a read-only endpoint, so Read-only cannot be chosen.',
-  'dialog.capabilities.noWritable': 'No plugin offers a writable endpoint, so Writable cannot be chosen.',
-  'dialog.capabilities.writeHint': 'A writable endpoint takes effect only when the shared Session allows writing, and is destructive inside a writable share.',
+  'dialog.capabilities.tier.all': 'All methods',
+  'dialog.capabilities.partial': 'Partial',
   'dialog.capabilities.empty': 'No plugin currently declares endpoints to share.',
   'dialog.capabilities.createFailed': 'The share was created, but its plugin endpoints were not saved; retry in Share permissions.',
   'dialog.linkHelp': 'Closing this panel does not stop the share.',
@@ -48,6 +62,7 @@ export const en = {
   'dialog.selectedRetired': 'This share keeps its older "specific colleagues" scope; new shares offer only the two modes above.',
   'dialog.description': 'Create a read-only Liveshare link for {title}',
   'dialog.relay': 'Share service address',
+
   'dialog.relaySaved': 'Saved. New shares use this address.',
   'dialog.relayInvalid': 'Enter a full address starting with http:// or https://.',
   'dialog.relayCurrent': 'Current address',
@@ -102,8 +117,11 @@ export const en = {
   'dialog.testOk': 'Relay connection OK',
   'dialog.testWarn': 'Relay HTTP is reachable but registration did not finish and the Host reported no reason. You can still create the share; the gateway retries.',
   'dialog.testFail': 'Relay connection failed (the Host reported no reason).',
+
   'dialog.addressHint': 'Save the share service address first.',
+
   'dialog.connectivityChecking': 'Testing whether the share service address answers…',
+
   'dialog.permissionChecking': 'Checking whether this host may publish at this address…',
   'dialog.permissionOk': 'Signed in; this host can publish shares.',
   'dialog.permissionPending': 'This address must be checked before a share can be created.',
@@ -115,6 +133,7 @@ export const en = {
   'dialog.open': 'Open',
   'dialog.stop': 'Stop sharing',
   'dialog.stopFailed': 'Failed to stop sharing. Try again.',
+  'dialog.ownerStateHeld': 'Another DSH process holds the share state; manage shares there, or quit it first.',
   'manage.title': 'Share management',
   'manage.open': 'Manage',
   'manage.cancelShare': 'Cancel share',
@@ -146,6 +165,8 @@ export const en = {
   'manage.audit.shareStop': 'Sharing stopped',
   'manage.done': 'Done',
   'viewer.title': 'Liveshare read-only session',
+  'viewer.pluginUnsupported': 'Plugin {plugin} is not available in this share; some features are unavailable.',
+  'viewer.dismiss': 'Dismiss',
   'viewer.sharedBy': 'Shared by {owner} · {title}',
   'viewer.readonlyNote': 'Read only: you can drive this Session, but you read files inside the share’s scope only and modify nothing.',
   'viewer.writeUnavailableNote': 'The owner granted writing, but this session cannot be driven right now; sending becomes available once it is prepared.',
@@ -204,7 +225,6 @@ export const en = {
   'viewer.row.fork': 'Fork session',
   'viewer.row.forkSource': 'Forked from “{title}”',
   'viewer.row.branchRefused': 'Could not complete the branch: {reason}',
-  'viewer.sharePath.unavailable': 'This page cannot open workspace files: a share hands over file paths, not file contents.',
   'viewer.reason.fork-not-permitted': 'The owner does not allow branching this Session',
   'viewer.reason.fork-not-implemented': 'This deployment does not support branching yet',
   'viewer.reason.write-not-implemented': 'This deployment does not support writing yet',
@@ -227,23 +247,30 @@ export const en = {
   'viewer.reason.prompt-identity-missing': 'This send carried no request identity to attribute, so the Host did not run it',
   'viewer.reason.viewer-not-authorized': 'Your account no longer has access to this share',
   'viewer.reason.liveshare/read-only': 'This Session is outside the share you hold, so it was not written',
-  'dialog.ptcSandboxWarning': 'Note: LiveShare’s PTC sandbox is not yet complete - a viewer may read or write files outside the shared workspace through run_code. Share only with people you trust.',
-  'dialog.capabilities.global': 'Plugin permissions',
-  'dialog.capabilities.global.none': 'Deny all',
-  'dialog.capabilities.global.all': 'Allow all',
-  'dialog.capabilities.global.custom': 'Custom',
-  'dialog.capabilities.tier.all': 'All methods',
-  'dialog.capabilities.partial': 'Partial',
-  'viewer.pluginUnsupported': 'Plugin {plugin} is not available in this share; some features are unavailable.',
-  'viewer.dismiss': 'Dismiss',
-  'dialog.ownerStateHeld': 'Another VEGA process holds the share state; manage shares there, or quit it first.',
-} satisfies Record<string, string>
+}
 
-/** Locale namespace owned by the Liveshare owner-side browser plugin. */
-export const NS = 'liveshare'
+/** Japanese Liveshare owner copy. */
+
+/** Spanish Liveshare owner copy. */
+
+/** French Liveshare owner copy. */
+
+/** German Liveshare owner copy. */
 
 /** Russian Liveshare owner copy. */
 export const ru: Record<keyof typeof en, string> = {
+  'dialog.capabilities.description': 'Выберите уровень для этого общего доступа; при сохранении уровень разворачивается в конечные точки, которые плагины объявляют сейчас, поэтому добавленные позже останутся закрытыми.',
+  'dialog.capabilities.none': 'Не открыт для зрителей',
+  'dialog.capabilities.count': 'Конечных точек открыто для зрителей: {count}',
+  'dialog.capabilities.tier.read': 'Только чтение',
+  'dialog.capabilities.tier.write': 'Запись',
+  'dialog.capabilities.summary.read': 'Только чтение · {count} конечных точек',
+  'dialog.capabilities.summary.write': 'Запись · {readable} только для чтения + {writable} для записи',
+  'dialog.capabilities.stale': 'Сохранённый выбор не является целым уровнем; повторное сохранение заменит его выбранным уровнем.',
+  'dialog.capabilities.noReadable': 'Ни один плагин не предоставляет конечную точку только для чтения, поэтому «Только чтение» выбрать нельзя.',
+  'dialog.capabilities.noWritable': 'Ни один плагин не предоставляет конечную точку для записи, поэтому «Запись» выбрать нельзя.',
+  'dialog.capabilities.writeHint': 'Конечная точка для записи действует только тогда, когда общий сеанс разрешает запись, и она разрушительна в общем доступе с записью.',
+  'viewer.sharePath.unavailable': 'Эта страница не может открыть файлы рабочего пространства: общий доступ передаёт пути к файлам, а не их содержимое.',
   'header.action': 'Поделиться',
   'inputOrigin.sharedSession': 'Из общего сеанса [{subjectId}]',
   'dialog.title': 'Поделиться сеансом',
@@ -254,6 +281,7 @@ export const ru: Record<keyof typeof en, string> = {
   'dialog.sessionMode.write': 'Запись в рабочем пространстве',
   'dialog.sessionMode.hint.view': 'Только чтение: зрители читают файлы и историю сеанса в общем доступе и могут отправлять сообщения в сеанс, но все инструменты работают в песочнице только для чтения и не могут записывать файлы.',
   'dialog.sessionMode.hint.write': 'Запись в рабочем пространстве: зритель работает в изолированной среде с ограниченной записью; он изменяет файлы в пределах общего доступа и под лимитом записи; чтение и запись за пределами этого доступа отклоняются, а ваши глобальные настройки, учётные данные и другие сеансы остаются закрытыми.',
+  'dialog.ptcSandboxWarning': 'Внимание: песочница PTC в LiveShare пока неполная — зритель может читать или записывать файлы за пределами общего рабочего пространства через run_code. Делитесь только с доверенными людьми.',
   'dialog.allowsFork': 'Разрешить зрителям ответвлять сеанс',
   'dialog.allowsForkHint': 'Ответвлённые сессии сохраняют те же разрешения, что и исходная сессия.',
   'dialog.sessionMode.notGranted': 'Этот Harness не вернул разрешение сеанса: более старая версия владельца должна быть обновлена, прежде чем общий доступ сможет его нести.',
@@ -267,18 +295,13 @@ export const ru: Record<keyof typeof en, string> = {
   'dialog.permissions.unsaved': 'Есть несохранённые изменения.',
   'dialog.permissions.discard': 'Есть несохранённые изменения; повторное нажатие «Готово» отменит их.',
   'dialog.capabilities': 'Конечные точки плагинов',
-  'dialog.capabilities.description': 'Выберите уровень для этого общего доступа; при сохранении уровень разворачивается в конечные точки, которые плагины объявляют сейчас, поэтому добавленные позже останутся закрытыми.',
-  'dialog.capabilities.none': 'Не открыт для зрителей',
-  'dialog.capabilities.count': 'Конечных точек открыто для зрителей: {count}',
+  'dialog.capabilities.global': 'Разрешения плагинов',
+  'dialog.capabilities.global.none': 'Запретить все',
+  'dialog.capabilities.global.all': 'Разрешить все',
+  'dialog.capabilities.global.custom': 'Настроить',
   'dialog.capabilities.tier.none': 'Недоступно',
-  'dialog.capabilities.tier.read': 'Только чтение',
-  'dialog.capabilities.tier.write': 'Запись',
-  'dialog.capabilities.summary.read': 'Только чтение · {count} конечных точек',
-  'dialog.capabilities.summary.write': 'Запись · {readable} только для чтения + {writable} для записи',
-  'dialog.capabilities.stale': 'Сохранённый выбор не является целым уровнем; повторное сохранение заменит его выбранным уровнем.',
-  'dialog.capabilities.noReadable': 'Ни один плагин не предоставляет конечную точку только для чтения, поэтому «Только чтение» выбрать нельзя.',
-  'dialog.capabilities.noWritable': 'Ни один плагин не предоставляет конечную точку для записи, поэтому «Запись» выбрать нельзя.',
-  'dialog.capabilities.writeHint': 'Конечная точка для записи действует только тогда, когда общий сеанс разрешает запись, и она разрушительна в общем доступе с записью.',
+  'dialog.capabilities.tier.all': 'Все методы',
+  'dialog.capabilities.partial': 'Часть',
   'dialog.capabilities.empty': 'Сейчас ни один плагин не объявляет конечные точки для общего доступа.',
   'dialog.capabilities.createFailed': 'Общий доступ создан, но конечные точки плагинов не сохранены; повторите в разделе «Разрешения общего доступа».',
   'dialog.linkHelp': 'Закрытие этой панели не останавливает общий доступ.',
@@ -361,6 +384,7 @@ export const ru: Record<keyof typeof en, string> = {
   'dialog.open': 'Открыть',
   'dialog.stop': 'Остановить доступ',
   'dialog.stopFailed': 'Не удалось остановить общий доступ. Повторите попытку позже.',
+  'dialog.ownerStateHeld': 'Состояние общего доступа удерживает другой процесс VEGA; управляйте общим доступом в нём или сначала завершите его.',
   'manage.title': 'Управление доступом',
   'manage.open': 'Управлять',
   'manage.cancelShare': 'Отменить общий доступ',
@@ -392,6 +416,8 @@ export const ru: Record<keyof typeof en, string> = {
   'manage.audit.shareStop': 'Общий доступ остановлен',
   'manage.done': 'Готово',
   'viewer.title': 'Сеанс Liveshare только для чтения',
+  'viewer.pluginUnsupported': 'Плагин {plugin} не поддерживается в этом общем доступе; некоторые функции недоступны.',
+  'viewer.dismiss': 'Закрыть',
   'viewer.sharedBy': 'Открыт {owner} · {title}',
   'viewer.readonlyNote': 'Только чтение: вы можете управлять этим сеансом, но читаете только файлы в пределах общего доступа и ничего не меняете.',
   'viewer.writeUnavailableNote': 'Владелец разрешил запись, но этим сеансом сейчас нельзя управлять; отправка станет доступна, когда он будет подготовлен.',
@@ -450,7 +476,6 @@ export const ru: Record<keyof typeof en, string> = {
   'viewer.row.fork': 'Ответвить сеанс',
   'viewer.row.forkSource': 'Ответвление от «{title}»',
   'viewer.row.branchRefused': 'Не удалось завершить ответвление: {reason}',
-  'viewer.sharePath.unavailable': 'Эта страница не может открыть файлы рабочего пространства: общий доступ передаёт пути к файлам, а не их содержимое.',
   'viewer.reason.fork-not-permitted': 'Владелец не разрешает ответвлять этот сеанс',
   'viewer.reason.fork-not-implemented': 'Это развертывание пока не поддерживает ответвление',
   'viewer.reason.write-not-implemented': 'Это развертывание пока не поддерживает запись',
@@ -473,17 +498,9 @@ export const ru: Record<keyof typeof en, string> = {
   'viewer.reason.prompt-identity-missing': 'В этой отправке не было идентичности запроса для указания авторства, поэтому хост её не выполнил',
   'viewer.reason.viewer-not-authorized': 'Ваша учётная запись больше не имеет доступа к этому общему доступу',
   'viewer.reason.liveshare/read-only': 'Этот сеанс вне вашего общего доступа, поэтому запись не выполнялась',
-  'dialog.ptcSandboxWarning': 'Внимание: песочница PTC в LiveShare пока неполная — зритель может читать или записывать файлы за пределами общего рабочего пространства через run_code. Делитесь только с доверенными людьми.',
-  'dialog.capabilities.global': 'Разрешения плагинов',
-  'dialog.capabilities.global.none': 'Запретить все',
-  'dialog.capabilities.global.all': 'Разрешить все',
-  'dialog.capabilities.global.custom': 'Настроить',
-  'dialog.capabilities.tier.all': 'Все методы',
-  'dialog.capabilities.partial': 'Часть',
-  'viewer.pluginUnsupported': 'Плагин {plugin} не поддерживается в этом общем доступе; некоторые функции недоступны.',
-  'viewer.dismiss': 'Закрыть',
-  'dialog.ownerStateHeld': 'Состояние общего доступа удерживает другой процесс VEGA; управляйте общим доступом в нём или сначала завершите его.',
 }
+
+/** Brazilian-Portuguese Liveshare owner copy. */
 
 /** Stable locale keys consumed by the share dialog and the viewer surfaces. */
 export type LiveshareKey = keyof typeof en

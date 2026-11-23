@@ -65,7 +65,7 @@ describe('shareableViewerCatalog', () => {
     expect(groups[0]).toMatchObject({
       plugin: 'forgePanel',
       package: '@deepseek-ai/dsh-experimental-client-ui-forge',
-      titles: { zh: '变更请求面板', en: 'Change request panel' },
+      titles: { ru: 'Панель запросов на изменение', en: 'Change request panel' },
     })
   })
 

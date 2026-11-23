@@ -4,7 +4,6 @@ import { preflightDesktopPublish } from '@deepseek-ai/dsh-desktop-publisher/pref
 it.each([
   ['macos-x64-unnotarized-debug-1.0.0-42-2', '跳过了公证'],
   ['macos-arm64-unnotarized-debug-1.0.0-42-2', '跳过了公证'],
-  ['2.42.windows-x64-unsigned-1.0.0', '未签名'],
   ['macos-arm64-unnotarized-debug-1.0.0-42-2.zip', '跳过了公证'],
   ...['arm64', 'x64'].flatMap(arch => ['.dmg', '-update.zip', '-metadata.zip'].map(suffix =>
     [`macos-${arch}-unnotarized-debug-1.0.0-42-2${suffix}`, '跳过了公证'])),

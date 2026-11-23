@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createServer, type IncomingMessage, type Server } from 'node:http'
 import type { AddressInfo } from 'node:net'
 import { VegaFetchProvider, VegaSearchProvider } from '@deepseek-ai/dsh-web-vega'
-import type { VegaProviderOptions } from '@deepseek-ai/dsh-web-vega'
+import type { VegaAccountCredential, VegaProviderOptions } from '@deepseek-ai/dsh-web-vega'
 
 const TEST_TOKEN = 'redirect-test-key'
 const TEST_QUERY = 'private redirect query'
@@ -19,7 +19,7 @@ interface ReceivedRequest {
 }
 
 type ResolvedOptions = VegaProviderOptions & {
-  readonly resolveAccountToken: (endpoint: string) => Promise<string | undefined>
+  readonly resolveAccountCredential: (endpoint: string) => Promise<VegaAccountCredential | undefined>
 }
 
 const options = (): ResolvedOptions => ({
@@ -27,7 +27,7 @@ const options = (): ResolvedOptions => ({
   model: 'openai/gpt-4o-mini',
   maxTokens: 64,
   anonymize: false,
-  resolveAccountToken: async () => TEST_TOKEN,
+  resolveAccountCredential: async () => ({ token: TEST_TOKEN, reject: async () => undefined }),
 })
 
 let redirectOrigin: string

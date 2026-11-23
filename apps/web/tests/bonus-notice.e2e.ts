@@ -91,7 +91,7 @@ async function mockPlatform() {
   const grant = (orderId: string, amount: string, extraCopy = ''): void => {
     const value = {
       orderId, amount,
-      zh_CN: `已赠送您 ${amount} 元 DSH 体验赠金。${extraCopy}`,
+      zh_CN: '已赠送您 ${amount} 元 DSH 体验赠金。${extraCopy}',
       en_US: `You received a CNY ${amount} DSH trial credit.${extraCopy}`,
     }
     unnotified.unshift(value)
@@ -271,7 +271,20 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
     const opened = await context.newPage()
     tripwires.push(watchConsole(opened))
     await opened.addInitScript(() => {
-      Object.defineProperty(globalThis, 'dshDesktop', { value: { protocolVersion: 1 } })
+      // The update carrier stays idle until a scenario publishes a status for the account row.
+      let update: { phase: string; version?: string } = { phase: 'idle' }
+      const updateListeners = new Set<(state: typeof update) => void>()
+      Object.defineProperty(globalThis, '__bonusPublishUpdate', {
+        value: (state: typeof update) => { update = state; for (const listener of updateListeners) listener(state) },
+      })
+      Object.defineProperty(globalThis, 'dshDesktop', { value: { protocolVersion: 1, updates: {
+        status: () => Promise.resolve(update),
+        open: () => Promise.resolve(),
+        subscribe: (listener: (state: typeof update) => void) => {
+          updateListeners.add(listener)
+          return () => { updateListeners.delete(listener) }
+        },
+      } } })
       // The embedded Platform view is a native child window owned by the Desktop shell.
       // The double answers immediately and records the calls, so the scenario observes
       // which page was opened and that returning destroyed the view.
@@ -305,7 +318,7 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
     // Resolve the signed-in identity before opening the renderer. First profile discovery
     // emits another account frame, which would supersede the held startup bonus read.
     expect(await scaffold.ctx.deepseekAccount.getProfile({
-      version: 'test', locale: 'ru-RU', timezoneOffsetSeconds: 28_800,
+      version: 'test', locale: 'ru-CN', timezoneOffsetSeconds: 28_800,
     })).toMatchObject({ status: 'ready', value: { id: ACCOUNT_ID } })
     browser = await chromium.launch()
   })
@@ -322,7 +335,7 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
     const zhLater = '已赠送您 8.00 元 DSH 体验赠金。'
     const enBonus = 'You received a CNY 9.00 DSH trial credit.'
     const observations: string[] = []
-    const page = await openDesktopPage('ru-RU')
+    const page = await openDesktopPage('ru-CN')
     onTestFailed(() => saveFailureShot(page, 'web-e2e-bonus-notice'))
     /** @returns every browser storage key of the started page, so a baseline can be taken before a notice shows. */
     const storageKeys = (): Promise<string[]> => page.evaluate(() => Object.keys(localStorage).sort())
@@ -408,14 +421,14 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
 
     const openGet = platform.served.at(-1)!
     const panel = (await settings.textContent()) ?? ''
-    const usage = await settings.getByRole('link', { name: 'Использование', exact: true }).getAttribute('href')
+    const usage = await settings.getByRole('link', { name: '查询用量', exact: true }).getAttribute('href')
     observations.push(`open.get locale=${String(openGet.locale)} query=${openGet.query} served=true gets=${String(platform.gets.length - getsBefore)}`)
-    observations.push(`open.balance bonus-row=${String(panel.includes('Бонусный баланс'))} amount=${String(panel.includes('¥13.00'))} dated=${String(/\d{4}-\d{2}-\d{2}/.test(panel))}`)
+    observations.push('open.balance bonus-row=${String(panel.includes(\'赠金余额\'))} amount=${String(panel.includes(\'¥13.00\'))} dated=${String(/\\d{4}-\\d{2}-\\d{2} из .test(panel))}')
     observations.push(`open.cards-while-open=${String(await noticeCards(page).count())} acks=${String(platform.acks.length)}`)
     observations.push(`open.usage-link=${String(usage).replace(platform.origin, '{{origin}}')}`)
     expect(openGet.locale).toBe('zh_CN')
     expect(openGet.query).toBe('')
-    expect(panel).toContain('Бонусный баланс')
+    expect(panel).toContain('赠金余额')
     expect(panel).toContain('¥13.00')
     expect(panel).not.toMatch(/\d{4}-\d{2}-\d{2}/)
     expect(usage).toBe(`${platform.origin}/usage`)
@@ -423,7 +436,7 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
     expect(platform.acks).toHaveLength(2)
 
     // Closing settings repeats no acknowledgement and leaves the card on the sidebar.
-    const launcher = page.getByRole('button', { name: 'Меню аккаунта', exact: true })
+    const launcher = page.getByRole('button', { name: '账号菜单', exact: true })
     await page.keyboard.press('Escape')
     await settings.waitFor({ state: 'detached', timeout: 30_000 })
     // The shell restores focus to the launcher once the close commits.
@@ -456,8 +469,8 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
     const nav = reopened.locator('nav')
     await nav.getByRole('button', { name: 'Модель', exact: true }).click()
     await expect.poll(async () => nav.getByRole('button', { name: 'Модель', exact: true }).getAttribute('aria-current'), { timeout: 30_000 }).toBe('true')
-    await nav.getByRole('button', { name: 'Аккаунт', exact: true }).click()
-    await expect.poll(async () => nav.getByRole('button', { name: 'Аккаунт', exact: true }).getAttribute('aria-current'), { timeout: 30_000 }).toBe('true')
+    await nav.getByRole('button', { name: '账号与余额', exact: true }).click()
+    await expect.poll(async () => nav.getByRole('button', { name: '账号与余额', exact: true }).getAttribute('aria-current'), { timeout: 30_000 }).toBe('true')
     platform.releaseGet()
     const sectionPanel = (await reopened.textContent()) ?? ''
     observations.push(`reopen.section-switch gets=${String(platform.gets.length - sectionGetsBefore)} summaries=${String(platform.summaries.length - sectionSummariesBefore)} amount=${String(sectionPanel.includes('¥13.00'))} cards=${String(await noticeCards(page).count())} acks=${String(platform.acks.length)}`)
@@ -483,8 +496,8 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
     await expect.poll(() => platform.summaries.length, { timeout: 30_000 }).toBe(topUpSummariesBefore + 1)
     observations.push(`topup.open gets=${String(platform.gets.length - topUpGetsBefore)} summaries=${String(platform.summaries.length - topUpSummariesBefore)}`)
     const callsBefore = (await platformCalls(page)).length
-    await topUpSettings.getByRole('link', { name: 'Пополнить', exact: true }).click()
-    const topUpOverlay = page.getByRole('dialog', { name: 'Вернуться в VEGA Harness', exact: true })
+    await topUpSettings.getByRole('link', { name: '充值', exact: true }).click()
+    const topUpOverlay = page.getByRole('dialog', { name: 'Вернуться к DeepSeek Harness', exact: true })
     await topUpOverlay.waitFor()
     // Opening the native view reads nothing by itself.
     expect(platform.gets.length).toBe(topUpGetsBefore + 1)
@@ -496,7 +509,7 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
     platform.grant(ORDER_TOPUP, '11.00')
     // Holding the notice read proves the return does not wait for the refresh it starts.
     platform.holdNextGet()
-    await topUpOverlay.getByRole('button', { name: 'Вернуться в VEGA Harness', exact: true }).click()
+    await topUpOverlay.getByRole('button', { name: 'Вернуться к DeepSeek Harness', exact: true }).click()
     await topUpOverlay.waitFor({ state: 'detached', timeout: 30_000 })
     const topUpCalls = (await platformCalls(page)).slice(callsBefore).join(',')
     observations.push(`topup.returned bridge=${topUpCalls} cards=${String(await noticeCards(page).count())}`)
@@ -585,7 +598,7 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
     await openSettings(page, 'ru')
     const failedSettings = page.getByRole('dialog', { name: 'Настройки', exact: true })
     await failedSettings.waitFor()
-    const failedLinks = failedSettings.getByRole('link', { name: 'Открыть в VEGA', exact: true })
+    const failedLinks = failedSettings.getByRole('link', { name: '前往开放平台查看', exact: true })
     await expect.poll(() => failedLinks.count(), { timeout: 30_000 }).toBe(2)
     await expect.poll(() => platform.summaries.length, { timeout: 30_000 }).toBe(failedSummariesBefore + 1)
     const failedHrefs = (await failedLinks.evaluateAll(nodes => nodes.map(node => node.getAttribute('href'))))
@@ -595,9 +608,9 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
     // Returning from usage refreshes nothing, because only a payment changes the account.
     for (const index of [0, 1]) {
       await failedLinks.nth(index).click()
-      const usageOverlay = page.getByRole('dialog', { name: 'Вернуться в VEGA Harness', exact: true })
+      const usageOverlay = page.getByRole('dialog', { name: 'Вернуться к DeepSeek Harness', exact: true })
       await usageOverlay.waitFor()
-      await usageOverlay.getByRole('button', { name: 'Вернуться в VEGA Harness', exact: true }).click()
+      await usageOverlay.getByRole('button', { name: 'Вернуться к DeepSeek Harness', exact: true }).click()
       await usageOverlay.waitFor({ state: 'detached', timeout: 30_000 })
     }
     const failedUsages = (await platformCalls(page)).filter(call => call === 'open:usage').length - failedUsagesBefore
@@ -626,7 +639,7 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
     await page.close()
     platform.clearUnnotified()
     platform.grant(ORDER_WEB, '4.00')
-    const webPage = await browser.newPage({ viewport: { width: 1440, height: 960 }, locale: 'ru-RU' })
+    const webPage = await browser.newPage({ viewport: { width: 1440, height: 960 }, locale: 'ru-CN' })
     tripwires.push(watchConsole(webPage))
     await webPage.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
     const webNotice = await shownNotice(webPage, '已赠送您 4.00 元 DSH 体验赠金。')
@@ -638,7 +651,7 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
     platform.grant('a2222222-2222-4222-8222-222222222222', '22.00', '\nMore details'.repeat(8))
     platform.grant('a1111111-1111-4111-8111-111111111111', '21.00')
     const ackStart = platform.acks.length
-    const stackPage = await openDesktopPage('ru-RU')
+    const stackPage = await openDesktopPage('ru-CN')
     await stackPage.setViewportSize({ width: 900, height: 960 })
     await stackPage.emulateMedia({ colorScheme: 'light' })
     await stackPage.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
@@ -667,6 +680,30 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
     })
     expect(transition).toBe('0.25s ease-out')
     observations.push(`stack.initial cards=3 acks=stack-first widths=260,252 inset=10 offset=-4 transition=${transition}`)
+    // A Desktop update status shares the account row and leaves the card row at full width.
+    const publishUpdate = (state: { phase: string; version?: string }) => stackPage.evaluate((value) => {
+      (globalThis as typeof globalThis & { __bonusPublishUpdate: (next: typeof value) => void }).__bonusPublishUpdate(value)
+    }, state)
+    await publishUpdate({ phase: 'installing', version: '0.1.5' })
+    const updateTag = stackPage.getByText('Подготовка к перезапуску…', { exact: true })
+    await updateTag.waitFor()
+    const artifactDir = fileURLToPath(new URL('../../../.artifacts', import.meta.url))
+    await mkdir(artifactDir, { recursive: true })
+    await stackPage.screenshot({ path: join(artifactDir, 'bonus-notice-update-tag.png'), clip: { x: 0, y: 560, width: 420, height: 400 } })
+    const taggedBox = await cards.first().boundingBox()
+    const tagBox = await updateTag.boundingBox()
+    const accountBox = await stackPage.getByRole('button', { name: '账号菜单', exact: true }).boundingBox()
+    expect(taggedBox!.x).toBeCloseTo(10, 0)
+    expect(taggedBox!.width).toBeCloseTo(260, 0)
+    expect(taggedBox!.y + taggedBox!.height).toBeLessThanOrEqual(accountBox!.y)
+    expect(tagBox!.y).toBeGreaterThanOrEqual(accountBox!.y)
+    expect(tagBox!.y + tagBox!.height).toBeLessThanOrEqual(accountBox!.y + accountBox!.height)
+    // The card floats over the session list: the list still reaches down to the card's bottom edge.
+    const listBottom = await stackPage.locator('[class*="scrollRegion"]').first().evaluate(element => element.getBoundingClientRect().bottom)
+    expect(listBottom).toBeGreaterThanOrEqual(taggedBox!.y + taggedBox!.height - 1)
+    observations.push('stack.update-tag card=260 left-inset=10 card-above-account-row=true tag-in-account-row=true floats-over-list=true')
+    await publishUpdate({ phase: 'idle' })
+    await updateTag.waitFor({ state: 'detached' })
     for (const [delta, width, edge] of [[80, 280, 360], [-80, 260, 280]] as const) {
       const handle = await stackPage.locator('[data-side="sidebar"]').boundingBox()
       const x = handle!.x + handle!.width / 2
@@ -700,8 +737,6 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
     expect(platform.acks.length).toBe(beforeCollapseAcks)
     expect(platform.dismissals.length).toBe(beforeCollapseDismissals)
     observations.push('stack.expanded cards=3 duplicate-acks=0 dismissed=0')
-    const artifactDir = fileURLToPath(new URL('../../../.artifacts', import.meta.url))
-    await mkdir(artifactDir, { recursive: true })
     await stackPage.screenshot({ path: join(artifactDir, 'bonus-notice-stack-light.png') })
     await stackPage.emulateMedia({ colorScheme: 'dark' })
     await expect.poll(() => stackPage.locator('body').getAttribute('data-ds-dark-theme')).not.toBeNull()
@@ -736,6 +771,16 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
     await expect.poll(() => platform.acks.length).toBe(ackStart + 2)
     expect(platform.acks.slice(ackStart).map(ack => ack.orderId)).toEqual(['a1111111-1111-4111-8111-111111111111', 'a2222222-2222-4222-8222-222222222222'])
     observations.push('stack.promoted cards=2 acks=stack-first,stack-second width=260 same-node=true')
+    // In a short window the long card scrolls its copy instead of pushing the account row out of view.
+    await stackPage.setViewportSize({ width: 1440, height: 390 })
+    const shortAccount = await stackPage.getByRole('button', { name: '账号菜单', exact: true }).boundingBox()
+    const shortCard = await second.boundingBox()
+    const copyScrolls = await second.getByRole('status').evaluate(element => element.scrollHeight > element.clientHeight)
+    expect(shortAccount!.y + shortAccount!.height).toBeLessThanOrEqual(390)
+    expect(shortCard!.y + shortCard!.height).toBeLessThanOrEqual(shortAccount!.y)
+    expect(copyScrolls).toBe(true)
+    observations.push('stack.short-window account-row-visible=true card-above-account-row=true copy-scrolls=true')
+    await stackPage.setViewportSize({ width: 1440, height: 960 })
     await second.getByRole('button', { name: 'Закрыть', exact: true }).click()
     await expect.poll(() => platform.acks.length).toBe(ackStart + 3)
     expect(platform.acks.slice(ackStart).map(ack => ack.orderId)).toEqual(['a1111111-1111-4111-8111-111111111111', 'a2222222-2222-4222-8222-222222222222', 'a3333333-3333-4333-8333-333333333333'])
@@ -750,7 +795,7 @@ describe.skipIf(MODE === 'record')('web e2e: bonus notice', () => {
 
     platform.grant('b1111111-1111-4111-8111-111111111111', '31.00')
     const refreshAckStart = platform.acks.length
-    const refreshPage = await openDesktopPage('ru-RU')
+    const refreshPage = await openDesktopPage('ru-CN')
     await refreshPage.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
     const refreshCards = noticeCards(refreshPage)
     await shownNotice(refreshPage, '已赠送您 31.00 元 DSH 体验赠金。')

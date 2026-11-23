@@ -428,14 +428,20 @@ export interface FixtureViewerGrant {
  * only the write answers; the read rows keep the scripted snapshot shaped like the real one.
  */
 const FIXTURE_SESSION_READS = [
-  'commands/list', 'goals/get', 'session/attachment', 'session/control', 'session/follow', 'session/list',
-  'session/page', 'session/projections', 'skills/list', 'workspace/follow',
+  'commands/list', 'fileReferences/list', 'goals/get', 'goals/edit',
+  'goals/clear', 'goals/complete', 'goals/create', 'goals/pause', 'goals/resume', 'job/list', 'job/follow',
+  'session/attachment', 'session/control', 'session/follow', 'session/list',
+  'session/page', 'session/projections', 'sessionReferenceResolver/candidates', 'skills/list',
+  'userQuestions/answer', 'userQuestions/attachWait', 'workspace/follow',
 ] as const
 
 /** Endpoint actions the owner's share policy allows a reader on the global resource. */
 const FIXTURE_GLOBAL_READS = [
   'commands/list', 'llm/listConfigurableProviders', 'llm/listProviders',
-  'session/canOpenWorkspacePath', 'session/control', 'session/list', 'session/modelCatalog', 'workspace/follow',
+  'productAnalytics/enabled', 'productAnalytics/report', 'productAnalytics/watchPolicy',
+  'speech/cancelPreparation', 'speech/catalog', 'speech/follow', 'speech/prepare', 'speech/transcribe',
+  'session/canOpenWorkspacePath', 'session/control', 'session/list', 'session/modelCatalog', 'pluginEvents/follow',
+  'workspace/follow',
 ] as const
 
 type FixtureControlFrame =
@@ -610,7 +616,7 @@ const MARKDOWN_FIXTURE = [
   '```',
 ].join('\n')
 
-const USER_MARKDOWN_LITERAL = '/example.com).用户字面量：# 不渲染 `code` [link](https:'
+const USER_MARKDOWN_LITERAL = '用户字面量: # 不渲染 `code` [link](https://example.com)'
 
 /**
  * SGR wrapper for the terminal output sample below: authoring the escapes as
@@ -987,7 +993,7 @@ function buildAlphaLog(presented = false): SessionEvent[] {
   toolTurn(
     60,
     'bash',
-    '{"command":"ls -la\\necho done","description":"fixture 终端样本","workdir":"/tmp/fixture"}',
+    '{"command":"ls -la\\\\necho done","description":"fixture 终端样本","workdir":"/tmp из fixture"}',
     'total 2\ndrwxr-xr-x fixture\n-rw-r--r-- demo.txt',
   )
   toolTurn(
@@ -1094,7 +1100,7 @@ function buildAlphaLog(presented = false): SessionEvent[] {
   toolTurn(
     66,
     'bash',
-    'tmp/fixture/deep/nested"}.{"command":"pnpm run check","description":"fixture 终端样本","workdir":"',
+    '{"command":"pnpm run check","description":"fixture 终端样本","workdir":"/tmp/fixture/deep из nested"}',
     `${TERMINAL_OUTPUT_FIXTURE}\n[exit code: 1]`,
   )
 
@@ -1180,7 +1186,7 @@ function buildAlphaLog(presented = false): SessionEvent[] {
   push({
     type: 'assistant/message',
     surfaceOp: 'append',
-    data: { turn: 72, step: 0, message: assistantMessage(text('条目 1: 第一条。条目 2：第二条。条目 3：这一条写到一半被')) },
+    data: { turn: 72, step: 0, message: assistantMessage(text('条目 1：第一条。条目 2：第二条。条目 3: 这一条写到一半被')) },
   })
   push({ type: 'step/end', data: { turn: 72, step: 0 } })
   push({ type: 'turn/end', data: { turn: 72, reason: { kind: 'max-tokens' } } })
@@ -1951,8 +1957,6 @@ export interface FixtureOptions {
   dropSessionCreateResponse?: boolean
   /** Order of the two successful create frames. */
   createFrameOrder?: 'session-first' | 'workspace-first'
-  /** Announce one Agent write to `notes/demo.txt` shortly after a `workspaceFiles/changes` stream opens. */
-  fileChanges?: boolean
   /**
    * Present a fork as the reading viewer's own branch of the shared Session: the child carries the
    * branch facts a Host publishes for a viewer's fork, so the client exercises the deployed shape.
@@ -1971,16 +1975,6 @@ export interface FixtureOptions {
   /** Have one fixture turn declare workspace files for the Host desktop, as the `present` tool does. */
   presented?: boolean
 }
-
-/** File observation payload, mirrored so this Client fixture names no Host package. */
-type FixtureWorkspaceFileChange =
-  | { readonly absolutePath: string; readonly version: string }
-  | { readonly absolutePath: string; readonly absent: true }
-
-/** Host subscription acknowledgement followed by file observations. */
-type FixtureWorkspaceFileWatchFrame =
-  | { readonly kind: 'ready' }
-  | { readonly kind: 'change'; readonly change: FixtureWorkspaceFileChange }
 
 /** Inbox pump shared by both stream generators (FrameQueue pattern: ONE abort listener hung
  *  outside the loop — a per-iteration {once:true} listener never fires for non-final rounds and
@@ -2260,10 +2254,10 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
     {
       id: 'harness-profile',
       header: '偏好',
-      question: 'Harness 候选人？.你现在更想招哪类 Agent',
+      question: '你现在更想招哪类 Agent из Harness 候选人？',
       options: [
-        { label: '工程落地型 (Recommended)', description: '更看重能直接做 runtime, tool executor、sandbox、trace 和线上问题排查。' },
-        { label: '研究潜力型', description: '更看重 Agent 理解, 训练评测思路和长期成长空间。' },
+        { label: '工程落地型 (Recommended)', description: '更看重能直接做 runtime、tool executor、sandbox、trace 和线上问题排查。' },
+        { label: '研究潜力型', description: '更看重 Agent 理解、训练评测思路和长期成长空间。' },
         { label: '均衡型', description: '同时要求工程能力和 Agent 认知, 但可能筛选门槛更高。' },
       ],
     },
@@ -2278,7 +2272,7 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
     },
     {
       id: 'signals',
-      header: 'Сигнал',
+      header: '信号',
       question: '哪些面试信号最重要？',
       detail: '按当前招聘目标选择；跳过则视为不设偏好。',
       multiSelect: true,
@@ -2702,157 +2696,6 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
   }
 
   /**
-   * Workspace text reads under `?fixture`.
-   *
-   * The sample content is deliberately more than one shape: the panel's states
-   * (text, oversized, unreadable) are only demonstrable if the fixture can
-   * produce each of them, and a preview that can only ever succeed hides its
-   * own failure rendering.
-   */
-  // The Session workspace the replayed conversation writes into: `list` walks a
-  // fixed tree under it so the file-tree tab has directories, files, one entry
-  // of neither kind, and one cut listing to draw.
-  const WORKSPACE_FILES_ROOT = '/tmp/fixture'
-  type FixtureWorkspaceEntry = { name: string; type: 'file' | 'directory' | 'other'; size?: number }
-  const workspaceFileTree = new Map<string, FixtureWorkspaceEntry[]>([
-    ['', [
-      { name: '.gitignore', type: 'file', size: 24 },
-      { name: 'dev.sock', type: 'other' },
-      { name: 'notes', type: 'directory' },
-      { name: 'package.json', type: 'file', size: 512 },
-      { name: 'README.md', type: 'file', size: 640 },
-      { name: 'src', type: 'directory' },
-    ]],
-    ['notes', [
-      { name: 'demo.txt', type: 'file', size: 14 },
-      { name: 'new-demo.txt', type: 'file', size: 14 },
-    ]],
-    ['src', [
-      { name: 'config.ts', type: 'file', size: 211 },
-      { name: 'index.ts', type: 'file', size: 88 },
-      { name: 'lib', type: 'directory' },
-    ]],
-    ['src/lib', Array.from({ length: 24 }, (_, index) => ({
-      name: `module-${String(index + 1).padStart(2, '0')}.ts`,
-      type: 'file' as const,
-      size: 96 + index,
-    }))],
-  ])
-  /** Resolve a `list` argument to its workspace-relative path, or undefined when it leaves the root. */
-  const workspaceFilePath = (path: string): string | undefined => {
-    const segments: string[] = []
-    for (const segment of (path.startsWith('/') ? path : `${WORKSPACE_FILES_ROOT}/${path}`).split('/')) {
-      if (segment === '' || segment === '.') continue
-      if (segment === '..') {
-        segments.pop()
-        continue
-      }
-      segments.push(segment)
-    }
-    const absolute = `/${segments.join('/')}`
-    if (absolute !== WORKSPACE_FILES_ROOT && !absolute.startsWith(`${WORKSPACE_FILES_ROOT}/`)) return undefined
-    return absolute.slice(WORKSPACE_FILES_ROOT.length + 1)
-  }
-  // Page cap mirrored from the Host default so an over-limit request fails here too.
-  const WORKSPACE_FILE_PAGE_LINES = 5000
-  /**
-   * Sample text for any readable path: a heading plus two lines of copy. The
-   * replayed conversation's `demo` files, and any `huge` path, run past two
-   * default pages so paging can be exercised without a real workspace.
-   */
-  const workspaceFileLines = (path: string): string[] => {
-    const name = path.slice(path.lastIndexOf('/') + 1)
-    const head = [`# ${name}`, '', 'fixture 模式下的示例文本, 用于验收侧栏的文本预览。', '真实构建从工作区读取同名文件。']
-    return path.includes('demo') || path.includes('huge')
-      ? [...head, ...Array.from({ length: 12_000 }, (_, index) => `第 ${index + 5} 行: 用于验收分页与滚动的长文本样本。`)]
-      : head
-  }
-  const workspaceFileRemotes = {
-    list(path: string): ConnectionRpcResult<{
-      path: string
-      entries: readonly FixtureWorkspaceEntry[]
-      truncated: boolean
-    }> {
-      if (path.length === 0) {
-        return { ok: false, error: { code: 'gateway/bad-request', message: 'path is required', details: {} } }
-      }
-      const relative = workspaceFilePath(path)
-      if (relative === undefined) {
-        return {
-          ok: false,
-          error: { code: 'workspace-file/outside-workspace', message: `${path} is outside the workspace`, details: { path } },
-        }
-      }
-      const entries = workspaceFileTree.get(relative)
-      if (entries === undefined) {
-        const cut = relative.lastIndexOf('/')
-        const name = relative.slice(cut + 1)
-        const sibling = workspaceFileTree.get(cut === -1 ? '' : relative.slice(0, cut))?.find(entry => entry.name === name)
-        if (sibling === undefined) {
-          return { ok: false, error: { code: 'workspace-file/not-found', message: `no entry at ${path}`, details: { path } } }
-        }
-        return {
-          ok: false,
-          error: {
-            code: 'workspace-file/not-directory',
-            message: `${path} is a ${sibling.type}`,
-            details: { path, kind: sibling.type === 'file' ? 'file' : 'other' },
-          },
-        }
-      }
-      return { ok: true, value: { path: relative, entries, truncated: relative === 'src/lib' } }
-    },
-    read(path: string, range: { offset?: number; limit?: number }): ConnectionRpcResult<{
-      absolutePath: string
-      version: string
-      bytes: number
-      offset: number
-      text: string
-      lines: number
-      eof: boolean
-    }> {
-      const located = workspaceFileRemotes.stat(path)
-      if (!located.ok) return located
-      const offset = range.offset ?? 1
-      const limit = range.limit ?? WORKSPACE_FILE_PAGE_LINES
-      if (!Number.isInteger(offset) || offset < 1 || !Number.isInteger(limit) || limit < 1 || limit > WORKSPACE_FILE_PAGE_LINES) {
-        return { ok: false, error: { code: 'gateway/bad-request', message: 'offset and limit must be positive integers within the page cap', details: {} } }
-      }
-      const lines = workspaceFileLines(path)
-      const page = lines.slice(offset - 1, offset - 1 + limit)
-      return {
-        ok: true,
-        value: {
-          ...located.value,
-          offset,
-          text: page.join('\n'),
-          lines: page.length,
-          eof: offset - 1 + limit >= lines.length,
-        },
-      }
-    },
-    stat(path: string): ConnectionRpcResult<{ absolutePath: string; version: string; bytes: number }> {
-      if (path.length === 0) {
-        return { ok: false, error: { code: 'gateway/bad-request', message: 'path is required', details: {} } }
-      }
-      if (path.endsWith('.png') || path.endsWith('.bin')) {
-        return {
-          ok: false,
-          error: { code: 'workspace-file/not-text', message: `${path} is not UTF-8 text`, details: { path } },
-        }
-      }
-      return {
-        ok: true,
-        value: {
-          absolutePath: path.startsWith('/') ? path : `/${path}`,
-          version: 'fx-v1',
-          bytes: new TextEncoder().encode(workspaceFileLines(path).join('\n')).byteLength,
-        },
-      }
-    },
-  }
-
-  /**
    * Canonical fixture implementation of the generated Directory Picker Remote
    * contract. The pick is deterministic — the keyless lanes drive the full
    * pick-then-adopt path without an OS chooser — over the same design-mock
@@ -3196,7 +3039,7 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
         for (let index = state.emitted; index < end; index++) {
           const chunkText = index === chunkCount - 1
             ? `\n${marker}`
-            : index % 64 === 63 ? 'Рассуждение\n' : 'Рассуждение'
+            : index % 64 === 63 ? '推理\\n' : 'Рассуждение'
           pushAssistant(sessionId, { type: 'reasoning-delta', index: 0, text: chunkText })
         }
         state.emitted = end
@@ -3817,7 +3660,7 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
     agentId: sid('fx-alpha'),
     request: {
       toolName: 'dangerous_tool',
-      reason: '拒绝后消失）.fixture 常驻审批（可答：批准',
+      reason: 'fixture 常驻审批（可答: 批准/拒绝后消失）',
     },
   })
 
@@ -3882,27 +3725,6 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
     } finally {
       streamBreakers.delete(breakNow)
       workspaceConns.delete(conn)
-    }
-  }
-
-  async function* openWorkspaceFileChanges(signal: AbortSignal): AsyncGenerator<FixtureWorkspaceFileWatchFrame> {
-    signal.throwIfAborted()
-    const conn = new FxInbox<FixtureWorkspaceFileWatchFrame>()
-    const breakNow = (): void => { conn.breakNow() }
-    streamBreakers.add(breakNow)
-    // Opt-in only: an unprompted frame would age every preview of demo.txt
-    // into its changed state on a timer the assembled snapshots cannot see.
-    const announce = options.fileChanges
-      ? setTimeout(() => {
-        conn.push({ kind: 'change', change: { absolutePath: `${WORKSPACE_FILES_ROOT}/notes/demo.txt`, version: 'fx-demo-v2' } })
-      }, 1000)
-      : undefined
-    try {
-      yield { kind: 'ready' }
-      yield* conn.drain(signal)
-    } finally {
-      if (announce !== undefined) clearTimeout(announce)
-      streamBreakers.delete(breakNow)
     }
   }
 
@@ -4287,15 +4109,6 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
         case 'session/openWorkspacePath': {
           return sessionOk({ opened: true as const })
         }
-        case 'workspaceFiles/read': {
-          return Promise.resolve(workspaceFileRemotes.read(args.path ?? '', args.range ?? {}))
-        }
-        case 'workspaceFiles/stat': {
-          return Promise.resolve(workspaceFileRemotes.stat(args.path ?? ''))
-        }
-        case 'workspaceFiles/list': {
-          return Promise.resolve(workspaceFileRemotes.list(args.path ?? ''))
-        }
         case 'session/canOpenWorkspacePath': return Promise.resolve({ ok: true, value: true })
         case 'session/modelCatalog': return Promise.resolve({
           ok: true,
@@ -4403,7 +4216,6 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
         case 'remoteAccess/follow': return openAccess(signal)
         case 'session/follow': return openFollow(args.request as FixtureFollowRequest, signal)
         case 'workspace/follow': return openWorkspace(signal)
-        case 'workspaceFiles/changes': return openWorkspaceFileChanges(signal)
         default:
           throw new Error(`fixture connection stream endpoint ${JSON.stringify(endpoint)} is unavailable`)
       }
@@ -4457,7 +4269,6 @@ function fixtureOptionsFromLocation(): FixtureOptions {
     failWorkspaceAttach: query.get('fixtureAttach') === 'fail',
     dropSessionCreateResponse: query.get('fixtureSessionCreate') === 'drop-response',
     createFrameOrder: query.get('fixtureFrames') === 'workspace-first' ? 'workspace-first' : 'session-first',
-    fileChanges: query.get('fixtureFileChanges') === 'demo',
     presented: query.get('fixturePresented') === '1',
     viewerFork: query.get('fixtureFork') === 'viewer' || query.get('fixtureFork') === 'refused'
       || query.get('fixtureFork') === 'running',

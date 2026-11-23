@@ -7,7 +7,7 @@ import type { SessionId } from '@deepseek-ai/dsh-session'
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import type { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import { TeamDisableConfirmation, type TeamDisableConfirmationProps } from '../src/client/TeamDisableConfirmation.tsx'
-import { zh } from '../src/client/locales.ts'
+import { ru } from '../src/client/locales.ts'
 import { brandString } from '@deepseek-ai/dsh-brand'
 
 vi.mock('../src/client/TeamDisableConfirmation.module.css', () => ({ default: {} }))
@@ -29,16 +29,16 @@ it('keeps one disable operation pending despite repeated callbacks without optio
   const disableTeam = vi.fn<TeamDisableConfirmationProps['disableTeam']>(() => pending.promise)
   const cancelDisable = vi.fn<TeamDisableConfirmationProps['cancelDisable']>()
   const useDisableRequest: TeamDisableConfirmationProps['useDisableRequest'] = select => select({ sessionId })
-  const props = { useDisableRequest, disableTeam, cancelDisable, t: makeTranslate(zh) } as TeamDisableConfirmationProps
+  const props = { useDisableRequest, disableTeam, cancelDisable, t: makeTranslate(ru) } as TeamDisableConfirmationProps
   render(<TeamDisableConfirmation {...props} />)
-  const confirm = screen.getByRole('button', { name: zh['disable.confirm'] })
+  const confirm = screen.getByRole('button', { name: ru['disable.confirm'] })
   fireEvent.click(confirm)
   expect(confirm.getAttribute('aria-disabled')).toBe('true')
   fireEvent.click(confirm)
-  fireEvent.click(screen.getByRole('button', { name: zh['disable.cancel'] }))
+  fireEvent.click(screen.getByRole('button', { name: ru['disable.cancel'] }))
   expect(disableTeam).toHaveBeenCalledExactlyOnceWith(sessionId)
   expect(cancelDisable).not.toHaveBeenCalled()
-  expect(screen.getByRole('dialog', { name: zh['disable.title'] })).toBeTruthy()
+  expect(screen.getByRole('dialog', { name: ru['disable.title'] })).toBeTruthy()
   await act(async () => { pending.resolve(null) })
   expect(cancelDisable).toHaveBeenCalledExactlyOnceWith(sessionId)
 })

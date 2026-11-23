@@ -32,7 +32,7 @@ describe('builtin command resolution', () => {
     }
     expect(resolveCommand('plan', [builtin, replacement])).toBe(replacement)
     expect(builtinCommandName(replacement)).toBeUndefined()
-    expect(resolveCommand('План', [builtin, replacement])).toBe(builtin)
+    expect(resolveCommand('план', [builtin, replacement])).toBe(builtin)
     expect(resolveCommand('missing', [builtin])).toBeUndefined()
     expect(resolveCommand('plan', [])).toBeUndefined()
   })

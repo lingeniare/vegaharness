@@ -2,5 +2,5 @@ VEGA Harness
 VEGA Harness
 Welcome to VEGA Harness
 Build potential. Explore intelligence.
-Sign In API VEGA
+Sign in
 Skip

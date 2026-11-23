@@ -474,7 +474,7 @@ describe.skipIf(MODE === 'record')('web e2e: App-only desktop onboarding', () =>
         observations.push(`closed.onboarding acks=${bonusAcks}`)
       }
     }
-    await page.getByRole('button', { name: '下一步', exact: true }).click()
+    await page.getByRole('button', { name: 'Далее', exact: true }).click()
     await page.getByRole('button', { name: 'Пропустить', exact: true }).click()
     await page.getByRole('dialog').getByRole('button', { name: '进入应用', exact: true }).click()
     await page.locator('[data-desktop-onboarding]').waitFor({ state: 'detached' })

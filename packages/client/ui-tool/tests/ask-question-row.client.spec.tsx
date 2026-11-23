@@ -136,7 +136,7 @@ describe('AskQuestionRow', () => {
   it('running call reads waiting (args-independent: the composer takeover shows the questions)', () => {
     const view = render(<AskQuestionRow {...rowProps(runningCall(ARGS))} />)
     expect(screen.getByText('Задать вопрос')).toBeTruthy()
-    expect(screen.getByText('Ожидание ответа')).toBeTruthy()
+    expect(screen.getByText('ожидание')).toBeTruthy()
     expect(view.container.querySelector('[data-state="running"]')).not.toBeNull()
   })
 
@@ -271,7 +271,7 @@ describe('AskQuestionRow', () => {
     })
     render(<AskQuestionRow {...rowProps(repaired, { answerable: ['c1'], revealPanel })} />)
 
-    expect(screen.getByText('Работа продолжена — вы всё ещё можете ответить')).toBeTruthy()
+    expect(screen.getByText('продолжено; ответ всё ещё доступен')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: PILL.reopen }))
     expect(revealPanel).toHaveBeenCalledWith('c1')
   })
@@ -377,7 +377,7 @@ describe('AskQuestionRow', () => {
       { answerable: ['c1'] },
     )} />)
 
-    expect(screen.getByText('Работа продолжена — вы всё ещё можете ответить')).toBeTruthy()
+    expect(screen.getByText('продолжено; ответ всё ещё доступен')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { expanded: false }))
     expect(screen.getByText('На эти ожидающие вопросы всё ещё можно ответить в поле ввода.')).toBeTruthy()
     expect(screen.getByText('What do you want to accomplish?')).toBeTruthy()
@@ -577,7 +577,7 @@ describe('AskQuestionRow', () => {
     // ASK_CANCELLED: the ask_user_question handler's cancel error.
     const view = render(<AskQuestionRow {...rowProps(resultNode(READABLE_ARGS, null,
       { isError: true, error: { name: 'UserQuestionError', code: 'ASK_CANCELLED' } }))} />)
-    expect(screen.getByText('Отменено')).toBeTruthy()
+    expect(screen.getByText('отменено')).toBeTruthy()
     expect(view.container.querySelector('[data-state="ok"]')).not.toBeNull()
     fireEvent.click(screen.getByRole('button', { expanded: false }))
     expect(screen.getByText('Этот набор вопросов отменён до отправки ответов.')).toBeTruthy()
@@ -608,7 +608,7 @@ describe('AskQuestionRow', () => {
   ])('cancelled result keeps raw diagnostics for $label', ({ args }) => {
     const view = render(<AskQuestionRow {...rowProps(resultNode(args, null,
       { isError: true, error: { name: 'UserQuestionError', code: 'ASK_CANCELLED' } }))} />)
-    expect(screen.getByText('Отменено')).toBeTruthy()
+    expect(screen.getByText('отменено')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { expanded: false }))
     expect(view.container.querySelector('[class*="ioCard"]')).not.toBeNull()
   })
@@ -618,7 +618,7 @@ describe('AskQuestionRow', () => {
       { isError: true, error: { name: 'Interrupted', code: 'interrupted' } }))} />)
     expect(view.container.querySelector('[data-state="stopped"]')).not.toBeNull()
     expect(view.container.querySelector('[data-state="stopped"] svg')).not.toBeNull()
-    expect(screen.queryByText('Отменено')).toBeNull()
+    expect(screen.queryByText('отменено')).toBeNull()
     expect(screen.getByText(ARGS)).toBeTruthy()
   })
 

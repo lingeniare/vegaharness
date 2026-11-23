@@ -2,11 +2,27 @@
 export const NS = 'cuaPermissions'
 /** English permission-page dictionary. */
 export const en = {
+  previewNotice: 'Computer use is an experimental preview. The agent may click the wrong button or type in the wrong window. Use caution in production environments. We recommend native PTC mode so the agent can operate apps and call other tools in the same program.',
+  windowsHelperBuild: 'If you installed DSH through npm, build the Windows helper from the matching DSH source. In {directory}, run {x64} or {arm64} with the .NET 10 SDK for your architecture.',
+  providerLookupFailed: 'Could not identify the computer use provider: {message}',
+  windowsHelperPath: 'In the active profile’s {patch}, find or add the entry with ID {entry}. Set {path} under its {config} to the absolute path of {exe}.',
+  approvalRisks: 'Risks',
+  approvalRiskTitle: 'Computer use risks',
+  approvalRiskNotice: 'The agent can access only apps you approve, and can read and control them in the background.\n\nOnline games, messaging apps, and other apps may restrict automation. Violating their rules could result in your account with that app being suspended or banned.\n\nProceed at your own risk. To stop automated control at any time, press Stop in DeepSeek Harness.',
   title: 'Authorize computer use',
   applicationsTitle: 'Manage applications computer use can access',
+  windowsSetupTitle: 'Check Windows desktop access',
+  windowsSetupBody: 'Unlock the Windows desktop, then check again. DSH asks before accessing each application.',
+  windowsSessionUnknown: 'No interactive Windows desktop was verified. Run DSH in a signed-in desktop session, then check again.',
+  windowsCaptureUnavailable: 'This Windows session does not support window capture. Check the Windows version and graphics driver, then check again.',
+  applicationInteraction: 'Application interaction',
+  windowsInstructions: 'Keep the Windows desktop unlocked. Some input needs the target application in front. Applications running with higher privileges can refuse access.',
+  windowsDesktop: 'Interactive desktop', windowsDesktopUse: 'An unlocked desktop is required for observation and input.',
+  windowsCapture: 'Window capture', available: 'Available', unavailable: 'Unavailable', locked: 'Locked or disconnected',
+  elevated: 'The native component is running with administrator privileges.', standardPrivileges: 'The native component is running with standard user privileges.',
   setupTitle: 'Set up computer use before use',
   setupBody: 'Computer use is enabled. Before using it, grant Accessibility and Screen Recording permissions. Open the plugin details to complete setup.',
-  setupQueryFailed: 'Computer use is enabled, but system permissions could not be checked. Open the plugin details to see the error and retry.',
+  setupQueryFailed: 'computer use is enabled, but system permissions could not be checked. Open the plugin details to see the error and retry.',
   defaultTitle: 'Default mode for new sessions',
   defaultBody: 'Computer use is available in Standard, Creator, and PTC modes. Choose PTC here to make it the default for new sessions.',
   defaultConfirm: 'Set to PTC', defaultSet: 'PTC is the default',
@@ -26,33 +42,51 @@ export const en = {
   accessibilityUse: 'Read interface controls, click, and type.', screenRecordingUse: 'Capture the selected application window.',
   accessibilityPermission: 'In System Settings, allow {application} to read interface controls, click, and type.',
   screenRecordingPermission: 'In System Settings, allow {application} to capture application windows.',
-  permissionHint: 'Manage permissions in System Settings for the application named by macOS.',
+  permissionHint: 'Manage Accessibility and Screen Recording permissions in System Settings.',
   granted: 'Allowed', unknown: 'Unknown', request: 'Request permission', settings: 'Open System Settings', retry: 'Retry',
   allowedApps: 'Always-allowed applications',
   blockedApps: 'Applications not allowed', retryApproval: 'Allow asking again',
   retryAllowed: 'The next application selection will ask again; access has not been granted',
   noApps: 'No always-allowed or blocked applications.',
-  revoke: 'Revoke', revoked: 'Application access revoked', requested: 'Review the macOS prompt, or open System Settings if no prompt appears', opened: 'System Settings opened',
+  revoke: 'Revoke', revoked: 'Application access revoked', requested: 'Follow the guide at the bottom of System Settings', opened: 'System Settings opened',
   applicationsFailed: 'Could not load application access: {message}', iconsFailed: 'Could not load application icons: {message}',
   failed: 'Could not update permissions: {message}', queryFailed: 'Could not check permissions: {message}',
-  approvalRisks: 'Risks',
-  approvalRiskTitle: 'Computer use risks',
-  approvalRiskNotice: 'The agent can access only apps you approve, and can read and control them in the background.\n\nOnline games, messaging apps, and other apps may restrict automation. Violating their rules could result in your account with that app being suspended or banned.\n\nProceed at your own risk. To stop automated control at any time, press Stop in VEGA Harness.',
-  windowsSetupTitle: 'Check Windows desktop access',
-  windowsSetupBody: 'Unlock the Windows desktop, then check again. VEGA asks before accessing each application.',
-  windowsSessionUnknown: 'No interactive Windows desktop was verified. Run VEGA in a signed-in desktop session, then check again.',
-  windowsCaptureUnavailable: 'This Windows session does not support window capture. Check the Windows version and graphics driver, then check again.',
-  applicationInteraction: 'Application interaction',
-  windowsInstructions: 'Keep the Windows desktop unlocked. Some input needs the target application in front. Applications running with higher privileges can refuse access.',
-  windowsDesktop: 'Interactive desktop', windowsDesktopUse: 'An unlocked desktop is required for observation and input.',
-  windowsCapture: 'Window capture', available: 'Available', unavailable: 'Unavailable', locked: 'Locked or disconnected',
-  elevated: 'The native component is running with administrator privileges.', standardPrivileges: 'The native component is running with standard user privileges.',
 }
 /** Keys shared by all supported locale dictionaries. */
 export type CuaPermissionLocaleKey = keyof typeof en
+/** Chinese permission-page dictionary. */
 
-/** Russian dictionary, checked against the English keys. */
+/** Japanese copy. */
+
+/** Spanish dictionary. */
+
+/** French dictionary. */
+
+/** German dictionary. */
+
+/** Russian dictionary. */
 export const ru = {
+  previewNotice: 'Управление компьютером доступно в режиме экспериментального предпросмотра. Агент может нажать не ту кнопку или ввести текст не в то окно. Используйте эту функцию в рабочей среде с осторожностью. Рекомендуем нативный режим PTC: в нём агент может управлять приложениями и вызывать другие инструменты в одной программе.',
+  windowsHelperBuild: 'Если DSH установлен через npm, соберите вспомогательную программу для Windows из исходного кода той же версии DSH. В каталоге {directory} выполните {x64} или {arm64} с помощью .NET 10 SDK в зависимости от архитектуры компьютера.',
+  providerLookupFailed: 'Не удалось определить поставщика Computer Use: {message}',
+  windowsHelperPath: 'В файле {patch} активного профиля найдите или добавьте запись с идентификатором {entry}. В её разделе {config} задайте для {path} абсолютный путь к {exe}.',
+  windowsSetupTitle: 'Проверить доступ к рабочему столу Windows',
+  windowsSetupBody: 'Разблокируйте рабочий стол Windows и повторите проверку. VEGA запрашивает разрешение перед доступом к каждому приложению.',
+  windowsSessionUnknown: 'Интерактивный рабочий стол Windows не подтверждён. Запустите VEGA в сеансе вошедшего в систему пользователя и повторите проверку.',
+  windowsCaptureUnavailable: 'Этот сеанс Windows не поддерживает захват окон. Проверьте версию Windows и графический драйвер, затем повторите проверку.',
+  applicationInteraction: 'Взаимодействие с приложениями',
+  windowsInstructions: 'Не блокируйте рабочий стол Windows. Для некоторых действий требуется вывести целевое приложение на передний план. Приложения с повышенными привилегиями могут отказать в доступе.',
+  windowsDesktop: 'Интерактивный рабочий стол',
+  windowsDesktopUse: 'Для наблюдения и ввода требуется разблокированный рабочий стол.',
+  windowsCapture: 'Захват окон',
+  available: 'Доступно',
+  unavailable: 'Недоступно',
+  locked: 'Заблокирован или отключён',
+  elevated: 'Нативный компонент работает с правами администратора.',
+  standardPrivileges: 'Нативный компонент работает с обычными правами пользователя.',
+  approvalRisks: 'Риски',
+  approvalRiskTitle: 'Риски управления компьютером',
+  approvalRiskNotice: 'Агент получает доступ только к приложениям, которые вы разрешили, и может читать их содержимое и управлять ими в фоновом режиме.\\n\\nВ онлайн-играх, мессенджерах и других приложениях могут действовать ограничения на автоматизацию. Нарушение их правил может привести к временной или постоянной блокировке вашей учётной записи в соответствующем приложении.\\n\\nВы пользуетесь этой возможностью на свой страх и риск. Чтобы в любой момент остановить автоматизированное управление, нажмите «Остановить» в VEGA Harness.',
   title: 'Разрешить использование компьютера',
   applicationsTitle: 'Управление приложениями, к которым может иметь доступ компьютер',
   setupTitle: 'Настройте использование компьютера перед использованием',
@@ -86,21 +120,6 @@ export const ru = {
   revoke: 'Отозвать', revoked: 'Доступ к приложению отозван', requested: 'Просмотрите подсказку macOS или откройте «Системные настройки», если подсказка не появляется.', opened: 'Системные настройки открыты',
   applicationsFailed: 'Не удалось загрузить доступ к приложению: {message}.', iconsFailed: 'Не удалось загрузить значки приложений: {message}.',
   failed: 'Не удалось обновить разрешения: {message}.', queryFailed: 'Не удалось проверить разрешения: {message}',
-  approvalRisks: 'Риски',
-  approvalRiskTitle: 'Риски управления компьютером',
-  approvalRiskNotice: 'Агент получает доступ только к приложениям, которые вы разрешили, и может читать их содержимое и управлять ими в фоновом режиме.\n\nВ онлайн-играх, мессенджерах и других приложениях могут действовать ограничения на автоматизацию. Нарушение их правил может привести к временной или постоянной блокировке вашей учётной записи в соответствующем приложении.\n\nВы пользуетесь этой возможностью на свой страх и риск. Чтобы в любой момент остановить автоматизированное управление, нажмите «Остановить» в VEGA Harness.',
-  windowsSetupTitle: 'Проверить доступ к рабочему столу Windows',
-  windowsSetupBody: 'Разблокируйте рабочий стол Windows и повторите проверку. VEGA запрашивает разрешение перед доступом к каждому приложению.',
-  windowsSessionUnknown: 'Интерактивный рабочий стол Windows не подтверждён. Запустите VEGA в сеансе вошедшего в систему пользователя и повторите проверку.',
-  windowsCaptureUnavailable: 'Этот сеанс Windows не поддерживает захват окон. Проверьте версию Windows и графический драйвер, затем повторите проверку.',
-  applicationInteraction: 'Взаимодействие с приложениями',
-  windowsInstructions: 'Не блокируйте рабочий стол Windows. Для некоторых действий требуется вывести целевое приложение на передний план. Приложения с повышенными привилегиями могут отказать в доступе.',
-  windowsDesktop: 'Интерактивный рабочий стол',
-  windowsDesktopUse: 'Для наблюдения и ввода требуется разблокированный рабочий стол.',
-  windowsCapture: 'Захват окон',
-  available: 'Доступно',
-  unavailable: 'Недоступно',
-  locked: 'Заблокирован или отключён',
-  elevated: 'Нативный компонент работает с правами администратора.',
-  standardPrivileges: 'Нативный компонент работает с обычными правами пользователя.',
 } satisfies Record<keyof typeof en, string>
+
+/** Portuguese dictionary. */

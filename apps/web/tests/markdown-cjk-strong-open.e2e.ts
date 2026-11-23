@@ -15,7 +15,7 @@ const MODE = webSnapshotMode()
 const STRONG_TEXTS = [
   '“当键盘已经进入深睡眠（彻底断连）时的重连速度”',
   '“Wi-Fi 下收不到推送”',
-  '（内容）',
+  'Содержимое',
   '「深睡眠」',
   '“配对流程”',
 ]

@@ -180,6 +180,7 @@ describe('optional bundles', () => {
     for (const moduleName of [
       '@deepseek-ai/dsh-experimental-forge',
       '@deepseek-ai/dsh-experimental-forge-github',
+      '@deepseek-ai/dsh-forge-gitlab',
       '@deepseek-ai/dsh-experimental-forge-session',
       '@deepseek-ai/dsh-experimental-client-ui-forge',
       '@deepseek-ai/dsh-experimental-tool-worktree',
@@ -307,7 +308,7 @@ describe('optional bundles', () => {
     expect(meta?.error).toBeUndefined()
     for (const field of [meta?.title, meta?.description]) {
       expect(typeof field).toBe('object')
-      for (const language of ['en', 'zh']) expect((field as Record<string, string>)[language]).toMatch(/\S/)
+      for (const language of ['en', 'ru']) expect((field as Record<string, string>)[language]).toMatch(/\S/)
     }
     expect(meta?.icon).toMatch(/^data:image\//)
   })

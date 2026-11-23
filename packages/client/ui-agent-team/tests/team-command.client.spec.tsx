@@ -6,7 +6,7 @@ import type { CommandId } from '@deepseek-ai/dsh-commands/types'
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import { IconUsersOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import { TeamCommandRow, type TeamCommandRowProps } from '../src/client/TeamCommandRow.tsx'
-import { zh, en, ja, es, fr, de, ru, pt } from '../src/client/locales.ts'
+import { en, ru } from '../src/client/locales.ts'
 
 afterEach(cleanup)
 
@@ -15,10 +15,7 @@ function command(args: string | null, outcome: Node['outcome']): Node {
   return { kind: 'command', seq: 1, time: 1, commandId: brandString<CommandId>('team-command'), name: 'team', args, outcome }
 }
 
-describe.each([
-  { id: 'zh', dictionary: zh }, { id: 'en', dictionary: en }, { id: 'ja', dictionary: ja }, { id: 'es', dictionary: es },
-  { id: 'fr', dictionary: fr }, { id: 'de', dictionary: de }, { id: 'ru', dictionary: ru }, { id: 'pt', dictionary: pt },
-])('Team command fallback in $id', ({ dictionary }) => {
+describe.each(Object.entries({ en, ru }))('Team command fallback in %s', (_id, dictionary) => {
   const t = makeTranslate(dictionary)
 
   it.each(['status', 'ON', '', null])('shows a localized pending status for unrecognized input %j', (args) => {
@@ -92,8 +89,8 @@ it.each(['success', 'error'] as const)('relocalizes the title without rewriting 
   expect(view.getByText(en['command.title'])).toBeTruthy()
   fireEvent.click(view.getByRole('button', { expanded: false }))
   expect(view.container.querySelector('pre')?.textContent).toBe(node.outcome?.text)
-  view.rerender(<TeamCommandRow node={node} t={makeTranslate(zh)} />)
-  expect(view.getByText(zh['command.title'])).toBeTruthy()
+  view.rerender(<TeamCommandRow node={node} t={makeTranslate(ru)} />)
+  expect(view.getByText(ru['command.title'])).toBeTruthy()
   expect(view.container.querySelector('pre')?.textContent).toBe(node.outcome?.text)
   expect(JSON.stringify(node)).toBe(original)
 })

@@ -20,7 +20,7 @@ const steps: SpeechPreparationStep[] = [
 ]
 function fixture(preparation: SpeechPreparationState, connected = true) {
   const prepare = vi.fn(async (_id: SpeechProviderId) => {}), cancelPreparation = vi.fn(async (_id: SpeechProviderId) => {})
-  const props = { provider: { id, name: 'SenseVoiceSmall', location: 'host-local' as const, languages: ['auto', 'ru', 'en', 'ru'], preparation },
+  const props = { provider: { id, name: 'SenseVoiceSmall', location: 'host-local' as const, languages: ['auto', 'zh', 'en', 'ja'], preparation },
     connected, prepare, cancelPreparation, t }
   return { ...render(<PreparationCard {...props} />), prepare, cancelPreparation, props }
 }
@@ -74,10 +74,10 @@ it('starts preparation and offers retry without showing progress for completed o
   await waitFor(() => { expect(screen.getByRole<HTMLButtonElement>('button', { name: ru.retryPrepare }).disabled).toBe(false) })
   b.prepare.mockRejectedValueOnce(new Error('offline'))
   fireEvent.click(screen.getByRole('button', { name: ru.retryPrepare }))
-  await screen.findByText('语音识别失败: offline')
+  await screen.findByText('Не удалось распознать речь: offline')
   b.prepare.mockRejectedValueOnce('network closed')
   fireEvent.click(screen.getByRole('button', { name: ru.retryPrepare }))
-  await screen.findByText('语音识别失败: network closed')
+  await screen.findByText('Не удалось распознать речь: network closed')
   fireEvent.click(screen.getByRole('button', { name: ru['short.failed'] }))
   expect(screen.queryByRole('progressbar')).toBeNull()
 })
@@ -93,8 +93,8 @@ it('explains download failures on the Host machine and retains an actionable ret
   const alert = screen.getByRole('alert')
   expect(alert.textContent).toContain('Не удалось загрузить model.int8.onnx: не удалось определить адрес загрузки.')
   expect(alert.textContent).toContain('Не удалось загрузить model.int8.onnx: не удалось определить адрес загрузки.Проверьте настройки DNS и прокси на компьютере с запущенным VEGA. Убедитесь, что он может определить домен источника загрузки, и повторите попытку.Источник загрузки: https://mirror.exampleКод ошибки: ENOTFOUND')
-  expect(alert.textContent).toContain('/mirror.example.下载来源: https:')
-  expect(alert.textContent).toContain('错误码: ENOTFOUND')
+  expect(alert.textContent).toContain('Источник загрузки: https://mirror.example')
+  expect(alert.textContent).toContain('Код ошибки: ENOTFOUND')
   expect(alert.textContent).not.toContain('fetch failed')
   expect(alert.textContent).not.toContain('Hugging Face')
   fireEvent.click(screen.getByRole('button', { name: ru.retryPrepare }))
@@ -113,8 +113,8 @@ it('explains download failures on the Host machine and retains an actionable ret
 it('persists settings and reports disconnection in the detail card', async () => {
   const store = createSnapshotStore<SpeechReadiness>({ connected: true, error: null, catalog: {
     selection: { providerId: id, language: 'auto' }, maxAudioBytes: 100, maxDurationSeconds: 120,
-    providers: [{ id, name: 'SenseVoiceSmall', location: 'host-local', languages: ['auto', 'ru', 'en', 'ru'], preparation: { phase: 'ready' } },
-      { id: 'cloud' as SpeechProviderId, name: 'Cloud', location: 'cloud', languages: ['auto', 'en', 'ru', 'ru', 'ru', 'it'], preparation: { phase: 'ready' } }],
+    providers: [{ id, name: 'SenseVoiceSmall', location: 'host-local', languages: ['auto', 'zh', 'en', 'ja'], preparation: { phase: 'ready' } },
+      { id: 'cloud' as SpeechProviderId, name: 'Cloud', location: 'cloud', languages: ['auto', 'en', 'zh', 'ja', 'fr', 'it'], preparation: { phase: 'ready' } }],
   } })
   const configure = vi.fn<VoiceInputProps['configure']>(async () => {})
   const props = { useSpeechReadiness: bindSnapshotSelector(store), configure, t,
@@ -128,15 +128,15 @@ it('persists settings and reports disconnection in the detail card', async () =>
   act(() => { store.set({ ...current, catalog: { ...current.catalog!, selection: { providerId: 'cloud' as SpeechProviderId, language: 'en' } } }) })
   expect(screen.getByText(ru.cloud)).toBeTruthy()
   expect(within(screen.getByLabelText(ru.language)).getAllByRole<HTMLOptionElement>('option').map(item => item.value))
-    .toEqual(['auto', 'en', 'ru', 'ru', 'ru', 'it'])
-  expect(within(screen.getByLabelText(ru.language)).getByRole('option', { name: ru.ru })).toBeTruthy()
+    .toEqual(['auto', 'en', 'zh', 'ja', 'fr', 'it'])
+  expect(within(screen.getByLabelText(ru.language)).getByRole('option', { name: ru.fr })).toBeTruthy()
   expect(within(screen.getByLabelText(ru.language)).getByRole('option', { name: 'it' })).toBeTruthy()
   configure.mockRejectedValueOnce(new Error('settings are read-only'))
-  fireEvent.change(screen.getByLabelText(ru.language), { target: { value: 'ru' } })
-  await screen.findByText('语音识别失败: settings are read-only')
+  fireEvent.change(screen.getByLabelText(ru.language), { target: { value: 'zh' } })
+  await screen.findByText('Не удалось распознать речь: settings are read-only')
   configure.mockRejectedValueOnce('settings are locked')
-  fireEvent.change(screen.getByLabelText(ru.language), { target: { value: 'ru' } })
-  await screen.findByText('语音识别失败: settings are locked')
+  fireEvent.change(screen.getByLabelText(ru.language), { target: { value: 'ja' } })
+  await screen.findByText('Не удалось распознать речь: settings are locked')
   act(() => { store.set({ catalog: null, connected: false, error: 'disconnected' }) })
   view.rerender(<VoicePreparation {...props} />)
   expect(screen.getByText(ru.loading)).toBeTruthy()

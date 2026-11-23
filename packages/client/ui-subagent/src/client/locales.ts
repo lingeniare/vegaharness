@@ -1,5 +1,30 @@
+/** `subagent` namespace dictionaries. */
+
+/** Dictionary namespace owned by this plugin. */
+export const NS = 'subagent'
+
 /** English dictionary (the key-set source of truth). */
+
+/** English dictionary. */
 export const en = {
+  'duration.exactTitle': 'Total active duration: {duration}',
+  'catalog.migrationRequired': 'Migration required',
+  'count.total.one': '{count} subagent',
+  'count.total.other': '{count} subagents',
+  'count.running.one': '{count} subagent running',
+  'count.running.other': '{count} subagents running',
+  'readonly.body': 'The parent session is offline; reopen it to continue sending messages.',
+  'section.empty': 'No subagents',
+
+  'section.title': 'Subagents',
+  'indicator.running': 'Subagents running: {count}',
+  'progress.completed': '{count} completed',
+  'progress.active': '{count} in progress',
+  'progress.inactive': '{count} not running',
+  'progress.external': '{count} external',
+  'list.more': 'Show {count} more',
+  'list.less': 'Show less',
+  'list.foldName': '{label} (subagents)',
   'duration.seconds': '{seconds}s',
   'duration.minutes': '{minutes}m {seconds}s',
   'duration.hours': '{hours}h {minutes}m {seconds}s',
@@ -10,13 +35,13 @@ export const en = {
   'duration.years': '~{years}y',
   'duration.yearsMonths': '~{years}y {months}mo',
   'duration.exactDays': '{days}d {hours}h {minutes}m {seconds}s',
-  'duration.exactTitle': 'Total active duration: {duration}',
   'tokens.thousand': '{value}K',
   'tokens.million': '{value}M',
   'tokens.total': '{value} tok',
+  'hover.owner': 'Owner: {name}',
   'loading.label': 'Loading subagents…',
+  'load.idle': 'Subagents not loaded',
   'load.error': 'Unable to load subagents',
-  'catalog.migrationRequired': 'Migration required',
   'retry': 'Retry',
   'mode.external': 'External task',
   'mode.oneShot': 'one-shot',
@@ -28,10 +53,6 @@ export const en = {
   'activity.inactive': 'not running',
   'branch.collapse': 'Collapse {label} descendants',
   'branch.expand': 'Expand {label} descendants',
-  'count.total.one': '{count} subagent',
-  'count.total.other': '{count} subagents',
-  'count.running.one': '{count} subagent running',
-  'count.running.other': '{count} subagents running',
   'switcher.aria': 'Switch subagent: {title}',
   'tree.aria': 'Subagent sessions',
   'open.sidebar': 'Open in sidebar',
@@ -41,26 +62,39 @@ export const en = {
   'readonly.oneShot.title': 'One-shot subagent record',
   'readonly.title': 'This subagent is read-only for now',
   'readonly.oneShot.body': 'One-shot tasks do not accept follow-ups; review the full execution record here.',
-  'readonly.body': 'The parent session is offline; reopen it to continue sending messages.',
-  'section.title': 'Subagents',
-  'section.empty': 'No subagents',
-  'progress.completed': '{count} completed',
-  'progress.active': '{count} in progress',
-  'progress.inactive': '{count} not running',
-  'progress.external': '{count} external',
-  'load.idle': 'Subagents not loaded',
-} satisfies Record<string, string>
+}
 
-/** `subagent` namespace dictionaries. */
-
-/** Dictionary namespace owned by this plugin. */
-export const NS = 'subagent'
-
-/** Key domain of the `subagent` namespace (en is the source of truth). */
+/** Key domain of the `subagent` namespace (zh is the source of truth). */
 export type SubagentKey = keyof typeof en
 
-/** Russian dictionary, checked against the English keys. */
+/** Japanese copy. */
+
+/** Spanish dictionary. */
+
+/** French dictionary. */
+
+/** German dictionary. */
+
+/** Russian dictionary. */
 export const ru = {
+  'duration.exactTitle': 'Общая активная длительность: {duration}',
+  'catalog.migrationRequired': 'Требуется миграция',
+  'count.total.one': '{count} субагент',
+  'count.total.other': '{count} субагентов',
+  'count.running.one': 'Выполняется: {count} субагент',
+  'count.running.other': 'Выполняются: {count} субагентов',
+  'readonly.body': 'Родительская сессия не в сети; откройте её снова, чтобы продолжить отправку сообщений.',
+  'section.empty': 'Нет субагентов',
+
+  'section.title': 'Субагенты',
+  'indicator.running': 'Выполняется субагентов: {count}',
+  'progress.completed': '{count} завершено',
+  'progress.active': '{count} в процессе',
+  'progress.inactive': '{count} не выполняются',
+  'progress.external': '{count} внешних',
+  'list.more': 'Показать ещё {count}',
+  'list.less': 'Свернуть',
+  'list.foldName': '{label} (субагенты)',
   'duration.seconds': '{seconds}с',
   'duration.minutes': '{minutes}м {seconds}с',
   'duration.hours': '{hours}ч {minutes}м {seconds}с',
@@ -71,13 +105,13 @@ export const ru = {
   'duration.years': '~{years}г',
   'duration.yearsMonths': '~{years}г {months}мес',
   'duration.exactDays': '{days}д {hours}ч {minutes}м {seconds}с',
-  'duration.exactTitle': 'Общая активная длительность: {duration}',
   'tokens.thousand': '{value}K',
   'tokens.million': '{value}M',
   'tokens.total': '{value} ток.',
+  'hover.owner': 'Ответственный: {name}',
   'loading.label': 'Загрузка субагентов…',
+  'load.idle': 'Субагенты не загружены',
   'load.error': 'Не удалось загрузить субагентов',
-  'catalog.migrationRequired': 'Требуется миграция',
   'retry': 'Повторить',
   'mode.external': 'Внешняя задача',
   'mode.oneShot': 'одноразовый',
@@ -89,10 +123,6 @@ export const ru = {
   'activity.inactive': 'не выполняется',
   'branch.collapse': 'Свернуть дочерние элементы {label}',
   'branch.expand': 'Развернуть дочерние элементы {label}',
-  'count.total.one': '{count} субагент',
-  'count.total.other': '{count} субагентов',
-  'count.running.one': 'Выполняется: {count} субагент',
-  'count.running.other': 'Выполняются: {count} субагентов',
   'switcher.aria': 'Переключить субагента: {title}',
   'tree.aria': 'Сессии субагентов',
   'open.sidebar': 'Открыть на боковой панели',
@@ -102,12 +132,6 @@ export const ru = {
   'readonly.oneShot.title': 'Запись одноразового субагента',
   'readonly.title': 'Этот субагент пока доступен только для чтения',
   'readonly.oneShot.body': 'Для одноразовых задач нельзя отправлять последующие сообщения; здесь можно просмотреть полную запись выполнения.',
-  'readonly.body': 'Родительская сессия не в сети; откройте её снова, чтобы продолжить отправку сообщений.',
-  'section.title': 'Субагенты',
-  'section.empty': 'Нет субагентов',
-  'progress.completed': '{count} завершено',
-  'progress.active': '{count} в процессе',
-  'progress.inactive': '{count} не выполняются',
-  'progress.external': '{count} внешних',
-  'load.idle': 'Субагенты не загружены',
 } satisfies Record<keyof typeof en, string>
+
+/** Portuguese dictionary. */

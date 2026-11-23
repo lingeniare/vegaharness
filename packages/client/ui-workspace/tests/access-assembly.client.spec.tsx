@@ -7,6 +7,7 @@
  * remote-access snapshot owner itself and renders the real slot tree, so the Workspace access Hooks
  * are the renderer's bindings over one non-owner snapshot.
  */
+import { syncedConfig } from '@deepseek-ai/dsh-client-test-runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, screen } from '@testing-library/react'
 import type { AccessEffect, RemoteEndpoint, TypertResourceKind } from '@deepseek-ai/dsh-api-remote-access/client'
@@ -79,8 +80,8 @@ async function bench(access: ClientAccessState, options: { ungroupedSession?: Se
     { 'sidebar.workspaces': { kind: 'single', scope: 'root', inject: SECTION_INJECT } } as never,
     SidebarFrame as never,
   )
-  await runtime.mount({ inject: [...injectMenus], apply: applyMenus })
-  await runtime.mount({ inject: [...inject], apply })
+  await runtime.mount({ inject: [...injectMenus], apply: applyMenus }, syncedConfig({ resolutionTimeoutMs: 1000 }))
+  await runtime.mount({ inject: [...inject], apply }, syncedConfig({ recentViewLimit: 10 }))
   return runtime
 }
 
@@ -95,7 +96,7 @@ describe('Workspace header actions under the page access snapshot', () => {
     try {
       runtime.renderRoot()
       const header = await screen.findByRole('treeitem')
-      expect(screen.queryByRole('button', { name: 'Действия для рабочей области Project' })).toBeNull()
+      expect(screen.queryByRole('button', { name: 'Создать сессию в рабочей области Project' })).toBeNull()
       expect(screen.getByRole('button', { name: 'Действия для рабочей области Project' })).toBeTruthy()
       const target = { kind: 'workspace' as const, value: { workspaceId: WORKSPACE, path: '/projects/project', displayTitle: 'Project' } }
       const deniedMenu = runtime.ctx.contextMenus.resolve(target)
@@ -128,7 +129,7 @@ describe('Workspace header actions under the page access snapshot', () => {
 
       // The owner's snapshot answers every action.
       act(() => { access.replace({ type: 'baseline', owner: true }) })
-      expect(screen.getByRole('button', { name: 'Действия для рабочей области Project' })).toBeTruthy()
+      expect(screen.getByRole('button', { name: 'Создать сессию в рабочей области Project' })).toBeTruthy()
     } finally {
       await runtime.dispose()
     }
@@ -140,11 +141,11 @@ describe('Workspace header actions under the page access snapshot', () => {
     try {
       runtime.renderRoot()
       await screen.findByText('Без группы')
-      expect(screen.queryByRole('button', { name: 'Создать сессию в рабочей области Project' })).toBeNull()
+      expect(screen.queryByRole('button', { name: 'Создать сессию в рабочей области Без группы' })).toBeNull()
       act(() => {
         access.update({ type: 'upsert', grant: { resource: { kind: 'global' }, actions: ['session/create'] } })
       })
-      expect(screen.queryByRole('button', { name: 'Создать сессию в рабочей области Project' })).toBeNull()
+      expect(screen.queryByRole('button', { name: 'Создать сессию в рабочей области Без группы' })).toBeNull()
     } finally {
       await runtime.dispose()
     }

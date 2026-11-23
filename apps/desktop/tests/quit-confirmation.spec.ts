@@ -39,11 +39,11 @@ describe('DesktopQuitConfirmation', () => {
     expect([...idle.shown, ...starting.shown]).toEqual([])
   })
 
-  it('shows the macOS alert with the warning icon, Chinese copy, and Quit as the default right-hand button', async () => {
+  it('shows the macOS alert with the warning icon, Russian copy, and Quit as the default right-hand button', async () => {
     const f = setup('darwin', async () => ({ activeTasks: true, scheduledTasks: true }))
     expect(await f.confirmation.confirm()).toBe(true)
     expect(f.shown).toEqual([{
-      type: 'warning', title: 'DeepSeek Harness', message: 'Выйти из VEGA Harness?',
+      type: 'warning', title: 'VEGA Harness', message: 'Выйти из VEGA Harness?',
       detail: 'Выполнение задач будет прервано, а запланированные задачи не будут выполняться, пока приложение закрыто.',
       buttons: ['Выйти', 'Отмена'], defaultId: 0, cancelId: 1, noLink: true,
     }])

@@ -57,13 +57,14 @@ export function decodeVegaModel(row: unknown): ListingEntry | undefined {
 /**
  * Fetch and decode the account-scoped model whitelist.
  * @param url - listing endpoint (`<baseURL>/models`).
- * @param token - managed account key.
+ * @param headers - credential headers the account released for this endpoint.
  * @param signal - request deadline from the listing cache.
  * @returns decoded entries in server order and the count of unusable rows.
  */
-export async function requestVegaListing(url: string, token: string, signal: AbortSignal): Promise<ModelListing> {
+export async function requestVegaListing(url: string, headers: Readonly<Record<string, string>>,
+  signal: AbortSignal): Promise<ModelListing> {
   const response = await fetch(url, {
-    headers: { authorization: `Bearer ${token}`, ...attributionHeaders() },
+    headers: { ...headers, ...attributionHeaders() },
     redirect: 'error', signal,
   }).catch((error: unknown) => { throw new LlmError(`vega model listing request failed: ${String(error)}`, 'DISCOVERY_FAILED', { cause: error }) })
   if (!response.ok) {

@@ -94,6 +94,7 @@ function mountBar(shell: SessionInputShell, over?: { running?: boolean; disabled
     useLexicon: bindSnapshotSelector(shell.lexicon),
     useMenuLauncher: bindSnapshotSelector(createSnapshotStore<string | null>(null)),
     renderSlot: (() => null) as InputBarProps['renderSlot'],
+    renderSlotChain: (_key, _owner, options) => options?.fallback,
     stop: vi.fn(),
     t: makeTranslate(ru, commonRu),
     variant: 'composer',
@@ -115,7 +116,7 @@ function bench(over?: {
   const wiring = shell
   const view = mountBar(shell, over)
   const textarea = view.container.querySelector<HTMLDivElement>('[data-composer-input]')!
-  const claim = (token = '/goal ', hint = 'Цель', attachments?: true) => {
+  const claim = (token = '/goal ', hint = '目标', attachments?: true) => {
     act(() => {
       shell.setDraft(token)
       shell.beginCommand(
@@ -173,7 +174,7 @@ describe('matrix row: claimed', () => {
   it('publishes the claim currency, renders the command chip, hints while args are blank, and edits stay free', () => {
     const { view, textarea, shell, claim, typeAtCaret } = bench()
     claim()
-    expect(shell.snapshot.claim).toEqual({ name: 'goal', token: '/goal ', hint: 'Цель' })
+    expect(shell.snapshot.claim).toEqual({ name: 'goal', token: '/goal ', hint: '目标' })
     const chip = view.container.querySelector('[data-composer-command="goal"]')
     expect(chip?.textContent).toBe('/goal')
     expect(chip?.getAttribute('contenteditable')).toBe('false')
@@ -183,13 +184,13 @@ describe('matrix row: claimed', () => {
     expect(textarea.getAttribute('contenteditable')).toBe('true')
     // Free editing after the chip: hint drops, claim holds.
     typeAtCaret('发布版本')
-    expect(shell.snapshot.draft).toBe('')
+    expect(shell.snapshot.draft).toBe('/goal 发布版本')
     expect(shell.snapshot.phase).toBe('claimed')
     expect(textarea.style.getPropertyValue('--dsh-composer-hint')).toBe('')
   })
 
   it('enter routes to claim.submit (command lane, never the queue sink)', async () => {
-    const submit = vi.fn(() => Promise.resolve({ kind: 'success' as const, text: 'Готово', source: 'command', name: 'goal' }))
+    const submit = vi.fn(() => Promise.resolve({ kind: 'success' as const, text: '完成', source: 'command', name: 'goal' }))
     const { view, textarea, shell, sink, claim, typeAtCaret } = bench({ submit })
     claim()
     typeAtCaret('发布')
@@ -198,7 +199,7 @@ describe('matrix row: claimed', () => {
     await vi.waitFor(() => { expect(submit).toHaveBeenCalledWith('发布', SCTX, []) })
     // Commit: draft cleared, notice surfaced, back to plain.
     await vi.waitFor(() => { expect(shell.snapshot.draft).toBe('') })
-    expect(view.getByText('Готово')).toBeTruthy()
+    expect(view.getByText('完成')).toBeTruthy()
   })
 
   it('replacing the whole draft removes the chip and releases to plain', () => {
@@ -234,9 +235,9 @@ describe('matrix row: claimed with attachments', () => {
     const png: SubmitAttachment = { type: 'image', mediaType: 'image/png', data: 'AA==' }
     const file: SubmitAttachment = { type: 'file', receiptId: 'receipt-x' }
     const { textarea, shell, claim, serialize, release } = bench({ submit, serialize: () => Promise.resolve([png, file]) })
-    claim('/goal ', 'Цель', true)
+    claim('/goal ', '目标', true)
     // The claim currency carries the acceptance flag the pre-gate reads.
-    expect(shell.snapshot.claim).toEqual({ name: 'goal', token: '/goal ', hint: 'Цель', attachments: true })
+    expect(shell.snapshot.claim).toEqual({ name: 'goal', token: '/goal ', hint: '目标', attachments: true })
     act(() => { shell.addAttachments([img]) })
     fireEvent.keyDown(textarea, { key: 'Enter' })
     await vi.waitFor(() => { expect(submit).toHaveBeenCalledWith('', SCTX, [png, file]) })
@@ -248,13 +249,13 @@ describe('matrix row: claimed with attachments', () => {
   })
 
   it('a handler error keeps a serialized file unreleased beside the notice and draft', async () => {
-    const submit = vi.fn(() => Promise.resolve({ kind: 'error' as const, text: 'Не удалось выполнить' }))
+    const submit = vi.fn(() => Promise.resolve({ kind: 'error' as const, text: '处理失败' }))
     const file: SubmitAttachment = { type: 'file', receiptId: 'receipt-x' }
     const { view, textarea, shell, claim, release } = bench({ submit, serialize: () => Promise.resolve([file]) })
-    claim('/goal ', 'Цель', true)
+    claim('/goal ', '目标', true)
     act(() => { shell.addAttachments([img]) })
     fireEvent.keyDown(textarea, { key: 'Enter' })
-    await vi.waitFor(() => { expect(view.getByText('Не удалось выполнить')).toBeTruthy() })
+    await vi.waitFor(() => { expect(view.getByText('处理失败')).toBeTruthy() })
     expect(shell.snapshot.phase).toBe('claimed')
     expect(shell.snapshot.attachmentIds).toEqual([img])
     expect(release).not.toHaveBeenCalled()
@@ -263,11 +264,11 @@ describe('matrix row: claimed with attachments', () => {
 
   it('a serialize rejection blocks the transaction: notice, no submit call, images kept', async () => {
     const submit = vi.fn(() => Promise.resolve({ kind: 'success' as const }))
-    const { view, textarea, shell, claim, release } = bench({ submit, serialize: () => Promise.reject(new Error('Не удалось выполнить')) })
-    claim('/goal ', 'Цель', true)
+    const { view, textarea, shell, claim, release } = bench({ submit, serialize: () => Promise.reject(new Error('附件已失效')) })
+    claim('/goal ', '目标', true)
     act(() => { shell.addAttachments([img]) })
     fireEvent.keyDown(textarea, { key: 'Enter' })
-    await vi.waitFor(() => { expect(view.getByText('Не удалось выполнить')).toBeTruthy() })
+    await vi.waitFor(() => { expect(view.getByText('附件已失效')).toBeTruthy() })
     expect(submit).not.toHaveBeenCalled()
     expect(shell.snapshot.attachmentIds).toEqual([img])
     expect(release).not.toHaveBeenCalled()
@@ -281,7 +282,7 @@ describe('matrix row: claimed with attachments', () => {
       submit,
       serialize: () => new Promise((resolve) => { resolveSerialize = resolve }),
     })
-    claim('/goal ', 'Цель', true)
+    claim('/goal ', '目标', true)
     act(() => { shell.addAttachments([img]) })
     fireEvent.keyDown(textarea, { key: 'Enter' })
     await vi.waitFor(() => { expect(resolveSerialize).toBeDefined() })
@@ -295,7 +296,7 @@ describe('matrix row: claimed with attachments', () => {
   it('image removal is refused while a command submit is in flight', async () => {
     const submit = vi.fn(() => new Promise<SubmitOutcome>(() => {})) // never settles
     const { shell, textarea, claim } = bench({ submit, serialize: () => Promise.resolve([]) })
-    claim('/goal ', 'Цель', true)
+    claim('/goal ', '目标', true)
     act(() => { shell.addAttachments([img]) })
     fireEvent.keyDown(textarea, { key: 'Enter' })
     expect(shell.snapshot.phase).toBe('submitting')

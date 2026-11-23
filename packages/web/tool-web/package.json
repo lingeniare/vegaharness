@@ -64,6 +64,8 @@
     "@types/turndown": "^5.0.6",
     "@deepseek-ai/dsh-scope": "workspace:*",
     "@deepseek-ai/dsh-token-meter": "workspace:*",
-    "@deepseek-ai/dsh-launch-environment": "workspace:*"
+    "@deepseek-ai/dsh-launch-environment": "workspace:*",
+    "@deepseek-ai/dsh-session-projection": "workspace:*",
+    "@deepseek-ai/dsh-deepseek-auth": "workspace:*"
   }
 }

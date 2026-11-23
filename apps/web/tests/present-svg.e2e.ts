@@ -19,7 +19,7 @@ import { connectFreshWorkspaceRu, RU_BROWSER_LOCALE } from './support.ts'
 const DIR = fileURLToPath(new URL('../../../snapshots/web/present-svg', import.meta.url))
 const FIXTURE = join(DIR, 'session.v3.jsonl')
 const MODE = webSnapshotMode()
-const RECORD_PROMPT = '简单画一个 SVG 表示冯诺依曼架构, 保存为 von-neumann.svg， и 提供独立文件卡片，方便打开。'
+const RECORD_PROMPT = '简单画一个 SVG 表示冯诺依曼架构, 保存为 von-neumann.svg,  и 提供独立文件卡片，方便打开。'
 const FILE = 'von-neumann.svg'
 
 /** Queue counters from the installed ws implementation; payload contents are never recorded. */

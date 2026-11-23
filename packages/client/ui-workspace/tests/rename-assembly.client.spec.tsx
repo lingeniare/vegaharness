@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { syncedConfig } from '@deepseek-ai/dsh-client-test-runtime'
 import { apply as applyMenus, inject as injectMenus } from '@deepseek-ai/dsh-client-ui-context-menu/client'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 /**
@@ -28,7 +29,7 @@ import { apply, inject } from '@deepseek-ai/dsh-client-ui-workspace/client'
 import { SECTION_HOOK_CONTEXT, SECTION_INJECT } from './section-scroller.client.ts'
 
 // The service reads its initial locale from the browser; these specs assert
-// the shipped Chinese copy, so they state the browser they assume.
+// the shipped Russian copy, so they state the browser they assume.
 usePinnedBrowserLanguages('ru-CN')
 
 const SID = 's1' as SessionId
@@ -49,7 +50,7 @@ async function createRuntime(): Promise<SlotTestRuntime> {
   const locale = new LocaleRuntime(runtime.ctx)
   runtime.ctx.provide('locale', locale)
   runtime.slots.installLocale(locale)
-  await runtime.mount({ inject: [...injectMenus], apply: applyMenus })
+  await runtime.mount({ inject: [...injectMenus], apply: applyMenus }, syncedConfig({ resolutionTimeoutMs: 1000 }))
   return runtime
 }
 
@@ -94,10 +95,10 @@ describe('session rename through the assembled browser', () => {
       summary: { title: 'Persisted title', displayTitle: 'Session title', cwd: '/w/alpha' },
       session: { rename: vi.fn() },
     })
-    await runtime.sessions.retainFor(runtime.ctx, SID, { source: 'mainView' }).ready
+    await runtime.sessions.retainFor(runtime.ctx, SID, { source: 'mainView', facets: { conversation: true } }).ready
     await seedWorkspace(runtime)
     await declareFrame(runtime)
-    await runtime.mount({ inject: [...inject], apply })
+    await runtime.mount({ inject: [...inject], apply }, syncedConfig({ recentViewLimit: 10 }))
     const registerAction = (id: string, order: number, priority: number, label: string) => {
       runtime.slots.register(
         { name: 'sidebar.workspaces.session.menu.item', id, order, priority },
@@ -168,15 +169,15 @@ describe('session rename through the assembled browser', () => {
       summary: { title: 'Persisted title', displayTitle: 'Persisted title', cwd: '/w/alpha' },
       session: { rename },
     })
-    await runtime.sessions.retainFor(runtime.ctx, SID, { source: 'mainView' }).ready
+    await runtime.sessions.retainFor(runtime.ctx, SID, { source: 'mainView', facets: { conversation: true } }).ready
     await seedWorkspace(runtime)
     await declareFrame(runtime)
-    await runtime.mount({ inject: [...inject], apply })
+    await runtime.mount({ inject: [...inject], apply }, syncedConfig({ recentViewLimit: 10 }))
     const view = runtime.renderRoot()
 
     // The current session's group auto-expands; open the row's action menu.
     const row = (await view.findByText('Persisted title')).closest('[role="treeitem"]')!
-    fireEvent.click(within(row as HTMLElement).getByLabelText('Действия для сессии 旧标题'))
+    fireEvent.click(within(row as HTMLElement).getByLabelText('Действия для сессии Persisted title'))
     fireEvent.click(await view.findByRole('menuitem', { name: 'Переименовать' }))
     // The rename row dismissed the menu; the dialog lives in the overlay list.
     expect(view.queryByRole('menu')).toBeNull()
@@ -184,18 +185,18 @@ describe('session rename through the assembled browser', () => {
     // The dialog seeds from the current title; submit a padded value.
     const input = await view.findByLabelText('Название сессии') as HTMLInputElement
     expect(input.value).toBe('Persisted title')
-    fireEvent.change(input, { target: { value: '  分叉  实验记录  ' } })
+    fireEvent.change(input, { target: { value: '  Новое  название  ' } })
     fireEvent.click(view.getByRole('button', { name: 'Переименовать' }))
 
     // The injected hop reached the session face with the edge-trimmed draft
     // (the dialog trims edges; interior normalization is host-side).
-    await waitFor(() => { expect(rename).toHaveBeenCalledWith('分叉  实验记录') })
+    await waitFor(() => { expect(rename).toHaveBeenCalledWith('Новое  название') })
     // Acceptance closes the dialog without any push-frame wait.
     await waitFor(() => { expect(view.queryByLabelText('Название сессии')).toBeNull() })
     // The manager lands the unary echo in the list store (its own package
     // tests own that hop); the row re-labels from list state alone.
-    await runtime.sessions.updateSummary(SID, { displayTitle: 'ID сессии скопирован', title: 'ID сессии скопирован' })
-    await view.findByText('ID сессии скопирован')
+    await runtime.sessions.updateSummary(SID, { displayTitle: 'Новое название', title: 'Новое название' })
+    await view.findByText('Новое название')
     expect(view.queryByText('Persisted title')).toBeNull()
     await runtime.dispose()
   })
@@ -210,18 +211,18 @@ describe('session rename through the assembled browser', () => {
       summary: { title: 'Persisted title', displayTitle: 'Persisted title', cwd: '/w/alpha' },
       session: { rename },
     })
-    await runtime.sessions.retainFor(runtime.ctx, SID, { source: 'mainView' }).ready
+    await runtime.sessions.retainFor(runtime.ctx, SID, { source: 'mainView', facets: { conversation: true } }).ready
     await seedWorkspace(runtime)
     await declareFrame(runtime)
-    await runtime.mount({ inject: [...inject], apply })
+    await runtime.mount({ inject: [...inject], apply }, syncedConfig({ recentViewLimit: 10 }))
     const view = runtime.renderRoot()
     await runtime.flush()
 
     const row = (await view.findByText('Persisted title')).closest('[role="treeitem"]')!
-    fireEvent.click(within(row as HTMLElement).getByLabelText('Действия для сессии 旧标题'))
+    fireEvent.click(within(row as HTMLElement).getByLabelText('Действия для сессии Persisted title'))
     fireEvent.click(await view.findByRole('menuitem', { name: 'Переименовать' }))
     const input = await view.findByLabelText('Название сессии')
-    fireEvent.change(input, { target: { value: '新名' } })
+    fireEvent.change(input, { target: { value: 'Новое имя' } })
     fireEvent.click(view.getByRole('button', { name: 'Переименовать' }))
 
     // Failure: the injected hop rethrows the business error; the dialog

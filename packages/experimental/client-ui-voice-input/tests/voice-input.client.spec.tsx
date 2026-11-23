@@ -136,7 +136,7 @@ it('keeps empty-speech and service errors inside the toolbar with retry and dism
   await screen.findByRole('button', { name: ru.stop })
   b.transcribe.mockResolvedValueOnce({ ok: false, error: new RemoteError('gateway/internal', 'offline', {}) })
   stop()
-  await screen.findByText('语音识别失败: offline')
+  await screen.findByText('Не удалось распознать речь: offline')
   fireEvent.click(screen.getByRole('button', { name: ru.cancel }))
   expect(screen.getByRole('button', { name: ru.start })).toBeTruthy()
 })
@@ -144,14 +144,14 @@ it('keeps empty-speech and service errors inside the toolbar with retry and dism
 it.each([new RecordingError('permission'), new Error('device lost'), 'device lost'])('handles capture failure locally (%s)', async (failure) => {
   const b = fixture(); b.capture.start.mockRejectedValueOnce(failure)
   fireEvent.click(screen.getByRole('button', { name: ru.start }))
-  await screen.findByText(failure instanceof RecordingError ? ru.permission : '语音识别失败: device lost')
+  await screen.findByText(failure instanceof RecordingError ? ru.permission : 'Не удалось распознать речь: device lost')
   expect(b.inputActions.notify).not.toHaveBeenCalled()
 })
 
 it.each([new RecordingError('empty'), new Error('decode failed'), 'decode failed'])('handles conversion failure locally (%s)', async (failure) => {
   const b = fixture(); b.capture.stop.mockRejectedValueOnce(failure)
   await start(); stop()
-  await screen.findByText(failure instanceof RecordingError ? ru.empty : '语音识别失败: decode failed')
+  await screen.findByText(failure instanceof RecordingError ? ru.empty : 'Не удалось распознать речь: decode failed')
   expect(b.capture.dispose).toHaveBeenCalledOnce()
   expect(b.inputActions.insertText).not.toHaveBeenCalled()
 })

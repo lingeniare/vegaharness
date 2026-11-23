@@ -204,13 +204,14 @@ it('localizes fullscreen timeout guidance and preserves the retry action', async
 
 it('keeps a configuration error actionable while download progress continues', async () => {
   const f = fixture()
-  await f.emit({ phase: 'idle', configurationError: 'format' })
+  await f.emit({ phase: 'error', failure: 'configuration', configurationError: 'format' })
   const error = screen.getByRole('button', { name: 'Повторить обновление' })
   fireEvent.click(error)
   await act(async () => {})
   expect(f.open).toHaveBeenCalledOnce()
+  // A flagged configurationError never counts as busy: progress stays clickable.
   await f.emit({ phase: 'downloading', percent: 58, configurationError: 'cleanup' })
-  fireEvent.click(screen.getByRole('button', { name: 'Повторить обновление' }))
+  fireEvent.click(screen.getByRole('button', { name: '58%' }))
   await act(async () => {})
   expect(f.open).toHaveBeenCalledTimes(2)
   f.view.unmount()

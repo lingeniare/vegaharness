@@ -8,7 +8,7 @@ it('presents common packaging fields in the same order with the same defaults', 
     yaml.load(readFileSync(resolve(import.meta.dirname, '../.github/workflows', name), 'utf8')) as {
       on: { workflow_dispatch: { inputs: Record<string, Record<string, unknown>> } }
     })
-  const common = ['source_ref', 'preset', 'update_channel', 'version_mode', 'build_version', 'test_release_id', 'compression_level']
+  const common = ['source_ref', 'preset', 'version_mode', 'build_version', 'test_release_id', 'compression_level']
   const reference = workflows[0]!.on.workflow_dispatch.inputs
   for (const workflow of workflows) {
     const inputs = workflow.on.workflow_dispatch.inputs

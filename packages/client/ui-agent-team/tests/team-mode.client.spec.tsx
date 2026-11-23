@@ -5,7 +5,7 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import type { SessionId } from '@deepseek-ai/dsh-session'
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import { TeamModePane, TeamModeToggle, type TeamModePaneProps, type TeamModeToggleProps } from '../src/client/TeamModeToggle.tsx'
-import { de, en, es, fr, ja, pt, ru, zh } from '../src/client/locales.ts'
+import { en, ru } from '../src/client/locales.ts'
 import { brandString } from '@deepseek-ai/dsh-brand'
 
 afterEach(cleanup)
@@ -22,18 +22,18 @@ function props(enabled: boolean | undefined, selectTeamMode = vi.fn(async () => 
       : enabled === undefined ? undefined : { enabled, tasks: [] },
     locked: false, openPane: vi.fn(), dismiss: vi.fn(), reportFailure: vi.fn(),
     selectTeamMode, requestDisableConfirmation: vi.fn(),
-    t: makeTranslate(zh),
+    t: makeTranslate(ru),
   } as TestProps
 }
 
-it.each(Object.entries({ zh, en, ja, es, fr, de, ru, pt }).flatMap(([locale, dictionary]) =>
+it.each(Object.entries({ en, ru }).flatMap(([locale, dictionary]) =>
   [false, true].map(enabled => ({ locale, dictionary, enabled })),
 ))('opens Team settings from the $locale summary without changing mode (enabled: $enabled)', ({ locale, dictionary, enabled }) => {
   const input = props(enabled)
   render(<TeamModeToggle {...input} t={makeTranslate(dictionary)} />)
   const summary = screen.getByRole('menuitem', { name: new RegExp(dictionary['command.title']) })
   expect(summary.textContent).toBe(dictionary['command.title'] + dictionary[enabled ? 'mode.on' : 'mode.off'])
-  if (locale === 'zh') expect(summary.textContent).toBe(`智能体团队协作${enabled ? '开启' : '关闭'}`)
+  if (locale === 'ru') expect(summary.textContent).toBe(`Совместная работа агентов${enabled ? 'Вкл.' : 'Выкл.'}`)
   expect(summary.getAttribute('data-model-menu-pane')).toBe('agent-team')
   expect(screen.queryByRole('switch')).toBeNull()
   expect(screen.queryByRole('tooltip', { hidden: true })).toBeNull()
@@ -48,10 +48,10 @@ it.each(Object.entries({ zh, en, ja, es, fr, de, ru, pt }).flatMap(([locale, dic
 it('keeps summary state projection-owned and blocks navigation while locked', () => {
   const input = props(false)
   const view = render(<TeamModeToggle {...input} />)
-  expect(screen.getByText('关闭')).toBeTruthy()
+  expect(screen.getByText('Выкл.')).toBeTruthy()
   const lockedInput = props(true)
   view.rerender(<TeamModeToggle {...lockedInput} locked />)
-  expect(screen.getByText('开启')).toBeTruthy()
+  expect(screen.getByText('Вкл.')).toBeTruthy()
   const summary = screen.getByRole('menuitem')
   expect(summary.hasAttribute('disabled')).toBe(true)
   fireEvent.click(summary)
@@ -71,7 +71,7 @@ it.each([false, true])('blocks repeated writes while waiting for persisted mode 
   onTestFinished(async () => { await act(async () => { pending.resolve(null) }) })
   const select = vi.fn(() => pending.promise)
   const view = render(<TeamModePane {...props(enabled, select)} />)
-  const toggle = screen.getByRole('switch', { name: '开启智能体团队协作' })
+  const toggle = screen.getByRole('switch', { name: 'Включить совместную работу агентов' })
   toggle.focus()
   fireEvent.click(toggle)
   expect(select).toHaveBeenCalledExactlyOnceWith(!enabled)
@@ -102,7 +102,7 @@ it.each(['returned', 'error', 'string'])('reports rejected mode writes through t
   expect(screen.getByRole('switch').hasAttribute('disabled')).toBe(false)
 })
 
-it.each(Object.entries({ zh, en, ja, es, fr, de, ru, pt }).flatMap(([locale, dictionary]) =>
+it.each(Object.entries({ en, ru }).flatMap(([locale, dictionary]) =>
   [false, true].map(locked => ({ locale, dictionary, locked })),
 ))('shows the full $locale explanation in the settings pane (locked: $locked)', ({ dictionary, locked }) => {
   const input = props(false)

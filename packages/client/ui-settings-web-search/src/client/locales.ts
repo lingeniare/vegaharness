@@ -5,7 +5,7 @@ import type { SettingsFormLabels } from '@deepseek-ai/dsh-client-ui-primitives'
 /** Locale keys the page renders. */
 export type WebSearchSettingsLocaleKey =
   | 'title' | 'description' | 'searchSection' | 'fetchSection'
-  | 'providerDeepSeek' | 'providerLocal' | 'providerDeepSeekFetch' | 'providerMissing' | 'providerAuto'
+  | 'providerDeepSeek' | 'providerLocal' | 'providerDeepSeekFetch' | 'providerMissing' | 'providerAuto' | 'searchAutoHint'
   | 'providerLegacy' | 'legacyKeyHint' | 'maxUses' | 'maxUsesHint' | 'invalidMaxUses'
   | 'providersFailed' | 'retry'
   | 'pluginProviderHint' | 'searchGuide' | 'searchGuideUrl'
@@ -14,8 +14,8 @@ export type WebSearchSettingsLocaleKey =
   | 'count' | 'countHint'
   | 'overridden' | 'reset' | 'readOnly' | 'unavailable'
   | 'save' | 'saving' | 'saveFailed' | 'invalidNumber' | 'invalidCount'
-  | 'billing' | 'billingAuto' | 'billingAutoHint' | 'billingAccount' | 'billingAccountHint'
-  | 'billingApiKey' | 'billingApiKeyHint' | 'billingAdvancedOverride'
+  | 'billing' | 'billingAuto' | 'billingAutoHint' | 'billingAccount' | 'billingAccountHint' | 'billingApiKey' | 'billingApiKeyHint'
+  | 'billingAdvancedOverride'
 
 /** English copy. */
 export const en: Record<WebSearchSettingsLocaleKey, string> = {
@@ -24,7 +24,7 @@ export const en: Record<WebSearchSettingsLocaleKey, string> = {
   searchSection: 'Web search provider',
   fetchSection: 'Web fetch provider',
   providerDeepSeek: 'DeepSeek Search API',
-  providerLegacy: 'DeepSeek (legacy)',
+  providerLegacy: 'DeepSeek server-side search',
   legacyKeyHint: 'Uses the signed-in account on account-model requests; otherwise uses this API key ({ref}), shared with Models by default.',
   maxUses: 'Maximum searches per request',
   maxUsesHint: 'Maximum server-side searches per Messages request: a positive integer, default 5.',
@@ -33,6 +33,7 @@ export const en: Record<WebSearchSettingsLocaleKey, string> = {
   providerDeepSeekFetch: 'DeepSeek Fetch API',
   providerMissing: '{id} (not loaded)',
   providerAuto: 'Automatic',
+  searchAutoHint: "Follows the conversation's model: DeepSeek models use DeepSeek server-side search, which has no per-search charge; other models use DeepSeek Search API.",
   providersFailed: "Couldn't load the provider list, so this menu may be incomplete.",
   retry: 'Retry',
   pluginProviderHint: 'Configure this provider in its own plugin settings.',
@@ -44,7 +45,7 @@ export const en: Record<WebSearchSettingsLocaleKey, string> = {
   searchGuideUrl: 'https://api.vega.chat',
   apiKeySet: 'A key is configured.',
   count: 'Results per search',
-  countHint: 'Results returned per query: an integer from 1 to 50, default 10. This controls result count, not search calls. web_search keeps no more sources than its own result limit.',
+  countHint: 'Results returned per search: 1 to 50, default 10.',
   overridden: 'Overridden',
   reset: 'Reset to default',
   readOnly: 'This deployment stores settings read-only.',
@@ -64,6 +65,8 @@ export const en: Record<WebSearchSettingsLocaleKey, string> = {
   billingAdvancedOverride: 'Overridden by {fields}',
 }
 
+/** Simplified Chinese copy. */
+
 /**
  * The form frame's copy, read from this page's dictionary.
  * @param t - the page's locale reader.
@@ -73,7 +76,15 @@ export function formLabels(t: (key: WebSearchSettingsLocaleKey) => string): Sett
   return { unavailable: t('unavailable'), readOnly: t('readOnly'), saveFailed: t('saveFailed'), save: t('save'), saving: t('saving') }
 }
 
-/** Russian dictionary, checked against the English keys. */
+/** Japanese copy. */
+
+/** Spanish dictionary. */
+
+/** French dictionary. */
+
+/** German dictionary. */
+
+/** Russian dictionary. */
 export const ru = {
   title: 'Веб-поиск и загрузка страниц',
   description: 'Выберите провайдеров для веб-поиска и загрузки страниц.',
@@ -89,6 +100,7 @@ export const ru = {
   providerDeepSeekFetch: 'DeepSeek Fetch API',
   providerMissing: '{id} (не загружен)',
   providerAuto: 'Автоматически',
+  searchAutoHint: 'Следует модели разговора: модели DeepSeek используют серверный поиск DeepSeek без платы за каждый поиск; остальные модели используют DeepSeek Search API.',
   providersFailed: 'Не удалось загрузить список провайдеров, поэтому это меню может быть неполным.',
   retry: 'Повторить',
   pluginProviderHint: 'Настройте этого провайдера в настройках его собственного плагина.',
@@ -119,3 +131,5 @@ export const ru = {
   billingApiKeyHint: 'Использует ключ API со страницы моделей; сначала задайте его.',
   billingAdvancedOverride: 'Переопределено: {fields}',
 } satisfies Record<keyof typeof en, string>
+
+/** Portuguese dictionary. */

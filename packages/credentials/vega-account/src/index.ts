@@ -5,7 +5,7 @@ import { platform, release } from 'node:os'
 import { Context, Service } from '@deepseek-ai/cordis'
 import Schema from '@deepseek-ai/schemastery'
 import { z } from 'zod'
-import { DeepSeekAccount, type AccountClientMetadata, type AccountDetails, type AccountNotificationBatch, type AccountNotification, type AccountNotificationEvent, type AccountNotificationId, type AccountUpdate, type AccountUserId, type AccountView, type PlatformSession, type SignInAttemptId, type SignInAttemptView } from '@deepseek-ai/dsh-deepseek-account'
+import { DeepSeekAccount, type AccountClientMetadata, type AccountDetails, type AccountNotificationBatch, type AccountNotification, type AccountNotificationEvent, type AccountNotificationId, type AccountRequestCredential, type AccountUpdate, type AccountUserId, type AccountView, type PlatformSession, type SignInAttemptId, type SignInAttemptView } from '@deepseek-ai/dsh-deepseek-account'
 import { platformClientHeaders } from '@deepseek-ai/dsh-deepseek-account/client-metadata'
 import { credentialKey } from '@deepseek-ai/dsh-credentials'
 import type { AuthorizationSession } from '@deepseek-ai/dsh-authorization'
@@ -108,6 +108,7 @@ export class VegaAccount extends DeepSeekAccount {
   private readonly logoutRetry: LogoutRetryPolicy
   private readonly logoutScope = new AbortController()
   private readonly pendingRevocations = new Set<Promise<void>>()
+  private signedOutScope = new AbortController()
   private signInAttempt: Attempt | undefined
   private readonly watchers = new Set<(kind: 'snapshot' | 'credentials-changed' | 'identity') => void>()
   /**
@@ -222,7 +223,8 @@ export class VegaAccount extends DeepSeekAccount {
   }
 
   /** VEGA exposes no notification feed; nothing can be acknowledged. */
-  override reportNotificationEvent(_id: AccountNotificationId, _event: AccountNotificationEvent, _client: AccountClientMetadata): Promise<boolean> {
+  override reportNotificationEvent(_id: AccountNotificationId, _event: AccountNotificationEvent,
+    _client: AccountClientMetadata): Promise<boolean> {
     return Promise.resolve(false)
   }
 
@@ -248,7 +250,22 @@ export class VegaAccount extends DeepSeekAccount {
     return { ...this.deployHeaders, ...platformClientHeaders(this.desktopPlatform, client) }
   }
 
-  override async rejectToken(token: string): Promise<void> {
+  /**
+   * Release the request credential one VEGA destination may carry: the managed key in its request
+   * header, a rejection bound to that key, and the sign-out signal that ends requests holding it.
+   */
+  override async resolveRequestCredential(url: string): Promise<AccountRequestCredential | undefined> {
+    const revoked = this.signedOutScope.signal
+    const token = await this.resolveManagedToken(url)
+    if (token === undefined) return undefined
+    return {
+      headers: { 'x-dsh-auth-token': token },
+      revoked,
+      reject: async () => { await this.rejectManagedToken(token) },
+    }
+  }
+
+  private async rejectManagedToken(token: string): Promise<void> {
     const lifetime = this.detailsScope
     const stored = await this.readGrant(lifetime)
     if (stored?.token !== token || this.detailsScope !== lifetime) return
@@ -265,7 +282,7 @@ export class VegaAccount extends DeepSeekAccount {
       await this.ctx.credentials.deleteRecord(KEY)
       this.ctx.emit('deepseek-account/session-expired')
       this.signInAttempt = undefined
-      this.ctx.emit('deepseek-account/signed-out')
+      this.announceSignedOut()
       this.notify()
       return this.getState()
     })().finally(() => { this.removal = undefined })
@@ -318,7 +335,7 @@ export class VegaAccount extends DeepSeekAccount {
     return parsed.data
   }
 
-  override async resolveToken(url: string): Promise<string | undefined> {
+  private async resolveManagedToken(url: string): Promise<string | undefined> {
     if (this.disposed || this.removal !== undefined) return undefined
     const destination = new URL(url)
     // VEGA serves auth, account and inference from one origin; the managed key
@@ -342,7 +359,7 @@ export class VegaAccount extends DeepSeekAccount {
     const previous = this.signInAttempt
     if (previous !== undefined) {
       await previous.done
-      // Disposal can close the provider while the previous attempt settles.
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Disposal can occur during the awaited attempt settlement.
       if (this.disposed) throw new VegaAuthError('protocol')
       if (this.signInAttempt !== previous) return this.getState()
     }
@@ -395,11 +412,22 @@ export class VegaAccount extends DeepSeekAccount {
         this.revokeGrant(parsed.data.token, platformClientHeaders(this.desktopPlatform, client))
       }
       this.signInAttempt = undefined
-      this.ctx.emit('deepseek-account/signed-out')
+      this.announceSignedOut()
       this.notify()
       return this.getState()
     })().finally(() => { this.removal = undefined })
     return this.removal
+  }
+
+  /**
+   * Announce a completed sign-out. Listeners run first, so a turn they cancel records that cause
+   * before the requests still carrying the signed-out token end.
+   */
+  private announceSignedOut(): void {
+    const scope = this.signedOutScope
+    this.signedOutScope = new AbortController()
+    try { this.ctx.emit('deepseek-account/signed-out') }
+    finally { scope.abort() }
   }
 
   override watch(signal: AbortSignal, includeIdentityChanges = false): AsyncIterable<AccountUpdate> {

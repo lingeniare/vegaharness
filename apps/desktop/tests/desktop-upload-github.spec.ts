@@ -60,11 +60,13 @@ async function startGithubLoopback(): Promise<GithubLoopback> {
     const uploadMatch = /^\/uploads\/(\d+)\/assets$/u.exec(url.pathname)
     if (request.method === 'GET' && tagMatch !== null) {
       const release = releaseByTag(decodeURIComponent(tagMatch[1]!))
-      return release === undefined ? reply(404, { message: 'Not Found' }) : reply(200, releaseJson(release))
+      if (release === undefined) { reply(404, { message: 'Not Found' }); return }
+      reply(200, releaseJson(release))
+      return
     }
     if (request.method === 'POST' && url.pathname === '/repos/lingeniare/vegaharness/releases') {
       const chunks: Buffer[] = []
-      request.on('data', chunk => chunks.push(chunk))
+      request.on('data', (chunk: Buffer) => chunks.push(chunk))
       request.on('end', () => {
         const body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as Record<string, unknown>
         const release: MockRelease = {
@@ -80,14 +82,15 @@ async function startGithubLoopback(): Promise<GithubLoopback> {
     }
     if (request.method === 'GET' && assetsMatch !== null) {
       const release = releaseById(Number(assetsMatch[1]))
-      if (release === undefined) return reply(404, { message: 'Not Found' })
-      return reply(200, release.assets.map(assetJson))
+      if (release === undefined) { reply(404, { message: 'Not Found' }); return }
+      reply(200, release.assets.map(assetJson))
+      return
     }
     if (request.method === 'PATCH' && releaseMatch !== null) {
       const release = releaseById(Number(releaseMatch[1]))
-      if (release === undefined) return reply(404, { message: 'Not Found' })
+      if (release === undefined) { reply(404, { message: 'Not Found' }); return }
       const chunks: Buffer[] = []
-      request.on('data', chunk => chunks.push(chunk))
+      request.on('data', (chunk: Buffer) => chunks.push(chunk))
       request.on('end', () => {
         const body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as Record<string, unknown>
         if (body.draft === false) release.draft = false
@@ -97,7 +100,7 @@ async function startGithubLoopback(): Promise<GithubLoopback> {
     }
     if (request.method === 'GET' && assetMatch !== null) {
       const asset = assetById(Number(assetMatch[1]))
-      if (asset === undefined) return reply(404, { message: 'Not Found' })
+      if (asset === undefined) { reply(404, { message: 'Not Found' }); return }
       response.writeHead(200, { 'Content-Type': 'application/octet-stream' })
       response.end(asset.bytes)
       return
@@ -105,15 +108,16 @@ async function startGithubLoopback(): Promise<GithubLoopback> {
     if (request.method === 'DELETE' && assetMatch !== null) {
       for (const release of releases.values()) {
         const index = release.assets.findIndex(asset => asset.id === Number(assetMatch[1]))
-        if (index >= 0) { release.assets.splice(index, 1); return reply(204) }
+        if (index >= 0) { release.assets.splice(index, 1); reply(204); return }
       }
-      return reply(404, { message: 'Not Found' })
+      reply(404, { message: 'Not Found' })
+      return
     }
     if (request.method === 'POST' && uploadMatch !== null) {
       const release = releaseById(Number(uploadMatch[1]))
-      if (release === undefined) return reply(404, { message: 'Not Found' })
+      if (release === undefined) { reply(404, { message: 'Not Found' }); return }
       const chunks: Buffer[] = []
-      request.on('data', chunk => chunks.push(chunk))
+      request.on('data', (chunk: Buffer) => chunks.push(chunk))
       request.on('end', () => {
         const asset: MockAsset = { id: nextAssetId++, name: url.searchParams.get('name') ?? '', bytes: Buffer.concat(chunks) }
         release.assets.push(asset)
@@ -127,7 +131,10 @@ async function startGithubLoopback(): Promise<GithubLoopback> {
   const base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
   return {
     base, releases, calls,
-    close: () => new Promise<void>((resolveClose, rejectClose) => server.close(error => error ? rejectClose(error) : resolveClose())),
+    close: () => new Promise<void>((resolveClose, rejectClose) => server.close((error) => {
+      if (error) rejectClose(error)
+      else resolveClose()
+    })),
   }
 }
 
@@ -175,7 +182,7 @@ describe('github releases publication', () => {
     const second = await resolveGithubRelease(selected, options)
     expect(second).toEqual(first)
     const release = github.releases.get(first.id)
-    expect(release).toMatchObject({ tag: 'v1.2.3', draft: true, prerelease: true, name: 'VEGA Harness 1.2.3' })
+    expect(release).toMatchObject({ tag: 'v1.2.3', draft: true, prerelease: false, name: 'VEGA Harness 1.2.3' })
     expect(github.calls.filter(call => call.startsWith('POST /repos'))).toHaveLength(1)
   })
 
@@ -238,7 +245,7 @@ describe('github releases publication', () => {
       fetchImpl: (async (input: RequestInfo | URL, init?: RequestInit) => {
         if (init?.method === 'PATCH') return new Response('broken', { status: 500 })
         return fetch(input, init)
-      }) as typeof fetch,
+      }),
     }
     await expect(uploadDesktopGithubRelease(selected, { token: 'test-token' }, records, failing))
       .rejects.toThrow(/did not publish/u)

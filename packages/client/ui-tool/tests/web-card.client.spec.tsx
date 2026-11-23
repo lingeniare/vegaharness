@@ -219,13 +219,13 @@ describe('chat row web body', () => {
   })
 
   it.each([
-    ['WEB_FETCH_DNS_FAILED', 'could not resolve the host name (ENOTFOUND): getaddrinfo ENOTFOUND example.com', '无法解析域名，请检查网络、代理或 DNS 设置'],
-    ['WEB_FETCH_CONNECTION_REFUSED', 'the server refused the connection (ECONNREFUSED): connect ECONNREFUSED 127.0.0.1:8080', '连接被拒绝，请检查地址、端口或代理'],
-    ['WEB_FETCH_CONNECTION_TIMEOUT', 'the connection timed out (UND_ERR_CONNECT_TIMEOUT): Connect Timeout Error', '连接超时，请检查网络或代理后重试'],
-    ['WEB_FETCH_CERTIFICATE_INVALID', 'the server certificate could not be verified (CERT_HAS_EXPIRED): certificate has expired', '安全证书校验失败，请检查系统时间、代理或证书配置'],
-    ['WEB_FETCH_CONNECTION_INTERRUPTED', 'the connection was interrupted (UND_ERR_SOCKET): other side closed', '连接中断，请稍后重试'],
-    ['WEB_FETCH_NETWORK_UNREACHABLE', 'the network or host is unreachable (ENETUNREACH): connect ENETUNREACH 10.0.0.1:443', '网络或主机不可达，请检查网络连接或代理'],
-    ['WEB_FETCH_NETWORK_ERROR', 'the network request failed (EPROTO): write EPROTO', '网络请求失败，详情见输出'],
+    ['WEB_FETCH_DNS_FAILED', 'could not resolve the host name (ENOTFOUND): getaddrinfo ENOTFOUND example.com', 'Не удалось разрешить имя хоста. Проверьте настройки сети, прокси или DNS.'],
+    ['WEB_FETCH_CONNECTION_REFUSED', 'the server refused the connection (ECONNREFUSED): connect ECONNREFUSED 127.0.0.1:8080', 'Соединение отклонено. Проверьте адрес, порт или прокси.'],
+    ['WEB_FETCH_CONNECTION_TIMEOUT', 'the connection timed out (UND_ERR_CONNECT_TIMEOUT): Connect Timeout Error', 'Истекло время ожидания соединения. Проверьте сеть или прокси и повторите попытку.'],
+    ['WEB_FETCH_CERTIFICATE_INVALID', 'the server certificate could not be verified (CERT_HAS_EXPIRED): certificate has expired', 'Не удалось проверить сертификат. Проверьте системное время, прокси или сертификаты.'],
+    ['WEB_FETCH_CONNECTION_INTERRUPTED', 'the connection was interrupted (UND_ERR_SOCKET): other side closed', 'Подключение прервано. Повторите попытку позже.'],
+    ['WEB_FETCH_NETWORK_UNREACHABLE', 'the network or host is unreachable (ENETUNREACH): connect ENETUNREACH 10.0.0.1:443', 'Сеть или хост недоступны. Проверьте сетевое подключение или прокси.'],
+    ['WEB_FETCH_NETWORK_ERROR', 'the network request failed (EPROTO): write EPROTO', 'Сетевой запрос не выполнен. Подробности см. в выводе.'],
   ])('a %s web fetch leads with its localized summary and keeps the detail in the output', (code, detail, summary) => {
     const text = `Error: web fetch failed: ${detail}`
     const view = render(<WebRow {...rowProps(transportFailure(code, text), 'web_fetch')} useContextMenu={contextMenuHook()} />)

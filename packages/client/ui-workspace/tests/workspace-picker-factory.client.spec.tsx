@@ -9,6 +9,7 @@
  * listed Workspaces, the occupancy-gated add entry, and the creation hop
  * before `onPick`.
  */
+import { syncedConfig } from '@deepseek-ai/dsh-client-test-runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, screen } from '@testing-library/react'
 import { useRef, useState } from 'react'
@@ -24,14 +25,14 @@ import { apply as applyMenus, inject as injectMenus } from '@deepseek-ai/dsh-cli
 import { apply, inject } from '@deepseek-ai/dsh-client-ui-workspace/client'
 
 // The service reads its initial locale from the browser; these specs assert
-// the shipped Chinese copy, so they state the browser they assume.
-usePinnedBrowserLanguages('zh-CN')
+// the shipped Russian copy, so they state the browser they assume.
+usePinnedBrowserLanguages('ru-CN')
 
 afterEach(cleanup)
 beforeEach(() => { localStorage.clear() })
 
 const ALPHA = 'w-alpha' as WorkspaceId
-const ADD = '添加工作区…'
+const ADD = 'Добавить рабочую область…'
 
 /** Test-owned consumer surface: another plugin's dialog that owns the anchor, open state, and pick meaning. */
 function ImportDialog({ renderFactorySlot }: PropsRenderFactories) {
@@ -95,8 +96,8 @@ async function bench(): Promise<SlotTestRuntime> {
       sessionIds: [], createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
     }] as never
   })
-  await runtime.mount({ inject: [...injectMenus], apply: applyMenus })
-  await runtime.mount({ inject: [...inject], apply })
+  await runtime.mount({ inject: [...injectMenus], apply: applyMenus }, syncedConfig({ resolutionTimeoutMs: 1000 }))
+  await runtime.mount({ inject: [...inject], apply }, syncedConfig({ recentViewLimit: 10 }))
   await runtime.root.declare({} as never, ImportDialog as never)
   runtime.renderRoot()
   return runtime

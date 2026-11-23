@@ -158,20 +158,20 @@ describe('progress display precision', () => {
     )
   })
 
-  it('uses the short Chinese count and percentage for each work state', () => {
+  it('uses the short Russian count and percentage for each work state', () => {
     const parts = measureAll(activeTasks(2), true).get(null)?.parts
-    const chinese: Readonly<Record<string, string>> = dictionaries.zh
+    const russian: Readonly<Record<string, string>> = dictionaries.ru
     const translate: TranslateNS<'timeline'> = (key, params) =>
-      (chinese[key] ?? key).replace(/\{(\w+)\}/gu, (match: string, name: string) =>
+      (russian[key] ?? key).replace(/\{(\w+)\}/gu, (match: string, name: string) =>
         typeof params?.[name] === 'number' || typeof params?.[name] === 'string' ? `${params[name]}` : match,
       )
     render(<Progress value={0} status="active" label="Progress" parts={parts} t={translate} />)
     const bar = screen.getByRole('progressbar')
     expect(bar.getAttribute('aria-valuetext')).toBe(
-      '0 项已完成的工作 (0.00%)\n2 项进行中的工作 (100.00%)\n0 项待开始的工作 (0.00%)\n0 项阻塞的工作 (0.00%)',
+      'Выполнено: 0 (0.00%)\nВ работе: 2 (100.00%)\nОжидает начала: 0 (0.00%)\nЗаблокировано: 0 (0.00%)',
     )
     fireEvent.mouseEnter(segment(bar, 'active'))
-    expect(bar.getAttribute('data-tooltip')).toBe('2 项进行中的工作 (100.00%)')
+    expect(bar.getAttribute('data-tooltip')).toBe('В работе: 2 (100.00%)')
   })
 
   it.each([5, 6, 7])('shows a bounded list after 0.5 seconds for %s tasks', (count) => {

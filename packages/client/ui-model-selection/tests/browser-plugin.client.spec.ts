@@ -256,7 +256,7 @@ describe('ui-model-selection dual entry', () => {
     const b = await bench()
     try {
       b.setGroups([
-        GROUPS[1]!, GROUPS[0]!, { ...GROUPS[0]!, id: 'deepseek-account', name: 'DeepSeek Account' },
+        GROUPS[1]!, GROUPS[0]!, { ...GROUPS[0]!, id: 'deepseek-account', name: 'DeepSeek Account', ...{ accountManaged: true } },
         { ...GROUPS[1]!, id: 'last-provider', name: 'Last Provider' },
       ])
       b.remote.emit('llm/adapters-updated', [])
@@ -311,11 +311,11 @@ describe('ui-model-selection dual entry', () => {
   it.each(['en', 'ru'] as const)('localizes account provider headings in the %s model popup', async (locale) => {
     const b = await bench(locale)
     try {
-      b.setGroups([{ ...GROUPS[0]!, id: 'deepseek-account', name: 'DeepSeek Account' }])
+      b.setGroups([{ ...GROUPS[0]!, id: 'deepseek-account', name: 'DeepSeek Account', ...{ accountManaged: true } }])
       b.remote.emit('llm/adapters-updated', [])
       b.mint('s1')
       const options = await b.popup().options(projection('s1'), new AbortController().signal)
-      expect(options[0]?.group?.label).toBe(locale === 'ru' ? 'Аккаунт VEGA' : 'DeepSeek Account')
+      expect(options[0]?.group?.label).toBe(locale === 'ru' ? 'Аккаунт VEGA' : 'VEGA Account')
     } finally {
       await b.ctx.fiber.dispose()
     }
@@ -324,18 +324,18 @@ describe('ui-model-selection dual entry', () => {
   it('removes account models from the picker after sign-out', async () => {
     const b = await bench('en')
     try {
-      b.setGroups([{ ...GROUPS[0]!, id: 'deepseek-account', name: 'DeepSeek Account' }, ...GROUPS])
+      b.setGroups([{ ...GROUPS[0]!, id: 'deepseek-account', name: 'DeepSeek Account', ...{ accountManaged: true } }, ...GROUPS])
       b.remote.emit('llm/adapters-updated', [])
       b.mint('s1')
       const before = await b.popup().options(projection('s1'), new AbortController().signal)
-      expect(before.some(option => option.group?.label === 'DeepSeek Account')).toBe(true)
+      expect(before.some(option => option.group?.label === 'VEGA Account')).toBe(true)
       b.setGroups(GROUPS)
       b.remote.emit('credentials/record-updated', ['deepseek-account-platform'])
       await vi.waitFor(() => {
         expect(b.ctx.modelDirectories.directoryFor(sid('s1')).store.getSnapshot().groups).toEqual(GROUPS)
       })
       const after = await b.popup().options(projection('s1'), new AbortController().signal)
-      expect(after.some(option => option.group?.label === 'DeepSeek Account')).toBe(false)
+      expect(after.some(option => option.group?.label === 'VEGA Account')).toBe(false)
       expect(after.length).toBeGreaterThan(0)
     } finally {
       await b.ctx.fiber.dispose()
