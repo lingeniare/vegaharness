@@ -1,6 +1,6 @@
 # Журнал изменений VEGA Harness
 
-## 0.2.4 — синхронизация с upstream (23.11.2026)
+## 0.2.5 — синхронизация с upstream (23.11.2026)
 
 Слит `deepseek-ai/deepseek-harness` master (коммит `4b399c39`) — релизы
 `0.2.3-alpha.1` и `0.2.3-alpha.2`, vendored Cordis `4.2.0-alpha.1` и все
@@ -70,8 +70,8 @@ Python SDK (5).
   `api.vega.chat` (OpenRouter-совместимый прокси).
 - Канал обновлений — только stable; upstream-переключатель nightly/stable
   намеренно не возвращён.
-- Версия `0.2.4` сохранена; upstream-манифесты `0.2.3-alpha.2` приведены
-  к `0.2.4` (benchmark остаётся `0.1.3-alpha.1`).
+- Версия поднята до `0.2.5`; upstream-манифесты `0.2.3-alpha.2` приведены
+  к `0.2.5` (benchmark остаётся `0.1.3-alpha.1`).
 - Upstream `deepseek-auth` согласован с реализацией аккаунта форка в
   `packages/credentials` (добавлен `ru_RU` в `PlatformLocale`).
 - Исправлены регрессии мёрджа: повреждённые фикстуры и локали, имена
